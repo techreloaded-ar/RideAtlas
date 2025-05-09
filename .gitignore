@@ -1,0 +1,36 @@
+# Dipendenze
+node_modules/
+.next/
+
+# File di ambiente
+.env*.local
+.env
+
+# File di sistema
+.DS_Store
+
+# File di debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# File di build/dist
+out/
+dist/
+
+# File IDE
+.idea/
+.vscode/
+
+# File di test
+coverage/
+
+# File temporanei
+*.tmp
+*.temp
+
+# File di configurazione locale
+*.local
+
+# File di cache
+.cache/
