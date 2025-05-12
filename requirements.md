@@ -193,7 +193,7 @@ Per i **motoviaggiatori over‑50**, spesso poco tecnologici ma desiderosi d’a
 
   4. Gli utenti del Trip Builder possono trovare e usare il nuovo elemento entro 15 min dalla pubblicazione.
 
-* **US 3.1  SETUP VIAGGIO (pt 3)** &#x20;
+* **US 3.1  CREAZIONE VIAGGIO (pt 3)** &#x20;
   *In qualità di motociclista, desidero creare un viaggio personalizzato indicando durata, destinazione, limite di trasferimento e chilometri giornalieri affinché possa andare dove desidero.* &#x20;
   **Criteri di accettazione** (sintesi)  \\
 
