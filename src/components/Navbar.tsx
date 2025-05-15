@@ -27,17 +27,18 @@ export default function Navbar() {
                 RideAtlas
               </Link>
             </div>
-            <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
+            <div className="hidden sm:-my-px sm:ml-6 sm:flex sm:space-x-8">
               {navigation.map((item) => {
                 const isActive = pathname === item.href;
                 return (
                   <Link
                     key={item.name}
                     href={item.href}
-                    className={`inline-flex items-center px-1 pt-1 text-sm font-medium ${isActive
-                      ? 'border-b-2 border-primary-500 text-gray-900'
-                      : 'border-b-2 border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                    className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${isActive
+                        ? 'border-primary-500 text-gray-900'
+                        : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
                       }`}
+                    aria-current={isActive ? 'page' : undefined}
                   >
                     {item.name}
                   </Link>
@@ -53,6 +54,15 @@ export default function Navbar() {
                   className="text-gray-500 hover:text-gray-700 px-3 py-2 text-sm font-medium"
                 >
                   Dashboard
+                </Link>
+                <Link
+                  href="/create-trip" // Nuovo link per creare viaggi
+                  className={`px-3 py-2 text-sm font-medium ${pathname === '/create-trip'
+                      ? 'text-primary-700 font-semibold'
+                      : 'text-gray-500 hover:text-gray-700'
+                    }`}
+                >
+                  Crea Viaggio
                 </Link>
                 <div className="ml-3">
                   <UserButton afterSignOutUrl="/" />

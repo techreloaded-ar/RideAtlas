@@ -19,6 +19,34 @@ export const supabase = createClient<Database>(
 );
 
 /**
+ * Crea un client Supabase per operazioni server-side autenticate.
+ * @param jwt Il token JWT dell'utente.
+ */
+export const createSupabaseClientForServer = (jwt: string) => {
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
+    throw new Error('Manca la variabile d\'ambiente NEXT_PUBLIC_SUPABASE_URL');
+  }
+  if (!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) { // Anon key is still needed for the client constructor
+    throw new Error('Manca la variabile d\'ambiente NEXT_PUBLIC_SUPABASE_ANON_KEY');
+  }
+  return createClient<Database>(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      global: {
+        headers: {
+          Authorization: `Bearer ${jwt}`,
+        },
+      },
+      auth: {
+        persistSession: false, // Evita di persistere la sessione sul server
+        autoRefreshToken: false, // Evita il refresh automatico del token sul server
+      }
+    }
+  );
+};
+
+/**
  * Funzione helper per ottenere un client Supabase con il contesto utente corrente
  * Utile per operazioni autenticate
  */
