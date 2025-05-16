@@ -56,7 +56,7 @@ export default function Navbar() {
                   Dashboard
                 </Link>
                 <Link
-                  href="/create-trip" // Nuovo link per creare viaggi
+                  href="/create-trip"
                   className={`px-3 py-2 text-sm font-medium ${pathname === '/create-trip'
                       ? 'text-primary-700 font-semibold'
                       : 'text-gray-500 hover:text-gray-700'
