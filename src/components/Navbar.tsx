@@ -5,27 +5,39 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { UserButton, SignInButton, SignUpButton, useUser } from '@clerk/nextjs';
 
-// Componente di fallback da mostrare durante il caricamento
-const AuthButtonsPlaceholder = () => (
-  <div className="flex space-x-4">
-    <div className="w-16 h-8 bg-gray-200 rounded animate-pulse"></div>
-    <div className="w-20 h-8 bg-primary-200 rounded animate-pulse"></div>
-  </div>
-);
+// Previene la duplicazione della navbar
+let navbarMounted = false;
 
 export default function Navbar() {
-  const { isSignedIn, isLoaded } = useUser();
+  const { isSignedIn, isLoaded, user } = useUser();
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [isDuplicate, setIsDuplicate] = useState(false);
 
   // Assicuriamoci che il componente sia montato lato client
   useEffect(() => {
     setMounted(true);
+    
+    // Verifica se la navbar è già stata montata
+    if (navbarMounted) {
+      setIsDuplicate(true);
+    } else {
+      navbarMounted = true;
+    }
+    
+    // Pulizia quando il componente viene smontato
+    return () => {
+      if (!isDuplicate) {
+        navbarMounted = false;
+      }
+    };
   }, []);
 
-  // Determina se dobbiamo mostrare il contenuto o il fallback
-  const shouldShowContent = mounted && isLoaded;
+  // Se è un duplicato, non renderizzare nulla
+  if (isDuplicate) {
+    return null;
+  }
 
   const navigation = [
     { name: 'Home', href: '/' },
@@ -64,9 +76,7 @@ export default function Navbar() {
             </div>
           </div>
           <div className="hidden sm:ml-6 sm:flex sm:items-center">
-            {!shouldShowContent ? (
-              <AuthButtonsPlaceholder />
-            ) : isSignedIn ? (
+            {mounted && isLoaded && isSignedIn ? (
               <>
                 <Link
                   href="/dashboard"
@@ -170,11 +180,7 @@ export default function Navbar() {
             })}
           </div>
           <div className="border-t border-gray-200 pt-4 pb-3">
-            {!shouldShowContent ? (
-              <div className="px-4 py-3">
-                <div className="w-full h-10 bg-gray-200 rounded animate-pulse"></div>
-              </div>
-            ) : isSignedIn ? (
+            {mounted && isLoaded && isSignedIn ? (
               <div className="flex items-center px-4">
                 <div className="flex-shrink-0">
                   <UserButton afterSignOutUrl="/" />
