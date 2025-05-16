@@ -1,7 +1,8 @@
 import Link from 'next/link';
 import Image from 'next/image';
+import ReadyToStart from '@/components/ReadyToStart';
 
-export default function Home() {
+export default function HomePage() {
   return (
     <main className="min-h-screen">
       {/* Hero Section */}
@@ -84,15 +85,7 @@ export default function Home() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 bg-secondary-700 text-white">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl font-display font-bold mb-6">Pronto a partire?</h2>
-          <p className="text-xl max-w-2xl mx-auto mb-8">Iscriviti ora per accedere a itinerari esclusivi e iniziare a pianificare la tua prossima avventura in moto.</p>
-          <Link href="/signup" className="btn-primary bg-white text-secondary-700 hover:bg-gray-100">
-            Inizia Gratuitamente
-          </Link>
-        </div>
-      </section>
+      <ReadyToStart />
     </main>
   );
 }
