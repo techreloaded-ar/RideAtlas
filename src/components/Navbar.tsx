@@ -1,14 +1,31 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { UserButton, SignInButton, SignUpButton, useUser } from '@clerk/nextjs';
 
+// Componente di fallback da mostrare durante il caricamento
+const AuthButtonsPlaceholder = () => (
+  <div className="flex space-x-4">
+    <div className="w-16 h-8 bg-gray-200 rounded animate-pulse"></div>
+    <div className="w-20 h-8 bg-primary-200 rounded animate-pulse"></div>
+  </div>
+);
+
 export default function Navbar() {
-  const { isSignedIn } = useUser();
+  const { isSignedIn, isLoaded } = useUser();
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  // Assicuriamoci che il componente sia montato lato client
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Determina se dobbiamo mostrare il contenuto o il fallback
+  const shouldShowContent = mounted && isLoaded;
 
   const navigation = [
     { name: 'Home', href: '/' },
@@ -47,7 +64,9 @@ export default function Navbar() {
             </div>
           </div>
           <div className="hidden sm:ml-6 sm:flex sm:items-center">
-            {isSignedIn ? (
+            {!shouldShowContent ? (
+              <AuthButtonsPlaceholder />
+            ) : isSignedIn ? (
               <>
                 <Link
                   href="/dashboard"
@@ -151,7 +170,11 @@ export default function Navbar() {
             })}
           </div>
           <div className="border-t border-gray-200 pt-4 pb-3">
-            {isSignedIn ? (
+            {!shouldShowContent ? (
+              <div className="px-4 py-3">
+                <div className="w-full h-10 bg-gray-200 rounded animate-pulse"></div>
+              </div>
+            ) : isSignedIn ? (
               <div className="flex items-center px-4">
                 <div className="flex-shrink-0">
                   <UserButton afterSignOutUrl="/" />
