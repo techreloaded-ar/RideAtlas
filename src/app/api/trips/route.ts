@@ -31,22 +31,31 @@ const tripCreationSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
+    console.log('Inizio elaborazione richiesta POST /trips');
+    
     const { userId, getToken } = auth();
     if (!userId) {
+      console.error('Errore autenticazione: userId non presente');
       return NextResponse.json({ error: "Utente non autorizzato." }, { status: 401 });
     }
 
     const token = await getToken({ template: "supabase" });
     if (!token) {
+      console.error('Errore autenticazione: token Supabase non disponibile');
       return NextResponse.json({ error: "Token di sessione Supabase non disponibile." }, { status: 401 });
     }
 
     const supabaseClient = createSupabaseClientForServer(token);
     const body = await request.json();
+    console.log('Dati ricevuti:', JSON.stringify(body, null, 2));
+    
     const parsed = tripCreationSchema.safeParse(body);
-
     if (!parsed.success) {
-      return NextResponse.json({ error: "Dati non validi.", details: parsed.error.flatten().fieldErrors }, { status: 400 });
+      console.error('Validazione fallita:', parsed.error);
+      return NextResponse.json({ 
+        error: "Dati non validi.", 
+        details: parsed.error.flatten().fieldErrors 
+      }, { status: 400 });
     }
 
     const tripData: TripCreationData = parsed.data;
@@ -62,7 +71,8 @@ export async function POST(request: NextRequest) {
       user_id: userId,
     };
 
-    // Inserimento nel database Supabase
+    console.log('Creazione nuovo viaggio:', JSON.stringify(newTrip, null, 2));
+    
     const { data, error } = await supabaseClient
       .from("trips")
       .insert([newTrip])
@@ -70,15 +80,26 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) {
+      console.error('Errore Supabase:', error);
       if (error.code === "23505") {
-        return NextResponse.json({ error: "Viaggio già esistente. Cambia titolo." }, { status: 409 });
+        return NextResponse.json({ 
+          error: "Viaggio già esistente. Cambia titolo." 
+        }, { status: 409 });
       }
-      return NextResponse.json({ error: "Errore creazione viaggio.", details: error.message }, { status: 500 });
+      return NextResponse.json({ 
+        error: "Errore creazione viaggio.", 
+        details: error.message 
+      }, { status: 500 });
     }
 
+    console.log('Viaggio creato con successo:', data.id);
     return NextResponse.json(data, { status: 201 });
   } catch (e) {
     const errorMessage = e instanceof Error ? e.message : "Errore sconosciuto";
-    return NextResponse.json({ error: "Errore interno server.", details: errorMessage }, { status: 500 });
+    console.error('Errore interno:', errorMessage);
+    return NextResponse.json({ 
+      error: "Errore interno server.", 
+      details: errorMessage 
+    }, { status: 500 });
   }
 }
