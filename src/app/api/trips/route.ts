@@ -23,7 +23,7 @@ const tripCreationSchema = z.object({
   destination: z.string().min(3, { message: 'La destinazione deve contenere almeno 3 caratteri.' }).max(100),
   duration_days: z.number().int().positive({ message: 'La durata in giorni deve essere un numero positivo.' }),
   duration_nights: z.number().int().positive({ message: 'La durata in notti deve essere un numero positivo.' }),
-  difficulty: z.enum(['Facile', 'Medio', 'Difficile']),
+
   tags: z.array(z.string().min(1)).min(1, { message: 'Devi specificare almeno un tag.' }),
   theme: z.string().min(3, { message: 'Il tema deve contenere almeno 3 caratteri.' }).max(50),
   recommended_season: z.enum(['Primavera', 'Estate', 'Autunno', 'Inverno', 'Tutte']),

@@ -13,7 +13,7 @@ const CreateTripForm = () => {
     destination: '',
     duration_days: 1,
     duration_nights: 1,
-    difficulty: 'Facile',
+
     tags: [],
     theme: '',
     recommended_season: 'Tutte',
@@ -171,22 +171,7 @@ const CreateTripForm = () => {
         </div>
       </div>
 
-      <div>
-        <label htmlFor="difficulty" className="block text-sm font-medium text-gray-700">Difficoltà</label>
-        <select
-          name="difficulty"
-          id="difficulty"
-          value={formData.difficulty}
-          onChange={handleChange}
-          required
-          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-        >
-          <option value="Facile">Facile</option>
-          <option value="Medio">Medio</option>
-          <option value="Difficile">Difficile</option>
-        </select>
-        {fieldErrors?.difficulty && <p className="text-xs text-red-500 mt-1">{fieldErrors.difficulty.join(', ')}</p>}
-      </div>
+
 
       <div>
         <label htmlFor="theme" className="block text-sm font-medium text-gray-700">Tema</label>
