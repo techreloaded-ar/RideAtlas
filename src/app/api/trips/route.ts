@@ -25,6 +25,7 @@ const tripCreationSchema = z.object({
   duration_nights: z.number().int().positive({ message: 'La durata in notti deve essere un numero positivo.' }),
   tags: z.array(z.string().min(1)).min(1, { message: 'Devi specificare almeno un tag.' }),
   theme: z.string().min(3, { message: 'Il tema deve contenere almeno 3 caratteri.' }).max(50),
+  characteristics: z.array(z.string()).optional().default([]),
   recommended_season: z.nativeEnum(RecommendedSeason),
 });
 
