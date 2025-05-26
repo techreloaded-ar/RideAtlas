@@ -54,6 +54,7 @@ model Trip {
   duration_nights     Int
   tags                String[]
   theme               String
+  characteristics     String[]
   recommended_season  RecommendedSeason
   slug                String            @unique
   status              TripStatus        @default(Bozza)

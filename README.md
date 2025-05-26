@@ -26,8 +26,12 @@ cd ride-atlas
 # Installa le dipendenze
 npm install
 
-# Crea un file .env.local con le variabili d'ambiente necessarie
+# Crea un file .env.local con le variabili d'ambiente necessarie (vedi Docs su nifty)
 touch .env.local
+touch .env
+
+# Crea il client di Prisma
+npx prisma generate
 
 # Avvia il server di sviluppo
 npm run dev
