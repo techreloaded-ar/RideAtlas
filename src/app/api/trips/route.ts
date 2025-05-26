@@ -3,7 +3,8 @@ import { NextResponse, NextRequest } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
 import { TripCreationData, RecommendedSeason } from '@/types/trip';
-import { auth, clerkClient } from '@clerk/nextjs/server'; // Per ottenere l'ID dell'utente e informazioni profilo
+import { auth } from '@/auth';
+import { ensureUserExists } from '@/lib/user-sync';
 
 // Funzione di utilità per generare lo slug
 function slugify(text: string): string {
@@ -32,11 +33,13 @@ export async function POST(request: NextRequest) {
   try {
     console.log('Inizio elaborazione richiesta POST /trips');
     
-    const { userId } = auth();
-    if (!userId) {
-      console.error('Errore autenticazione: userId non presente');
+    const session = await auth();
+    if (!session?.user?.id) {
+      console.error('Errore autenticazione: sessione non presente');
       return NextResponse.json({ error: "Utente non autorizzato." }, { status: 401 });
     }
+
+    const userId = session.user.id;
 
     const body = await request.json();
     console.log('Dati ricevuti:', JSON.stringify(body, null, 2));
@@ -56,39 +59,15 @@ export async function POST(request: NextRequest) {
     console.log('Creazione nuovo viaggio:', JSON.stringify({ ...tripData, slug }, null, 2));
     
     try {
-      // Prima di creare il viaggio, assicuriamoci che il profilo utente esista
-      // Otteniamo le informazioni dell'utente da Clerk per creare un profilo completo
-      let userName = 'Utente';
-      let avatarUrl = null;
-      
-      try {
-        const user = await clerkClient.users.getUser(userId);
-        userName = `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.username || 'Utente';
-        avatarUrl = user.imageUrl || null;
-        console.log(`Informazioni utente da Clerk: ${userName}, avatar: ${avatarUrl ? 'presente' : 'assente'}`);
-      } catch (clerkError) {
-        console.warn('Impossibile ottenere informazioni utente da Clerk:', clerkError);
-        // Continuiamo con i valori di default
-      }
-
-      console.log(`Creazione/aggiornamento profilo per userId: ${userId}`);
-      const profile = await prisma.profile.upsert({
-        where: { user_id: userId },
-        update: {}, // Non aggiorniamo nulla se esiste già
-        create: {
-          user_id: userId,
-          full_name: userName,
-          avatar_url: avatarUrl,
-          role: 'user'
-        }
-      });
-      console.log(`Profilo gestito: ${profile.id} - ${profile.full_name}`);
+      // Ensure user exists in database (sync from JWT session)
+      const user = await ensureUserExists(session);
+      console.log(`User ensured in database: ${user.id} - ${user.name}`);
 
       const newTrip = await prisma.trip.create({
         data: {
           ...tripData,
           slug,
-          user_id: userId,
+          user_id: user.id,
         },
       });
 

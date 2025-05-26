@@ -1,7 +1,7 @@
 import './globals.css';
 import type { Metadata } from 'next';
 import { Inter, Montserrat } from 'next/font/google';
-import { ClerkProvider } from '@clerk/nextjs';
+import { SessionProvider } from 'next-auth/react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 
@@ -19,16 +19,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <ClerkProvider>
-      <html lang="it">
-        <body className={`${inter.variable} ${montserrat.variable} font-sans min-h-screen flex flex-col`}>
+    <html lang="it">
+      <body className={`${inter.variable} ${montserrat.variable} font-sans min-h-screen flex flex-col`}>
+        <SessionProvider>
           <Navbar />
           <div className="flex-grow">
             {children}
           </div>
           <Footer />
-        </body>
-      </html>
-    </ClerkProvider>
+        </SessionProvider>
+      </body>
+    </html>
   );
 }

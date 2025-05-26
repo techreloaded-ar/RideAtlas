@@ -38,13 +38,20 @@ npm run dev
 Crea un file `.env.local` nella root del progetto con le seguenti variabili:
 
 ```
-# Clerk (Autenticazione)
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
-CLERK_SECRET_KEY=sk_test_...
+# NextAuth.js (Autenticazione)
+NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_SECRET=your-secret-key-here
+
+# Google OAuth
+GOOGLE_CLIENT_ID=your-google-client-id
+GOOGLE_CLIENT_SECRET=your-google-client-secret
 
 # Supabase (Database e Storage)
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+
+# Database
+DATABASE_URL=your-database-url
 
 # Mapbox (Mappe)
 NEXT_PUBLIC_MAPBOX_TOKEN=your-mapbox-token

@@ -3,13 +3,14 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { UserButton, SignInButton, SignUpButton, useUser } from '@clerk/nextjs';
+import { useSession, signIn, signOut } from 'next-auth/react';
+import Image from 'next/image';
 
 // Previene la duplicazione della navbar
 let navbarMounted = false;
 
 export default function Navbar() {
-  const { isSignedIn, isLoaded, user } = useUser();
+  const { data: session, status } = useSession();
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -76,7 +77,7 @@ export default function Navbar() {
             </div>
           </div>
           <div className="hidden sm:ml-6 sm:flex sm:items-center">
-            {mounted && isLoaded && isSignedIn ? (
+            {mounted && status === 'authenticated' && session ? (
               <>
                 <Link
                   href="/dashboard"
@@ -93,22 +94,38 @@ export default function Navbar() {
                 >
                   Crea Viaggio
                 </Link>
-                <div className="ml-3">
-                  <UserButton afterSignOutUrl="/" />
+                <div className="ml-3 flex items-center space-x-3">
+                  {session.user?.image && (
+                    <Image
+                      src={session.user.image}
+                      alt={session.user.name || 'User'}
+                      width={32}
+                      height={32}
+                      className="rounded-full"
+                    />
+                  )}
+                  <button
+                    onClick={() => signOut()}
+                    className="text-gray-500 hover:text-gray-700 px-3 py-2 text-sm font-medium"
+                  >
+                    Esci
+                  </button>
                 </div>
               </>
             ) : (
               <div className="flex space-x-4">
-                <SignInButton mode="modal">
-                  <button className="text-gray-500 hover:text-gray-700 px-3 py-2 text-sm font-medium">
-                    Accedi
-                  </button>
-                </SignInButton>
-                <SignUpButton mode="modal">
-                  <button className="btn-primary">
-                    Registrati
-                  </button>
-                </SignUpButton>
+                <button
+                  onClick={() => signIn('google')}
+                  className="text-gray-500 hover:text-gray-700 px-3 py-2 text-sm font-medium"
+                >
+                  Accedi
+                </button>
+                <button
+                  onClick={() => signIn('google')}
+                  className="btn-primary"
+                >
+                  Registrati
+                </button>
               </div>
             )}
           </div>
@@ -180,10 +197,18 @@ export default function Navbar() {
             })}
           </div>
           <div className="border-t border-gray-200 pt-4 pb-3">
-            {mounted && isLoaded && isSignedIn ? (
+            {mounted && status === 'authenticated' && session ? (
               <div className="flex items-center px-4">
                 <div className="flex-shrink-0">
-                  <UserButton afterSignOutUrl="/" />
+                  {session.user?.image && (
+                    <Image
+                      src={session.user.image}
+                      alt={session.user.name || 'User'}
+                      width={32}
+                      height={32}
+                      className="rounded-full"
+                    />
+                  )}
                 </div>
                 <div className="ml-3">
                   <Link
@@ -192,20 +217,28 @@ export default function Navbar() {
                   >
                     Dashboard
                   </Link>
+                  <button
+                    onClick={() => signOut()}
+                    className="block w-full text-left px-4 py-2 text-base font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-800"
+                  >
+                    Esci
+                  </button>
                 </div>
               </div>
             ) : (
               <div className="mt-3 space-y-1">
-                <SignInButton mode="modal">
-                  <button className="block w-full px-4 py-2 text-left text-base font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-800">
-                    Accedi
-                  </button>
-                </SignInButton>
-                <SignUpButton mode="modal">
-                  <button className="block w-full px-4 py-2 text-left text-base font-medium text-primary-600 hover:bg-gray-100 hover:text-primary-800">
-                    Registrati
-                  </button>
-                </SignUpButton>
+                <button
+                  onClick={() => signIn('google')}
+                  className="block w-full px-4 py-2 text-left text-base font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-800"
+                >
+                  Accedi
+                </button>
+                <button
+                  onClick={() => signIn('google')}
+                  className="block w-full px-4 py-2 text-left text-base font-medium text-primary-600 hover:bg-gray-100 hover:text-primary-800"
+                >
+                  Registrati
+                </button>
               </div>
             )}
           </div>

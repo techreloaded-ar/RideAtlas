@@ -13,6 +13,9 @@ const customJestConfig = {
     '^@/(.*)$': '<rootDir>/src/$1',
   },
   testPathIgnorePatterns: ['<rootDir>/node_modules/', '<rootDir>/.next/'],
+  transformIgnorePatterns: [
+    'node_modules/(?!(next-auth|@auth|@next|@next-auth|@panva|jose|preact|oauth4webapi)/)',
+  ],
 };
 
 // createJestConfig è esportato in questo modo per garantire che next/jest possa caricare la configurazione Next.js

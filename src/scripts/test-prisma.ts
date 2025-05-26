@@ -15,8 +15,8 @@ async function testPrismaConnection() {
     const tripCount = await prisma.trip.count()
     console.log(`📊 Trovati ${tripCount} viaggi nel database`)
     
-    const profileCount = await prisma.profile.count()
-    console.log(`👥 Trovati ${profileCount} profili nel database`)
+    const userCount = await prisma.user.count()
+    console.log(`👥 Trovati ${userCount} utenti nel database`)
     
     console.log('🎉 Tutti i test superati!')
   } catch (error) {
