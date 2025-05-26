@@ -34,3 +34,4 @@ coverage/
 
 # File di cache
 .cache/
+/src/generated/prisma

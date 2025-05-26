@@ -1,31 +1,16 @@
 // src/types/trip.ts
+import { Trip as PrismaTrip, TripStatus, RecommendedSeason } from '@prisma/client'
 
-// Rimozione dalla definizione Trip
-export interface Trip {
-  id: string;
-  title: string;
-  summary: string;
-  destination: string;
-  duration_days: number;
-  duration_nights: number;
-  // difficulty rimosso
-  tags: string[];
-  theme: string;
-  recommended_season: 'Primavera' | 'Estate' | 'Autunno' | 'Inverno' | 'Tutte';
-  slug: string; // generated automatically
-  status: 'Bozza' | 'Pronto per revisione' | 'Pubblicato' | 'Archiviato';
-  created_at: string; // ISO date string
-  updated_at: string; // ISO date string
-  user_id: string; // ID dell'utente (ranger) che ha creato il viaggio
-  // Campi opzionali che potrebbero essere aggiunti in seguito (US 4.1, 4.5)
-  // gpx_track_url?: string;
-  // photos?: { url: string; caption?: string }[];
-  // videos?: { url: string; caption?: string }[];
-  // pois?: { latitude: number; longitude: number; name: string; description?: string }[];
+// Usa i tipi generati da Prisma
+export type Trip = PrismaTrip
+
+// Tipo per la creazione di un viaggio (esclude campi auto-generati)
+export type TripCreationData = Omit<Trip, 'id' | 'slug' | 'status' | 'created_at' | 'updated_at' | 'user_id'>
+
+// Tipo per l'aggiornamento di un viaggio
+export type TripUpdateData = Partial<TripCreationData> & {
+  status?: TripStatus;
 }
 
-export type TripCreationData = Omit<Trip, 'id' | 'slug' | 'status' | 'created_at' | 'updated_at' | 'user_id'>;
-
-export type TripUpdateData = Partial<TripCreationData> & {
-  status?: Trip['status'];
-};
+// Esporta gli enum per facilità d'uso
+export { TripStatus, RecommendedSeason }

@@ -3,7 +3,7 @@
 
 import { useState, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
-import { TripCreationData } from '@/types/trip';
+import { TripCreationData, RecommendedSeason } from '@/types/trip';
 
 const CreateTripForm = () => {
   const router = useRouter();
@@ -13,10 +13,9 @@ const CreateTripForm = () => {
     destination: '',
     duration_days: 1,
     duration_nights: 1,
-
     tags: [],
     theme: '',
-    recommended_season: 'Tutte',
+    recommended_season: RecommendedSeason.Tutte,
   });
   const [tagInput, setTagInput] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -234,11 +233,11 @@ const CreateTripForm = () => {
           required
           className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
         >
-          <option value="Primavera">Primavera</option>
-          <option value="Estate">Estate</option>
-          <option value="Autunno">Autunno</option>
-          <option value="Inverno">Inverno</option>
-          <option value="Tutte">Tutte</option>
+          <option value={RecommendedSeason.Primavera}>Primavera</option>
+          <option value={RecommendedSeason.Estate}>Estate</option>
+          <option value={RecommendedSeason.Autunno}>Autunno</option>
+          <option value={RecommendedSeason.Inverno}>Inverno</option>
+          <option value={RecommendedSeason.Tutte}>Tutte</option>
         </select>
         {fieldErrors?.recommended_season && <p className="text-xs text-red-500 mt-1">{fieldErrors.recommended_season.join(', ')}</p>}
       </div>
