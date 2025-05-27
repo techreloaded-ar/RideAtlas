@@ -4,9 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
-    "vercel-build": "prisma generate && next build",
-    "postinstall": "prisma generate",
+    "build": "prisma generate && next build",
+    "vercel-build": "prisma generate && prisma db push && next build",
+    "postinstall": "prisma generate && prisma db push",
+    "setup": "npm install && prisma db push",
     "start": "next start",
     "lint": "next lint",
     "test": "jest",
