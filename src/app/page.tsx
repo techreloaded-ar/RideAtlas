@@ -68,7 +68,7 @@ export default function HomePage() {
                 </svg>
               </div>
               <h3 className="text-xl font-bold mb-2">Trip Builder con AI</h3>
-              <p className="text-gray-600">Costruisci il tuo itinerario personalizzato inserendo date, durata, budget e preferenze con l'assistenza dell'intelligenza artificiale.</p>
+              <p className="text-gray-600">Costruisci il tuo itinerario personalizzato inserendo date, durata, budget e preferenze con l&apos;assistenza dell&apos;intelligenza artificiale.</p>
             </div>
             
             <div className="card">

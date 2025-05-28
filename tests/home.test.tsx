@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react';
+import '@testing-library/jest-dom';
 import Home from '@/app/page';
 
 // Mock dei componenti Next.js che non sono supportati in ambiente di test

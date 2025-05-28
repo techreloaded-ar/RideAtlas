@@ -11,7 +11,7 @@ function AuthErrorContent() {
   const errorMessages: Record<string, { title: string; description: string }> = {
     Configuration: {
       title: 'Errore di configurazione',
-      description: 'C\'è un problema con la configurazione del server. Riprova più tardi.'
+      description: 'C&apos;è un problema con la configurazione del server. Riprova più tardi.'
     },
     AccessDenied: {
       title: 'Accesso negato',
@@ -23,7 +23,7 @@ function AuthErrorContent() {
     },
     Default: {
       title: 'Errore di autenticazione',
-      description: 'Si è verificato un errore durante l\'autenticazione. Riprova.'
+      description: 'Si è verificato un errore durante l&apos;autenticazione. Riprova.'
     }
   };
 
@@ -69,7 +69,7 @@ function AuthErrorContent() {
             href="/auth/signin"
             className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
           >
-            Riprova l'accesso
+            Riprova l&apos;accesso
           </Link>
 
           <Link 

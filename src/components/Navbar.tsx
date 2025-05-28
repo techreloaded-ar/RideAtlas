@@ -33,7 +33,7 @@ export default function Navbar() {
         navbarMounted = false;
       }
     };
-  }, []);
+  }, [isDuplicate]);
 
   // Se è un duplicato, non renderizzare nulla
   if (isDuplicate) {

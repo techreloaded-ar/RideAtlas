@@ -40,8 +40,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Utente non autorizzato." }, { status: 401 });
     }
 
-    const userId = session.user.id;
-
     const body = await request.json();
     console.log('Dati ricevuti:', JSON.stringify(body, null, 2));
     
@@ -74,18 +72,21 @@ export async function POST(request: NextRequest) {
 
       console.log('Viaggio creato con successo:', newTrip.id);
       return NextResponse.json(newTrip, { status: 201 });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Errore Prisma:', error);
       
+      // Type guard per errori Prisma
+      const prismaError = error as { code?: string; meta?: { target?: string[] }; message?: string };
+      
       // Gestione errore di duplicazione slug (constraint unique)
-      if (error.code === 'P2002' && error.meta?.target?.includes('slug')) {
+      if (prismaError.code === 'P2002' && prismaError.meta?.target?.includes('slug')) {
         return NextResponse.json({ 
           error: "Viaggio già esistente. Cambia titolo." 
         }, { status: 409 });
       }
       
       // Gestione errore foreign key constraint
-      if (error.code === 'P2003') {
+      if (prismaError.code === 'P2003') {
         return NextResponse.json({ 
           error: "Errore di collegamento utente. Riprova." 
         }, { status: 500 });
@@ -93,7 +94,7 @@ export async function POST(request: NextRequest) {
       
       return NextResponse.json({ 
         error: "Errore creazione viaggio.", 
-        details: error.message 
+        details: prismaError.message || "Errore sconosciuto"
       }, { status: 500 });
     }
   } catch (e) {

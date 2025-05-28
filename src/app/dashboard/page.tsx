@@ -93,7 +93,7 @@ export default function Dashboard() {
                     Migrazione completata!
                   </h3>
                   <div className="mt-2 text-sm text-blue-700">
-                    L'autenticazione è ora gestita da NextAuth.js con Google OAuth. 
+                    L&apos;autenticazione è ora gestita da NextAuth.js con Google OAuth. 
                     Puoi iniziare a creare i tuoi viaggi in moto!
                   </div>
                 </div>

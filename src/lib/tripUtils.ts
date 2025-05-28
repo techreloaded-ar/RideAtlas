@@ -28,7 +28,7 @@ export function filterOutCharacteristicTags(tags: string[]): string[] {
  * @param trip L'oggetto viaggio da arricchire
  * @returns Lo stesso oggetto arricchito con le caratteristiche estratte
  */
-export function enrichTripWithCharacteristics(trip: any): any {
+export function enrichTripWithCharacteristics(trip: Record<string, unknown>): Record<string, unknown> {
   if (!trip || !trip.tags || !Array.isArray(trip.tags)) {
     return trip;
   }

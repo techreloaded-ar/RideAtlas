@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import { useSession, signIn } from 'next-auth/react';
 
 export default function ReadyToStart() {

@@ -1,6 +1,5 @@
 // src/app/create-trip/page.tsx
 import CreateTripForm from '@/components/CreateTripForm';
-import Footer from '@/components/Footer';
 
 export default function CreateTripPage() {
   return (
