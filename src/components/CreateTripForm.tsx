@@ -123,7 +123,7 @@ const CreateTripForm = () => {
           value={formData.title}
           onChange={handleChange}
           required
-          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
         />
         {fieldErrors?.title && <p className="text-xs text-red-500 mt-1">{fieldErrors.title.join(', ')}</p>}
       </div>
@@ -137,7 +137,7 @@ const CreateTripForm = () => {
           onChange={handleChange}
           rows={3}
           required
-          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
         />
         {fieldErrors?.summary && <p className="text-xs text-red-500 mt-1">{fieldErrors.summary.join(', ')}</p>}
       </div>
@@ -151,7 +151,7 @@ const CreateTripForm = () => {
           value={formData.destination}
           onChange={handleChange}
           required
-          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
         />
         {fieldErrors?.destination && <p className="text-xs text-red-500 mt-1">{fieldErrors.destination.join(', ')}</p>}
       </div>
@@ -167,7 +167,7 @@ const CreateTripForm = () => {
             onChange={handleChange}
             min="1"
             required
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
           />
           {fieldErrors?.duration_days && <p className="text-xs text-red-500 mt-1">{fieldErrors.duration_days.join(', ')}</p>}
         </div>
@@ -181,11 +181,12 @@ const CreateTripForm = () => {
             onChange={handleChange}
             min="1"
             required
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
           />
           {fieldErrors?.duration_nights && <p className="text-xs text-red-500 mt-1">{fieldErrors.duration_nights.join(', ')}</p>}
         </div>
       </div>
+      
       <div>
         <label htmlFor="theme" className="block text-sm font-medium text-gray-700">Tema</label>
         <input
@@ -195,7 +196,7 @@ const CreateTripForm = () => {
           value={formData.theme}
           onChange={handleChange}
           required
-          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
         />
         {fieldErrors?.theme && <p className="text-xs text-red-500 mt-1">{fieldErrors.theme.join(', ')}</p>}
       </div>
@@ -209,7 +210,7 @@ const CreateTripForm = () => {
                 type="checkbox"
                 checked={formData.characteristics.includes(characteristic)}
                 onChange={(e) => handleCharacteristicChange(characteristic, e.target.checked)}
-                className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
               />
               <span className="ml-2 text-sm text-gray-700">{characteristic}</span>
             </label>
@@ -227,12 +228,12 @@ const CreateTripForm = () => {
             value={tagInput}
             onChange={handleTagInputChange}
             onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addTag(); } }}
-            className="flex-grow px-3 py-2 border border-gray-300 rounded-l-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            className="flex-grow px-3 py-2 border border-gray-300 rounded-l-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
           />
           <button
             type="button"
             onClick={addTag}
-            className="px-4 py-2 bg-indigo-600 text-white font-medium rounded-r-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            className="px-4 py-2 bg-primary-600 text-white font-medium rounded-r-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
           >
             Aggiungi Tag
           </button>
@@ -240,12 +241,12 @@ const CreateTripForm = () => {
         {fieldErrors?.tags && <p className="text-xs text-red-500 mt-1">{fieldErrors.tags.join(', ')}</p>}
         <div className="mt-2 flex flex-wrap gap-2">
           {formData.tags.map(tag => (
-            <span key={tag} className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+            <span key={tag} className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800">
               {tag}
               <button
                 type="button"
                 onClick={() => removeTag(tag)}
-                className="ml-1.5 flex-shrink-0 inline-flex text-indigo-500 hover:text-indigo-700 focus:outline-none focus:text-indigo-700"
+                className="ml-1.5 flex-shrink-0 inline-flex text-primary-500 hover:text-primary-700 focus:outline-none focus:text-primary-700"
               >
                 <span className="sr-only">Rimuovi tag</span>
                 &times;
@@ -263,7 +264,7 @@ const CreateTripForm = () => {
           value={formData.recommended_season}
           onChange={handleChange}
           required
-          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
         >
           <option value={RecommendedSeason.Primavera}>Primavera</option>
           <option value={RecommendedSeason.Estate}>Estate</option>
@@ -278,7 +279,7 @@ const CreateTripForm = () => {
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+          className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50"
         >
           {isLoading ? 'Creazione in corso...' : 'Crea Viaggio'}
         </button>
