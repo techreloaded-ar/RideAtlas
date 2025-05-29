@@ -34,6 +34,7 @@ model User {
   email         String    @unique
   emailVerified DateTime?
   image         String?
+  password      String?   // Per autenticazione email/password tradizionale
   role          String    @default("user") // 'user' | 'power_user' | 'ranger' | 'admin'
   bio           String?
   createdAt     DateTime  @default(now())

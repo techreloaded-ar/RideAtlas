@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useSession, signIn, signOut } from 'next-auth/react';
+import { useSession, signOut } from 'next-auth/react';
 import Image from 'next/image';
 
 // Previene la duplicazione della navbar
@@ -114,18 +114,18 @@ export default function Navbar() {
               </>
             ) : (
               <div className="flex space-x-4">
-                <button
-                  onClick={() => signIn('google')}
+                <Link
+                  href="/auth/signin"
                   className="text-gray-500 hover:text-gray-700 px-3 py-2 text-sm font-medium"
                 >
                   Accedi
-                </button>
-                <button
-                  onClick={() => signIn('google')}
+                </Link>
+                <Link
+                  href="/auth/register"
                   className="btn-primary"
                 >
                   Registrati
-                </button>
+                </Link>
               </div>
             )}
           </div>
@@ -227,18 +227,18 @@ export default function Navbar() {
               </div>
             ) : (
               <div className="mt-3 space-y-1">
-                <button
-                  onClick={() => signIn('google')}
+                <Link
+                  href="/auth/signin"
                   className="block w-full px-4 py-2 text-left text-base font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-800"
                 >
                   Accedi
-                </button>
-                <button
-                  onClick={() => signIn('google')}
+                </Link>
+                <Link
+                  href="/auth/register"
                   className="block w-full px-4 py-2 text-left text-base font-medium text-primary-600 hover:bg-gray-100 hover:text-primary-800"
                 >
                   Registrati
-                </button>
+                </Link>
               </div>
             )}
           </div>
