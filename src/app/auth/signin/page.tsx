@@ -44,7 +44,11 @@ function SignInContent() {
     });
 
     if (result?.error) {
-      setCredentialsError('Email o password non corretti');
+      if (result.error === 'EmailNotVerified') {
+        setCredentialsError('Email non verificata. Controlla la tua casella di posta per il link di verifica.');
+      } else {
+        setCredentialsError('Email o password non corretti');
+      }
       setIsLoading(false);
     } else {
       // Redirect to dashboard on success
@@ -63,6 +67,7 @@ function SignInContent() {
     EmailSignin: 'Controlla la tua email per il link di accesso.',
     CredentialsSignin: 'Accesso fallito. Controlla che i dettagli che hai fornito siano corretti.',
     SessionRequired: 'Effettua l\'accesso per accedere a questa pagina.',
+    'email-verified': 'Email verificata con successo! Ora puoi accedere.',
     default: 'Si è verificato un errore durante l\'accesso.',
   };
 
@@ -84,9 +89,28 @@ function SignInContent() {
         </div>
 
         {(error || credentialsError) && (
-          <div className="bg-red-50 border border-red-200 rounded-md p-4">
-            <div className="text-red-800 text-sm">
-              {credentialsError || errorMessages[error!] || errorMessages.default}
+          <div className={`border rounded-md p-4 ${
+            searchParams.get('message') === 'email-verified' 
+              ? 'bg-green-50 border-green-200' 
+              : 'bg-red-50 border-red-200'
+          }`}>
+            <div className={`text-sm ${
+              searchParams.get('message') === 'email-verified' 
+                ? 'text-green-800' 
+                : 'text-red-800'
+            }`}>
+              {searchParams.get('message') === 'email-verified' 
+                ? 'Email verificata con successo! Ora puoi accedere.'
+                : (credentialsError || errorMessages[error!] || errorMessages.default)
+              }
+            </div>
+          </div>
+        )}
+
+        {searchParams.get('message') === 'email-verified' && !error && !credentialsError && (
+          <div className="bg-green-50 border border-green-200 rounded-md p-4">
+            <div className="text-green-800 text-sm">
+              Email verificata con successo! Ora puoi accedere.
             </div>
           </div>
         )}

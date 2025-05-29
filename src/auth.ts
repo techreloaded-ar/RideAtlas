@@ -38,10 +38,15 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           // Find user in database
           const user = await prisma.user.findUnique({
             where: { email },
-          }) as { id: string; email: string; name: string | null; image: string | null; password: string | null } | null
+          }) as { id: string; email: string; name: string | null; image: string | null; password: string | null; emailVerified: Date | null } | null
 
           if (!user || !user.password) {
             return null
+          }
+
+          // Check if email is verified
+          if (!user.emailVerified) {
+            throw new Error("EmailNotVerified")
           }
 
           // Verify password
@@ -59,6 +64,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           }
         } catch (error) {
           console.error("Authorization error:", error)
+          if (error instanceof Error && error.message === "EmailNotVerified") {
+            throw error
+          }
           return null
         }
       },

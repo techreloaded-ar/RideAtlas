@@ -3,6 +3,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
+import { sendVerificationEmail } from '@/lib/email';
+import { randomBytes } from 'crypto';
 
 // Schema di validazione per la registrazione
 const registerSchema = z.object({
@@ -44,13 +46,17 @@ export async function POST(request: NextRequest) {
     // Hash della password
     const hashedPassword = await bcrypt.hash(password, 12);
 
-    // Crea l'utente
+    // Genera token di verifica
+    const verificationToken = randomBytes(32).toString('hex');
+    const tokenExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 ore
+
+    // Crea l'utente (non verificato inizialmente)
     const user = await prisma.user.create({
       data: {
         name,
         email,
         password: hashedPassword,
-        emailVerified: new Date(), // Considera l'email verificata per semplicità
+        emailVerified: null, // Non verificato inizialmente
       },
       select: {
         id: true,
@@ -61,10 +67,34 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    // Salva il token di verifica
+    await prisma.emailVerificationToken.create({
+      data: {
+        email,
+        token: verificationToken,
+        expiresAt: tokenExpiry,
+      }
+    });
+
+    // Invia email di verifica
+    const emailResult = await sendVerificationEmail(email, verificationToken);
+    
+    if (!emailResult.success) {
+      // Se l'invio dell'email fallisce, elimina l'utente e il token creati
+      await prisma.user.delete({ where: { id: user.id } });
+      await prisma.emailVerificationToken.deleteMany({ where: { email } });
+      
+      return NextResponse.json(
+        { error: 'Errore nell\'invio dell\'email di verifica. Riprova più tardi.' },
+        { status: 500 }
+      );
+    }
+
     return NextResponse.json(
       { 
-        message: 'Utente registrato con successo',
-        user 
+        message: 'Registrazione completata! Controlla la tua email per verificare l\'account.',
+        requiresVerification: true,
+        email: email 
       },
       { status: 201 }
     );

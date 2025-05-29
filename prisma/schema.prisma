@@ -10,41 +10,32 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Enum per le stagioni raccomandate
-enum RecommendedSeason {
-  Primavera
-  Estate
-  Autunno
-  Inverno
-  Tutte
-}
-
-// Enum per lo status del viaggio
-enum TripStatus {
-  Bozza
-  Pronto_per_revisione @map("Pronto per revisione")
-  Pubblicato
-  Archiviato
-}
-
-// NextAuth.js required tables
 model User {
   id            String    @id @default(cuid())
   name          String?
   email         String    @unique
   emailVerified DateTime?
   image         String?
-  password      String?   // Per autenticazione email/password tradizionale
-  role          String    @default("user") // 'user' | 'power_user' | 'ranger' | 'admin'
+  password      String?
+  role          String    @default("user")
   bio           String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
-
-  accounts Account[]
-  sessions Session[]
-  trips    Trip[]
+  accounts      Account[]
+  sessions      Session[]
+  trips         Trip[]
 
   @@map("users")
+}
+
+model EmailVerificationToken {
+  id        String   @id @default(cuid())
+  email     String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@map("email_verification_tokens")
 }
 
 model Account {
@@ -59,11 +50,9 @@ model Account {
   scope             String?
   id_token          String?
   session_state     String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@id([provider, providerAccountId])
   @@map("accounts")
@@ -73,10 +62,9 @@ model Session {
   sessionToken String   @unique
   userId       String
   expires      DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 
   @@map("sessions")
 }
@@ -90,26 +78,38 @@ model VerificationToken {
   @@map("verificationtokens")
 }
 
-// Modello principale per i viaggi
 model Trip {
-  id                  String            @id @default(cuid())
-  title               String
-  summary             String
-  destination         String
-  duration_days       Int
-  duration_nights     Int
-  tags                String[]
-  theme               String
-  characteristics     String[]
-  recommended_season  RecommendedSeason
-  slug                String            @unique
-  status              TripStatus        @default(Bozza)
-  created_at          DateTime          @default(now())
-  updated_at          DateTime          @updatedAt
-  user_id             String
-
-  // Relazioni
-  user User @relation(fields: [user_id], references: [id])
+  id                 String            @id @default(cuid())
+  title              String
+  summary            String
+  destination        String
+  duration_days      Int
+  duration_nights    Int
+  tags               String[]
+  theme              String
+  characteristics    String[]
+  recommended_season RecommendedSeason
+  slug               String            @unique
+  status             TripStatus        @default(Bozza)
+  created_at         DateTime          @default(now())
+  updated_at         DateTime          @updatedAt
+  user_id            String
+  user               User              @relation(fields: [user_id], references: [id])
 
   @@map("trips")
+}
+
+enum RecommendedSeason {
+  Primavera
+  Estate
+  Autunno
+  Inverno
+  Tutte
+}
+
+enum TripStatus {
+  Bozza
+  Pronto_per_revisione @map("Pronto per revisione")
+  Pubblicato
+  Archiviato
 }
