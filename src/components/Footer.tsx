@@ -10,6 +10,9 @@ export default function Footer() {
             <p className="text-gray-300">
               Piattaforma per appassionati di viaggi in moto con itinerari curati e personalizzabili.
             </p>
+            <p className="text-primary-300 italic font-medium">
+              "Il viaggio lo progettiamo insieme, tu guidi l'avventura"
+            </p>
             <div className="flex space-x-4">
               <a href="#" className="text-gray-300 hover:text-white">
                 <span className="sr-only">Facebook</span>

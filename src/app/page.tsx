@@ -13,8 +13,8 @@ export default function HomePage() {
               <h1 className="text-4xl md:text-5xl font-display font-bold">
                 Scopri itinerari in moto personalizzati con RideAtlas
               </h1>
-              <p className="text-xl">
-                Pacchetti viaggio multimediali e costruttore di percorsi assistito da AI per gli appassionati di viaggi in moto.
+              <p className="text-2xl font-semibold text-primary-200 italic mb-2">
+                "Il viaggio lo progettiamo insieme, tu guidi l'avventura"
               </p>
               <div className="pt-4 flex flex-wrap gap-4">
                 <Link href="/pacchetti" className="btn-primary">
