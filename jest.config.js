@@ -7,15 +7,29 @@ const createJestConfig = nextJest({
 
 // Configurazione Jest personalizzata
 const customJestConfig = {
-  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
+  setupFilesAfterEnv: ['<rootDir>/src/tests/setup/jest.setup.ts'],
   testEnvironment: 'jest-environment-jsdom',
+  testMatch: [
+    '<rootDir>/src/tests/**/*.test.{ts,tsx}',
+    '<rootDir>/src/tests/**/*.spec.{ts,tsx}'
+  ],
+  collectCoverageFrom: [
+    'src/**/*.{ts,tsx}',
+    '!src/**/*.d.ts',
+    '!src/tests/**/*',
+    '!src/app/layout.tsx',
+    '!src/app/globals.css',
+  ],
+  coverageDirectory: 'coverage',
+  coverageReporters: ['text', 'lcov', 'html'],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
   },
   testPathIgnorePatterns: ['<rootDir>/node_modules/', '<rootDir>/.next/'],
   transformIgnorePatterns: [
-    'node_modules/(?!(next-auth|@auth|@next|@next-auth|@panva|jose|preact|oauth4webapi|uuid)/)',
+    'node_modules/(?!(next-auth|@auth|@next|@next-auth|@panva|jose|preact|oauth4webapi|uuid|@testing-library)/)',
   ],
+  testTimeout: 10000,
 };
 
 // createJestConfig è esportato in questo modo per garantire che next/jest possa caricare la configurazione Next.js
