@@ -15,6 +15,21 @@ jest.mock('next/navigation', () => ({
   useSearchParams: jest.fn().mockReturnValue(new URLSearchParams()),
 }));
 
+// Mock per next/image
+jest.mock('next/image', () => ({
+  __esModule: true,
+  default: (props) => {
+    const { fill, priority, ...rest } = props;
+    return (
+      <img
+        {...rest}
+        fill={fill ? 'true' : undefined}
+        priority={priority ? 'true' : undefined}
+      />
+    );
+  },
+}));
+
 // Mock per next-auth
 jest.mock('next-auth/react', () => ({
   useSession: jest.fn(() => ({

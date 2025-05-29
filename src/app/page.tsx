@@ -14,7 +14,7 @@ export default function HomePage() {
                 Scopri itinerari in moto personalizzati con RideAtlas
               </h1>
               <p className="text-2xl font-semibold text-primary-200 italic mb-2">
-                "Il viaggio lo progettiamo insieme, tu guidi l'avventura"
+                &quot;Il viaggio lo progettiamo insieme, tu guidi l&apos;avventura&quot;
               </p>
               
               {/* Badge di certificazione qualità */}

@@ -11,7 +11,7 @@ export default function Footer() {
               Piattaforma per appassionati di viaggi in moto con itinerari curati e personalizzabili.
             </p>
             <p className="text-primary-300 italic font-medium">
-              "Il viaggio lo progettiamo insieme, tu guidi l'avventura"
+              &quot;Il viaggio lo progettiamo insieme, tu guidi l&apos;avventura&quot;
             </p>
             <div className="flex space-x-4">
               <a href="#" className="text-gray-300 hover:text-white">
