@@ -1,13 +1,19 @@
 // Authentication Integration Test
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { SessionProvider } from 'next-auth/react';
 import Register from '../src/app/auth/register/page';
 import SignIn from '../src/app/auth/signin/page';
 
 // Mock next-auth/react
 jest.mock('next-auth/react', () => ({
-  ...jest.requireActual('next-auth/react'),
+  SessionProvider: ({ children }: { children: React.ReactNode }) => children,
+  useSession: () => ({
+    data: null,
+    status: 'unauthenticated'
+  }),
   signIn: jest.fn(),
+  signOut: jest.fn(),
   getProviders: jest.fn(() => Promise.resolve({
     google: {
       id: 'google',
@@ -39,6 +45,9 @@ jest.mock('next/navigation', () => ({
 // Mock fetch for registration
 global.fetch = jest.fn();
 
+// Mock React act for better testing
+import { act } from 'react';
+
 describe('Authentication System', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -57,19 +66,28 @@ describe('Authentication System', () => {
     });
 
     it('validates password length correctly', async () => {
+      const user = userEvent.setup();
       render(<Register />);
       
+      const nameInput = screen.getByLabelText(/nome completo/i);
+      const emailInput = screen.getByLabelText(/email/i);
       const passwordInput = screen.getByLabelText(/^password$/i);
       const confirmPasswordInput = screen.getByLabelText(/conferma password/i);
       const submitButton = screen.getByRole('button', { name: /crea account/i });
       
-      fireEvent.change(passwordInput, { target: { value: '123' } });
-      fireEvent.change(confirmPasswordInput, { target: { value: '123' } });
-      fireEvent.click(submitButton);
+      // Riempi tutti i campi richiesti
+      await user.type(nameInput, 'Test User');
+      await user.type(emailInput, 'test@example.com');
+      await user.type(passwordInput, '123');
+      await user.type(confirmPasswordInput, '123');
       
+      // Clicca submit
+      await user.click(submitButton);
+      
+      // Aspetta che appaia il messaggio di errore (il messaggio corretto include "La")
       await waitFor(() => {
         expect(screen.getByText(/la password deve essere di almeno 8 caratteri/i)).toBeInTheDocument();
-      });
+      }, { timeout: 3000 });
     });
 
     it('validates password confirmation', async () => {

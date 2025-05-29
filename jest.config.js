@@ -14,7 +14,7 @@ const customJestConfig = {
   },
   testPathIgnorePatterns: ['<rootDir>/node_modules/', '<rootDir>/.next/'],
   transformIgnorePatterns: [
-    'node_modules/(?!(next-auth|@auth|@next|@next-auth|@panva|jose|preact|oauth4webapi)/)',
+    'node_modules/(?!(next-auth|@auth|@next|@next-auth|@panva|jose|preact|oauth4webapi|uuid)/)',
   ],
 };
 

@@ -1,6 +1,17 @@
 // Importa jest-dom per estendere le asserzioni di Jest
 import '@testing-library/jest-dom';
 
+// Mock per crypto
+Object.defineProperty(global, 'crypto', {
+  value: {
+    randomUUID: () => 'test-uuid-1234',
+    getRandomValues: (arr) => arr.fill(1),
+    subtle: {
+      digest: jest.fn(() => Promise.resolve(new ArrayBuffer(32)))
+    }
+  }
+});
+
 // Mock per next/router
 jest.mock('next/navigation', () => ({
   useRouter: () => ({
