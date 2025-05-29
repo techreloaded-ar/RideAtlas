@@ -16,6 +16,20 @@ export default function HomePage() {
               <p className="text-2xl font-semibold text-primary-200 italic mb-2">
                 "Il viaggio lo progettiamo insieme, tu guidi l'avventura"
               </p>
+              
+              {/* Badge di certificazione qualità */}
+              <div className="flex items-center gap-3 bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
+                <div className="flex-shrink-0">
+                  <svg className="w-8 h-8 text-nature-300" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.286.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="font-semibold text-white text-lg">✓ Itinerari Testati & Certificati</p>
+                  <p className="text-primary-200 text-sm">Verificati dai nostri ranger esperti</p>
+                </div>
+              </div>
+
               <div className="pt-4 flex flex-wrap gap-4">
                 <Link href="/pacchetti" className="btn-primary">
                   Esplora Pacchetti
@@ -51,14 +65,26 @@ export default function HomePage() {
           <h2 className="text-3xl font-display font-bold text-center mb-12 text-secondary-800">Caratteristiche Principali</h2>
           
           <div className="grid md:grid-cols-3 gap-8">
-            <div className="card hover:shadow-lg transition-shadow">
+            <div className="card hover:shadow-lg transition-shadow relative">
+              {/* Badge "Testato" nell'angolo */}
+              <div className="absolute -top-2 -right-2 bg-nature-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">
+                TESTATO ✓
+              </div>
+              
               <div className="h-12 w-12 bg-nature-200 text-nature-800 rounded-full flex items-center justify-center mb-4">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 6.75V15m6-6v8.25m.503 3.498l4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 00-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-bold mb-2 text-secondary-800">Pacchetti Viaggio Curati</h3>
-              <p className="text-secondary-600">Itinerari di qualità con tracce GPX esplorate da ranger esperti, completi di storytelling e punti di interesse.</p>
+              <h3 className="text-xl font-bold mb-2 text-secondary-800">Pacchetti Viaggio Curati & Certificati</h3>
+              <p className="text-secondary-600 mb-3">Itinerari di qualità con tracce GPX <strong>testati e verificati</strong> da ranger esperti, completi di storytelling e punti di interesse.</p>
+              
+              {/* Indicatori di qualità */}
+              <div className="flex flex-wrap gap-2 text-xs">
+                <span className="bg-nature-100 text-nature-800 px-2 py-1 rounded-full font-medium">✓ Testato su strada</span>
+                <span className="bg-nature-100 text-nature-800 px-2 py-1 rounded-full font-medium">✓ Verificato sicurezza</span>
+                <span className="bg-nature-100 text-nature-800 px-2 py-1 rounded-full font-medium">✓ GPS certificato</span>
+              </div>
             </div>
             
             <div className="card hover:shadow-lg transition-shadow">
@@ -68,7 +94,15 @@ export default function HomePage() {
                 </svg>
               </div>
               <h3 className="text-xl font-bold mb-2 text-secondary-800">Trip Builder con AI</h3>
-              <p className="text-secondary-600">Costruisci il tuo itinerario personalizzato inserendo date, durata, budget e preferenze con l&apos;assistenza dell&apos;intelligenza artificiale.</p>
+              <p className="text-secondary-600 mb-3">Costruisci il tuo itinerario personalizzato inserendo date, durata, budget e preferenze con l&apos;assistenza dell&apos;intelligenza artificiale <strong>supportata dai nostri ranger esperti</strong>.</p>
+              
+              {/* Badge supporto umano */}
+              <div className="flex items-center gap-2 text-xs text-primary-700 bg-primary-50 px-3 py-2 rounded-full">
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                </svg>
+                <span className="font-medium">Supporto umano sempre disponibile</span>
+              </div>
             </div>
             
             <div className="card hover:shadow-lg transition-shadow">
