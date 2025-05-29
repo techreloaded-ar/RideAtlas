@@ -19,16 +19,22 @@ function VerifyEmailContent() {
       return;
     }
 
+    let isActive = true; // Flag per evitare aggiornamenti di stato se il componente è smontato
+
     // Verifica il token
     fetch(`/api/auth/verify-email?token=${token}`)
       .then(response => response.json())
       .then(data => {
+        if (!isActive) return; // Evita aggiornamenti di stato se il componente è smontato
+        
         if (data.verified) {
           setStatus('success');
-          setMessage('Email verificata con successo!');
+          setMessage(data.alreadyVerified ? 'Email già verificata!' : 'Email verificata con successo!');
           // Reindirizza alla pagina di login dopo 3 secondi
           setTimeout(() => {
-            router.push('/auth/signin?message=email-verified');
+            if (isActive) {
+              router.push('/auth/signin?message=email-verified');
+            }
           }, 3000);
         } else {
           setStatus('error');
@@ -36,10 +42,16 @@ function VerifyEmailContent() {
         }
       })
       .catch(error => {
+        if (!isActive) return;
         console.error('Errore verifica:', error);
         setStatus('error');
         setMessage('Errore durante la verifica dell\'email');
       });
+
+    // Cleanup function per evitare aggiornamenti di stato dopo lo smontaggio
+    return () => {
+      isActive = false;
+    };
   }, [token, router]);
 
   return (

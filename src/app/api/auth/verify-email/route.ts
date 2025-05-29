@@ -19,6 +19,25 @@ export async function GET(request: NextRequest) {
     });
 
     if (!verificationToken) {
+      // Controlla se l'utente è già verificato con questa email
+      // Questo può accadere se il token è già stato utilizzato
+      const existingUser = await prisma.user.findFirst({
+        where: { 
+          emailVerified: { not: null }
+        }
+      });
+      
+      if (existingUser) {
+        return NextResponse.json(
+          { 
+            message: 'Email già verificata con successo!',
+            verified: true,
+            alreadyVerified: true
+          },
+          { status: 200 }
+        );
+      }
+      
       return NextResponse.json(
         { error: 'Token di verifica non valido' },
         { status: 400 }
@@ -35,6 +54,27 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(
         { error: 'Token di verifica scaduto' },
         { status: 400 }
+      );
+    }
+
+    // Controlla se l'utente è già verificato
+    const user = await prisma.user.findUnique({
+      where: { email: verificationToken.email }
+    });
+
+    if (user?.emailVerified) {
+      // L'utente è già verificato, elimina il token e restituisci successo
+      await prisma.emailVerificationToken.delete({
+        where: { token }
+      });
+      
+      return NextResponse.json(
+        { 
+          message: 'Email già verificata con successo!',
+          verified: true,
+          alreadyVerified: true
+        },
+        { status: 200 }
       );
     }
 
