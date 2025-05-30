@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
 import Image from 'next/image';
+import { UserRole, UserPermissions } from '@/types/profile';
 
 // Previene la duplicazione della navbar
 let navbarMounted = false;
@@ -85,15 +86,28 @@ export default function Navbar() {
                 >
                   Dashboard
                 </Link>
-                <Link
-                  href="/create-trip"
-                  className={`px-3 py-2 text-sm font-medium ${pathname === '/create-trip'
-                      ? 'text-primary-700 font-semibold'
-                      : 'text-gray-500 hover:text-gray-700'
-                    }`}
-                >
-                  Crea Viaggio
-                </Link>
+                {UserPermissions.canCreateTrips(session.user.role as UserRole) && (
+                  <Link
+                    href="/create-trip"
+                    className={`px-3 py-2 text-sm font-medium ${pathname === '/create-trip'
+                        ? 'text-primary-700 font-semibold'
+                        : 'text-gray-500 hover:text-gray-700'
+                      }`}
+                  >
+                    Crea Viaggio
+                  </Link>
+                )}
+                {UserPermissions.canAccessAdminPanel(session.user.role as UserRole) && (
+                  <Link
+                    href="/admin"
+                    className={`px-3 py-2 text-sm font-medium ${pathname === '/admin'
+                        ? 'text-primary-700 font-semibold'
+                        : 'text-gray-500 hover:text-gray-700'
+                      }`}
+                  >
+                    Admin
+                  </Link>
+                )}
                 <div className="ml-3 flex items-center space-x-3">
                   {session.user?.image && (
                     <Image
@@ -217,6 +231,22 @@ export default function Navbar() {
                   >
                     Dashboard
                   </Link>
+                  {UserPermissions.canCreateTrips(session.user.role as UserRole) && (
+                    <Link
+                      href="/create-trip"
+                      className="block px-4 py-2 text-base font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-800"
+                    >
+                      Crea Viaggio
+                    </Link>
+                  )}
+                  {UserPermissions.canAccessAdminPanel(session.user.role as UserRole) && (
+                    <Link
+                      href="/admin"
+                      className="block px-4 py-2 text-base font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-800"
+                    >
+                      Admin
+                    </Link>
+                  )}
                   <button
                     onClick={() => signOut()}
                     className="block w-full text-left px-4 py-2 text-base font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-800"

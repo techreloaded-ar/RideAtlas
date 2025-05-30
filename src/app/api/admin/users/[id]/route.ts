@@ -1,0 +1,175 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { prisma } from '@/lib/prisma'
+import { auth } from '@/auth'
+import { UserRole } from '@/types/profile'
+import { z } from 'zod'
+
+// Force dynamic rendering
+export const dynamic = 'force-dynamic'
+
+const updateUserSchema = z.object({
+  role: z.nativeEnum(UserRole),
+})
+
+// PATCH - Aggiorna il ruolo di un utente (solo per Sentinel)
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const session = await auth()
+    
+    if (!session?.user) {
+      return NextResponse.json(
+        { error: 'Non autorizzato' },
+        { status: 401 }
+      )
+    }
+
+    if (session.user.role !== UserRole.Sentinel) {
+      return NextResponse.json(
+        { error: 'Permessi insufficienti' },
+        { status: 403 }
+      )
+    }
+
+    const body = await request.json()
+    const result = updateUserSchema.safeParse(body)
+    
+    if (!result.success) {
+      return NextResponse.json(
+        { error: 'Dati non validi', details: result.error.flatten().fieldErrors },
+        { status: 400 }
+      )
+    }
+
+    const { role } = result.data
+    const userId = params.id
+
+    // Non permettere di modificare il proprio ruolo
+    if (session.user.id === userId) {
+      return NextResponse.json(
+        { error: 'Non puoi modificare il tuo stesso ruolo' },
+        { status: 400 }
+      )
+    }
+
+    // Verifica che l'utente esista
+    const existingUser = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true, name: true, email: true, role: true }
+    })
+
+    if (!existingUser) {
+      return NextResponse.json(
+        { error: 'Utente non trovato' },
+        { status: 404 }
+      )
+    }
+
+    // Aggiorna il ruolo
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: { role },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        emailVerified: true,
+        createdAt: true,
+        updatedAt: true,
+        image: true,
+        _count: {
+          select: {
+            trips: true
+          }
+        }
+      }
+    })
+
+    return NextResponse.json({
+      message: 'Ruolo utente aggiornato con successo',
+      user: updatedUser
+    })
+
+  } catch (error) {
+    console.error('Errore nell\'aggiornamento ruolo utente:', error)
+    return NextResponse.json(
+      { error: 'Errore interno del server' },
+      { status: 500 }
+    )
+  }
+}
+
+// GET - Ottieni dettagli di un singolo utente
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const session = await auth()
+    
+    if (!session?.user) {
+      return NextResponse.json(
+        { error: 'Non autorizzato' },
+        { status: 401 }
+      )
+    }
+
+    if (session.user.role !== UserRole.Sentinel) {
+      return NextResponse.json(
+        { error: 'Permessi insufficienti' },
+        { status: 403 }
+      )
+    }
+
+    const userId = params.id
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        emailVerified: true,
+        createdAt: true,
+        updatedAt: true,
+        image: true,
+        bio: true,
+        _count: {
+          select: {
+            trips: true
+          }
+        },
+        trips: {
+          select: {
+            id: true,
+            title: true,
+            status: true,
+            created_at: true
+          },
+          orderBy: { created_at: 'desc' },
+          take: 5
+        }
+      }
+    })
+
+    if (!user) {
+      return NextResponse.json(
+        { error: 'Utente non trovato' },
+        { status: 404 }
+      )
+    }
+
+    return NextResponse.json({ user })
+
+  } catch (error) {
+    console.error('Errore nel recupero dettagli utente:', error)
+    return NextResponse.json(
+      { error: 'Errore interno del server' },
+      { status: 500 }
+    )
+  }
+}

@@ -22,7 +22,8 @@
     "db:studio": "prisma studio",
     "db:migrate": "prisma migrate dev",
     "db:reset": "prisma migrate reset",
-    "test:prisma": "npx tsx src/scripts/test-prisma.ts"
+    "test:prisma": "npx tsx src/scripts/test-prisma.ts",
+    "create:sentinel": "npx tsx src/scripts/create-sentinel.ts"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.9.1",

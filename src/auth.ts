@@ -5,6 +5,7 @@ import { PrismaAdapter } from "@auth/prisma-adapter"
 import { prisma } from "@/lib/prisma"
 import bcrypt from "bcryptjs"
 import { z } from "zod"
+import { UserRole } from "@/types/profile"
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: PrismaAdapter(prisma),
@@ -38,7 +39,16 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           // Find user in database
           const user = await prisma.user.findUnique({
             where: { email },
-          }) as { id: string; email: string; name: string | null; image: string | null; password: string | null; emailVerified: Date | null } | null
+            select: {
+              id: true,
+              email: true,
+              name: true,
+              image: true,
+              password: true,
+              emailVerified: true,
+              role: true,
+            }
+          })
 
           if (!user || !user.password) {
             return null
@@ -61,6 +71,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             email: user.email,
             name: user.name,
             image: user.image,
+            role: user.role,
           }
         } catch (error) {
           console.error("Authorization error:", error)
@@ -95,10 +106,24 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         token.name = profile.name
         token.picture = profile.picture
       }
+      
       // If user data is available from database, use it
       if (user) {
         token.id = user.id
+        token.role = (user as { role?: string }).role
       }
+      
+      // Se non abbiamo ancora il ruolo, lo recuperiamo dal database
+      if (!token.role && token.email) {
+        const dbUser = await prisma.user.findUnique({
+          where: { email: token.email },
+          select: { role: true }
+        })
+        if (dbUser) {
+          token.role = dbUser.role
+        }
+      }
+      
       return token
     },
     session: async ({ session, token }) => {
@@ -107,6 +132,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         user: {
           ...session.user,
           id: token.id as string,
+          role: token.role as UserRole,
         },
       }
     },

@@ -1,6 +1,13 @@
 // src/types/profile.ts
 import { User as PrismaUser } from '@prisma/client'
 
+// Definisco l'enum UserRole che corrisponde a quello nel database
+export enum UserRole {
+  Explorer = 'Explorer',
+  Ranger = 'Ranger',
+  Sentinel = 'Sentinel'
+}
+
 // Usa i tipi generati da Prisma
 export type User = PrismaUser
 
@@ -8,7 +15,27 @@ export type User = PrismaUser
 export type Profile = PrismaUser
 
 // Tipo per la creazione di un profilo (esclude campi auto-generati)
-export type ProfileCreationData = Omit<Profile, 'id' | 'created_at' | 'updated_at'>
+export type ProfileCreationData = Omit<Profile, 'id' | 'createdAt' | 'updatedAt'>
 
 // Tipo per l'aggiornamento di un profilo
-export type ProfileUpdateData = Partial<Omit<Profile, 'id' | 'user_id' | 'created_at' | 'updated_at'>>
+export type ProfileUpdateData = Partial<Omit<Profile, 'id' | 'createdAt' | 'updatedAt'>>
+
+// Helper per controllare i permessi
+export const UserPermissions = {
+  canCreateTrips: (role: UserRole) => role === UserRole.Ranger || role === UserRole.Sentinel,
+  canManageUsers: (role: UserRole) => role === UserRole.Sentinel,
+  canAccessAdminPanel: (role: UserRole) => role === UserRole.Sentinel,
+} as const
+
+// Traduzione ruoli per l'UI
+export const UserRoleLabels: Record<UserRole, string> = {
+  [UserRole.Explorer]: 'Explorer',
+  [UserRole.Ranger]: 'Ranger',
+  [UserRole.Sentinel]: 'Sentinel',
+} as const
+
+export const UserRoleDescriptions: Record<UserRole, string> = {
+  [UserRole.Explorer]: 'Può visualizzare e partecipare ai viaggi',
+  [UserRole.Ranger]: 'Può creare, modificare e partecipare ai viaggi',
+  [UserRole.Sentinel]: 'Può gestire utenti e ha accesso completo al sistema',
+} as const
