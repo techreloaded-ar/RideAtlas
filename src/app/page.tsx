@@ -28,10 +28,8 @@ export default function HomePage() {
                   <p className="font-semibold text-white text-lg">✓ Itinerari Testati & Certificati</p>
                   <p className="text-primary-200 text-sm">Verificati dai nostri ranger esperti</p>
                 </div>
-              </div>
-
-              <div className="pt-4 flex flex-wrap gap-4">
-                <Link href="/pacchetti" className="btn-primary">
+              </div>              <div className="pt-4 flex flex-wrap gap-4">
+                <Link href="/trips" className="btn-primary">
                   Esplora Pacchetti
                 </Link>
                 <Link href="/trip-builder" className="bg-white text-secondary-800 hover:bg-gray-100 font-semibold py-2 px-4 rounded-md transition-colors">

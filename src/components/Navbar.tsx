@@ -39,11 +39,9 @@ export default function Navbar() {
   // Se è un duplicato, non renderizzare nulla
   if (isDuplicate) {
     return null;
-  }
-
-  const navigation = [
+  }  const navigation = [
     { name: 'Home', href: '/' },
-    { name: 'Pacchetti', href: '/pacchetti' },
+    { name: 'Pacchetti', href: '/trips' },
     { name: 'Trip Builder', href: '/trip-builder' },
     { name: 'Community', href: '/community' },
   ];

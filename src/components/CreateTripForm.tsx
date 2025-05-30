@@ -93,9 +93,7 @@ const CreateTripForm = () => {
           setFieldErrors(result.details);
         }
         return;
-      }
-
-      // Redirect to a success page or the newly created trip page (e.g., /trips/[slug])
+      }      // Redirect to a success page or the newly created trip page (e.g., /trips/[slug])
       // For now, let's redirect to the home page or a generic success message page
       router.push('/'); // O router.push(`/trips/${result.slug}`) se l'API restituisce lo slug
       alert('Viaggio creato con successo!'); // Sostituire con una notifica migliore

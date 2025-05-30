@@ -37,9 +37,8 @@ export default function Footer() {
           
           <div>
             <h3 className="text-lg font-semibold mb-4">Esplora</h3>
-            <ul className="space-y-2">
-              <li>
-                <Link href="/pacchetti" className="text-gray-300 hover:text-white">
+            <ul className="space-y-2">              <li>
+                <Link href="/trips" className="text-gray-300 hover:text-white">
                   Pacchetti Viaggio
                 </Link>
               </li>
