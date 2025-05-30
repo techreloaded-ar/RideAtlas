@@ -1,6 +1,5 @@
 import '@testing-library/jest-dom';
 import { TextEncoder, TextDecoder } from 'util';
-import 'whatwg-fetch';
 
 // Setup globals per Node.js
 global.TextEncoder = TextEncoder;
