@@ -1,5 +1,6 @@
 import '@testing-library/jest-dom';
 import { TextEncoder, TextDecoder } from 'util';
+import 'whatwg-fetch';
 
 // Setup globals per Node.js
 global.TextEncoder = TextEncoder;
@@ -16,6 +17,29 @@ Object.defineProperty(global, 'crypto', {
   },
   writable: true,
 });
+
+// Mock NextResponse
+jest.mock('next/server', () => ({
+  NextResponse: {
+    json: (data: unknown, init?: ResponseInit) => {
+      const response = {
+        json: async () => data,
+        status: init?.status || 200,
+        ok: (init?.status || 200) < 400,
+        headers: new Map(),
+        text: async () => JSON.stringify(data),
+      };
+      return response;
+    },
+    redirect: (url: string, status?: number) => ({
+      json: async () => ({ redirect: url }),
+      status: status || 302,
+      ok: false,
+      headers: new Map(),
+      text: async () => JSON.stringify({ redirect: url }),
+    }),
+  },
+}));
 
 // Mock next-auth globalmente
 jest.mock('next-auth/react', () => ({
@@ -77,7 +101,9 @@ beforeEach(() => {
     if (
       typeof message === 'string' &&
       (message.includes('Warning: An update to') ||
-       message.includes('Warning: ReactDOM.render'))
+       message.includes('Warning: ReactDOM.render') ||
+       message.includes('⚠️  Configurazione email non completa') ||
+       message.includes('❌ Errore invio email:'))
     ) {
       return;
     }
@@ -88,7 +114,8 @@ beforeEach(() => {
     const message = args[0];
     if (
       typeof message === 'string' &&
-      message.includes('Warning:')
+      (message.includes('Warning:') ||
+       message.includes('⚠️  Variabili email mancanti:'))
     ) {
       return;
     }
