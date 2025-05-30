@@ -40,6 +40,9 @@ export default function UserManagement() {
   const [search, setSearch] = useState('')
   const [roleFilter, setRoleFilter] = useState<UserRole | ''>('')
   const [updatingUser, setUpdatingUser] = useState<string | null>(null)
+  const [deletingUser, setDeletingUser] = useState<string | null>(null)
+  const [userToDelete, setUserToDelete] = useState<User | null>(null)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
 
   const fetchUsers = useCallback(async () => {
     try {
@@ -91,11 +94,61 @@ export default function UserManagement() {
     }
   }
 
+  const handleDeleteUser = (user: User) => {
+    setUserToDelete(user)
+    setShowDeleteModal(true)
+  }
+
+  const confirmDeleteUser = async () => {
+    if (!userToDelete) return
+
+    try {
+      setDeletingUser(userToDelete.id)
+      const response = await fetch(`/api/admin/users/${userToDelete.id}`, {
+        method: 'DELETE',
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Errore nell\'eliminazione')
+      }
+
+      await response.json()
+      showSuccess(`Utente ${userToDelete.email} eliminato con successo`)
+      
+      // Ricarica la lista utenti
+      await fetchUsers()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Errore sconosciuto')
+    } finally {
+      setDeletingUser(null)
+      setShowDeleteModal(false)
+      setUserToDelete(null)
+    }
+  }
+
+  const cancelDeleteUser = () => {
+    setShowDeleteModal(false)
+    setUserToDelete(null)
+  }
+
   useEffect(() => {
     if (session?.user?.role === UserRole.Sentinel) {
       fetchUsers()
     }
   }, [fetchUsers, session])
+
+  // Gestione tasto ESC per chiudere il modale
+  useEffect(() => {
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && showDeleteModal) {
+        cancelDeleteUser()
+      }
+    }
+
+    document.addEventListener('keydown', handleEscape)
+    return () => document.removeEventListener('keydown', handleEscape)
+  }, [showDeleteModal])
 
   const handleSearchChange = (value: string) => {
     setSearch(value)
@@ -275,28 +328,42 @@ export default function UserManagement() {
                         {new Date(user.createdAt).toLocaleDateString('it-IT')}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        {user.id !== session?.user?.id && (
-                          <select
-                            value={user.role}
-                            onChange={(e) => updateUserRole(user.id, e.target.value as UserRole)}
-                            disabled={updatingUser === user.id}
-                            className="text-sm border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 disabled:opacity-50"
-                          >
-                            <option value={UserRole.Explorer}>Explorer</option>
-                            <option value={UserRole.Ranger}>Ranger</option>
-                            <option value={UserRole.Sentinel}>Sentinel</option>
-                          </select>
-                        )}
-                        {user.id === session?.user?.id && (
-                          <span className="text-gray-400 text-sm">
-                            (Il tuo account)
-                          </span>
-                        )}
-                        {updatingUser === user.id && (
-                          <div className="ml-2 inline-block">
-                            <div className="w-4 h-4 border-2 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
-                          </div>
-                        )}
+                        <div className="flex items-center space-x-2">
+                          {user.id !== session?.user?.id && (
+                            <>
+                              <select
+                                value={user.role}
+                                onChange={(e) => updateUserRole(user.id, e.target.value as UserRole)}
+                                disabled={updatingUser === user.id}
+                                className="text-sm border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 disabled:opacity-50"
+                              >
+                                <option value={UserRole.Explorer}>Explorer</option>
+                                <option value={UserRole.Ranger}>Ranger</option>
+                                <option value={UserRole.Sentinel}>Sentinel</option>
+                              </select>
+                              <button
+                                onClick={() => handleDeleteUser(user)}
+                                disabled={deletingUser === user.id}
+                                className="inline-flex items-center px-2 py-1 border border-red-300 rounded text-xs font-medium text-red-700 bg-red-50 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 disabled:opacity-50"
+                                title="Elimina utente"
+                              >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                              </button>
+                            </>
+                          )}
+                          {user.id === session?.user?.id && (
+                            <span className="text-gray-400 text-sm">
+                              (Il tuo account)
+                            </span>
+                          )}
+                          {(updatingUser === user.id || deletingUser === user.id) && (
+                            <div className="ml-2 inline-block">
+                              <div className="w-4 h-4 border-2 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
+                            </div>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -386,6 +453,68 @@ export default function UserManagement() {
         {!loading && usersData && usersData.users.length === 0 && (
           <div className="bg-white rounded-lg shadow p-8 text-center">
             <div className="text-gray-600">Nessun utente trovato con i criteri selezionati.</div>
+          </div>
+        )}
+
+        {/* Modale di conferma eliminazione */}
+        {showDeleteModal && userToDelete && (
+          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+            <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+              <div className="mt-3 text-center">
+                <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
+                  <svg className="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                  </svg>
+                </div>
+                <h3 className="text-lg leading-6 font-medium text-gray-900 mt-4">
+                  Elimina Utente
+                </h3>
+                <div className="mt-2 px-7 py-3">
+                  <p className="text-sm text-gray-500">
+                    Sei sicuro di voler eliminare l&apos;utente <strong>{userToDelete.email}</strong>?
+                  </p>
+                  <p className="text-sm text-red-600 mt-2">
+                    ⚠️ Questa azione è irreversibile e eliminerà:
+                  </p>
+                  <ul className="text-sm text-gray-600 mt-1 text-left">
+                    <li>• Account utente</li>
+                    <li>• {userToDelete._count.trips} viaggi creati</li>
+                    <li>• Tutte le sessioni attive</li>
+                    <li>• Dati correlati</li>
+                  </ul>
+                  {userToDelete.role === UserRole.Sentinel && (
+                    <p className="text-sm text-orange-600 mt-2 font-semibold">
+                      ⚠️ Stai eliminando un Sentinel!
+                    </p>
+                  )}
+                </div>
+                <div className="items-center px-4 py-3">
+                  <div className="flex space-x-3">
+                    <button
+                      onClick={cancelDeleteUser}
+                      disabled={deletingUser === userToDelete.id}
+                      className="flex-1 px-4 py-2 bg-gray-200 text-gray-800 text-base font-medium rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-300 disabled:opacity-50"
+                    >
+                      Annulla
+                    </button>
+                    <button
+                      onClick={confirmDeleteUser}
+                      disabled={deletingUser === userToDelete.id}
+                      className="flex-1 px-4 py-2 bg-red-600 text-white text-base font-medium rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 disabled:opacity-50"
+                    >
+                      {deletingUser === userToDelete.id ? (
+                        <>
+                          <div className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                          Eliminando...
+                        </>
+                      ) : (
+                        'Elimina'
+                      )}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         )}
       </div>

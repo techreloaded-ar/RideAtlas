@@ -173,3 +173,110 @@ export async function GET(
     )
   }
 }
+
+// DELETE - Elimina un utente (solo per Sentinel)
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const session = await auth()
+    
+    if (!session?.user) {
+      return NextResponse.json(
+        { error: 'Non autorizzato' },
+        { status: 401 }
+      )
+    }
+
+    if (session.user.role !== UserRole.Sentinel) {
+      return NextResponse.json(
+        { error: 'Permessi insufficienti' },
+        { status: 403 }
+      )
+    }
+
+    const userId = params.id
+
+    // Non permettere di eliminare il proprio account
+    if (session.user.id === userId) {
+      return NextResponse.json(
+        { error: 'Non puoi eliminare il tuo stesso account' },
+        { status: 400 }
+      )
+    }
+
+    // Verifica che l'utente esista
+    const existingUser = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { 
+        id: true, 
+        name: true, 
+        email: true, 
+        role: true,
+        _count: {
+          select: {
+            trips: true
+          }
+        }
+      }
+    })
+
+    if (!existingUser) {
+      return NextResponse.json(
+        { error: 'Utente non trovato' },
+        { status: 404 }
+      )
+    }
+
+    // Verifica se è l'ultimo Sentinel nel sistema
+    if (existingUser.role === UserRole.Sentinel) {
+      const sentinelCount = await prisma.user.count({
+        where: { role: UserRole.Sentinel }
+      })
+      
+      if (sentinelCount <= 1) {
+        return NextResponse.json(
+          { error: 'Non puoi eliminare l\'ultimo Sentinel del sistema' },
+          { status: 400 }
+        )
+      }
+    }
+
+    // Elimina l'utente e tutti i dati correlati
+    // Prima elimina i viaggi associati
+    await prisma.trip.deleteMany({
+      where: { user_id: userId }
+    })
+
+    // Poi elimina account e sessioni
+    await prisma.account.deleteMany({
+      where: { userId }
+    })
+
+    await prisma.session.deleteMany({
+      where: { userId }
+    })
+
+    // Infine elimina l'utente
+    await prisma.user.delete({
+      where: { id: userId }
+    })
+
+    return NextResponse.json({
+      message: 'Utente eliminato con successo',
+      deletedUser: {
+        id: existingUser.id,
+        email: existingUser.email,
+        tripsDeleted: existingUser._count.trips
+      }
+    })
+
+  } catch (error) {
+    console.error('Errore nell\'eliminazione utente:', error)
+    return NextResponse.json(
+      { error: 'Errore interno del server' },
+      { status: 500 }
+    )
+  }
+}
