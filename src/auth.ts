@@ -97,7 +97,36 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       }
     },
   },
+  events: {
+    linkAccount: async ({ user, account }) => {
+      // Quando viene collegato un account Google, verifica automaticamente l'email
+      if (account.provider === 'google') {
+        await prisma.user.update({
+          where: { id: user.id },
+          data: { emailVerified: new Date() }
+        })
+      }
+    },
+  },
   callbacks: {
+    signIn: async ({ user, account }) => {
+      // Se è un login Google, verifica automaticamente l'email per nuovi utenti e esistenti
+      if (account?.provider === 'google' && user.email) {
+        const existingUser = await prisma.user.findUnique({
+          where: { email: user.email },
+          select: { id: true, emailVerified: true }
+        })
+        
+        if (existingUser && !existingUser.emailVerified) {
+          await prisma.user.update({
+            where: { id: existingUser.id },
+            data: { emailVerified: new Date() }
+          })
+        }
+      }
+      
+      return true
+    },
     jwt: async ({ token, account, profile, user }) => {
       // Persist the OAuth account data to the token right after signin
       if (account && profile) {
