@@ -45,9 +45,10 @@ const createMockRequest = (url: string, method: string = 'DELETE'): NextRequest 
 
 import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
+import { Session } from 'next-auth'
 
-// Access the mocked auth function
-const mockAuth = auth as jest.MockedFunction<typeof auth>
+// Access the mocked auth function with proper typing
+const mockAuth = auth as unknown as jest.MockedFunction<() => Promise<Session | null>>
 
 describe('User Deletion API', () => {
   const sentinelUser = {
@@ -91,7 +92,8 @@ describe('User Deletion API', () => {
 
     it('should return 403 if user is not a Sentinel', async () => {
       mockAuth.mockResolvedValue({
-        user: { id: 'explorer-1', role: UserRole.Explorer }
+        user: { id: 'explorer-1', role: UserRole.Explorer },
+        expires: '2024-12-31T23:59:59.999Z'
       })
 
       const request = createMockRequest('http://localhost/api/admin/users/test-id')
@@ -105,7 +107,8 @@ describe('User Deletion API', () => {
 
     it('should return 403 if Ranger tries to delete a user', async () => {
       mockAuth.mockResolvedValue({
-        user: { id: 'ranger-1', role: UserRole.Ranger }
+        user: { id: 'ranger-1', role: UserRole.Ranger },
+        expires: '2024-12-31T23:59:59.999Z'
       })
 
       const request = createMockRequest('http://localhost/api/admin/users/test-id')
@@ -121,7 +124,8 @@ describe('User Deletion API', () => {
   describe('Self-Protection', () => {
     it('should prevent user from deleting their own account', async () => {
       mockAuth.mockResolvedValue({
-        user: sentinelUser
+        user: sentinelUser,
+        expires: '2024-12-31T23:59:59.999Z'
       })
 
       const request = createMockRequest('http://localhost/api/admin/users/sentinel-1')
@@ -136,7 +140,10 @@ describe('User Deletion API', () => {
 
   describe('User Existence Validation', () => {
     it('should return 404 if user to delete does not exist', async () => {
-      mockAuth.mockResolvedValue({ user: sentinelUser })
+      mockAuth.mockResolvedValue({ 
+        user: sentinelUser,
+        expires: '2024-12-31T23:59:59.999Z'
+      })
       ;(prisma.user.findUnique as jest.Mock).mockResolvedValue(null)
 
       const request = createMockRequest('http://localhost/api/admin/users/non-existent')
@@ -173,7 +180,10 @@ describe('User Deletion API', () => {
         _count: { trips: 0 }
       }
 
-      mockAuth.mockResolvedValue({ user: sentinelUser })
+      mockAuth.mockResolvedValue({ 
+        user: sentinelUser,
+        expires: '2024-12-31T23:59:59.999Z'
+      })
       ;(prisma.user.findUnique as jest.Mock).mockResolvedValue(anotherSentinel)
       ;(prisma.user.count as jest.Mock).mockResolvedValue(1) // Solo un Sentinel rimasto
 
@@ -198,7 +208,10 @@ describe('User Deletion API', () => {
         _count: { trips: 2 }
       }
 
-      mockAuth.mockResolvedValue({ user: sentinelUser })
+      mockAuth.mockResolvedValue({ 
+        user: sentinelUser,
+        expires: '2024-12-31T23:59:59.999Z'
+      })
       ;(prisma.user.findUnique as jest.Mock).mockResolvedValue(anotherSentinel)
       ;(prisma.user.count as jest.Mock).mockResolvedValue(3) // Più Sentinels disponibili
       ;(prisma.trip.deleteMany as jest.Mock).mockResolvedValue({ count: 2 })
@@ -220,7 +233,10 @@ describe('User Deletion API', () => {
 
   describe('Successful Deletion Scenarios', () => {
     it('should successfully delete an Explorer user with cascading deletes', async () => {
-      mockAuth.mockResolvedValue({ user: sentinelUser })
+      mockAuth.mockResolvedValue({ 
+        user: sentinelUser,
+        expires: '2024-12-31T23:59:59.999Z'
+      })
       ;(prisma.user.findUnique as jest.Mock).mockResolvedValue(explorerUser)
       ;(prisma.trip.deleteMany as jest.Mock).mockResolvedValue({ count: 3 })
       ;(prisma.account.deleteMany as jest.Mock).mockResolvedValue({ count: 1 })
@@ -254,7 +270,10 @@ describe('User Deletion API', () => {
     })
 
     it('should successfully delete a Ranger user', async () => {
-      mockAuth.mockResolvedValue({ user: sentinelUser })
+      mockAuth.mockResolvedValue({ 
+        user: sentinelUser,
+        expires: '2024-12-31T23:59:59.999Z'
+      })
       ;(prisma.user.findUnique as jest.Mock).mockResolvedValue(rangerUser)
       ;(prisma.trip.deleteMany as jest.Mock).mockResolvedValue({ count: 5 })
       ;(prisma.account.deleteMany as jest.Mock).mockResolvedValue({ count: 1 })
@@ -279,7 +298,10 @@ describe('User Deletion API', () => {
         _count: { trips: 0 }
       }
 
-      mockAuth.mockResolvedValue({ user: sentinelUser })
+      mockAuth.mockResolvedValue({ 
+        user: sentinelUser,
+        expires: '2024-12-31T23:59:59.999Z'
+      })
       ;(prisma.user.findUnique as jest.Mock).mockResolvedValue(userWithNoTrips)
       ;(prisma.trip.deleteMany as jest.Mock).mockResolvedValue({ count: 0 })
       ;(prisma.account.deleteMany as jest.Mock).mockResolvedValue({ count: 1 })
@@ -298,7 +320,10 @@ describe('User Deletion API', () => {
 
   describe('Error Handling', () => {
     it('should handle database errors gracefully', async () => {
-      mockAuth.mockResolvedValue({ user: sentinelUser })
+      mockAuth.mockResolvedValue({ 
+        user: sentinelUser,
+        expires: '2024-12-31T23:59:59.999Z'
+      })
       ;(prisma.user.findUnique as jest.Mock).mockRejectedValue(new Error('Database connection failed'))
 
       const request = createMockRequest('http://localhost/api/admin/users/test-id')
@@ -311,7 +336,10 @@ describe('User Deletion API', () => {
     })
 
     it('should handle deletion errors during cascading deletes', async () => {
-      mockAuth.mockResolvedValue({ user: sentinelUser })
+      mockAuth.mockResolvedValue({ 
+        user: sentinelUser,
+        expires: '2024-12-31T23:59:59.999Z'
+      })
       ;(prisma.user.findUnique as jest.Mock).mockResolvedValue(explorerUser)
       ;(prisma.trip.deleteMany as jest.Mock).mockRejectedValue(new Error('Failed to delete trips'))
 
@@ -329,7 +357,8 @@ describe('User Deletion API', () => {
     it('should test all three user roles for permissions', async () => {
       // Test Explorer permissions
       mockAuth.mockResolvedValue({
-        user: { id: 'explorer-1', role: UserRole.Explorer }
+        user: { id: 'explorer-1', role: UserRole.Explorer },
+        expires: '2024-12-31T23:59:59.999Z'
       })
 
       let request = createMockRequest('http://localhost/api/admin/users/test-id')
@@ -339,7 +368,8 @@ describe('User Deletion API', () => {
 
       // Test Ranger permissions  
       mockAuth.mockResolvedValue({
-        user: { id: 'ranger-1', role: UserRole.Ranger }
+        user: { id: 'ranger-1', role: UserRole.Ranger },
+        expires: '2024-12-31T23:59:59.999Z'
       })
 
       request = createMockRequest('http://localhost/api/admin/users/test-id')
@@ -348,7 +378,10 @@ describe('User Deletion API', () => {
       expect(response.status).toBe(403)
 
       // Test Sentinel permissions (should pass authentication check)
-      mockAuth.mockResolvedValue({ user: sentinelUser })
+      mockAuth.mockResolvedValue({ 
+        user: sentinelUser,
+        expires: '2024-12-31T23:59:59.999Z'
+      })
       ;(prisma.user.findUnique as jest.Mock).mockResolvedValue(null) // User not found
 
       request = createMockRequest('http://localhost/api/admin/users/test-id')
@@ -360,7 +393,10 @@ describe('User Deletion API', () => {
 
   describe('Edge Cases', () => {
     it('should handle empty user ID parameter', async () => {
-      mockAuth.mockResolvedValue({ user: sentinelUser })
+      mockAuth.mockResolvedValue({ 
+        user: sentinelUser,
+        expires: '2024-12-31T23:59:59.999Z'
+      })
       ;(prisma.user.findUnique as jest.Mock).mockResolvedValue(null)
 
       const request = createMockRequest('http://localhost/api/admin/users/')
@@ -373,7 +409,10 @@ describe('User Deletion API', () => {
     })
 
     it('should verify proper mock call order for cascading deletes', async () => {
-      mockAuth.mockResolvedValue({ user: sentinelUser })
+      mockAuth.mockResolvedValue({ 
+        user: sentinelUser,
+        expires: '2024-12-31T23:59:59.999Z'
+      })
       ;(prisma.user.findUnique as jest.Mock).mockResolvedValue(explorerUser)
       ;(prisma.trip.deleteMany as jest.Mock).mockResolvedValue({ count: 3 })
       ;(prisma.account.deleteMany as jest.Mock).mockResolvedValue({ count: 1 })
