@@ -43,6 +43,15 @@ export default function UserManagement() {
   const [deletingUser, setDeletingUser] = useState<string | null>(null)
   const [userToDelete, setUserToDelete] = useState<User | null>(null)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [showCreateModal, setShowCreateModal] = useState(false)
+  const [createFormData, setCreateFormData] = useState({
+    name: '',
+    email: '',
+    password: '',
+    role: UserRole.Explorer,
+    sendWelcomeEmail: true,
+  })
+  const [creatingUser, setCreatingUser] = useState(false)
 
   const fetchUsers = useCallback(async () => {
     try {
@@ -132,6 +141,66 @@ export default function UserManagement() {
     setUserToDelete(null)
   }
 
+  const handleCreateUser = async () => {
+    try {
+      setCreatingUser(true)
+      
+      // Validazione
+      if (!createFormData.name || !createFormData.email || !createFormData.password) {
+        throw new Error('Tutti i campi sono obbligatori')
+      }
+      
+      if (createFormData.password.length < 8) {
+        throw new Error('La password deve essere di almeno 8 caratteri')
+      }
+
+      const response = await fetch('/api/admin/users', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(createFormData),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Errore nella creazione dell\'utente')
+      }
+
+      const data = await response.json()
+      showSuccess(data.message || 'Utente creato con successo')
+      
+      // Reset form e chiudi modal
+      setCreateFormData({
+        name: '',
+        email: '',
+        password: '',
+        role: UserRole.Explorer,
+        sendWelcomeEmail: true,
+      })
+      setShowCreateModal(false)
+      
+      // Ricarica la lista utenti
+      await fetchUsers()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Errore sconosciuto')
+    } finally {
+      setCreatingUser(false)
+    }
+  }
+
+  // Gestione chiusura modale creazione utente
+  const closeCreateModal = () => {
+    setShowCreateModal(false)
+    setCreateFormData({
+      name: '',
+      email: '',
+      password: '',
+      role: UserRole.Explorer,
+      sendWelcomeEmail: true,
+    })
+  }
+
   useEffect(() => {
     if (session?.user?.role === UserRole.Sentinel) {
       fetchUsers()
@@ -141,14 +210,18 @@ export default function UserManagement() {
   // Gestione tasto ESC per chiudere il modale
   useEffect(() => {
     const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && showDeleteModal) {
-        cancelDeleteUser()
+      if (event.key === 'Escape') {
+        if (showDeleteModal) {
+          cancelDeleteUser()
+        } else if (showCreateModal) {
+          closeCreateModal()
+        }
       }
     }
 
     document.addEventListener('keydown', handleEscape)
     return () => document.removeEventListener('keydown', handleEscape)
-  }, [showDeleteModal])
+  }, [showDeleteModal, showCreateModal])
 
   const handleSearchChange = (value: string) => {
     setSearch(value)
@@ -192,11 +265,22 @@ export default function UserManagement() {
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Gestione Utenti</h1>
-          <p className="mt-2 text-gray-600">
-            Gestisci i ruoli e i permessi degli utenti del sistema
-          </p>
+        <div className="mb-8 flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Gestione Utenti</h1>
+            <p className="mt-2 text-gray-600">
+              Gestisci i ruoli e i permessi degli utenti del sistema
+            </p>
+          </div>
+          <button
+            onClick={() => setShowCreateModal(true)}
+            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+          >
+            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </svg>
+            Crea Utente
+          </button>
         </div>
 
         {/* Filtri */}
@@ -509,6 +593,129 @@ export default function UserManagement() {
                         </>
                       ) : (
                         'Elimina'
+                      )}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Modale di creazione utente */}
+        {showCreateModal && (
+          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+            <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+              <div className="mt-3 text-center">
+                <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100">
+                  <svg className="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+                  </svg>
+                </div>
+                <h3 className="text-lg leading-6 font-medium text-gray-900 mt-4">
+                  Crea Nuovo Utente
+                </h3>
+                <div className="mt-2 px-7 py-3">
+                  <p className="text-sm text-gray-500">
+                    Compila i campi sottostanti per creare un nuovo utente.
+                  </p>
+                </div>
+
+                {/* Form di creazione utente */}
+                <div className="px-4 py-3">
+                  <div className="space-y-4">
+                    <div>
+                      <label htmlFor="createName" className="block text-sm font-medium text-gray-700">
+                        Nome
+                      </label>
+                      <input
+                        type="text"
+                        id="createName"
+                        value={createFormData.name}
+                        onChange={(e) => setCreateFormData({ ...createFormData, name: e.target.value })}
+                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                        placeholder="Nome completo"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="createEmail" className="block text-sm font-medium text-gray-700">
+                        Email
+                      </label>
+                      <input
+                        type="email"
+                        id="createEmail"
+                        value={createFormData.email}
+                        onChange={(e) => setCreateFormData({ ...createFormData, email: e.target.value })}
+                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                        placeholder="Email dell'utente"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="createPassword" className="block text-sm font-medium text-gray-700">
+                        Password
+                      </label>
+                      <input
+                        type="password"
+                        id="createPassword"
+                        value={createFormData.password}
+                        onChange={(e) => setCreateFormData({ ...createFormData, password: e.target.value })}
+                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                        placeholder="Password temporanea"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="createRole" className="block text-sm font-medium text-gray-700">
+                        Ruolo
+                      </label>
+                      <select
+                        id="createRole"
+                        value={createFormData.role}
+                        onChange={(e) => setCreateFormData({ ...createFormData, role: e.target.value as UserRole })}
+                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                      >
+                        <option value={UserRole.Explorer}>Explorer</option>
+                        <option value={UserRole.Ranger}>Ranger</option>
+                        <option value={UserRole.Sentinel}>Sentinel</option>
+                      </select>
+                    </div>
+                    <div className="flex items-center">
+                      <input
+                        type="checkbox"
+                        id="sendWelcomeEmail"
+                        checked={createFormData.sendWelcomeEmail}
+                        onChange={(e) => setCreateFormData({ ...createFormData, sendWelcomeEmail: e.target.checked })}
+                        className="h-4 w-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
+                      />
+                      <label htmlFor="sendWelcomeEmail" className="ml-2 block text-sm text-gray-700">
+                        Invia email di benvenuto
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="items-center px-4 py-3">
+                  <div className="flex space-x-3">
+                    <button
+                      onClick={closeCreateModal}
+                      className="flex-1 px-4 py-2 bg-gray-200 text-gray-800 text-base font-medium rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-300"
+                    >
+                      Annulla
+                    </button>
+                    <button
+                      onClick={handleCreateUser}
+                      disabled={creatingUser}
+                      className="flex-1 px-4 py-2 bg-green-600 text-white text-base font-medium rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 disabled:opacity-50"
+                    >
+                      {creatingUser ? (
+                        <>
+                          <div className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                          Creando...
+                        </>
+                      ) : (
+                        'Crea Utente'
                       )}
                     </button>
                   </div>

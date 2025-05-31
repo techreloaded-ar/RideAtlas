@@ -11,7 +11,7 @@ describe('Email Service', () => {
     process.env.SMTP_USER = 'test@example.com';
     process.env.SMTP_PASSWORD = 'testpassword';
     process.env.NEXTAUTH_URL = 'http://localhost:3000';
-    process.env.NODE_ENV = 'test';
+    // Non modificare NODE_ENV direttamente per evitare errori TypeScript
   });
 
   afterEach(() => {
@@ -47,13 +47,19 @@ describe('Email Service', () => {
     });
 
     it('simulates success in development mode when configuration is incomplete', async () => {
-      delete process.env.SMTP_HOST;
+      // Salva l'originale e imposta modalità development
+      const originalNodeEnv = process.env.NODE_ENV;
       process.env.NODE_ENV = 'development';
+      
+      delete process.env.SMTP_HOST;
 
       const result = await sendVerificationEmail('user@example.com', 'test-token-123');
       
       expect(result.success).toBe(true);
       expect(result.simulated).toBe(true);
+      
+      // Ripristina l'ambiente originale
+      process.env.NODE_ENV = originalNodeEnv;
     });
 
     it('returns success when all configuration is present in test mode', async () => {
