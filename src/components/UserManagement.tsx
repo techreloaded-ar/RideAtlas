@@ -387,11 +387,6 @@ export default function UserManagement() {
                                 Non verificato
                               </span>
                             )}
-                            {user.password === null && (
-                              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-800">
-                                Password da impostare
-                              </span>
-                            )}
                           </div>
                         </div>
                       </td>
