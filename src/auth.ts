@@ -50,8 +50,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             }
           })
 
-          if (!user || !user.password) {
+          if (!user) {
             return null
+          }
+
+          // Se l'utente non ha password, deve impostarla
+          if (user.password === null) {
+            throw new Error("PasswordSetupRequired")
           }
 
           // Check if email is verified
@@ -75,8 +80,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           }
         } catch (error) {
           console.error("Authorization error:", error)
-          if (error instanceof Error && error.message === "EmailNotVerified") {
-            throw error
+          if (error instanceof Error) {
+            if (error.message === "EmailNotVerified" || error.message === "PasswordSetupRequired") {
+              throw error
+            }
           }
           return null
         }

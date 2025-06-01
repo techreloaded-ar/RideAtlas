@@ -3,7 +3,6 @@ import { prisma } from '@/lib/prisma'
 import { auth } from '@/auth'
 import { UserRole } from '@/types/profile'
 import { z } from 'zod'
-import bcrypt from 'bcryptjs'
 import { sendVerificationEmail } from '@/lib/email'
 import { randomBytes } from 'crypto'
 
@@ -14,7 +13,6 @@ export const dynamic = 'force-dynamic'
 const createUserSchema = z.object({
   name: z.string().min(2, 'Il nome deve contenere almeno 2 caratteri'),
   email: z.string().email('Inserisci un indirizzo email valido'),
-  password: z.string().min(8, 'La password deve contenere almeno 8 caratteri'),
   role: z.nativeEnum(UserRole).optional().default(UserRole.Explorer),
   sendWelcomeEmail: z.boolean().optional().default(true),
 })
@@ -65,6 +63,7 @@ export async function GET(request: NextRequest) {
           email: true,
           role: true,
           emailVerified: true,
+          password: true,
           createdAt: true,
           updatedAt: true,
           image: true,
@@ -132,7 +131,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const { name, email, password, role, sendWelcomeEmail } = result.data
+    const { name, email, role, sendWelcomeEmail } = result.data
 
     // Controlla se l'utente esiste già
     const existingUser = await prisma.user.findUnique({
@@ -146,27 +145,18 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Hash della password
-    const hashedPassword = await bcrypt.hash(password, 12)
+    // Genera sempre un token di verifica per il setup password
+    const verificationToken = randomBytes(32).toString('hex')
+    const tokenExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 ore
 
-    // Genera token di verifica se richiesto l'invio email
-    let verificationToken: string | undefined
-    let tokenExpiry: Date | undefined
-    
-    if (sendWelcomeEmail) {
-      verificationToken = randomBytes(32).toString('hex')
-      tokenExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 ore
-    }
-
-    // Crea l'utente
+    // Crea l'utente senza password (sarà impostata al primo accesso)
     const user = await prisma.user.create({
       data: {
         name,
         email,
-        password: hashedPassword,
+        password: null, // L'utente deve impostare la password al primo accesso
         role,
-        // Se non inviamo email di benvenuto, marca come verificato
-        emailVerified: sendWelcomeEmail ? null : new Date(),
+        emailVerified: null, // Sarà verificata quando imposta la password
       },
       select: {
         id: true,
@@ -185,18 +175,24 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    // Salva il token di verifica se necessario
-    if (sendWelcomeEmail && verificationToken && tokenExpiry) {
-      await prisma.emailVerificationToken.create({
-        data: {
-          email,
-          token: verificationToken,
-          expiresAt: tokenExpiry,
-        }
-      })
+    // Salva il token per il setup password
+    await prisma.emailVerificationToken.create({
+      data: {
+        email,
+        token: verificationToken,
+        expiresAt: tokenExpiry,
+      }
+    })
 
-      // Invia email di verifica
-      const emailResult = await sendVerificationEmail(email, verificationToken)
+    console.log('🔑 Token creato per setup password:', {
+      email,
+      token: verificationToken,
+      expiresAt: tokenExpiry,
+    })
+
+    // Invia email con link per setup password
+    if (sendWelcomeEmail) {
+      const emailResult = await sendVerificationEmail(email, verificationToken, true) // true per setup password
       
       if (!emailResult.success) {
         // Se l'invio dell'email fallisce, elimina l'utente e il token creati
@@ -204,7 +200,7 @@ export async function POST(request: NextRequest) {
         await prisma.emailVerificationToken.deleteMany({ where: { email } })
         
         return NextResponse.json(
-          { error: 'Errore nell\'invio dell\'email di verifica. Riprova più tardi.' },
+          { error: 'Errore nell\'invio dell\'email per il setup password. Riprova più tardi.' },
           { status: 500 }
         )
       }
@@ -212,9 +208,9 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(
       { 
-        message: `Utente creato con successo${sendWelcomeEmail ? '. Email di verifica inviata.' : '.'}`,
+        message: `Utente creato con successo${sendWelcomeEmail ? '. Email per il setup password inviata.' : '. L\'utente deve impostare la password al primo accesso.'}`,
         user,
-        requiresVerification: sendWelcomeEmail,
+        requiresPasswordSetup: true,
       },
       { status: 201 }
     )

@@ -12,6 +12,7 @@ interface User {
   email: string
   role: UserRole
   emailVerified: Date | null
+  password: string | null
   createdAt: Date
   updatedAt: Date
   image: string | null
@@ -47,7 +48,6 @@ export default function UserManagement() {
   const [createFormData, setCreateFormData] = useState({
     name: '',
     email: '',
-    password: '',
     role: UserRole.Explorer,
     sendWelcomeEmail: true,
   })
@@ -144,14 +144,9 @@ export default function UserManagement() {
   const handleCreateUser = async () => {
     try {
       setCreatingUser(true)
-      
-      // Validazione
-      if (!createFormData.name || !createFormData.email || !createFormData.password) {
-        throw new Error('Tutti i campi sono obbligatori')
-      }
-      
-      if (createFormData.password.length < 8) {
-        throw new Error('La password deve essere di almeno 8 caratteri')
+       // Validazione
+      if (!createFormData.name || !createFormData.email) {
+        throw new Error('Nome e email sono obbligatori')
       }
 
       const response = await fetch('/api/admin/users', {
@@ -174,7 +169,6 @@ export default function UserManagement() {
       setCreateFormData({
         name: '',
         email: '',
-        password: '',
         role: UserRole.Explorer,
         sendWelcomeEmail: true,
       })
@@ -195,7 +189,6 @@ export default function UserManagement() {
     setCreateFormData({
       name: '',
       email: '',
-      password: '',
       role: UserRole.Explorer,
       sendWelcomeEmail: true,
     })
@@ -390,8 +383,13 @@ export default function UserManagement() {
                             </div>
                             <div className="text-sm text-gray-500">{user.email}</div>
                             {!user.emailVerified && (
-                              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
+                              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800 mr-2">
                                 Non verificato
+                              </span>
+                            )}
+                            {user.password === null && (
+                              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-800">
+                                Password da impostare
                               </span>
                             )}
                           </div>
@@ -653,20 +651,6 @@ export default function UserManagement() {
                       />
                     </div>
                     <div>
-                      <label htmlFor="createPassword" className="block text-sm font-medium text-gray-700">
-                        Password
-                      </label>
-                      <input
-                        type="password"
-                        id="createPassword"
-                        value={createFormData.password}
-                        onChange={(e) => setCreateFormData({ ...createFormData, password: e.target.value })}
-                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                        placeholder="Password temporanea"
-                        required
-                      />
-                    </div>
-                    <div>
                       <label htmlFor="createRole" className="block text-sm font-medium text-gray-700">
                         Ruolo
                       </label>
@@ -681,6 +665,20 @@ export default function UserManagement() {
                         <option value={UserRole.Sentinel}>Sentinel</option>
                       </select>
                     </div>
+                    <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
+                      <div className="flex">
+                        <div className="flex-shrink-0">
+                          <svg className="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                          </svg>
+                        </div>
+                        <div className="ml-3">
+                          <p className="text-sm text-blue-700">
+                            <strong>Password:</strong> L&apos;utente riceverà un&apos;email per impostare la propria password al primo accesso.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
                     <div className="flex items-center">
                       <input
                         type="checkbox"
@@ -690,7 +688,7 @@ export default function UserManagement() {
                         className="h-4 w-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
                       />
                       <label htmlFor="sendWelcomeEmail" className="ml-2 block text-sm text-gray-700">
-                        Invia email di benvenuto
+                        Invia email per setup password
                       </label>
                     </div>
                   </div>

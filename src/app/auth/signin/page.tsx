@@ -46,6 +46,8 @@ function SignInContent() {
     if (result?.error) {
       if (result.error === 'EmailNotVerified') {
         setCredentialsError('Email non verificata. Controlla la tua casella di posta per il link di verifica.');
+      } else if (result.error === 'PasswordSetupRequired') {
+        setCredentialsError('È necessario impostare la password. Controlla la tua email per il link di configurazione.');
       } else {
         setCredentialsError('Email o password non corretti');
       }
