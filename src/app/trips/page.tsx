@@ -3,6 +3,9 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Calendar, MapPin, Tag, User, Clock, Navigation } from 'lucide-react';
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
 // Funzione per ottenere il colore del tema
 const getThemeColor = (theme: string) => {
   const colors: { [key: string]: string } = {
