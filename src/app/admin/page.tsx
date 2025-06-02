@@ -1,7 +1,7 @@
 import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
 import { UserRole } from '@/types/profile'
-import UserManagement from '@/components/UserManagement'
+import AdminDashboard from '@/components/AdminDashboard'
 
 export default async function AdminPage() {
   const session = await auth()
@@ -16,5 +16,5 @@ export default async function AdminPage() {
     redirect('/dashboard?error=insufficient-permissions')
   }
 
-  return <UserManagement />
+  return <AdminDashboard />
 }

@@ -2,6 +2,8 @@ import { prisma } from '@/lib/prisma';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Calendar, MapPin, Tag, User, Clock, Navigation } from 'lucide-react';
+import { auth } from '@/auth';
+import { UserRole } from '@/types/profile';
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic';
@@ -41,8 +43,44 @@ const formatDate = (date: Date) => {
 };
 
 export default async function PacchettiPage() {
-  // Recupera tutti i viaggi dal database con le informazioni del creatore
+  // Get current session to determine user role
+  const session = await auth();
+  
+  // Build query based on user role
+  let whereClause = {};
+  
+  if (!session?.user) {
+    // Non-logged users: only show published trips
+    whereClause = { status: 'Pubblicato' };
+  } else {
+    const userRole = session.user.role as UserRole;
+    const userId = session.user.id;
+    
+    if (userRole === UserRole.Explorer) {
+      // Explorer: only show published trips
+      whereClause = { status: 'Pubblicato' };
+    } else if (userRole === UserRole.Ranger) {
+      // Ranger: show published trips + their own draft trips
+      whereClause = {
+        OR: [
+          { status: 'Pubblicato' },
+          { 
+            AND: [
+              { status: 'Bozza' },
+              { user_id: userId }
+            ]
+          }
+        ]
+      };
+    } else if (userRole === UserRole.Sentinel) {
+      // Sentinel: show all trips regardless of status
+      whereClause = {};
+    }
+  }
+
+  // Recupera i viaggi dal database con filtri basati sui ruoli
   const trips = await prisma.trip.findMany({
+    where: whereClause,
     include: {
       user: {
         select: {
