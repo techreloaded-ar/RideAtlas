@@ -27,6 +27,7 @@ export async function GET() {
       },
       select: {
         id: true,
+        slug: true,
         title: true,
         destination: true,
         duration_days: true,

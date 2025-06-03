@@ -18,6 +18,7 @@ import { TripStatus } from '@/types/trip'
 
 interface UserTrip {
   id: string
+  slug: string
   title: string
   destination: string
   duration_days: number
@@ -187,7 +188,7 @@ export default function UserTrips() {
                 <div className="flex items-center space-x-2 ml-4">
                   {/* Visualizza sempre */}
                   <Link
-                    href={`/trips/${trip.id}`}
+                    href={`/trips/${trip.slug}`}
                     className="p-2 text-gray-400 hover:text-blue-600 transition-colors"
                     title="Visualizza viaggio"
                   >

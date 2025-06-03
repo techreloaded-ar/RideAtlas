@@ -39,6 +39,7 @@ describe('/api/user/trips', () => {
       const mockTrips = [
         {
           id: 'trip-1',
+          slug: 'viaggio-in-toscana',
           title: 'Viaggio in Toscana',
           destination: 'Toscana',
           duration_days: 7,
@@ -50,6 +51,7 @@ describe('/api/user/trips', () => {
         },
         {
           id: 'trip-2',
+          slug: 'tour-delle-dolomiti',
           title: 'Tour delle Dolomiti',
           destination: 'Dolomiti',
           duration_days: 5,
@@ -79,6 +81,7 @@ describe('/api/user/trips', () => {
         },
         select: {
           id: true,
+          slug: true,
           title: true,
           destination: true,
           duration_days: true,
@@ -186,6 +189,7 @@ describe('/api/user/trips', () => {
       const mockTrips = [
         {
           id: 'trip-2',
+          slug: 'viaggio-recente',
           title: 'Viaggio Recente',
           destination: 'Milano',
           duration_days: 3,
@@ -197,6 +201,7 @@ describe('/api/user/trips', () => {
         },
         {
           id: 'trip-1',
+          slug: 'viaggio-vecchio',
           title: 'Viaggio Vecchio',
           destination: 'Roma',
           duration_days: 5,
@@ -243,6 +248,7 @@ describe('/api/user/trips', () => {
         expect.objectContaining({
           select: {
             id: true,
+            slug: true,
             title: true,
             destination: true,
             duration_days: true,
@@ -268,6 +274,7 @@ describe('/api/user/trips', () => {
       const mockTrips = [
         {
           id: 'trip-1',
+          slug: 'viaggio-approvato',
           title: 'Viaggio Approvato',
           destination: 'Firenze',
           duration_days: 3,
@@ -279,6 +286,7 @@ describe('/api/user/trips', () => {
         },
         {
           id: 'trip-2',
+          slug: 'viaggio-in-attesa',
           title: 'Viaggio in Attesa',
           destination: 'Venezia',
           duration_days: 4,
@@ -290,6 +298,7 @@ describe('/api/user/trips', () => {
         },
         {
           id: 'trip-3',
+          slug: 'viaggio-rifiutato',
           title: 'Viaggio Rifiutato',
           destination: 'Napoli',
           duration_days: 6,

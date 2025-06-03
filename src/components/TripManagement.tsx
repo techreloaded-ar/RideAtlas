@@ -9,6 +9,7 @@ import { Calendar, MapPin, User, Clock, Navigation, Check, Eye, Edit } from 'luc
 
 interface Trip {
   id: string
+  slug: string
   title: string
   destination: string
   duration_days: number
@@ -322,7 +323,7 @@ export default function TripManagement() {
                         <div className="flex items-center space-x-2">
                           {/* View button */}
                           <a
-                            href={`/trips/${trip.id}`}
+                            href={`/trips/${trip.slug}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-blue-600 hover:text-blue-900 p-1 rounded"
