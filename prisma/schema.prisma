@@ -95,6 +95,7 @@ model Trip {
   theme              String
   characteristics    String[]
   recommended_season RecommendedSeason
+  media              Json[]            @default([])
   slug               String            @unique
   status             TripStatus        @default(Bozza)
   created_at         DateTime          @default(now())

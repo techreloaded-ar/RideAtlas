@@ -1,8 +1,8 @@
 import { useState, useCallback, useEffect } from 'react'
-import { TripCreationData, RecommendedSeason, Trip } from '@/types/trip'
+import { TripCreationData, RecommendedSeason, Trip, MediaItem } from '@/types/trip'
 
 interface UseTripFormProps {
-  initialData?: Partial<TripCreationData & Pick<Trip, 'id'>>
+  initialData?: Partial<TripCreationData & Pick<Trip, 'id'>> | (Partial<Omit<Trip, 'media'>> & { media?: MediaItem[] })
   onSuccess?: (trip: unknown) => void
   mode?: 'create' | 'edit'
   tripId?: string
@@ -28,23 +28,37 @@ export const useTripForm = ({
     theme: '',
     characteristics: [],
     recommended_season: RecommendedSeason.Tutte,
+    media: [],
     ...initialData,
   })
+
+  // Stato separato per i media items come MediaItem[]
+  const [mediaItems, setMediaItems] = useState<MediaItem[]>([])
 
   const [tagInput, setTagInput] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [fieldErrors, setFieldErrors] = useState<FormErrors | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [isInitialized, setIsInitialized] = useState(false)
-
   // Update form data when initialData changes (useful for edit mode)
   // Only update once when data is first loaded
   useEffect(() => {
     if (initialData && initialData.id && !isInitialized) {
+      const { media, ...restData } = initialData
       setFormData(prev => ({
         ...prev,
-        ...initialData,
+        ...restData,
+        media: [], // Reset media in formData since we manage it separately
       }))
+      // Se ci sono media iniziali, convertili in MediaItem[]
+      if (media) {
+        // Se i media sono già MediaItem[], usali direttamente
+        // Altrimenti convertili da JsonValue[]
+        const mediaItems = Array.isArray(media) && media.length > 0 && typeof media[0] === 'object' && 'id' in media[0]
+          ? media as MediaItem[]
+          : []
+        setMediaItems(mediaItems)
+      }
       setIsInitialized(true)
     }
   }, [initialData?.id, initialData, isInitialized])
@@ -93,12 +107,33 @@ export const useTripForm = ({
       theme: '',
       characteristics: [],
       recommended_season: RecommendedSeason.Tutte,
+      media: [],
       ...initialData,
     })
+    setMediaItems([])
     setTagInput('')
     setError(null)
     setFieldErrors(null)
   }, [initialData])
+
+  // Funzioni per gestire i media items
+  const addMedia = useCallback((mediaItem: Omit<MediaItem, 'id'>) => {
+    const newMedia: MediaItem = {
+      id: crypto.randomUUID(),
+      ...mediaItem
+    }
+    setMediaItems(prev => [...prev, newMedia])
+  }, [])
+
+  const removeMedia = useCallback((mediaId: string) => {
+    setMediaItems(prev => prev.filter(item => item.id !== mediaId))
+  }, [])
+
+  const updateMediaCaption = useCallback((mediaId: string, caption: string) => {
+    setMediaItems(prev => prev.map(item => 
+      item.id === mediaId ? { ...item, caption } : item
+    ))
+  }, [])
 
   const submitForm = useCallback(async () => {
     setIsLoading(true)
@@ -116,12 +151,18 @@ export const useTripForm = ({
       const url = mode === 'create' ? '/api/trips' : `/api/trips/${tripId}`
       const method = mode === 'create' ? 'POST' : 'PUT'
 
+      // Combina i dati del form con i media items
+      const submitData = {
+        ...formData,
+        media: mediaItems
+      }
+
       const response = await fetch(url, {
         method,
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(submitData),
       })
 
       const result = await response.json()
@@ -143,11 +184,12 @@ export const useTripForm = ({
     } finally {
       setIsLoading(false)
     }
-  }, [formData, mode, tripId, onSuccess])
+  }, [formData, mediaItems, mode, tripId, onSuccess])
 
   return {
     formData,
     setFormData,
+    mediaItems,
     tagInput,
     error,
     fieldErrors,
@@ -157,6 +199,9 @@ export const useTripForm = ({
     addTag,
     removeTag,
     handleCharacteristicChange,
+    addMedia,
+    removeMedia,
+    updateMediaCaption,
     resetForm,
     submitForm,
     setError,

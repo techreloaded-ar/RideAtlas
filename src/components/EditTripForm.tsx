@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { RecommendedSeason, TripCreationData, Trip } from '@/types/trip';
 import { useTripForm } from '@/hooks/useTripForm';
 import { useToast } from '@/hooks/useToast';
+import MultimediaUpload from './MultimediaUpload';
 
 interface EditTripFormProps {
   tripId: string;
@@ -50,9 +51,9 @@ const EditTripForm = ({ tripId }: EditTripFormProps) => {
   useEffect(() => {
     fetchTrip();
   }, [fetchTrip]);
-
   const {
     formData,
+    mediaItems,
     tagInput,
     error,
     fieldErrors,
@@ -62,6 +63,9 @@ const EditTripForm = ({ tripId }: EditTripFormProps) => {
     addTag,
     removeTag,
     handleCharacteristicChange,
+    addMedia,
+    removeMedia,
+    updateMediaCaption,
     submitForm,
   } = useTripForm({
     mode: 'edit',
@@ -291,9 +295,7 @@ const EditTripForm = ({ tripId }: EditTripFormProps) => {
             </span>
           ))}
         </div>
-      </div>
-
-      <div>
+      </div>      <div>
         <label htmlFor="recommended_season" className="block text-sm font-medium text-gray-700">Stagione Consigliata</label>
         <select
           name="recommended_season"
@@ -311,6 +313,14 @@ const EditTripForm = ({ tripId }: EditTripFormProps) => {
         </select>
         {fieldErrors?.recommended_season && <p className="text-xs text-red-500 mt-1">{fieldErrors.recommended_season.join(', ')}</p>}
       </div>
+
+      {/* Multimedia Upload Section */}
+      <MultimediaUpload
+        mediaItems={mediaItems}
+        onAddMedia={addMedia}
+        onRemoveMedia={removeMedia}
+        onUpdateCaption={updateMediaCaption}
+      />
 
       <div className="flex gap-4 pt-5">
         <button

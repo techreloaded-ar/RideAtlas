@@ -5,12 +5,13 @@ import { FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { RecommendedSeason } from '@/types/trip';
 import { useTripForm } from '@/hooks/useTripForm';
+import MultimediaUpload from './MultimediaUpload';
 
 const CreateTripForm = () => {
   const router = useRouter();
-  
-  const {
+    const {
     formData,
+    mediaItems,
     tagInput,
     error,
     fieldErrors,
@@ -20,6 +21,9 @@ const CreateTripForm = () => {
     addTag,
     removeTag,
     handleCharacteristicChange,
+    addMedia,
+    removeMedia,
+    updateMediaCaption,
     submitForm,
   } = useTripForm({
     mode: 'create',
@@ -206,8 +210,15 @@ const CreateTripForm = () => {
           <option value={RecommendedSeason.Inverno}>Inverno</option>
           <option value={RecommendedSeason.Tutte}>Tutte</option>
         </select>
-        {fieldErrors?.recommended_season && <p className="text-xs text-red-500 mt-1">{fieldErrors.recommended_season.join(', ')}</p>}
-      </div>
+        {fieldErrors?.recommended_season && <p className="text-xs text-red-500 mt-1">{fieldErrors.recommended_season.join(', ')}</p>}      </div>
+
+      {/* Multimedia Upload Section */}
+      <MultimediaUpload
+        mediaItems={mediaItems}
+        onAddMedia={addMedia}
+        onRemoveMedia={removeMedia}
+        onUpdateCaption={updateMediaCaption}
+      />
 
       <div className="pt-5">
         <button

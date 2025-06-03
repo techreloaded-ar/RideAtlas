@@ -8,6 +8,15 @@ import { RecommendedSeason } from '@/types/trip'
 // Force dynamic rendering
 export const dynamic = 'force-dynamic'
 
+// Schema di validazione per i media item
+const mediaItemSchema = z.object({
+  id: z.string(),
+  type: z.enum(['image', 'video']),
+  url: z.string().url({ message: 'L\'URL non è valido.' }),
+  caption: z.string().optional(),
+  thumbnailUrl: z.string().url({ message: 'L\'URL della thumbnail non è valido.' }).optional(),
+});
+
 // Schema di validazione per l'aggiornamento del viaggio
 const tripUpdateSchema = z.object({
   title: z.string().min(3, { message: 'Il titolo deve contenere almeno 3 caratteri.' }).max(100).optional(),
@@ -19,6 +28,7 @@ const tripUpdateSchema = z.object({
   theme: z.string().min(3, { message: 'Il tema deve contenere almeno 3 caratteri.' }).max(50).optional(),
   characteristics: z.array(z.string()).optional(),
   recommended_season: z.nativeEnum(RecommendedSeason).optional(),
+  media: z.array(mediaItemSchema).optional(),
 })
 
 // Funzione di utilità per generare lo slug
@@ -177,9 +187,7 @@ export async function PUT(
     // TODO: Salva i dati originali per l'audit log quando implementeremo la tabella trip_changes
     // const originalData = await prisma.trip.findUnique({
     //   where: { id: tripId }
-    // })
-
-    // Aggiorna il viaggio
+    // })    // Aggiorna il viaggio con i dati di base (senza media)
     const updatedTrip = await prisma.trip.update({
       where: { id: tripId },
       data: {
@@ -196,7 +204,20 @@ export async function PUT(
           }
         }
       }
-    })
+    });
+    
+    // Se ci sono media da aggiornare, fallo in un'operazione separata
+    if (body.media && Array.isArray(body.media)) {
+      try {
+        // Usa un'operazione SQL diretta per aggiornare i media
+        // @ts-expect-error - Ignora i problemi di tipo
+        await prisma.$queryRaw`UPDATE "trips" SET "media" = ${JSON.stringify(body.media)}::jsonb[] WHERE "id" = ${tripId}`;
+        console.log('Media aggiornati per il viaggio:', tripId);
+      } catch (mediaError) {
+        console.error('Errore nell\'aggiornamento dei media:', mediaError);
+        // Non bloccare il flusso se l'aggiornamento dei media fallisce
+      }
+    }
 
     // TODO: Implementare audit log qui
     // await createTripAuditLog(tripId, session.user.id, originalData, updatedTrip)

@@ -77,7 +77,6 @@ export default async function PacchettiPage() {
       whereClause = {};
     }
   }
-
   // Recupera i viaggi dal database con filtri basati sui ruoli
   const trips = await prisma.trip.findMany({
     where: whereClause,
@@ -93,6 +92,16 @@ export default async function PacchettiPage() {
     orderBy: {
       created_at: 'desc'
     }
+  });
+  
+  // Converte i media per ogni viaggio
+  const tripsWithProcessedMedia = trips.map(trip => {
+    // Cast sicuro di media a MediaItem[]
+    const tripWithMedia = {
+      ...trip,
+      mediaItems: (trip.media || []) as unknown as any[]
+    };
+    return tripWithMedia;
   });
 
   return (
@@ -142,13 +151,29 @@ export default async function PacchettiPage() {
               <div 
                 key={trip.id} 
                 className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden"
-              >
-                {/* Immagine placeholder */}
+              >                {/* Media preview or placeholder */}
                 <div className="relative h-48 bg-gradient-to-br from-primary-400 to-secondary-500">
-                  <div className="absolute inset-0 bg-black/20"></div>
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <Navigation className="w-16 h-16 text-white/70" />
-                  </div>
+                  {/* Mostra la prima immagine se disponibile, altrimenti un placeholder */}
+                  {trip.media && Array.isArray(trip.media) && trip.media.length > 0 && trip.media[0].type === 'image' ? (
+                    <img 
+                      src={trip.media[0].url} 
+                      alt={trip.media[0].caption || trip.title}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : trip.media && Array.isArray(trip.media) && trip.media.length > 0 && trip.media[0].type === 'video' && trip.media[0].thumbnailUrl ? (
+                    <img 
+                      src={trip.media[0].thumbnailUrl} 
+                      alt={trip.media[0].caption || trip.title}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <>
+                      <div className="absolute inset-0 bg-black/20"></div>
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <Navigation className="w-16 h-16 text-white/70" />
+                      </div>
+                    </>
+                  )}
                   
                   {/* Status badge */}
                   <div className="absolute top-4 right-4">

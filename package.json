@@ -31,6 +31,7 @@
     "@heroicons/react": "^2.0.18",
     "@prisma/client": "^6.8.2",
     "@types/nodemailer": "^6.4.17",
+    "@vercel/blob": "^1.1.1",
     "bcryptjs": "^3.0.2",
     "crypto": "^1.0.1",
     "lucide-react": "^0.511.0",
