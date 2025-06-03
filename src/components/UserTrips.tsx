@@ -11,7 +11,8 @@ import {
   Eye, 
   Edit, 
   Plus,
-  Loader2
+  Loader2,
+  Check
 } from 'lucide-react'
 import { TripStatus } from '@/types/trip'
 
@@ -202,6 +203,25 @@ export default function UserTrips() {
                     >
                       <Edit className="w-4 h-4" />
                     </Link>
+                  )}
+
+                  {/* Pubblica solo per viaggi in Bozza */}
+                  {trip.status === 'Bozza' && (
+                    <button
+                      onClick={async () => {
+                        try {
+                          const res = await fetch(`/api/trips/${trip.id}/publish`, { method: 'PATCH' })
+                          if (!res.ok) throw new Error('Pubblicazione fallita')
+                          fetchUserTrips()
+                        } catch (e) {
+                          console.error(e)
+                        }
+                      }}
+                      className="p-2 text-green-600 hover:text-green-900 transition-colors"
+                      title="Pubblica viaggio"
+                    >
+                      <Check className="w-4 h-4" />
+                    </button>
                   )}
                 </div>
               </div>
