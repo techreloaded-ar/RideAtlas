@@ -6,6 +6,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { UserRole, UserRoleLabels, UserRoleDescriptions, UserPermissions } from '@/types/profile';
 import { useEffect, useState, Suspense } from 'react';
+import UserTrips from '@/components/UserTrips';
 
 function DashboardContent() {
   const { data: session, status } = useSession();
@@ -225,22 +226,31 @@ function DashboardContent() {
                 </div>
               )}
 
-              {/* I tuoi viaggi */}
-              <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-lg font-medium text-gray-900">
-                      I Tuoi Viaggi
-                    </h3>
-                    <p className="text-gray-600">
-                      Traccia i tuoi viaggi e le tue avventure
-                    </p>
-                    <p className="text-sm text-gray-500 mt-2">
-                      Funzione in arrivo...
-                    </p>
+              {/* I tuoi viaggi - Solo per utenti che possono creare viaggi */}
+              {UserPermissions.canCreateTrips(userRole) && (
+                <div className="md:col-span-2 lg:col-span-3">
+                  <UserTrips />
+                </div>
+              )}
+
+              {/* Placeholder per Explorer */}
+              {!UserPermissions.canCreateTrips(userRole) && (
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-lg font-medium text-gray-900">
+                        I Tuoi Viaggi
+                      </h3>
+                      <p className="text-gray-600">
+                        Traccia i tuoi viaggi e le tue avventure
+                      </p>
+                      <p className="text-sm text-gray-500 mt-2">
+                        Solo gli utenti Ranger e Sentinel possono creare viaggi
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
             </div>
 
             <div className="mt-8 bg-blue-50 border border-blue-200 rounded-md p-4">

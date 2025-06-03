@@ -1,0 +1,224 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { z } from 'zod'
+import { prisma } from '@/lib/prisma'
+import { auth } from '@/auth'
+import { UserRole } from '@/types/profile'
+import { RecommendedSeason } from '@/types/trip'
+
+// Force dynamic rendering
+export const dynamic = 'force-dynamic'
+
+// Schema di validazione per l'aggiornamento del viaggio
+const tripUpdateSchema = z.object({
+  title: z.string().min(3, { message: 'Il titolo deve contenere almeno 3 caratteri.' }).max(100).optional(),
+  summary: z.string().min(10, { message: 'Il sommario deve contenere almeno 10 caratteri.' }).max(500).optional(),
+  destination: z.string().min(3, { message: 'La destinazione deve contenere almeno 3 caratteri.' }).max(100).optional(),
+  duration_days: z.number().int().positive({ message: 'La durata in giorni deve essere un numero positivo.' }).optional(),
+  duration_nights: z.number().int().positive({ message: 'La durata in notti deve essere un numero positivo.' }).optional(),
+  tags: z.array(z.string().min(1)).min(1, { message: 'Devi specificare almeno un tag.' }).optional(),
+  theme: z.string().min(3, { message: 'Il tema deve contenere almeno 3 caratteri.' }).max(50).optional(),
+  characteristics: z.array(z.string()).optional(),
+  recommended_season: z.nativeEnum(RecommendedSeason).optional(),
+})
+
+// Funzione di utilità per generare lo slug
+function slugify(text: string): string {
+  return text
+    .toString()
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, '-') // Sostituisci gli spazi con -
+    .replace(/[^\w-]+/g, '') // Rimuovi i caratteri non validi
+    .replace(/--+/g, '-'); // Sostituisci multipli - con uno singolo
+}
+
+// GET - Ottieni un singolo viaggio per modifica
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const session = await auth()
+    
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { error: 'Non autorizzato' },
+        { status: 401 }
+      )
+    }
+
+    const tripId = params.id
+
+    // Trova il viaggio con informazioni dell'utente
+    const trip = await prisma.trip.findUnique({
+      where: { id: tripId },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            role: true
+          }
+        }
+      }
+    })
+
+    if (!trip) {
+      return NextResponse.json(
+        { error: 'Viaggio non trovato' },
+        { status: 404 }
+      )
+    }
+
+    // Controlla i permessi: solo creatore o Sentinel
+    const isOwner = trip.user_id === session.user.id
+    const isSentinel = session.user.role === UserRole.Sentinel
+
+    if (!isOwner && !isSentinel) {
+      return NextResponse.json(
+        { error: 'Non hai i permessi per visualizzare questo viaggio' },
+        { status: 403 }
+      )
+    }
+
+    return NextResponse.json(trip)
+
+  } catch (error) {
+    console.error('Errore nel caricamento del viaggio:', error)
+    return NextResponse.json(
+      { error: 'Errore interno del server' },
+      { status: 500 }
+    )
+  }
+}
+
+// PUT - Aggiorna un viaggio
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const session = await auth()
+    
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { error: 'Non autorizzato' },
+        { status: 401 }
+      )
+    }
+
+    const tripId = params.id
+    const body = await request.json()
+
+    // Validazione dei dati
+    const parsed = tripUpdateSchema.safeParse(body)
+    if (!parsed.success) {
+      return NextResponse.json({
+        error: 'Dati non validi',
+        details: parsed.error.flatten().fieldErrors
+      }, { status: 400 })
+    }
+
+    // Trova il viaggio esistente
+    const existingTrip = await prisma.trip.findUnique({
+      where: { id: tripId },
+      select: {
+        id: true,
+        title: true,
+        user_id: true,
+        status: true,
+        slug: true
+      }
+    })
+
+    if (!existingTrip) {
+      return NextResponse.json(
+        { error: 'Viaggio non trovato' },
+        { status: 404 }
+      )
+    }
+
+    // Controlla i permessi: solo creatore o Sentinel
+    const isOwner = existingTrip.user_id === session.user.id
+    const isSentinel = session.user.role === UserRole.Sentinel
+
+    if (!isOwner && !isSentinel) {
+      return NextResponse.json(
+        { error: 'Non hai i permessi per modificare questo viaggio' },
+        { status: 403 }
+      )
+    }
+
+    const updateData = parsed.data
+
+    // Se il titolo è cambiato, aggiorna anche lo slug
+    let newSlug = existingTrip.slug
+    if (updateData.title && updateData.title !== existingTrip.title) {
+      newSlug = slugify(updateData.title)
+      
+      // Verifica che il nuovo slug non esista già
+      const existingWithSlug = await prisma.trip.findUnique({
+        where: { slug: newSlug },
+        select: { id: true }
+      })
+      
+      if (existingWithSlug && existingWithSlug.id !== tripId) {
+        return NextResponse.json({
+          error: 'Un viaggio con questo titolo esiste già. Scegli un titolo diverso.'
+        }, { status: 409 })
+      }
+    }
+
+    // TODO: Salva i dati originali per l'audit log quando implementeremo la tabella trip_changes
+    // const originalData = await prisma.trip.findUnique({
+    //   where: { id: tripId }
+    // })
+
+    // Aggiorna il viaggio
+    const updatedTrip = await prisma.trip.update({
+      where: { id: tripId },
+      data: {
+        ...updateData,
+        ...(newSlug !== existingTrip.slug && { slug: newSlug }),
+        updated_at: new Date()
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true
+          }
+        }
+      }
+    })
+
+    // TODO: Implementare audit log qui
+    // await createTripAuditLog(tripId, session.user.id, originalData, updatedTrip)
+
+    return NextResponse.json({
+      message: 'Viaggio aggiornato con successo',
+      trip: updatedTrip
+    })
+
+  } catch (error) {
+    console.error('Errore nell\'aggiornamento del viaggio:', error)
+    
+    // Gestione errori specifici di Prisma
+    if (error && typeof error === 'object' && 'code' in error) {
+      const prismaError = error as { code?: string; meta?: { target?: string[] } }
+      
+      if (prismaError.code === 'P2002' && prismaError.meta?.target?.includes('slug')) {
+        return NextResponse.json({
+          error: 'Un viaggio con questo titolo esiste già. Scegli un titolo diverso.'
+        }, { status: 409 })
+      }
+    }
+
+    return NextResponse.json(
+      { error: 'Errore interno del server' },
+      { status: 500 }
+    )
+  }
+}
