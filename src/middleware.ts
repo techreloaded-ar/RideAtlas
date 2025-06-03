@@ -4,7 +4,7 @@ import { UserRole } from "@/types/profile"
 
 export default auth((req) => {
   const { nextUrl } = req
-  const isLoggedIn = !!req.auth
+  const isLoggedIn = !!req.auth?.user?.id
   const userRole = req.auth?.user?.role as UserRole | undefined
 
   // Routes that require authentication
@@ -29,7 +29,8 @@ export default auth((req) => {
   )
 
   // Redirect to signin if trying to access protected route while not logged in
-  if (isProtectedRoute && !isLoggedIn) {
+  // or if user doesn't have a valid role
+  if (isProtectedRoute && (!isLoggedIn || !userRole)) {
     return NextResponse.redirect(new URL('/auth/signin', nextUrl))
   }
 

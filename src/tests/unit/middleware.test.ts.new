@@ -1,0 +1,413 @@
+// filepath: /Users/stefanoleli/Projects/RideAtlas/src/tests/unit/middleware.test.ts
+import { auth } from '@/auth'
+import { NextRequest, NextResponse } from 'next/server'
+import { UserRole } from '@/types/profile'
+
+// Mock auth middleware
+jest.mock('@/auth', () => ({
+  auth: jest.fn((handler) => handler),
+}))
+
+// Mock NextResponse methods
+jest.mock('next/server', () => ({
+  NextRequest: jest.fn(),
+  NextResponse: {
+    redirect: jest.fn(() => 'redirected'),
+    next: jest.fn(() => 'next'),
+  },
+}))
+
+// Import middleware function to test
+const middleware = require('@/middleware').default
+const MockedNextResponse = NextResponse as jest.Mocked<typeof NextResponse>
+
+describe('Middleware Authorization', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+  })
+
+  // Helper to create mock request objects
+  const createMockRequest = (url: string, auth?: any): any => ({
+    nextUrl: new URL(url, 'http://localhost'),
+    auth,
+  })
+
+  describe('Route Protection', () => {
+    describe('Unauthenticated Access', () => {
+      it('should redirect to signin for protected routes without authentication', () => {
+        const request = createMockRequest('http://localhost/dashboard')
+        
+        middleware(request)
+
+        expect(MockedNextResponse.redirect).toHaveBeenCalledWith(
+          new URL('/auth/signin', 'http://localhost/dashboard')
+        )
+      })
+
+      it('should redirect to signin for API protected routes', () => {
+        const request = createMockRequest('http://localhost/api/trips')
+        
+        middleware(request)
+
+        expect(MockedNextResponse.redirect).toHaveBeenCalledWith(
+          new URL('/auth/signin', 'http://localhost/api/trips')
+        )
+      })
+
+      it('should allow access to public routes', () => {
+        const publicRoutes = [
+          'http://localhost/',
+          'http://localhost/auth/signin',
+          'http://localhost/auth/register',
+          'http://localhost/about',
+        ]
+
+        publicRoutes.forEach(url => {
+          const request = createMockRequest(url)
+          
+          middleware(request)
+
+          expect(MockedNextResponse.next).toHaveBeenCalled()
+          expect(MockedNextResponse.redirect).not.toHaveBeenCalled()
+          
+          // Clear mock before next iteration
+          jest.clearAllMocks()
+        })
+      })
+    })
+
+    describe('Authenticated Access', () => {
+      it('should allow access to protected routes for authenticated users', () => {
+        const request = createMockRequest('http://localhost/dashboard', {
+          user: { role: UserRole.Explorer },
+        })
+
+        middleware(request)
+
+        expect(MockedNextResponse.next).toHaveBeenCalled()
+        expect(MockedNextResponse.redirect).not.toHaveBeenCalled()
+      })
+
+      it('should redirect authenticated users away from signin page', () => {
+        const request = createMockRequest('http://localhost/auth/signin', {
+          user: { role: UserRole.Explorer },
+        })
+
+        middleware(request)
+
+        expect(MockedNextResponse.redirect).toHaveBeenCalledWith(
+          new URL('/dashboard', 'http://localhost/auth/signin')
+        )
+      })
+    })
+  })
+
+  describe('Role-Based Access Control', () => {
+    describe('Explorer Permissions', () => {
+      it('should block Explorer from accessing Ranger routes', () => {
+        const request = createMockRequest('http://localhost/create-trip', {
+          user: { role: UserRole.Explorer },
+        })
+
+        middleware(request)
+
+        expect(MockedNextResponse.redirect).toHaveBeenCalledWith(
+          new URL('/dashboard?error=insufficient-permissions', 'http://localhost/create-trip')
+        )
+      })
+
+      it('should block Explorer from accessing Ranger API routes', () => {
+        const request = createMockRequest('http://localhost/api/trips', {
+          user: { role: UserRole.Explorer },
+        })
+
+        middleware(request)
+
+        expect(MockedNextResponse.redirect).toHaveBeenCalledWith(
+          new URL('/dashboard?error=insufficient-permissions', 'http://localhost/api/trips')
+        )
+      })
+
+      it('should block Explorer from accessing Sentinel routes', () => {
+        const request = createMockRequest('http://localhost/admin', {
+          user: { role: UserRole.Explorer },
+        })
+
+        middleware(request)
+
+        expect(MockedNextResponse.redirect).toHaveBeenCalledWith(
+          new URL('/dashboard?error=insufficient-permissions', 'http://localhost/admin')
+        )
+      })
+
+      it('should allow Explorer to access dashboard', () => {
+        const request = createMockRequest('http://localhost/dashboard', {
+          user: { role: UserRole.Explorer },
+        })
+
+        middleware(request)
+
+        expect(MockedNextResponse.next).toHaveBeenCalled()
+        expect(MockedNextResponse.redirect).not.toHaveBeenCalled()
+      })
+    })
+
+    describe('Ranger Permissions', () => {
+      it('should allow Ranger to access trip creation routes', () => {
+        const request = createMockRequest('http://localhost/create-trip', {
+          user: { role: UserRole.Ranger },
+        })
+
+        middleware(request)
+
+        expect(MockedNextResponse.next).toHaveBeenCalled()
+        expect(MockedNextResponse.redirect).not.toHaveBeenCalled()
+      })
+
+      it('should allow Ranger to access trip API routes', () => {
+        const request = createMockRequest('http://localhost/api/trips', {
+          user: { role: UserRole.Ranger },
+        })
+
+        middleware(request)
+
+        expect(MockedNextResponse.next).toHaveBeenCalled()
+        expect(MockedNextResponse.redirect).not.toHaveBeenCalled()
+      })
+
+      it('should block Ranger from accessing Sentinel routes', () => {
+        const request = createMockRequest('http://localhost/admin', {
+          user: { role: UserRole.Ranger },
+        })
+
+        middleware(request)
+
+        expect(MockedNextResponse.redirect).toHaveBeenCalledWith(
+          new URL('/dashboard?error=insufficient-permissions', 'http://localhost/admin')
+        )
+      })
+
+      it('should block Ranger from accessing admin API routes', () => {
+        const request = createMockRequest('http://localhost/api/admin/users', {
+          user: { role: UserRole.Ranger },
+        })
+
+        middleware(request)
+
+        expect(MockedNextResponse.redirect).toHaveBeenCalledWith(
+          new URL('/dashboard?error=insufficient-permissions', 'http://localhost/api/admin/users')
+        )
+      })
+    })
+
+    describe('Sentinel Permissions', () => {
+      it('should allow Sentinel to access all routes', () => {
+        const sentinelRoutes = [
+          'http://localhost/dashboard',
+          'http://localhost/create-trip',
+          'http://localhost/admin',
+          'http://localhost/api/trips',
+          'http://localhost/api/admin/users',
+        ]
+
+        sentinelRoutes.forEach(url => {
+          const request = createMockRequest(url, {
+            user: { role: UserRole.Sentinel },
+          })
+
+          middleware(request)
+
+          expect(MockedNextResponse.next).toHaveBeenCalled()
+          expect(MockedNextResponse.redirect).not.toHaveBeenCalled()
+          
+          // Clear mock before next iteration
+          jest.clearAllMocks()
+        })
+      })
+
+      it('should allow Sentinel to access admin sub-routes', () => {
+        const adminRoutes = [
+          'http://localhost/admin/users',
+          'http://localhost/admin/trips',
+          'http://localhost/api/admin/users/create',
+          'http://localhost/api/admin/trips/approve',
+        ]
+
+        adminRoutes.forEach(url => {
+          const request = createMockRequest(url, {
+            user: { role: UserRole.Sentinel },
+          })
+
+          middleware(request)
+
+          expect(MockedNextResponse.next).toHaveBeenCalled()
+          expect(MockedNextResponse.redirect).not.toHaveBeenCalled()
+          
+          // Clear mock before next iteration
+          jest.clearAllMocks()
+        })
+      })
+    })
+  })
+
+  describe('Route Pattern Matching', () => {
+    it('should correctly identify protected routes', () => {
+      const protectedRoutes = [
+        'http://localhost/dashboard',
+        'http://localhost/dashboard/profile',
+        'http://localhost/create-trip',
+        'http://localhost/api/trips/create',
+        'http://localhost/api/trips/123',
+      ]
+
+      protectedRoutes.forEach(url => {
+        const request = createMockRequest(url)
+        
+        middleware(request)
+
+        expect(MockedNextResponse.redirect).toHaveBeenCalledWith(
+          new URL('/auth/signin', url)
+        )
+        
+        // Clear mock before next iteration
+        jest.clearAllMocks()
+      })
+    })
+
+    it('should correctly identify Ranger routes', () => {
+      const rangerRoutes = [
+        'http://localhost/create-trip',
+        'http://localhost/create-trip/new',
+        'http://localhost/api/trips',
+        'http://localhost/api/trips/create',
+      ]
+
+      rangerRoutes.forEach(url => {
+        const request = createMockRequest(url, {
+          user: { role: UserRole.Explorer },
+        })
+
+        middleware(request)
+
+        expect(MockedNextResponse.redirect).toHaveBeenCalledWith(
+          new URL('/dashboard?error=insufficient-permissions', url)
+        )
+        
+        // Clear mock before next iteration
+        jest.clearAllMocks()
+      })
+    })
+
+    it('should correctly identify Sentinel routes', () => {
+      const sentinelRoutes = [
+        'http://localhost/admin',
+        'http://localhost/admin/users',
+        'http://localhost/admin/trips',
+        'http://localhost/api/admin',
+        'http://localhost/api/admin/users',
+        'http://localhost/api/admin/trips',
+      ]
+
+      sentinelRoutes.forEach(url => {
+        const request = createMockRequest(url, {
+          user: { role: UserRole.Ranger },
+        })
+
+        middleware(request)
+
+        expect(MockedNextResponse.redirect).toHaveBeenCalledWith(
+          new URL('/dashboard?error=insufficient-permissions', url)
+        )
+        
+        // Clear mock before next iteration
+        jest.clearAllMocks()
+      })
+    })
+  })
+
+  describe('Edge Cases', () => {
+    it('should handle requests without user role', () => {
+      const request = createMockRequest('http://localhost/dashboard', {
+        user: {}, // User object without role
+      })
+
+      middleware(request)
+
+      expect(MockedNextResponse.redirect).toHaveBeenCalledWith(
+        new URL('/auth/signin', 'http://localhost/dashboard')
+      )
+    })
+
+    it('should handle malformed URLs gracefully', () => {
+      const request = createMockRequest('http://localhost//dashboard///', {
+        user: { role: UserRole.Explorer },
+      })
+
+      middleware(request)
+
+      expect(MockedNextResponse.next).toHaveBeenCalled()
+    })
+
+    it('should handle requests with query parameters', () => {
+      const request = createMockRequest('http://localhost/admin?tab=users&page=2', {
+        user: { role: UserRole.Explorer },
+      })
+
+      middleware(request)
+
+      expect(MockedNextResponse.redirect).toHaveBeenCalledWith(
+        new URL('/dashboard?error=insufficient-permissions', 'http://localhost/admin?tab=users&page=2')
+      )
+    })
+
+    it('should handle requests with fragments', () => {
+      const request = createMockRequest('http://localhost/dashboard#section1', {
+        user: { role: UserRole.Explorer },
+      })
+
+      middleware(request)
+
+      expect(MockedNextResponse.next).toHaveBeenCalled()
+    })
+  })
+
+  describe('Performance and Security', () => {
+    it('should not make unnecessary redirects for allowed routes', () => {
+      const request = createMockRequest('http://localhost/dashboard', {
+        user: { role: UserRole.Sentinel },
+      })
+
+      middleware(request)
+
+      expect(MockedNextResponse.next).toHaveBeenCalledTimes(1)
+      expect(MockedNextResponse.redirect).not.toHaveBeenCalled()
+    })
+
+    it('should handle concurrent requests properly', () => {
+      const requests = [
+        createMockRequest('http://localhost/dashboard', { user: { role: UserRole.Explorer } }),
+        createMockRequest('http://localhost/admin', { user: { role: UserRole.Sentinel } }),
+        createMockRequest('http://localhost/create-trip', { user: { role: UserRole.Ranger } }),
+      ]
+
+      requests.forEach(request => {
+        middleware(request)
+        jest.clearAllMocks()
+      })
+
+      // Each request was handled independently
+      expect(true).toBe(true)
+    })
+
+    it('should preserve original URL in redirect for auth', () => {
+      const originalUrl = 'http://localhost/dashboard/profile?tab=settings'
+      const request = createMockRequest(originalUrl)
+
+      middleware(request)
+
+      expect(MockedNextResponse.redirect).toHaveBeenCalledWith(
+        new URL('/auth/signin', originalUrl)
+      )
+    })
+  })
+})

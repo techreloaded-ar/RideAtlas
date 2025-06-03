@@ -27,9 +27,13 @@ function slugify(text: string): string {
     .toString()
     .toLowerCase()
     .trim()
-    .replace(/\s+/g, '-') // Sostituisci gli spazi con -
-    .replace(/[^\w-]+/g, '') // Rimuovi i caratteri non validi
-    .replace(/--+/g, '-'); // Sostituisci multipli - con uno singolo
+    .normalize('NFD')             // Normalize diacritics
+    .replace(/[\u0300-\u036f]/g, '') // Remove accents
+    .replace(/\s+/g, '-')        // Sostituisci gli spazi con -
+    .replace(/[^\w-]+/g, '-')    // Sostituisci caratteri non-word con -
+    .replace(/-+/g, '-')         // Sostituisci multipli - con uno singolo
+    .replace(/^-+/, '')          // Rimuovi - iniziali
+    .replace(/-+$/, '');         // Rimuovi - finali
 }
 
 // GET - Ottieni un singolo viaggio per modifica
@@ -87,7 +91,7 @@ export async function GET(
   } catch (error) {
     console.error('Errore nel caricamento del viaggio:', error)
     return NextResponse.json(
-      { error: 'Errore interno del server' },
+      { error: 'Errore interno server.' },
       { status: 500 }
     )
   }
@@ -217,7 +221,7 @@ export async function PUT(
     }
 
     return NextResponse.json(
-      { error: 'Errore interno del server' },
+      { error: 'Errore interno server.' },
       { status: 500 }
     )
   }

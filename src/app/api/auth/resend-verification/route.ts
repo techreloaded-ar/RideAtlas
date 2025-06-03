@@ -5,9 +5,26 @@ import { randomBytes } from 'crypto';
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { email } = body;
-
+    // Handle empty request body as server error, not validation error
+    let body;
+    try {
+      if (request.body) {
+        body = await request.json();
+      } else {
+        return NextResponse.json(
+          { error: 'Errore interno del server' },
+          { status: 500 }
+        );
+      }
+    } catch {
+      return NextResponse.json(
+        { error: 'Errore interno del server' },
+        { status: 500 }
+      );
+    }
+    
+    const { email } = body || {};
+    
     if (!email) {
       return NextResponse.json(
         { error: 'Email richiesta' },

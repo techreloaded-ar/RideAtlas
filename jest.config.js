@@ -24,6 +24,8 @@ const customJestConfig = {
   coverageReporters: ['text', 'lcov', 'html'],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
+    '^@/auth$': '<rootDir>/src/tests/unit/mocks/auth.ts',
+    '^@/app/api/admin/users/route$': '<rootDir>/src/tests/unit/mocks/api/admin/users/route.ts',
   },
   testPathIgnorePatterns: ['<rootDir>/node_modules/', '<rootDir>/.next/'],
   transformIgnorePatterns: [

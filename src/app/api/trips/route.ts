@@ -12,9 +12,13 @@ function slugify(text: string): string {
     .toString()
     .toLowerCase()
     .trim()
-    .replace(/\s+/g, '-') // Sostituisci gli spazi con -
-    .replace(/[^\w-]+/g, '') // Rimuovi i caratteri non validi
-    .replace(/--+/g, '-'); // Sostituisci multipli - con uno singolo
+    .normalize('NFD')             // Normalize diacritics
+    .replace(/[\u0300-\u036f]/g, '') // Remove accents
+    .replace(/\s+/g, '-')        // Sostituisci gli spazi con -
+    .replace(/[^\w-]+/g, '-')    // Sostituisci caratteri non-word con -
+    .replace(/-+/g, '-')         // Sostituisci multipli - con uno singolo
+    .replace(/^-+/, '')          // Rimuovi - iniziali
+    .replace(/-+$/, '');         // Rimuovi - finali
 }
 
 // Schema di validazione Zod per i dati di creazione del viaggio
@@ -93,7 +97,7 @@ export async function POST(request: NextRequest) {
       }
       
       return NextResponse.json({ 
-        error: "Errore creazione viaggio.", 
+        error: "Errore interno server.", 
         details: prismaError.message || "Errore sconosciuto"
       }, { status: 500 });
     }

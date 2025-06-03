@@ -18,7 +18,7 @@ Object.defineProperty(global, 'crypto', {
   writable: true,
 });
 
-// Mock NextResponse
+// Mock NextResponse and NextRequest
 jest.mock('next/server', () => ({
   NextResponse: {
     json: (data: unknown, init?: ResponseInit) => {
@@ -39,6 +39,23 @@ jest.mock('next/server', () => ({
       text: async () => JSON.stringify({ redirect: url }),
     }),
   },
+  NextRequest: jest.fn().mockImplementation((url: string, init?: RequestInit) => {
+    const parsedUrl = new URL(url);
+    return {
+      url,
+      method: init?.method || 'GET',
+      headers: new Map(Object.entries(init?.headers || {})),
+      body: init?.body || null,
+      json: async () => (init?.body ? JSON.parse(init.body as string) : {}),
+      text: async () => init?.body as string || '',
+      nextUrl: {
+        searchParams: parsedUrl.searchParams,
+        pathname: parsedUrl.pathname,
+        search: parsedUrl.search,
+        href: parsedUrl.href,
+      },
+    };
+  }),
 }));
 
 // Mock next-auth globalmente

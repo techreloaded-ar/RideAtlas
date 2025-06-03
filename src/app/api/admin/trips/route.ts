@@ -26,8 +26,10 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url)
-    const page = parseInt(searchParams.get('page') || '1')
-    const limit = parseInt(searchParams.get('limit') || '10')
+    const pageParam = searchParams.get('page') || '1'
+    const limitParam = searchParams.get('limit') || '10'
+    const page = isNaN(parseInt(pageParam)) ? 1 : parseInt(pageParam)
+    const limit = isNaN(parseInt(limitParam)) ? 10 : parseInt(limitParam)
     const search = searchParams.get('search') || ''
     const statusFilter = searchParams.get('status') || ''
 
