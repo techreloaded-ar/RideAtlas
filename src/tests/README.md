@@ -11,15 +11,21 @@ src/tests/
 │   └── test-utils.tsx              # Utilities per rendering e testing
 ├── unit/                           # Test unitari
 │   ├── components/                 # Test componenti React
+│   │   ├── MediaGallery.test.tsx   # Test visualizzazione media
+│   │   └── MultimediaUpload.test.tsx # Test upload media
 │   ├── pages/                      # Test pagine Next.js
 │   │   ├── HomePage.test.tsx       # Test homepage
 │   │   ├── RegisterPage.test.tsx   # Test registrazione
 │   │   └── SignInPage.test.tsx     # Test login
-│   └── lib/                        # Test librerie e utilities
-│       └── email.test.ts           # Test servizio email
+│   ├── lib/                        # Test librerie e utilities
+│   │   └── email.test.ts           # Test servizio email
+│   └── types/                      # Test tipi e funzioni di utility
+│       └── trip.test.ts            # Test funzioni helper per media e viaggi
 ├── integration/                    # Test di integrazione
 │   ├── auth-flow.test.tsx          # Test flusso autenticazione completo
-│   └── email-verification.test.tsx # Test verifica email
+│   ├── email-verification.test.tsx # Test verifica email
+│   ├── media-upload.test.ts        # Test API upload media
+│   └── trip-with-media.test.ts     # Test creazione/modifica viaggi con media
 └── e2e/                           # Test end-to-end (per il futuro)
 ```
 
@@ -29,6 +35,13 @@ src/tests/
 - **Pagine**: Test rendering e interazioni UI delle pagine
 - **Componenti**: Test isolati dei componenti React
 - **Librerie**: Test logica business e utilities
+- **Tipi**: Test delle funzioni di utility per i tipi
+
+### Test Media (`unit/components/` e `integration/`)
+- **MediaGallery**: Test visualizzazione galleria immagini e video
+- **MultimediaUpload**: Test upload immagini e aggiunta video YouTube
+- **API Upload**: Test delle API di upload media su Vercel Blob
+- **Gestione Trip con Media**: Test integrazione dei media nei viaggi
 
 ### Test di Integrazione (`integration/`)
 - **Auth Flow**: Test completo del flusso di autenticazione
