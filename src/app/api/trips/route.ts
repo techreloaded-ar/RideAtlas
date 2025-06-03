@@ -53,7 +53,7 @@ export async function GET() {
     const session = await auth();
     
     // Build query based on user role
-    let whereClause: any = {};
+    let whereClause: Record<string, unknown> = {};
     
     if (!session?.user) {
       // Non-logged users: only show published trips
@@ -168,7 +168,6 @@ export async function POST(request: NextRequest) {
         await prisma.trip.update({
           where: { id: newTrip.id },
           data: { 
-            // @ts-expect-error - Ignora i problemi di tipo con media per Json[]
             media: body.media
           }
         });

@@ -210,7 +210,6 @@ export async function PUT(
     if (body.media && Array.isArray(body.media)) {
       try {
         // Usa un'operazione SQL diretta per aggiornare i media
-        // @ts-expect-error - Ignora i problemi di tipo
         await prisma.$queryRaw`UPDATE "trips" SET "media" = ${JSON.stringify(body.media)}::jsonb[] WHERE "id" = ${tripId}`;
         console.log('Media aggiornati per il viaggio:', tripId);
       } catch (mediaError) {

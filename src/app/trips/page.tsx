@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { Calendar, MapPin, Tag, User, Clock, Navigation } from 'lucide-react';
 import { auth } from '@/auth';
 import { UserRole } from '@/types/profile';
+import { castToMediaItems } from '@/types/trip'; // Importa la funzione helper
+
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic';
@@ -95,14 +97,10 @@ export default async function PacchettiPage() {
   });
   
   // Converte i media per ogni viaggio
-  const tripsWithProcessedMedia = trips.map(trip => {
-    // Cast sicuro di media a MediaItem[]
-    const tripWithMedia = {
-      ...trip,
-      mediaItems: (trip.media || []) as unknown as any[]
-    };
-    return tripWithMedia;
-  });
+  const tripsWithProcessedMedia = trips.map(trip => ({
+    ...trip,
+    media: castToMediaItems(trip.media || [])
+  }));
 
   return (
     <main className="min-h-screen bg-gray-50">
@@ -122,7 +120,7 @@ export default async function PacchettiPage() {
 
       {/* Contenuto principale */}
       <section className="container mx-auto px-4 py-12">
-        {trips.length === 0 ? (
+        {tripsWithProcessedMedia.length === 0 ? (
           // Stato vuoto
           <div className="text-center py-20">
             <div className="max-w-md mx-auto">
@@ -147,7 +145,7 @@ export default async function PacchettiPage() {
         ) : (
           // Griglia dei viaggi
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {trips.map((trip) => (
+            {tripsWithProcessedMedia.map((trip) => (
               <div 
                 key={trip.id} 
                 className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden"
