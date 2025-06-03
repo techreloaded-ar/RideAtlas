@@ -5,7 +5,7 @@ import { useSession } from 'next-auth/react'
 import { useToast } from '@/hooks/useToast'
 import Image from 'next/image'
 import { UserRole } from '@/types/profile'
-import { Calendar, MapPin, User, Clock, Navigation, Check, Eye } from 'lucide-react'
+import { Calendar, MapPin, User, Clock, Navigation, Check, Eye, Edit } from 'lucide-react'
 
 interface Trip {
   id: string
@@ -330,6 +330,17 @@ export default function TripManagement() {
                           >
                             <Eye className="w-4 h-4" />
                           </a>
+                          
+                          {/* Edit button - only for draft trips */}
+                          {trip.status === 'Bozza' && (
+                            <a
+                              href={`/edit-trip/${trip.id}`}
+                              className="text-orange-600 hover:text-orange-900 p-1 rounded"
+                              title="Modifica viaggio"
+                            >
+                              <Edit className="w-4 h-4" />
+                            </a>
+                          )}
                           
                           {/* Approve button - only for draft trips */}
                           {trip.status === 'Bozza' && (
