@@ -1,7 +1,13 @@
 import { GET } from '@/app/api/user/trips/route'
 import { NextRequest } from 'next/server'
+import { auth } from '@/auth'
+import { prisma } from '@/lib/prisma'
 
 // Mock delle dipendenze
+jest.mock('@/auth', () => ({
+  auth: jest.fn(),
+}))
+
 jest.mock('@/lib/prisma', () => ({
   prisma: {
     trip: {
@@ -10,16 +16,7 @@ jest.mock('@/lib/prisma', () => ({
   },
 }))
 
-jest.mock('@/auth', () => ({
-  auth: jest.fn(),
-}))
-
-// Import dei mock
-import { prisma } from '@/lib/prisma'
-import { auth } from '@/auth'
-
-const mockPrisma = prisma as jest.Mocked<typeof prisma>
-const mockAuth = auth as jest.MockedFunction<typeof auth>
+const mockAuth = auth as jest.Mock
 
 describe('/api/user/trips', () => {
   beforeEach(() => {
@@ -63,8 +60,8 @@ describe('/api/user/trips', () => {
         },
       ]
 
-      mockAuth.mockResolvedValue(mockSession)
-      mockPrisma.trip.findMany.mockResolvedValue(mockTrips)
+      mockAuth.mockResolvedValue(mockSession as any)
+      ;(prisma.trip.findMany as jest.Mock).mockResolvedValue(mockTrips)
 
       const response = await GET()
       const data = await response.json()
@@ -75,7 +72,7 @@ describe('/api/user/trips', () => {
         total: 2,
       })
 
-      expect(mockPrisma.trip.findMany).toHaveBeenCalledWith({
+      expect(prisma.trip.findMany).toHaveBeenCalledWith({
         where: {
           user_id: 'user-123',
         },
@@ -106,8 +103,8 @@ describe('/api/user/trips', () => {
         },
       }
 
-      mockAuth.mockResolvedValue(mockSession)
-      mockPrisma.trip.findMany.mockResolvedValue([])
+      mockAuth.mockResolvedValue(mockSession as any)
+      ;(prisma.trip.findMany as jest.Mock).mockResolvedValue([])
 
       const response = await GET()
       const data = await response.json()
@@ -120,7 +117,7 @@ describe('/api/user/trips', () => {
     })
 
     it('dovrebbe restituire 401 se l\'utente non è autenticato', async () => {
-      mockAuth.mockResolvedValue(null)
+      mockAuth.mockResolvedValue(null as any)
 
       const response = await GET()
       const data = await response.json()
@@ -130,11 +127,11 @@ describe('/api/user/trips', () => {
         error: 'Non autorizzato',
       })
 
-      expect(mockPrisma.trip.findMany).not.toHaveBeenCalled()
+      expect((prisma.trip.findMany as jest.Mock)).not.toHaveBeenCalled()
     })
 
     it('dovrebbe restituire 401 se la sessione non ha utente', async () => {
-      mockAuth.mockResolvedValue({ user: null })
+      mockAuth.mockResolvedValue({ user: null } as any)
 
       const response = await GET()
       const data = await response.json()
@@ -144,7 +141,7 @@ describe('/api/user/trips', () => {
         error: 'Non autorizzato',
       })
 
-      expect(mockPrisma.trip.findMany).not.toHaveBeenCalled()
+      expect((prisma.trip.findMany as jest.Mock)).not.toHaveBeenCalled()
     })
 
     it('dovrebbe gestire gli errori del database', async () => {
@@ -156,8 +153,8 @@ describe('/api/user/trips', () => {
         },
       }
 
-      mockAuth.mockResolvedValue(mockSession)
-      mockPrisma.trip.findMany.mockRejectedValue(new Error('Database error'))
+      mockAuth.mockResolvedValue(mockSession as any)
+      ;(prisma.trip.findMany as jest.Mock).mockRejectedValue(new Error('Database error'))
 
       const consoleSpy = jest.spyOn(console, 'error').mockImplementation()
 
@@ -213,15 +210,15 @@ describe('/api/user/trips', () => {
         },
       ]
 
-      mockAuth.mockResolvedValue(mockSession)
-      mockPrisma.trip.findMany.mockResolvedValue(mockTrips)
+      mockAuth.mockResolvedValue(mockSession as any)
+      ;(prisma.trip.findMany as jest.Mock).mockResolvedValue(mockTrips)
 
       const response = await GET()
       const data = await response.json()
 
       expect(response.status).toBe(200)
       expect(data.trips).toEqual(mockTrips)
-      expect(mockPrisma.trip.findMany).toHaveBeenCalledWith(
+      expect(prisma.trip.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
           orderBy: {
             updated_at: 'desc',
@@ -239,12 +236,12 @@ describe('/api/user/trips', () => {
         },
       }
 
-      mockAuth.mockResolvedValue(mockSession)
-      mockPrisma.trip.findMany.mockResolvedValue([])
+      mockAuth.mockResolvedValue(mockSession as any)
+      ;(prisma.trip.findMany as jest.Mock).mockResolvedValue([])
 
       await GET()
 
-      expect(mockPrisma.trip.findMany).toHaveBeenCalledWith(
+      expect(prisma.trip.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
           select: {
             id: true,
@@ -310,8 +307,8 @@ describe('/api/user/trips', () => {
         },
       ]
 
-      mockAuth.mockResolvedValue(mockSession)
-      mockPrisma.trip.findMany.mockResolvedValue(mockTrips)
+      mockAuth.mockResolvedValue(mockSession as any)
+      ;(prisma.trip.findMany as jest.Mock).mockResolvedValue(mockTrips)
 
       const response = await GET()
       const data = await response.json()

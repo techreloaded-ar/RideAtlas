@@ -18,7 +18,7 @@ jest.mock('@/lib/prisma', () => ({
   },
 }))
 
-const mockAuth = auth as jest.MockedFunction<typeof auth>
+const mockAuth = auth as jest.Mock
 
 describe('PATCH /api/admin/trips/[id]/approve - Approvazione Viaggi', () => {
   beforeEach(() => {
