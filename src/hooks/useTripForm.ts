@@ -17,8 +17,7 @@ export const useTripForm = ({
   onSuccess, 
   mode = 'create',
   tripId 
-}: UseTripFormProps) => {
-  const [formData, setFormData] = useState<TripCreationData>({
+}: UseTripFormProps) => {  const [formData, setFormData] = useState<TripCreationData>({
     title: '',
     summary: '',
     destination: '',
@@ -28,6 +27,7 @@ export const useTripForm = ({
     theme: '',
     characteristics: [],
     recommended_season: RecommendedSeason.Tutte,
+    insights: '',
     media: [],
     ...initialData,
   })
@@ -107,6 +107,7 @@ export const useTripForm = ({
       theme: '',
       characteristics: [],
       recommended_season: RecommendedSeason.Tutte,
+      insights: '',
       media: [],
       ...initialData,
     })

@@ -28,6 +28,7 @@ const tripUpdateSchema = z.object({
   theme: z.string().min(3, { message: 'Il tema deve contenere almeno 3 caratteri.' }).max(50).optional(),
   characteristics: z.array(z.string()).optional(),
   recommended_season: z.nativeEnum(RecommendedSeason).optional(),
+  insights: z.string().max(10000, { message: 'Il testo esteso non può superare 10000 caratteri.' }).optional(),
   media: z.array(mediaItemSchema).optional(),
 })
 

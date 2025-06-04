@@ -2,7 +2,7 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
-import { TripCreationData, RecommendedSeason } from '@/types/trip';
+import { RecommendedSeason } from '@/types/trip';
 import { auth } from '@/auth';
 import { ensureUserExists } from '@/lib/user-sync';
 import { UserRole } from '@/types/profile';
@@ -37,10 +37,10 @@ const tripCreationSchema = z.object({
   destination: z.string().min(3, { message: 'La destinazione deve contenere almeno 3 caratteri.' }).max(100),
   duration_days: z.number().int().positive({ message: 'La durata in giorni deve essere un numero positivo.' }),
   duration_nights: z.number().int().positive({ message: 'La durata in notti deve essere un numero positivo.' }),
-  tags: z.array(z.string().min(1)).min(1, { message: 'Devi specificare almeno un tag.' }),
-  theme: z.string().min(3, { message: 'Il tema deve contenere almeno 3 caratteri.' }).max(50),
+  tags: z.array(z.string().min(1)).min(1, { message: 'Devi specificare almeno un tag.' }),  theme: z.string().min(3, { message: 'Il tema deve contenere almeno 3 caratteri.' }).max(50),
   characteristics: z.array(z.string()).optional().default([]),
   recommended_season: z.nativeEnum(RecommendedSeason),
+  insights: z.string().max(10000, { message: 'Il testo esteso non può superare 10000 caratteri.' }).nullable().optional(),
   media: z.array(mediaItemSchema).optional().default([]),
 });
 
@@ -131,9 +131,8 @@ export async function POST(request: NextRequest) {
         error: "Dati non validi.", 
         details: parsed.error.flatten().fieldErrors 
       }, { status: 400 });
-    }
-
-    const tripData: TripCreationData = parsed.data;
+    }    
+    const tripData = {...parsed.data};
     const slug = slugify(tripData.title);
 
     console.log('Creazione nuovo viaggio:', JSON.stringify({ ...tripData, slug }, null, 2));
@@ -141,9 +140,7 @@ export async function POST(request: NextRequest) {
     try {
       // Ensure user exists in database (sync from JWT session)
       const user = await ensureUserExists(session);
-      console.log(`User ensured in database: ${user.id} - ${user.name}`);
-
-      // Crea un oggetto dati per Prisma senza il campo media
+      console.log(`User ensured in database: ${user.id} - ${user.name}`);      // Crea un oggetto dati per Prisma senza il campo media      
       const prismaData = {
         title: tripData.title,
         summary: tripData.summary,
@@ -154,6 +151,7 @@ export async function POST(request: NextRequest) {
         theme: tripData.theme,
         characteristics: tripData.characteristics,
         recommended_season: tripData.recommended_season,
+        insights: tripData.insights,
         slug,
         user_id: user.id,
       };

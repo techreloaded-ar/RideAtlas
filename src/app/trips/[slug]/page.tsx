@@ -39,7 +39,7 @@ export default async function TripDetailPage({ params }: { params: { slug: strin
     notFound();
   }
 
-  // Converti i media da JsonValue a MediaItem[]
+  // Convert media to MediaItem[]
   const tripMedia = (trip.media || []) as unknown as MediaItem[];
 
   // Controlla se l'utente è il creatore o un Sentinel
@@ -125,14 +125,21 @@ export default async function TripDetailPage({ params }: { params: { slug: strin
         
         {/* Characteristics */}
         {trip.characteristics.length > 0 && (
-          <div className="p-6">
+          <div className="p-6 border-b">
             <h2 className="text-xl font-semibold mb-3">Caratteristiche</h2>
-            <div className="flex flex-wrap gap-2">
-              {trip.characteristics.map((characteristic: string) => (
+            <div className="flex flex-wrap gap-2">              {trip.characteristics.map((characteristic: string) => (
                 <span key={characteristic} className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
                   {characteristic}
                 </span>
               ))}
+            </div>
+          </div>
+        )}        
+        {/* Insights - Approfondimenti */}
+        {trip.insights && (
+          <div className="p-6 border-b">
+            <h2 className="text-xl font-semibold mb-3">Approfondimenti</h2>
+            <div className="prose prose-slate max-w-none">              <p className="text-gray-700 whitespace-pre-wrap">{trip.insights}</p>
             </div>
           </div>
         )}

@@ -243,4 +243,96 @@ describe('Trip API con Media Integration', () => {
       expect(updateCall.data.media[0].caption).toBe('Didascalia modificata');
     });
   });
+  
+  describe('Creazione e aggiornamento con insights', () => {
+    const tripWithInsights = {
+      id: 'trip-456',
+      title: 'Viaggio con insights',
+      summary: 'Un viaggio con approfondimenti dettagliati',
+      destination: 'Toscana',
+      duration_days: 7,
+      duration_nights: 6,
+      tags: ['toscana', 'cultura', 'vino'],
+      theme: 'Culturale',
+      characteristics: ['Città storiche', 'Strade panoramiche'],
+      recommended_season: 'Primavera',
+      insights: 'La Toscana è una regione ricca di storia e cultura. Durante questo viaggio potrai visitare luoghi famosi come Firenze, Siena e San Gimignano, conoscere la loro storia e assaporare la cucina locale.',
+      media: [],
+      slug: 'viaggio-toscana-insights',
+      status: 'Bozza',
+      created_at: new Date(),
+      updated_at: new Date(),
+      user_id: 'user-123'
+    };    beforeEach(() => {
+      (prisma.trip.create as jest.Mock).mockResolvedValue(tripWithInsights);
+      (prisma.trip.update as jest.Mock).mockImplementation(({ data }) => {
+        return Promise.resolve({
+          ...tripWithInsights,
+          ...data
+        });
+      });
+    });
+
+    it('deve creare un viaggio con insights', async () => {
+      const requestBody = {
+        title: tripWithInsights.title,
+        summary: tripWithInsights.summary,
+        destination: tripWithInsights.destination,
+        duration_days: tripWithInsights.duration_days,
+        duration_nights: tripWithInsights.duration_nights,
+        tags: tripWithInsights.tags,
+        theme: tripWithInsights.theme,
+        characteristics: tripWithInsights.characteristics,
+        recommended_season: tripWithInsights.recommended_season,
+        insights: tripWithInsights.insights,
+        media: []
+      };
+
+      const request = createMockRequest(requestBody);
+      const response = await createTripHandler(request);
+      const body = await response.json();
+
+      expect(prisma.trip.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            insights: tripWithInsights.insights
+          })
+        })
+      );
+      expect(response.status).toBe(201);
+      expect(body).toEqual(expect.objectContaining({
+        id: expect.any(String),
+        insights: tripWithInsights.insights
+      }));
+    });
+
+    it('deve aggiornare gli insights di un viaggio', async () => {
+      const updatedInsights = 'Aggiornamento: La Toscana offre anche splendidi percorsi in moto attraverso le colline del Chianti, ideali per gli amanti delle due ruote.';
+      
+      const requestBody = {
+        insights: updatedInsights
+      };
+
+      (prisma.trip.findUnique as jest.Mock).mockResolvedValue({
+        ...tripWithInsights,
+        user_id: 'user-123'
+      });
+
+      const request = createMockRequest(requestBody);
+      const response = await updateTripHandler(request, mockParams('trip-456'));
+      const body = await response.json();
+
+      expect(prisma.trip.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            insights: updatedInsights
+          })
+        })
+      );
+      expect(response.status).toBe(200);
+      expect(body.trip).toEqual(expect.objectContaining({
+        insights: updatedInsights
+      }));
+    });
+  });
 });

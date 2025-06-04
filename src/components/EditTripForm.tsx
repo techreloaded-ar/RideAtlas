@@ -322,6 +322,21 @@ const EditTripForm = ({ tripId }: EditTripFormProps) => {
         onUpdateCaption={updateMediaCaption}
       />
 
+      <div>
+        <label htmlFor="insights" className="block text-sm font-medium text-gray-700">Approfondimenti</label>
+        <div className="text-xs text-gray-500 mb-1">Aggiungi fatti interessanti, luoghi da visitare e altre informazioni utili</div>
+        <textarea
+          name="insights"
+          id="insights"
+          rows={6}
+          value={formData.insights || ''}
+          onChange={handleChange}
+          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+          placeholder="Racconta curiosità, fatti storici, luoghi d'interesse e altre informazioni utili per i motociclisti..."
+        />
+        {fieldErrors?.insights && <p className="text-xs text-red-500 mt-1">{fieldErrors.insights.join(', ')}</p>}
+      </div>
+
       <div className="flex gap-4 pt-5">
         <button
           type="button"
