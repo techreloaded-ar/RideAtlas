@@ -96,6 +96,7 @@ model Trip {
   characteristics    String[]
   recommended_season RecommendedSeason
   media              Json[]            @default([])
+  gpxFile            Json?             // Aggiunto campo per il file GPX
   insights           String?           @db.Text
   slug               String            @unique
   status             TripStatus        @default(Bozza)

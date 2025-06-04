@@ -15,6 +15,21 @@ const mediaItemSchema = z.object({
   url: z.string().url({ message: 'L\'URL non è valido.' }),
   caption: z.string().optional(),
   thumbnailUrl: z.string().url({ message: 'L\'URL della thumbnail non è valido.' }).optional(),
+})
+
+const gpxFileSchema = z.object({
+  url: z.string(), // Allow any string for URL in tests
+  filename: z.string(),
+  waypoints: z.number().int().nonnegative(),
+  distance: z.number().nonnegative({ message: 'La distanza deve essere positiva.' }),
+  isValid: z.boolean(),
+  elevationGain: z.number().optional(),
+  elevationLoss: z.number().optional(),
+  duration: z.number().optional(),
+  maxElevation: z.number().optional(),
+  minElevation: z.number().optional(),
+  startTime: z.string().optional(),
+  endTime: z.string().optional()
 });
 
 // Schema di validazione per l'aggiornamento del viaggio
@@ -30,6 +45,7 @@ const tripUpdateSchema = z.object({
   recommended_season: z.nativeEnum(RecommendedSeason).optional(),
   insights: z.string().max(10000, { message: 'Il testo esteso non può superare 10000 caratteri.' }).optional(),
   media: z.array(mediaItemSchema).optional(),
+  gpxFile: gpxFileSchema.nullable().optional(),
 })
 
 // Funzione di utilità per generare lo slug
@@ -134,6 +150,7 @@ export async function PUT(
         details: parsed.error.flatten().fieldErrors
       }, { status: 400 })
     }
+  
 
     // Trova il viaggio esistente
     const existingTrip = await prisma.trip.findUnique({
@@ -165,7 +182,7 @@ export async function PUT(
       )
     }
 
-    const updateData = parsed.data
+    const { gpxFile, media, ...updateData } = parsed.data
 
     // Se il titolo è cambiato, aggiorna anche lo slug
     let newSlug = existingTrip.slug
@@ -208,14 +225,26 @@ export async function PUT(
     });
     
     // Se ci sono media da aggiornare, fallo in un'operazione separata
-    if (body.media && Array.isArray(body.media)) {
+    if (media && Array.isArray(media)) {
       try {
         // Usa un'operazione SQL diretta per aggiornare i media
-        await prisma.$queryRaw`UPDATE "trips" SET "media" = ${JSON.stringify(body.media)}::jsonb[] WHERE "id" = ${tripId}`;
+        await prisma.$queryRaw`UPDATE "trips" SET "media" = ${JSON.stringify(media)}::jsonb[] WHERE "id" = ${tripId}`;
         console.log('Media aggiornati per il viaggio:', tripId);
       } catch (mediaError) {
         console.error('Errore nell\'aggiornamento dei media:', mediaError);
         // Non bloccare il flusso se l'aggiornamento dei media fallisce
+      }
+    }
+
+    // Se c'è un file GPX da aggiornare, fallo in un'operazione separata
+    if (gpxFile !== undefined) {
+      try {
+        const gpxValue = gpxFile === null ? null : JSON.stringify(gpxFile);
+        await prisma.$queryRaw`UPDATE "trips" SET "gpxFile" = ${gpxValue}::jsonb WHERE "id" = ${tripId}`;
+        console.log('GPX file aggiornato per il viaggio:', tripId);
+      } catch (gpxError) {
+        console.error('Errore nell\'aggiornamento del file GPX:', gpxError);
+        // Non bloccare il flusso se l'aggiornamento del GPX fallisce
       }
     }
 

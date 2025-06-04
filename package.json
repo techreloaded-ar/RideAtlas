@@ -34,6 +34,7 @@
     "@vercel/blob": "^1.1.1",
     "bcryptjs": "^3.0.2",
     "crypto": "^1.0.1",
+    "fast-xml-parser": "^5.2.3",
     "lucide-react": "^0.511.0",
     "mapbox-gl": "^2.15.0",
     "next": "14.2.28",

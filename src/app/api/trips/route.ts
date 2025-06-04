@@ -31,17 +31,34 @@ const mediaItemSchema = z.object({
   thumbnailUrl: z.string().url({ message: 'L\'URL della thumbnail non è valido.' }).optional(),
 });
 
+const gpxFileSchema = z.object({
+  url: z.string().url({ message: "L'URL del file GPX non è valido" }),
+  filename: z.string(),
+  waypoints: z.number().int().positive(),
+  distance: z.number().positive(),
+  elevationGain: z.number().optional(),
+  elevationLoss: z.number().optional(),
+  duration: z.number().optional(),
+  maxElevation: z.number().optional(),
+  minElevation: z.number().optional(),
+  startTime: z.string().optional(),
+  endTime: z.string().optional(),
+  isValid: z.boolean()
+}).nullable().optional();
+
 const tripCreationSchema = z.object({
   title: z.string().min(3, { message: 'Il titolo deve contenere almeno 3 caratteri.' }).max(100),
   summary: z.string().min(10, { message: 'Il sommario deve contenere almeno 10 caratteri.' }).max(500),
   destination: z.string().min(3, { message: 'La destinazione deve contenere almeno 3 caratteri.' }).max(100),
   duration_days: z.number().int().positive({ message: 'La durata in giorni deve essere un numero positivo.' }),
   duration_nights: z.number().int().positive({ message: 'La durata in notti deve essere un numero positivo.' }),
-  tags: z.array(z.string().min(1)).min(1, { message: 'Devi specificare almeno un tag.' }),  theme: z.string().min(3, { message: 'Il tema deve contenere almeno 3 caratteri.' }).max(50),
+  tags: z.array(z.string().min(1)).min(1, { message: 'Devi specificare almeno un tag.' }),  
+  theme: z.string().min(3, { message: 'Il tema deve contenere almeno 3 caratteri.' }).max(50),
   characteristics: z.array(z.string()).optional().default([]),
   recommended_season: z.nativeEnum(RecommendedSeason),
   insights: z.string().max(10000, { message: 'Il testo esteso non può superare 10000 caratteri.' }).nullable().optional(),
   media: z.array(mediaItemSchema).optional().default([]),
+  gpxFile: gpxFileSchema,
 });
 
 // Implementazione GET per ottenere tutti i viaggi con filtri appropriati per i ruoli
@@ -131,7 +148,8 @@ export async function POST(request: NextRequest) {
         error: "Dati non validi.", 
         details: parsed.error.flatten().fieldErrors 
       }, { status: 400 });
-    }    
+    }
+    
     const tripData = {...parsed.data};
     const slug = slugify(tripData.title);
 
@@ -155,24 +173,38 @@ export async function POST(request: NextRequest) {
         slug,
         user_id: user.id,
       };
-      
-      // Crea il viaggio con i dati di base
+        // Crea il viaggio con i dati di base
       const newTrip = await prisma.trip.create({
         data: prismaData,
       });
+        // Aggiorna media e gpxFile in una seconda operazione per evitare conflitti
+      const updateData: {
+        media?: typeof body.media;
+        gpxFile?: typeof body.gpxFile;
+      } = {};
       
-      // Se ci sono media, aggiornali in una seconda operazione
+      // Aggiungi media se presenti
       if (body.media && Array.isArray(body.media)) {
+        updateData.media = body.media;
+      }
+      
+      // Aggiungi gpxFile solo se non è null
+      if (body.gpxFile) {
+        updateData.gpxFile = body.gpxFile;
+      }
+      
+      // Esegui update solo se ci sono dati da aggiornare
+      if (Object.keys(updateData).length > 0) {
         await prisma.trip.update({
           where: { id: newTrip.id },
-          data: { 
-            media: body.media
-          }
+          data: updateData
         });
         console.log('Viaggio creato con media:', newTrip.id);
       } else {
         console.log('Viaggio creato senza media:', newTrip.id);
       }
+
+      
       
       return NextResponse.json(newTrip, { status: 201 });
     } catch (error: unknown) {

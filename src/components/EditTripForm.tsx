@@ -7,6 +7,7 @@ import { RecommendedSeason, TripCreationData, Trip } from '@/types/trip';
 import { useTripForm } from '@/hooks/useTripForm';
 import { useToast } from '@/hooks/useToast';
 import MultimediaUpload from './MultimediaUpload';
+import GPXUpload from './GPXUpload';
 
 interface EditTripFormProps {
   tripId: string;
@@ -50,10 +51,10 @@ const EditTripForm = ({ tripId }: EditTripFormProps) => {
   // Fetch trip data on mount
   useEffect(() => {
     fetchTrip();
-  }, [fetchTrip]);
-  const {
+  }, [fetchTrip]);  const {
     formData,
     mediaItems,
+    gpxFile,
     tagInput,
     error,
     fieldErrors,
@@ -66,6 +67,8 @@ const EditTripForm = ({ tripId }: EditTripFormProps) => {
     addMedia,
     removeMedia,
     updateMediaCaption,
+    setGpxFile,
+    removeGpxFile,
     submitForm,
   } = useTripForm({
     mode: 'edit',
@@ -313,6 +316,14 @@ const EditTripForm = ({ tripId }: EditTripFormProps) => {
         </select>
         {fieldErrors?.recommended_season && <p className="text-xs text-red-500 mt-1">{fieldErrors.recommended_season.join(', ')}</p>}
       </div>
+
+      {/* GPX Upload Section */}
+      <GPXUpload
+        gpxFile={gpxFile}
+        onGpxUpload={setGpxFile}
+        onGpxRemove={removeGpxFile}
+        isUploading={isLoading}
+      />
 
       {/* Multimedia Upload Section */}
       <MultimediaUpload

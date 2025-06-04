@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { Calendar, MapPin, Tag, User, Clock, Navigation } from 'lucide-react';
 import { auth } from '@/auth';
 import { UserRole } from '@/types/profile';
-import { castToMediaItems } from '@/types/trip'; // Importa la funzione helper
+import { castToGpxFile, castToMediaItems } from '@/types/trip'; // Importa la funzione helper
 
 
 // Force dynamic rendering
@@ -95,9 +95,15 @@ export default async function PacchettiPage() {
       created_at: 'desc'
     }
   });
+
+  // Converte i media per ogni viaggio
+  const tripsWithProcessedGpx = trips.map(trip => ({
+    ...trip,
+    gpxFile: castToGpxFile(trip.gpxFile || [])
+  }));
   
   // Converte i media per ogni viaggio
-  const tripsWithProcessedMedia = trips.map(trip => ({
+  const tripsWithProcessedMedia = tripsWithProcessedGpx.map(trip => ({
     ...trip,
     media: castToMediaItems(trip.media || [])
   }));

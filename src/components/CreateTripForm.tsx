@@ -6,12 +6,14 @@ import { useRouter } from 'next/navigation';
 import { RecommendedSeason } from '@/types/trip';
 import { useTripForm } from '@/hooks/useTripForm';
 import MultimediaUpload from './MultimediaUpload';
+import GPXUpload from './GPXUpload';
 
 const CreateTripForm = () => {
   const router = useRouter();
-    const {
+  const {
     formData,
     mediaItems,
+    gpxFile,
     tagInput,
     error,
     fieldErrors,
@@ -24,6 +26,8 @@ const CreateTripForm = () => {
     addMedia,
     removeMedia,
     updateMediaCaption,
+    setGpxFile,
+    removeGpxFile,
     submitForm,
   } = useTripForm({
     mode: 'create',
@@ -211,6 +215,14 @@ const CreateTripForm = () => {
           <option value={RecommendedSeason.Tutte}>Tutte</option>
         </select>
         {fieldErrors?.recommended_season && <p className="text-xs text-red-500 mt-1">{fieldErrors.recommended_season.join(', ')}</p>}      </div>
+
+      {/* GPX Upload Section */}
+      <GPXUpload
+        gpxFile={gpxFile}
+        onGpxUpload={setGpxFile}
+        onGpxRemove={removeGpxFile}
+        isUploading={isLoading}
+      />
 
       {/* Multimedia Upload Section */}
       <MultimediaUpload
