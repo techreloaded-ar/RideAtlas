@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { UserRole, UserRoleLabels, UserRoleDescriptions } from '@/types/profile'
 import { useSession } from 'next-auth/react'
 import { useToast } from '@/hooks/useToast'
-import Image from 'next/image'
+import UserAvatar from '@/components/UserAvatar'
 
 interface User {
   id: string
@@ -360,22 +360,8 @@ export default function UserManagement() {
                     <tr key={user.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
-                          <div className="flex-shrink-0 h-10 w-10">
-                            {user.image ? (
-                              <Image
-                                className="h-10 w-10 rounded-full"
-                                src={user.image}
-                                alt=""
-                                width={40}
-                                height={40}
-                              />
-                            ) : (
-                              <div className="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
-                                <span className="text-sm font-medium text-gray-700">
-                                  {user.name?.charAt(0).toUpperCase() || user.email.charAt(0).toUpperCase()}
-                                </span>
-                              </div>
-                            )}
+                          <div className="flex-shrink-0">
+                            <UserAvatar user={user} size="lg" />
                           </div>
                           <div className="ml-4">
                             <div className="text-sm font-medium text-gray-900">

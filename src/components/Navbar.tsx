@@ -4,8 +4,8 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
-import Image from 'next/image';
 import { UserRole, UserPermissions } from '@/types/profile';
+import UserAvatar from '@/components/UserAvatar';
 
 export default function Navbar() {
   const { data: session, status } = useSession();
@@ -16,7 +16,9 @@ export default function Navbar() {
   // Assicuriamoci che il componente sia montato lato client
   useEffect(() => {
     setMounted(true);
-  }, []);const navigation = [
+  }, []);
+
+  const navigation = [
     { name: 'Home', href: '/' },
     { name: 'Pacchetti', href: '/trips' },
     { name: 'Trip Builder', href: '/trip-builder' },
@@ -84,15 +86,7 @@ export default function Navbar() {
                   </Link>
                 )}
                 <div className="ml-3 flex items-center space-x-3">
-                  {session.user?.image && (
-                    <Image
-                      src={session.user.image}
-                      alt={session.user.name || 'User'}
-                      width={32}
-                      height={32}
-                      className="rounded-full"
-                    />
-                  )}
+                  <UserAvatar user={session.user} size="md" />
                   <button
                     onClick={() => signOut()}
                     className="text-gray-500 hover:text-gray-700 px-3 py-2 text-sm font-medium"
@@ -189,15 +183,7 @@ export default function Navbar() {
             {mounted && status === 'authenticated' && session ? (
               <div className="flex items-center px-4">
                 <div className="flex-shrink-0">
-                  {session.user?.image && (
-                    <Image
-                      src={session.user.image}
-                      alt={session.user.name || 'User'}
-                      width={32}
-                      height={32}
-                      className="rounded-full"
-                    />
-                  )}
+                  <UserAvatar user={session.user} size="md" />
                 </div>
                 <div className="ml-3">
                   <Link
