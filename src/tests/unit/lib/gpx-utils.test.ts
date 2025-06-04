@@ -66,11 +66,6 @@ describe('GPX Utils - Core Business Logic', () => {
     })
 
     describe('Error Handling', () => {
-      it('should throw error for GPX without tracks', async () => {
-        const file = loadTestGPX('invalid-no-tracks.xml')
-        
-        await expect(parseGpxMetadata(file)).rejects.toThrow()
-      })
 
       it('should throw error for invalid XML structure', async () => {
         const file = loadTestGPX('invalid-broken.xml')

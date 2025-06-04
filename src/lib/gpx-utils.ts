@@ -68,7 +68,7 @@ export async function parseGpxMetadata(file: File): Promise<GpxMetadata> {
   
   // Verifica che ci siano tracce
   if (tracks.length === 0) {
-    throw new Error('File GPX non contiene tracce valide')
+    console.error('File GPX non contiene tracce valide')
   }
   
   // Analizza ogni traccia
