@@ -7,39 +7,16 @@ import { useSession, signOut } from 'next-auth/react';
 import Image from 'next/image';
 import { UserRole, UserPermissions } from '@/types/profile';
 
-// Previene la duplicazione della navbar
-let navbarMounted = false;
-
 export default function Navbar() {
   const { data: session, status } = useSession();
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const [isDuplicate, setIsDuplicate] = useState(false);
 
   // Assicuriamoci che il componente sia montato lato client
   useEffect(() => {
     setMounted(true);
-    
-    // Verifica se la navbar è già stata montata
-    if (navbarMounted) {
-      setIsDuplicate(true);
-    } else {
-      navbarMounted = true;
-    }
-    
-    // Pulizia quando il componente viene smontato
-    return () => {
-      if (!isDuplicate) {
-        navbarMounted = false;
-      }
-    };
-  }, [isDuplicate]);
-
-  // Se è un duplicato, non renderizzare nulla
-  if (isDuplicate) {
-    return null;
-  }  const navigation = [
+  }, []);const navigation = [
     { name: 'Home', href: '/' },
     { name: 'Pacchetti', href: '/trips' },
     { name: 'Trip Builder', href: '/trip-builder' },
