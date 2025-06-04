@@ -1,12 +1,13 @@
 // src/app/trips/[slug]/page.tsx
 import { prisma } from '@/lib/prisma';
 import { notFound } from 'next/navigation';
-import { Calendar, MapPin, Tag, User, Clock, Award } from 'lucide-react';
+import { Calendar, MapPin, Tag, User, Clock, Award, Route, TrendingUp } from 'lucide-react';
 import { auth } from '@/auth';
 import Link from 'next/link';
 import { UserRole } from '@/types/profile';
-import { MediaItem } from '@/types/trip';
+import { MediaItem, GpxFile } from '@/types/trip';
 import MediaGallery from '@/components/MediaGallery';
+import GPXDownloadButton from '@/components/GPXDownloadButton';
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic';
@@ -41,6 +42,9 @@ export default async function TripDetailPage({ params }: { params: { slug: strin
 
   // Convert media to MediaItem[]
   const tripMedia = (trip.media || []) as unknown as MediaItem[];
+
+  // Cast GPX file safely
+  const gpxFile = trip.gpxFile as GpxFile | null;
 
   // Controlla se l'utente è il creatore o un Sentinel
   const isOwner = session?.user?.id === trip.user_id;
@@ -104,6 +108,98 @@ export default async function TripDetailPage({ params }: { params: { slug: strin
           </div>
         )}
         
+        {/* GPX Section */}
+        {gpxFile && gpxFile.isValid && (
+          <div className="p-6 border-b">            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-semibold flex items-center">
+                <Route className="w-5 h-5 mr-2 text-blue-600" />
+                Traccia GPX
+              </h2>
+              <GPXDownloadButton 
+                tripId={trip.id} 
+                tripTitle={trip.title}
+              />
+            </div>
+            
+            <div className="bg-blue-50 rounded-lg p-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="flex items-center">
+                  <Route className="w-4 h-4 text-blue-600 mr-2" />
+                  <div>
+                    <div className="text-sm font-medium text-gray-700">Distanza</div>
+                    <div className="text-lg font-semibold text-blue-800">{gpxFile.distance} km</div>
+                  </div>
+                </div>
+                
+                <div className="flex items-center">
+                  <MapPin className="w-4 h-4 text-blue-600 mr-2" />
+                  <div>
+                    <div className="text-sm font-medium text-gray-700">Waypoints</div>
+                    <div className="text-lg font-semibold text-blue-800">{gpxFile.waypoints}</div>
+                  </div>
+                </div>
+                
+                {gpxFile.elevationGain && (
+                  <div className="flex items-center">
+                    <TrendingUp className="w-4 h-4 text-blue-600 mr-2" />
+                    <div>
+                      <div className="text-sm font-medium text-gray-700">Dislivello positivo</div>
+                      <div className="text-lg font-semibold text-blue-800">+{gpxFile.elevationGain} m</div>
+                    </div>
+                  </div>
+                )}
+              </div>
+              
+              {(gpxFile.duration || gpxFile.elevationLoss || gpxFile.maxElevation) && (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 pt-4 border-t border-blue-200">
+                  {gpxFile.duration && (
+                    <div className="flex items-center">
+                      <Clock className="w-4 h-4 text-blue-600 mr-2" />
+                      <div>
+                        <div className="text-sm font-medium text-gray-700">Durata stimata</div>
+                        <div className="text-lg font-semibold text-blue-800">
+                          {Math.floor(gpxFile.duration / 3600)}h {Math.floor((gpxFile.duration % 3600) / 60)}m
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {gpxFile.elevationLoss && (
+                    <div className="flex items-center">
+                      <TrendingUp className="w-4 h-4 text-blue-600 mr-2 transform rotate-180" />
+                      <div>
+                        <div className="text-sm font-medium text-gray-700">Dislivello negativo</div>
+                        <div className="text-lg font-semibold text-blue-800">-{gpxFile.elevationLoss} m</div>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {gpxFile.maxElevation && (
+                    <div className="flex items-center">
+                      <Award className="w-4 h-4 text-blue-600 mr-2" />
+                      <div>
+                        <div className="text-sm font-medium text-gray-700">Altitudine max</div>
+                        <div className="text-lg font-semibold text-blue-800">{gpxFile.maxElevation} m</div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+              
+              <div className="mt-4 pt-4 border-t border-blue-200">
+                <div className="text-xs text-gray-600">
+                  <span className="font-medium">File:</span> {gpxFile.filename}
+                </div>
+                {gpxFile.startTime && gpxFile.endTime && (
+                  <div className="text-xs text-gray-600 mt-1">
+                    <span className="font-medium">Registrato:</span> {new Date(gpxFile.startTime).toLocaleDateString('it-IT')} - {new Date(gpxFile.endTime).toLocaleDateString('it-IT')}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Summary */}
         <div className="p-6 border-b">
           <h2 className="text-xl font-semibold mb-3">Sommario</h2>
