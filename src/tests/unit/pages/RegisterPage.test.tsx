@@ -40,7 +40,7 @@ describe('RegisterPage', () => {
     
     // Aspetta che appaia il messaggio di errore
     await waitFor(() => {
-      expect(screen.getByText(/la password deve essere di almeno 8 caratteri/i)).toBeInTheDocument();
+      expect(screen.getByText(/la password deve contenere almeno 8 caratteri/i)).toBeInTheDocument();
     }, { timeout: 3000 });
   });
 
@@ -56,8 +56,8 @@ describe('RegisterPage', () => {
     
     await user.type(nameInput, 'Test User');
     await user.type(emailInput, 'test@example.com');
-    await user.type(passwordInput, 'password123');
-    await user.type(confirmPasswordInput, 'password456');
+    await user.type(passwordInput, 'ValidPass123');
+    await user.type(confirmPasswordInput, 'DifferentPass456');
     
     await user.click(submitButton);
     
@@ -94,13 +94,13 @@ describe('RegisterPage', () => {
     
     await user.type(nameInput, 'Test User');
     await user.type(emailInput, 'test@example.com');
-    await user.type(passwordInput, 'password123');
-    await user.type(confirmPasswordInput, 'password123');
+    await user.type(passwordInput, 'ValidPass123');
+    await user.type(confirmPasswordInput, 'ValidPass123');
     
     await user.click(submitButton);
     
     await waitFor(() => {
-      expect(screen.getByText(/registrazione completata/i)).toBeInTheDocument();
+      expect(screen.getByText(/registrazione completata!/i)).toBeInTheDocument();
     });
   });
 });

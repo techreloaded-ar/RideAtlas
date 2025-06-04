@@ -45,15 +45,15 @@ describe('Authentication Flow Integration', () => {
       // Compila il form di registrazione
       await user.type(screen.getByLabelText(/nome completo/i), 'Test User');
       await user.type(screen.getByLabelText(/email/i), 'test@example.com');
-      await user.type(screen.getByLabelText(/^password$/i), 'password123');
-      await user.type(screen.getByLabelText(/conferma password/i), 'password123');
+      await user.type(screen.getByLabelText(/^password$/i), 'ValidPass123');
+      await user.type(screen.getByLabelText(/conferma password/i), 'ValidPass123');
       
       // Submit del form
       await user.click(screen.getByRole('button', { name: /crea account/i }));
       
       // Verifica il messaggio di successo
       await waitFor(() => {
-        expect(screen.getByText(/registrazione completata/i)).toBeInTheDocument();
+        expect(screen.getByText(/registrazione completata!/i)).toBeInTheDocument();
       });
 
       // Verifica che sia stato fatto il fetch corretto
@@ -65,7 +65,7 @@ describe('Authentication Flow Integration', () => {
         body: JSON.stringify({
           name: 'Test User',
           email: 'test@example.com',
-          password: 'password123',
+          password: 'ValidPass123',
         }),
       });
     });
@@ -83,8 +83,8 @@ describe('Authentication Flow Integration', () => {
       // Compila il form
       await user.type(screen.getByLabelText(/nome completo/i), 'Test User');
       await user.type(screen.getByLabelText(/email/i), 'existing@example.com');
-      await user.type(screen.getByLabelText(/^password$/i), 'password123');
-      await user.type(screen.getByLabelText(/conferma password/i), 'password123');
+      await user.type(screen.getByLabelText(/^password$/i), 'ValidPass123');
+      await user.type(screen.getByLabelText(/conferma password/i), 'ValidPass123');
       
       // Submit
       await user.click(screen.getByRole('button', { name: /crea account/i }));
@@ -122,13 +122,13 @@ describe('Authentication Flow Integration', () => {
       // Completa registrazione
       await user.type(screen.getByLabelText(/nome completo/i), 'Test User');
       await user.type(screen.getByLabelText(/email/i), 'test@example.com');
-      await user.type(screen.getByLabelText(/^password$/i), 'password123');
-      await user.type(screen.getByLabelText(/conferma password/i), 'password123');
+      await user.type(screen.getByLabelText(/^password$/i), 'ValidPass123');
+      await user.type(screen.getByLabelText(/conferma password/i), 'ValidPass123');
       await user.click(screen.getByRole('button', { name: /crea account/i }));
       
       // Aspetta la pagina di successo
       await waitFor(() => {
-        expect(screen.getByText(/registrazione completata/i)).toBeInTheDocument();
+        expect(screen.getByText(/registrazione completata!/i)).toBeInTheDocument();
       });
       
       // Clicca il bottone per inviare nuovamente l'email
@@ -159,13 +159,13 @@ describe('Authentication Flow Integration', () => {
       
       // Riempi il form di login
       await user.type(screen.getByLabelText(/email/i), 'unverified@example.com');
-      await user.type(screen.getByLabelText(/password/i), 'password123');
+      await user.type(screen.getByLabelText(/password/i), 'ValidPass123');
       await user.click(screen.getByRole('button', { name: /^accedi$/i }));
       
       // Verifica che signIn sia stato chiamato
       expect(mockSignIn).toHaveBeenCalledWith('credentials', {
         email: 'unverified@example.com',
-        password: 'password123',
+        password: 'ValidPass123',
         redirect: false
       });
       

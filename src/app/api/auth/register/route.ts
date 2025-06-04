@@ -5,12 +5,13 @@ import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
 import { sendVerificationEmail } from '@/lib/email';
 import { randomBytes } from 'crypto';
+import { passwordSchema } from '@/lib/password-validation';
 
 // Schema di validazione per la registrazione
 const registerSchema = z.object({
   name: z.string().min(2, 'Il nome deve contenere almeno 2 caratteri'),
   email: z.string().email('Inserisci un indirizzo email valido'),
-  password: z.string().min(8, 'La password deve contenere almeno 8 caratteri'),
+  password: passwordSchema,
 });
 
 export async function POST(request: NextRequest) {

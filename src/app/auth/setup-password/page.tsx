@@ -4,6 +4,7 @@ import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { CheckCircle, XCircle, Loader2, Eye, EyeOff } from 'lucide-react';
+import { validatePasswordComplexity } from '@/lib/password-validation';
 
 function SetupPasswordContent() {
   const [status, setStatus] = useState<'loading' | 'form' | 'success' | 'error'>('loading');
@@ -43,23 +44,6 @@ function SetupPasswordContent() {
       });
   }, [token]);
 
-  const validatePassword = (pwd: string): string[] => {
-    const errors: string[] = [];
-    if (pwd.length < 8) {
-      errors.push('La password deve contenere almeno 8 caratteri');
-    }
-    if (!/[A-Z]/.test(pwd)) {
-      errors.push('La password deve contenere almeno una lettera maiuscola');
-    }
-    if (!/[a-z]/.test(pwd)) {
-      errors.push('La password deve contenere almeno una lettera minuscola');
-    }
-    if (!/[0-9]/.test(pwd)) {
-      errors.push('La password deve contenere almeno un numero');
-    }
-    return errors;
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -67,7 +51,7 @@ function SetupPasswordContent() {
     setValidationErrors([]);
     
     // Validazione password
-    const passwordErrors = validatePassword(password);
+    const passwordErrors = validatePasswordComplexity(password);
     if (passwordErrors.length > 0) {
       setValidationErrors(passwordErrors);
       return;

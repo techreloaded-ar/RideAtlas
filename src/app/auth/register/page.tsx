@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { signIn } from 'next-auth/react';
 import Link from 'next/link';
+import { validatePasswordComplexity, getPasswordRequirements } from '@/lib/password-validation';
+import { CheckCircle, XCircle } from 'lucide-react';
 
 export default function Register() {
   const [formData, setFormData] = useState({
@@ -15,21 +17,37 @@ export default function Register() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [userEmail, setUserEmail] = useState('');
+  const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
+
+  const handlePasswordChange = (password: string) => {
+    setFormData(prev => ({ ...prev, password }));
+    
+    // Validate password in real-time if user has started typing
+    if (password.length > 0) {
+      const errors = validatePasswordComplexity(password);
+      setPasswordErrors(errors);
+    } else {
+      setPasswordErrors([]);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
+    setPasswordErrors([]);
 
-    // Basic validation
-    if (formData.password !== formData.confirmPassword) {
-      setError('Le password non corrispondono');
+    // Validate password complexity
+    const passwordValidationErrors = validatePasswordComplexity(formData.password);
+    if (passwordValidationErrors.length > 0) {
+      setPasswordErrors(passwordValidationErrors);
       setIsLoading(false);
       return;
     }
 
-    if (formData.password.length < 8) {
-      setError('La password deve essere di almeno 8 caratteri');
+    // Check if passwords match
+    if (formData.password !== formData.confirmPassword) {
+      setError('Le password non corrispondono');
       setIsLoading(false);
       return;
     }
@@ -162,6 +180,18 @@ export default function Register() {
           </div>
         )}
 
+        {passwordErrors.length > 0 && (
+          <div className="rounded-md bg-red-50 p-4">
+            <div className="text-sm text-red-700">
+              <ul className="list-disc list-inside space-y-1">
+                {passwordErrors.map((error, index) => (
+                  <li key={index}>{error}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        )}
+
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div>
@@ -206,10 +236,43 @@ export default function Register() {
                 type="password"
                 required
                 value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                onChange={(e) => handlePasswordChange(e.target.value)}
                 className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 focus:z-10 sm:text-sm"
                 placeholder="Almeno 8 caratteri"
               />
+              
+              {/* Password requirements */}
+              {formData.password.length > 0 && (
+                <div className="mt-2 space-y-1">
+                  <p className="text-xs text-gray-600 mb-1">Requisiti password:</p>
+                  {getPasswordRequirements().map((requirement, index) => {
+                    // Check specific requirements
+                    let requirementMet = false;
+                    if (requirement.includes('8 caratteri')) {
+                      requirementMet = formData.password.length >= 8;
+                    } else if (requirement.includes('maiuscola')) {
+                      requirementMet = /[A-Z]/.test(formData.password);
+                    } else if (requirement.includes('minuscola')) {
+                      requirementMet = /[a-z]/.test(formData.password);
+                    } else if (requirement.includes('numero')) {
+                      requirementMet = /[0-9]/.test(formData.password);
+                    }
+                    
+                    return (
+                      <div key={index} className="flex items-center text-xs">
+                        {requirementMet ? (
+                          <CheckCircle className="w-3 h-3 text-green-500 mr-1" />
+                        ) : (
+                          <XCircle className="w-3 h-3 text-red-500 mr-1" />
+                        )}
+                        <span className={requirementMet ? "text-green-600" : "text-red-600"}>
+                          {requirement}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
 
             <div>

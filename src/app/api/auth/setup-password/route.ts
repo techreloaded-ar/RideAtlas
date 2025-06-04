@@ -2,14 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
 import { z } from 'zod';
+import { passwordSchema } from '@/lib/password-validation';
 
 // Schema di validazione per la richiesta
 const setupPasswordSchema = z.object({
   token: z.string().min(1, 'Token richiesto'),
-  password: z.string().min(8, 'La password deve contenere almeno 8 caratteri')
-    .regex(/[A-Z]/, 'La password deve contenere almeno una lettera maiuscola')
-    .regex(/[a-z]/, 'La password deve contenere almeno una lettera minuscola')
-    .regex(/[0-9]/, 'La password deve contenere almeno un numero'),
+  password: passwordSchema,
 });
 
 export async function POST(request: NextRequest) {
