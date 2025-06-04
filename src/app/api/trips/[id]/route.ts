@@ -200,19 +200,31 @@ export async function PUT(
           error: 'Un viaggio con questo titolo esiste già. Scegli un titolo diverso.'
         }, { status: 409 })
       }
-    }
-
-    // TODO: Salva i dati originali per l'audit log quando implementeremo la tabella trip_changes
+    }    // TODO: Salva i dati originali per l'audit log quando implementeremo la tabella trip_changes
     // const originalData = await prisma.trip.findUnique({
     //   where: { id: tripId }
-    // })    // Aggiorna il viaggio con i dati di base (senza media)
+    // })    // Prepara i dati per l'aggiornamento di base
+    const baseUpdateData = {
+      ...updateData,
+      ...(newSlug !== existingTrip.slug && { slug: newSlug }),
+      updated_at: new Date()
+    }
+
+    // Aggiungi i campi JSON condizionalmente con il casting corretto
+    const updatePayload: Record<string, unknown> = baseUpdateData
+    
+    if (media !== undefined) {
+      updatePayload.media = media
+    }
+    
+    if (gpxFile !== undefined) {
+      updatePayload.gpxFile = gpxFile
+    }
+
+    // Aggiorna il viaggio con tutti i dati in un'unica chiamata
     const updatedTrip = await prisma.trip.update({
       where: { id: tripId },
-      data: {
-        ...updateData,
-        ...(newSlug !== existingTrip.slug && { slug: newSlug }),
-        updated_at: new Date()
-      },
+      data: updatePayload,
       include: {
         user: {
           select: {
@@ -223,30 +235,6 @@ export async function PUT(
         }
       }
     });
-    
-    // Se ci sono media da aggiornare, fallo in un'operazione separata
-    if (media && Array.isArray(media)) {
-      try {
-        // Usa un'operazione SQL diretta per aggiornare i media
-        await prisma.$queryRaw`UPDATE "trips" SET "media" = ${JSON.stringify(media)}::jsonb[] WHERE "id" = ${tripId}`;
-        console.log('Media aggiornati per il viaggio:', tripId);
-      } catch (mediaError) {
-        console.error('Errore nell\'aggiornamento dei media:', mediaError);
-        // Non bloccare il flusso se l'aggiornamento dei media fallisce
-      }
-    }
-
-    // Se c'è un file GPX da aggiornare, fallo in un'operazione separata
-    if (gpxFile !== undefined) {
-      try {
-        const gpxValue = gpxFile === null ? null : JSON.stringify(gpxFile);
-        await prisma.$queryRaw`UPDATE "trips" SET "gpxFile" = ${gpxValue}::jsonb WHERE "id" = ${tripId}`;
-        console.log('GPX file aggiornato per il viaggio:', tripId);
-      } catch (gpxError) {
-        console.error('Errore nell\'aggiornamento del file GPX:', gpxError);
-        // Non bloccare il flusso se l'aggiornamento del GPX fallisce
-      }
-    }
 
     // TODO: Implementare audit log qui
     // await createTripAuditLog(tripId, session.user.id, originalData, updatedTrip)

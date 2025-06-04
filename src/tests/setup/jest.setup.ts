@@ -6,6 +6,33 @@ import 'whatwg-fetch';
 global.TextEncoder = TextEncoder;
 global.TextDecoder = TextDecoder as typeof globalThis.TextDecoder;
 
+// Mock File API per Node.js test environment
+class MockFile extends Blob {
+  name: string;
+  lastModified: number;
+  private content: string;
+
+  constructor(fileBits: BlobPart[], fileName: string, options?: FilePropertyBag) {
+    super(fileBits, options);
+    this.name = fileName;
+    this.lastModified = options?.lastModified || Date.now();
+      // Store the content as string for easy access
+    if (fileBits.length > 0 && typeof fileBits[0] === 'string') {
+      this.content = fileBits[0];
+    } else if (fileBits.length > 0) {
+      this.content = String(fileBits[0]);
+    } else {
+      this.content = '';
+    }
+  }
+  async text(): Promise<string> {
+    return this.content;
+  }
+}
+
+// Make File available globally in test environment
+global.File = MockFile as any;
+
 // Mock setImmediate per nodemailer
 global.setImmediate = global.setImmediate || ((fn: (...args: unknown[]) => void, ...args: unknown[]) => setTimeout(fn, 0, ...args));
 

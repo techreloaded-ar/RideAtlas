@@ -1,0 +1,38 @@
+{
+  "validBasic": {
+    "filename": "valid-basic.xml",
+    "expectedDistance": 0.41,
+    "expectedWaypoints": 4,
+    "expectedElevationGain": 25,
+    "expectedElevationLoss": 5,
+    "expectedDuration": 900,
+    "expectedMaxElevation": 120,
+    "expectedMinElevation": 100,
+    "expectedStartTime": "2024-01-01T10:00:00Z",
+    "expectedEndTime": "2024-01-01T10:15:00Z"
+  },
+  "validComplex": {
+    "filename": "valid-complex.xml",
+    "expectedDistance": 6.77,
+    "expectedWaypoints": 8,
+    "expectedElevationGain": 250,
+    "expectedElevationLoss": 100,
+    "expectedDuration": 12600,
+    "expectedMaxElevation": 950,
+    "expectedMinElevation": 500,
+    "expectedStartTime": "2024-01-01T08:00:00Z",
+    "expectedEndTime": "2024-01-01T11:30:00Z"
+  },
+  "edgeCases": {
+    "filename": "edge-cases.xml",
+    "expectedDistance": 0.41,
+    "expectedWaypoints": 4,
+    "expectedValidPoints": 2,
+    "expectedElevationGain": 20
+  },
+  "knownCoordinates": {
+    "point1": { "lat": 45.0000, "lon": 7.0000 },
+    "point2": { "lat": 45.0010, "lon": 7.0010 },
+    "expectedDistance": 0.14
+  }
+}
