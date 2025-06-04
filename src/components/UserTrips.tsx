@@ -195,16 +195,14 @@ export default function UserTrips() {
                     <Eye className="w-4 h-4" />
                   </Link>
                   
-                  {/* Modifica solo per viaggi in bozza */}
-                  {trip.status === 'Bozza' && (
-                    <Link
-                      href={`/edit-trip/${trip.id}`}
-                      className="p-2 text-gray-400 hover:text-orange-600 transition-colors"
-                      title="Modifica viaggio"
-                    >
-                      <Edit className="w-4 h-4" />
-                    </Link>
-                  )}
+                  {/* Modifica per tutti i viaggi */}
+                  <Link
+                    href={`/edit-trip/${trip.id}`}
+                    className="p-2 text-gray-400 hover:text-orange-600 transition-colors"
+                    title="Modifica viaggio"
+                  >
+                    <Edit className="w-4 h-4" />
+                  </Link>
 
                   {/* Pubblica solo per viaggi in Bozza */}
                   {trip.status === 'Bozza' && (

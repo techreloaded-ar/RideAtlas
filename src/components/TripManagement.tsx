@@ -332,16 +332,14 @@ export default function TripManagement() {
                             <Eye className="w-4 h-4" />
                           </a>
                           
-                          {/* Edit button - only for draft trips */}
-                          {trip.status === 'Bozza' && (
-                            <a
-                              href={`/edit-trip/${trip.id}`}
-                              className="text-orange-600 hover:text-orange-900 p-1 rounded"
-                              title="Modifica viaggio"
-                            >
-                              <Edit className="w-4 h-4" />
-                            </a>
-                          )}
+                          {/* Edit button - for all trips */}
+                          <a
+                            href={`/edit-trip/${trip.id}`}
+                            className="text-orange-600 hover:text-orange-900 p-1 rounded"
+                            title="Modifica viaggio"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </a>
                           
                           {/* Approve button - only for draft trips */}
                           {trip.status === 'Bozza' && (
