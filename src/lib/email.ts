@@ -155,3 +155,117 @@ export async function sendVerificationEmail(email: string, token: string, isPass
     return { success: false, error: errorMessage };
   }
 }
+
+export async function sendRoleChangeNotificationEmail(
+  email: string, 
+  userName: string, 
+  newRole: string, 
+  changedBy: string
+) {
+  const transporter = createTransporter();
+  
+  if (!transporter) {
+    console.error('⚠️  Configurazione email non completa. Email di notifica ruolo non inviata.');
+    console.log('📧 Email di cambio ruolo simulata per:', email);
+    console.log('🔄 Nuovo ruolo:', newRole);
+    console.log('👨‍💼 Cambiato da:', changedBy);
+    
+    // In sviluppo, simula l'invio riuscito
+    if (process.env.NODE_ENV === 'development') {
+      return { success: true, simulated: true };
+    }
+    
+    return { success: false, error: 'Configurazione email mancante' };
+  }
+
+  // Converti il ruolo in italiano per l'email
+  const roleTranslations: Record<string, string> = {
+    'User': 'Utente',
+    'Rider': 'Rider',
+    'Sentinel': 'Sentinel'
+  };
+
+  const roleInItalian = roleTranslations[newRole] || newRole;
+  
+  const mailOptions = {
+    from: process.env.SMTP_FROM || 'noreply@rideatlas.it',
+    to: email,
+    subject: 'Aggiornamento ruolo account - RideAtlas',
+    html: `
+      <div style="max-width: 600px; margin: 0 auto; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 20px; text-align: center; border-radius: 12px 12px 0 0;">
+          <h1 style="color: white; margin: 0; font-size: 32px; font-weight: bold;">RideAtlas</h1>
+          <p style="color: rgba(255, 255, 255, 0.9); margin: 10px 0 0 0; font-size: 16px;">Il viaggio lo progettiamo insieme, tu guidi l'avventura</p>
+        </div>
+        
+        <div style="background: white; padding: 40px 30px; border-radius: 0 0 12px 12px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);">
+          <h2 style="color: #333; margin: 0 0 20px 0; font-size: 24px;">Aggiornamento Ruolo Account</h2>
+          
+          <p style="color: #666; line-height: 1.6; margin-bottom: 20px; font-size: 16px;">
+            Ciao ${userName || 'Utente'},
+          </p>
+          
+          <p style="color: #666; line-height: 1.6; margin-bottom: 30px; font-size: 16px;">
+            Ti informiamo che un amministratore (<strong>${changedBy}</strong>) ha aggiornato il tuo ruolo su RideAtlas.
+          </p>
+          
+          <div style="background: #f8f9ff; border-left: 4px solid #667eea; padding: 20px; margin: 30px 0; border-radius: 0 8px 8px 0;">
+            <p style="margin: 0; color: #333; font-size: 16px;">
+              <strong>Il tuo nuovo ruolo:</strong> <span style="color: #667eea; font-weight: bold;">${roleInItalian}</span>
+            </p>
+          </div>
+          
+          <p style="color: #666; line-height: 1.6; margin-bottom: 30px; font-size: 16px;">
+            Questo cambiamento potrebbe influenzare le tue autorizzazioni e l'accesso a determinate funzioni della piattaforma. Accedi al tuo account per vedere i nuovi privilegi disponibili.
+          </p>
+          
+          <div style="text-align: center; margin: 40px 0;">
+            <a href="${process.env.NEXTAUTH_URL}/dashboard" 
+               style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 16px 32px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px; display: inline-block; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);">
+              Accedi al Dashboard
+            </a>
+          </div>
+          
+          <p style="color: #999; font-size: 14px; line-height: 1.5; margin-top: 30px;">
+            Se hai domande su questo cambiamento, contatta il supporto o l'amministratore che ha effettuato la modifica.
+          </p>
+          
+          <div style="border-top: 1px solid #eee; margin-top: 30px; padding-top: 20px; text-align: center;">
+            <p style="color: #999; font-size: 12px; margin: 0;">
+              © 2024 RideAtlas. Tutti i diritti riservati.
+            </p>
+          </div>
+        </div>
+      </div>
+    `,
+    text: `
+      Aggiornamento Ruolo Account - RideAtlas
+      
+      Ciao ${userName || 'Utente'},
+      
+      Ti informiamo che un amministratore (${changedBy}) ha aggiornato il tuo ruolo su RideAtlas.
+      
+      Il tuo nuovo ruolo: ${roleInItalian}
+      
+      Questo cambiamento potrebbe influenzare le tue autorizzazioni e l'accesso a determinate funzioni della piattaforma.
+      
+      Accedi al tuo account: ${process.env.NEXTAUTH_URL}/dashboard
+      
+      Se hai domande su questo cambiamento, contatta il supporto o l'amministratore che ha effettuato la modifica.
+      
+      © 2024 RideAtlas. Tutti i diritti riservati.
+    `,
+  };
+
+  try {
+    console.log('📧 Tentativo di invio email di notifica ruolo a:', email);
+    
+    await transporter.sendMail(mailOptions);
+    console.log('✅ Email di notifica ruolo inviata con successo a:', email);
+    return { success: true };
+  } catch (error: unknown) {
+    console.error('❌ Errore invio email di notifica ruolo:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Errore sconosciuto';
+    return { success: false, error: errorMessage };
+  }
+}

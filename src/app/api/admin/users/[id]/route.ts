@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { auth } from '@/auth'
 import { UserRole } from '@/types/profile'
 import { z } from 'zod'
+import { sendRoleChangeNotificationEmail } from '@/lib/email'
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic'
@@ -87,6 +88,22 @@ export async function PATCH(
         }
       }
     })
+
+    // Invia email di notifica se il ruolo è effettivamente cambiato
+    if (existingUser.role !== role && updatedUser.email) {
+      try {
+        await sendRoleChangeNotificationEmail(
+          updatedUser.email,
+          updatedUser.name || 'Utente',
+          role,
+          session.user.name || 'Amministratore'
+        );
+        console.log(`✅ Email di notifica ruolo inviata a ${updatedUser.email}`);
+      } catch (emailError) {
+        console.error('❌ Errore nell\'invio email di notifica ruolo:', emailError);
+        // Non blocchiamo l'operazione anche se l'email fallisce
+      }
+    }
 
     return NextResponse.json({
       message: 'Ruolo utente aggiornato con successo',
