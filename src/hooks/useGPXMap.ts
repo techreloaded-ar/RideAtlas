@@ -1,6 +1,6 @@
 // src/hooks/useGPXMap.ts
 import { useState, useCallback } from 'react'
-import { parseGPX, ParsedGPXData } from '@/lib/gpx-utils'
+import { parseGPXContent, GPXParseResult } from '@/lib/gpx-utils'
 
 interface GPXPoint {
   lat: number
@@ -15,8 +15,14 @@ interface GPXWaypointForMap {
   elevation?: number
 }
 
+interface GPXRouteForMap {
+  name?: string
+  points: GPXPoint[]
+}
+
 interface UseGPXMapReturn {
   gpxData: GPXPoint[]
+  routes: GPXRouteForMap[]
   waypoints: GPXWaypointForMap[]
   isLoading: boolean
   error: string | null
@@ -26,6 +32,7 @@ interface UseGPXMapReturn {
 
 export function useGPXMap(): UseGPXMapReturn {
   const [gpxData, setGpxData] = useState<GPXPoint[]>([])
+  const [routes, setRoutes] = useState<GPXRouteForMap[]>([])
   const [waypoints, setWaypoints] = useState<GPXWaypointForMap[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -45,8 +52,8 @@ export function useGPXMap(): UseGPXMapReturn {
       
       const gpxContent = await response.text()
       
-      // Parsa il contenuto GPX
-      const parsedData: ParsedGPXData = parseGPX(gpxContent)
+      // Parsa il contenuto GPX con la nuova funzione che supporta le route
+      const parsedData: GPXParseResult = parseGPXContent(gpxContent, 'preview.gpx')
       
       if (!parsedData || !parsedData.tracks || parsedData.tracks.length === 0) {
         throw new Error('Il file GPX non contiene tracciati validi')
@@ -56,13 +63,11 @@ export function useGPXMap(): UseGPXMapReturn {
       const allPoints: GPXPoint[] = []
       
       parsedData.tracks.forEach((track) => {
-        track.segments.forEach((segment) => {
-          segment.points.forEach((point) => {
-            allPoints.push({
-              lat: point.lat,
-              lng: point.lon,
-              elevation: point.ele
-            })
+        track.forEach((point) => {
+          allPoints.push({
+            lat: point.lat,
+            lng: point.lon,
+            elevation: point.elevation
           })
         })
       })
@@ -78,10 +83,22 @@ export function useGPXMap(): UseGPXMapReturn {
         lat: wp.lat,
         lng: wp.lon,
         name: wp.name,
-        elevation: wp.ele
+        elevation: wp.elevation
       }))
       
       setWaypoints(gpxWaypoints)
+      
+      // Estrai le route e converti al formato per la mappa
+      const gpxRoutes: GPXRouteForMap[] = parsedData.routes.map(route => ({
+        name: route.name,
+        points: route.points.map(point => ({
+          lat: point.lat,
+          lng: point.lon,
+          elevation: point.elevation
+        }))
+      }))
+      
+      setRoutes(gpxRoutes)
       
     } catch (err) {
       console.error('Errore nel caricamento GPX:', err)
@@ -93,12 +110,14 @@ export function useGPXMap(): UseGPXMapReturn {
 
   const clearData = useCallback(() => {
     setGpxData([])
+    setRoutes([])
     setWaypoints([])
     setError(null)
   }, [])
 
   return {
     gpxData,
+    routes,
     waypoints,
     isLoading,
     error,

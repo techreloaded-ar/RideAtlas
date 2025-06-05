@@ -28,10 +28,16 @@ interface GPXWaypoint {
   elevation?: number
 }
 
+interface GPXRoute {
+  name?: string
+  points: GPXPoint[]
+}
+
 interface GPXMapModalProps {
   isOpen: boolean
   onClose: () => void
   gpxData: GPXPoint[]
+  routes?: GPXRoute[]
   waypoints?: GPXWaypoint[]
   tripName?: string
   onDownloadGpx?: () => void
@@ -41,6 +47,7 @@ export default function GPXMapModal({
   isOpen, 
   onClose, 
   gpxData, 
+  routes = [],
   waypoints = [],
   tripName = 'Viaggio',
   onDownloadGpx 
@@ -141,6 +148,7 @@ export default function GPXMapModal({
             {gpxData.length > 0 ? (
               <GPXMapViewer 
                 gpxData={gpxData}
+                routes={routes}
                 waypoints={waypoints}
                 className="rounded-lg border h-full"
               />

@@ -2,6 +2,21 @@
 import { GpxFile } from '@/types/trip'
 import { XMLParser } from 'fast-xml-parser'
 
+export interface GPXPoint {
+  lat: number
+  lon: number  // Usiamo 'lon' per essere coerenti con il formato GPX
+  elevation?: number
+}
+
+export interface GPXWaypoint extends GPXPoint {
+  name?: string
+}
+
+export interface GPXRoute {
+  name?: string
+  points: GPXPoint[]
+}
+
 export interface GpxMetadata {
   filename: string
   distance: number
@@ -13,6 +28,16 @@ export interface GpxMetadata {
   minElevation?: number
   startTime?: string
   endTime?: string
+}
+
+/**
+ * Risultato del parsing completo di un file GPX
+ */
+export interface GPXParseResult {
+  tracks: GPXPoint[][]  // Array di tracciati (ogni tracciato è un array di punti)
+  routes: GPXRoute[]    // Array di route 
+  waypoints: GPXWaypoint[]  // Array di waypoints
+  metadata: GpxMetadata
 }
 
 /**
@@ -391,4 +416,424 @@ export function parseGPX(gpxContent: string): ParsedGPXData {
   }
 
   return result
+}
+
+/**
+ * Parse completo di un file GPX che estrae tracks, routes e waypoints
+ */
+export async function parseGPXFile(file: File): Promise<GPXParseResult> {
+  let content: string
+  let filename: string
+  
+  if (file && typeof file.text === 'function') {
+    try {
+      content = await file.text()
+      filename = file.name
+    } catch (error) {
+      throw new Error('Unable to read file content: ' + (error as Error).message)
+    }
+  } else {
+    throw new Error('Invalid file input: expected File object with .text() method')
+  }
+
+  const parser = new XMLParser({
+    ignoreAttributes: false,
+    attributeNamePrefix: "@_",
+    parseAttributeValue: true,
+    parseTagValue: true,
+    trimValues: true
+  })
+  
+  const xmlDoc = parser.parse(content)
+  
+  if (!xmlDoc.gpx) {
+    throw new Error('File non è un GPX valido')
+  }
+
+  const gpx = xmlDoc.gpx
+  const tracks: GPXPoint[][] = []
+  const routes: GPXRoute[] = []
+  const waypoints: GPXWaypoint[] = []
+  
+  let totalDistance = 0
+  let totalWaypoints = 0
+  let elevationGain = 0
+  let elevationLoss = 0
+  let maxElevation = -Infinity
+  let minElevation = Infinity
+  let startTime: string | undefined
+  let endTime: string | undefined
+
+  // Parse tracks (tracciati)
+  let gpxTracks = gpx.trk
+  if (!Array.isArray(gpxTracks)) {
+    gpxTracks = gpxTracks ? [gpxTracks] : []
+  }
+
+  for (const track of gpxTracks) {
+    let segments = track.trkseg
+    if (!Array.isArray(segments)) {
+      segments = segments ? [segments] : []
+    }
+
+    for (const segment of segments) {
+      let trackPoints = segment.trkpt
+      if (!Array.isArray(trackPoints)) {
+        trackPoints = trackPoints ? [trackPoints] : []
+      }
+
+      const trackPointsArray: GPXPoint[] = []
+      let previousPoint: { lat: number; lon: number; ele?: number; time?: Date } | null = null
+
+      for (const point of trackPoints) {
+        const lat = parseFloat(point['@_lat'])
+        const lon = parseFloat(point['@_lon'])
+        
+        if (isNaN(lat) || isNaN(lon)) continue
+
+        const elevation = point.ele ? parseFloat(point.ele) : undefined
+        const timeStr = point.time ? point.time : null
+        const pointTime = timeStr ? new Date(timeStr) : undefined
+
+        trackPointsArray.push({ lat, lon, elevation })
+        totalWaypoints++
+
+        // Calcoli per metadati
+        if (elevation !== undefined && !isNaN(elevation)) {
+          maxElevation = Math.max(maxElevation, elevation)
+          minElevation = Math.min(minElevation, elevation)
+        }
+
+        if (pointTime && !isNaN(pointTime.getTime())) {
+          const isoString = pointTime.toISOString().replace(/\.000Z$/, 'Z')
+          if (!startTime) startTime = isoString
+          endTime = isoString
+        }
+
+        if (previousPoint) {
+          const distance = calculateDistance(previousPoint.lat, previousPoint.lon, lat, lon)
+          totalDistance += distance
+
+          if (previousPoint.ele !== undefined && elevation !== undefined) {
+            const elevationDiff = elevation - previousPoint.ele
+            if (Math.abs(elevationDiff) >= 3) {
+              if (elevationDiff > 0) {
+                elevationGain += elevationDiff
+              } else {
+                elevationLoss += Math.abs(elevationDiff)
+              }
+            }
+          }
+        }
+
+        previousPoint = { lat, lon, ele: elevation, time: pointTime }
+      }
+
+      if (trackPointsArray.length > 0) {
+        tracks.push(trackPointsArray)
+      }
+    }
+  }
+
+  // Parse routes (percorsi pianificati)
+  let gpxRoutes = gpx.rte
+  if (!Array.isArray(gpxRoutes)) {
+    gpxRoutes = gpxRoutes ? [gpxRoutes] : []
+  }
+
+  for (const route of gpxRoutes) {
+    let routePoints = route.rtept
+    if (!Array.isArray(routePoints)) {
+      routePoints = routePoints ? [routePoints] : []
+    }
+
+    const routePointsArray: GPXPoint[] = []
+    let previousPoint: { lat: number; lon: number; ele?: number } | null = null
+
+    for (const point of routePoints) {
+      const lat = parseFloat(point['@_lat'])
+      const lon = parseFloat(point['@_lon'])
+      
+      if (isNaN(lat) || isNaN(lon)) continue
+
+      const elevation = point.ele ? parseFloat(point.ele) : undefined
+      routePointsArray.push({ lat, lon, elevation })
+
+      // Aggiungi alla distanza totale e conteggi
+      if (previousPoint) {
+        const distance = calculateDistance(previousPoint.lat, previousPoint.lon, lat, lon)
+        totalDistance += distance
+      }
+
+      if (elevation !== undefined && !isNaN(elevation)) {
+        maxElevation = Math.max(maxElevation, elevation)
+        minElevation = Math.min(minElevation, elevation)
+      }
+
+      previousPoint = { lat, lon, ele: elevation }
+    }
+
+    if (routePointsArray.length > 0) {
+      routes.push({
+        name: route.name || `Route ${routes.length + 1}`,
+        points: routePointsArray
+      })
+    }
+  }
+
+  // Parse waypoints
+  let gpxWaypoints = gpx.wpt
+  if (!Array.isArray(gpxWaypoints)) {
+    gpxWaypoints = gpxWaypoints ? [gpxWaypoints] : []
+  }
+
+  for (const waypoint of gpxWaypoints) {
+    const lat = parseFloat(waypoint['@_lat'])
+    const lon = parseFloat(waypoint['@_lon'])
+    
+    if (isNaN(lat) || isNaN(lon)) continue
+
+    const elevation = waypoint.ele ? parseFloat(waypoint.ele) : undefined
+    const name = waypoint.name || undefined
+
+    waypoints.push({ lat, lon, elevation, name })
+
+    if (elevation !== undefined && !isNaN(elevation)) {
+      maxElevation = Math.max(maxElevation, elevation)
+      minElevation = Math.min(minElevation, elevation)
+    }
+  }
+
+  // Crea metadati
+  const metadata: GpxMetadata = {
+    filename: filename,
+    distance: parseFloat(totalDistance.toFixed(2)),
+    waypoints: totalWaypoints
+  }
+
+  if (elevationGain > 0) metadata.elevationGain = Math.round(elevationGain)
+  if (elevationLoss > 0) metadata.elevationLoss = Math.round(elevationLoss)
+  if (maxElevation !== -Infinity) metadata.maxElevation = Math.round(maxElevation)
+  if (minElevation !== Infinity) metadata.minElevation = Math.round(minElevation)
+  if (startTime) metadata.startTime = startTime
+  if (endTime) metadata.endTime = endTime
+
+  if (startTime && endTime) {
+    const start = new Date(startTime)
+    const end = new Date(endTime)
+    const durationMs = end.getTime() - start.getTime()
+    if (durationMs > 0) {
+      metadata.duration = Math.round(durationMs / 1000)
+    }
+  }
+
+  return {
+    tracks,
+    routes,
+    waypoints,
+    metadata
+  }
+}
+
+/**
+ * Parse completo del contenuto GPX da stringa che estrae tracks, routes e waypoints
+ */
+export function parseGPXContent(gpxContent: string, filename: string = 'unknown.gpx'): GPXParseResult {
+  const parser = new XMLParser({
+    ignoreAttributes: false,
+    attributeNamePrefix: "@_",
+    parseAttributeValue: true,
+    parseTagValue: true,
+    trimValues: true
+  })
+  
+  const xmlDoc = parser.parse(gpxContent)
+  
+  if (!xmlDoc.gpx) {
+    throw new Error('File non è un GPX valido')
+  }
+
+  const gpx = xmlDoc.gpx
+  const tracks: GPXPoint[][] = []
+  const routes: GPXRoute[] = []
+  const waypoints: GPXWaypoint[] = []
+  
+  let totalDistance = 0
+  let totalWaypoints = 0
+  let elevationGain = 0
+  let elevationLoss = 0
+  let maxElevation = -Infinity
+  let minElevation = Infinity
+  let startTime: string | undefined
+  let endTime: string | undefined
+
+  // Parse tracks (tracciati)
+  let gpxTracks = gpx.trk
+  if (!Array.isArray(gpxTracks)) {
+    gpxTracks = gpxTracks ? [gpxTracks] : []
+  }
+
+  for (const track of gpxTracks) {
+    let segments = track.trkseg
+    if (!Array.isArray(segments)) {
+      segments = segments ? [segments] : []
+    }
+
+    for (const segment of segments) {
+      let trackPoints = segment.trkpt
+      if (!Array.isArray(trackPoints)) {
+        trackPoints = trackPoints ? [trackPoints] : []
+      }
+
+      const trackPointsArray: GPXPoint[] = []
+      let previousPoint: { lat: number; lon: number; ele?: number; time?: Date } | null = null
+
+      for (const point of trackPoints) {
+        const lat = parseFloat(point['@_lat'])
+        const lon = parseFloat(point['@_lon'])
+        
+        if (isNaN(lat) || isNaN(lon)) continue
+
+        const elevation = point.ele ? parseFloat(point.ele) : undefined
+        const timeStr = point.time ? point.time : null
+        const pointTime = timeStr ? new Date(timeStr) : undefined
+
+        trackPointsArray.push({ lat, lon, elevation })
+        totalWaypoints++
+
+        // Calcoli per metadati
+        if (elevation !== undefined && !isNaN(elevation)) {
+          maxElevation = Math.max(maxElevation, elevation)
+          minElevation = Math.min(minElevation, elevation)
+        }
+
+        if (pointTime && !isNaN(pointTime.getTime())) {
+          const isoString = pointTime.toISOString().replace(/\.000Z$/, 'Z')
+          if (!startTime) startTime = isoString
+          endTime = isoString
+        }
+
+        if (previousPoint) {
+          const distance = calculateDistance(previousPoint.lat, previousPoint.lon, lat, lon)
+          totalDistance += distance
+
+          if (previousPoint.ele !== undefined && elevation !== undefined) {
+            const elevationDiff = elevation - previousPoint.ele
+            if (Math.abs(elevationDiff) >= 3) {
+              if (elevationDiff > 0) {
+                elevationGain += elevationDiff
+              } else {
+                elevationLoss += Math.abs(elevationDiff)
+              }
+            }
+          }
+        }
+
+        previousPoint = { lat, lon, ele: elevation, time: pointTime }
+      }
+
+      if (trackPointsArray.length > 0) {
+        tracks.push(trackPointsArray)
+      }
+    }
+  }
+
+  // Parse routes (percorsi pianificati)
+  let gpxRoutes = gpx.rte
+  if (!Array.isArray(gpxRoutes)) {
+    gpxRoutes = gpxRoutes ? [gpxRoutes] : []
+  }
+
+  for (const route of gpxRoutes) {
+    let routePoints = route.rtept
+    if (!Array.isArray(routePoints)) {
+      routePoints = routePoints ? [routePoints] : []
+    }
+
+    const routePointsArray: GPXPoint[] = []
+    let previousPoint: { lat: number; lon: number; ele?: number } | null = null
+
+    for (const point of routePoints) {
+      const lat = parseFloat(point['@_lat'])
+      const lon = parseFloat(point['@_lon'])
+      
+      if (isNaN(lat) || isNaN(lon)) continue
+
+      const elevation = point.ele ? parseFloat(point.ele) : undefined
+      routePointsArray.push({ lat, lon, elevation })
+
+      // Aggiungi alla distanza totale e conteggi
+      if (previousPoint) {
+        const distance = calculateDistance(previousPoint.lat, previousPoint.lon, lat, lon)
+        totalDistance += distance
+      }
+
+      if (elevation !== undefined && !isNaN(elevation)) {
+        maxElevation = Math.max(maxElevation, elevation)
+        minElevation = Math.min(minElevation, elevation)
+      }
+
+      previousPoint = { lat, lon, ele: elevation }
+    }
+
+    if (routePointsArray.length > 0) {
+      routes.push({
+        name: route.name || `Route ${routes.length + 1}`,
+        points: routePointsArray
+      })
+    }
+  }
+
+  // Parse waypoints
+  let gpxWaypoints = gpx.wpt
+  if (!Array.isArray(gpxWaypoints)) {
+    gpxWaypoints = gpxWaypoints ? [gpxWaypoints] : []
+  }
+
+  for (const waypoint of gpxWaypoints) {
+    const lat = parseFloat(waypoint['@_lat'])
+    const lon = parseFloat(waypoint['@_lon'])
+    
+    if (isNaN(lat) || isNaN(lon)) continue
+
+    const elevation = waypoint.ele ? parseFloat(waypoint.ele) : undefined
+    const name = waypoint.name || undefined
+
+    waypoints.push({ lat, lon, elevation, name })
+
+    if (elevation !== undefined && !isNaN(elevation)) {
+      maxElevation = Math.max(maxElevation, elevation)
+      minElevation = Math.min(minElevation, elevation)
+    }
+  }
+
+  // Crea metadati
+  const metadata: GpxMetadata = {
+    filename: filename,
+    distance: parseFloat(totalDistance.toFixed(2)),
+    waypoints: totalWaypoints
+  }
+
+  if (elevationGain > 0) metadata.elevationGain = Math.round(elevationGain)
+  if (elevationLoss > 0) metadata.elevationLoss = Math.round(elevationLoss)
+  if (maxElevation !== -Infinity) metadata.maxElevation = Math.round(maxElevation)
+  if (minElevation !== Infinity) metadata.minElevation = Math.round(minElevation)
+  if (startTime) metadata.startTime = startTime
+  if (endTime) metadata.endTime = endTime
+
+  if (startTime && endTime) {
+    const start = new Date(startTime)
+    const end = new Date(endTime)
+    const durationMs = end.getTime() - start.getTime()
+    if (durationMs > 0) {
+      metadata.duration = Math.round(durationMs / 1000)
+    }
+  }
+
+  return {
+    tracks,
+    routes,
+    waypoints,
+    metadata
+  }
 }

@@ -23,8 +23,14 @@ interface GPXWaypoint {
   elevation?: number
 }
 
+interface GPXRoute {
+  name?: string
+  points: GPXPoint[]
+}
+
 interface GPXMapViewerProps {
   gpxData: GPXPoint[]
+  routes?: GPXRoute[]
   waypoints?: GPXWaypoint[]
   className?: string
 }
@@ -42,7 +48,7 @@ function MapAutoFit({ bounds }: { bounds: L.LatLngBounds | null }) {
   return null
 }
 
-export default function GPXMapViewer({ gpxData, waypoints = [], className = '' }: GPXMapViewerProps) {
+export default function GPXMapViewer({ gpxData, routes = [], waypoints = [], className = '' }: GPXMapViewerProps) {
   const mapRef = useRef<L.Map | null>(null)
   const [waypointIcon, setWaypointIcon] = useState<L.Icon | null>(null)
   
@@ -79,9 +85,10 @@ export default function GPXMapViewer({ gpxData, waypoints = [], className = '' }
     )
   }
   
-  // Calcola i bounds includendo sia tracciato che waypoints
+  // Calcola i bounds includendo tracciato, routes e waypoints
   const allPoints = [
     ...gpxData.map(point => [point.lat, point.lng] as [number, number]),
+    ...routes.flatMap(route => route.points.map(point => [point.lat, point.lng] as [number, number])),
     ...waypoints.map(wp => [wp.lat, wp.lng] as [number, number])
   ]
   
@@ -114,12 +121,28 @@ export default function GPXMapViewer({ gpxData, waypoints = [], className = '' }
           <Polyline
             positions={polylinePositions}
             pathOptions={{
-              color: '#3b82f6', // blue-500
+              color: '#3b82f6', // blue-500 for tracks
               weight: 4,
               opacity: 0.8
             }}
           />
         )}
+        
+        {routes.map((route, routeIndex) => {
+          const routePositions: [number, number][] = route.points.map(point => [point.lat, point.lng])
+          return routePositions.length > 0 ? (
+            <Polyline
+              key={`route-${routeIndex}`}
+              positions={routePositions}
+              pathOptions={{
+                color: '#dc2626', // red-600 for routes
+                weight: 4,
+                opacity: 0.8,
+                dashArray: '10, 10' // dashed line to distinguish from tracks
+              }}
+            />
+          ) : null
+        })}
         
         {waypoints.map((waypoint, index) => (
           <Marker
