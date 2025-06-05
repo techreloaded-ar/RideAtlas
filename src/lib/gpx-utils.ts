@@ -250,6 +250,10 @@ export interface GPXPoint {
   time?: string
 }
 
+export interface GPXWaypoint extends GPXPoint {
+  name?: string
+}
+
 export interface GPXSegment {
   points: GPXPoint[]
 }
@@ -261,7 +265,7 @@ export interface GPXTrack {
 
 export interface ParsedGPXData {
   tracks: GPXTrack[]
-  waypoints: GPXPoint[]
+  waypoints: GPXWaypoint[]
 }
 
 /**
@@ -365,7 +369,7 @@ export function parseGPX(gpxContent: string): ParsedGPXData {
     const lon = parseFloat(wpt['@_lon'])
     
     if (!isNaN(lat) && !isNaN(lon)) {
-      const waypoint: GPXPoint = { lat, lon }
+      const waypoint: GPXWaypoint = { lat, lon }
       
       if (wpt.ele) {
         const elevation = parseFloat(wpt.ele)
@@ -376,6 +380,10 @@ export function parseGPX(gpxContent: string): ParsedGPXData {
       
       if (wpt.time) {
         waypoint.time = wpt.time
+      }
+      
+      if (wpt.name) {
+        waypoint.name = wpt.name
       }
       
       result.waypoints.push(waypoint)

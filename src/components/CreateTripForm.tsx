@@ -40,7 +40,7 @@ const CreateTripForm = () => {
       alert('Viaggio creato con successo!'); // TODO: Sostituire con toast
     }
   });
-  const { gpxData, loadGPXFromUrl, clearData } = useGPXMap();
+  const { gpxData, waypoints, loadGPXFromUrl, clearData } = useGPXMap();
 
   const characteristicOptions = [
     'Strade sterrate',
@@ -281,6 +281,7 @@ const CreateTripForm = () => {
         isOpen={isMapModalOpen}
         onClose={handleCloseModal}
         gpxData={gpxData}
+        waypoints={waypoints}
         tripName={formData.title || 'Nuovo Viaggio'}
       />
     </form>

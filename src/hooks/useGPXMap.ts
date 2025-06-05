@@ -8,8 +8,16 @@ interface GPXPoint {
   elevation?: number
 }
 
+interface GPXWaypointForMap {
+  lat: number
+  lng: number
+  name?: string
+  elevation?: number
+}
+
 interface UseGPXMapReturn {
   gpxData: GPXPoint[]
+  waypoints: GPXWaypointForMap[]
   isLoading: boolean
   error: string | null
   loadGPXFromUrl: (blobUrl: string) => Promise<void>
@@ -18,6 +26,7 @@ interface UseGPXMapReturn {
 
 export function useGPXMap(): UseGPXMapReturn {
   const [gpxData, setGpxData] = useState<GPXPoint[]>([])
+  const [waypoints, setWaypoints] = useState<GPXWaypointForMap[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -64,6 +73,16 @@ export function useGPXMap(): UseGPXMapReturn {
       
       setGpxData(allPoints)
       
+      // Estrai i waypoints e converti al formato per la mappa
+      const gpxWaypoints: GPXWaypointForMap[] = parsedData.waypoints.map(wp => ({
+        lat: wp.lat,
+        lng: wp.lon,
+        name: wp.name,
+        elevation: wp.ele
+      }))
+      
+      setWaypoints(gpxWaypoints)
+      
     } catch (err) {
       console.error('Errore nel caricamento GPX:', err)
       setError(err instanceof Error ? err.message : 'Errore sconosciuto')
@@ -74,11 +93,13 @@ export function useGPXMap(): UseGPXMapReturn {
 
   const clearData = useCallback(() => {
     setGpxData([])
+    setWaypoints([])
     setError(null)
   }, [])
 
   return {
     gpxData,
+    waypoints,
     isLoading,
     error,
     loadGPXFromUrl,

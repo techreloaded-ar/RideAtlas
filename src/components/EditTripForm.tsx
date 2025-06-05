@@ -56,7 +56,7 @@ const EditTripForm = ({ tripId }: EditTripFormProps) => {
     fetchTrip();
   }, [fetchTrip]);
 
-  const { gpxData, loadGPXFromUrl, clearData } = useGPXMap();
+  const { gpxData, waypoints, loadGPXFromUrl, clearData } = useGPXMap();
 
   const {
     formData,
@@ -390,6 +390,7 @@ const EditTripForm = ({ tripId }: EditTripFormProps) => {
         isOpen={isMapModalOpen}
         onClose={handleCloseModal}
         gpxData={gpxData}
+        waypoints={waypoints}
         tripName={formData.title || 'Viaggio'}
       />
     </form>

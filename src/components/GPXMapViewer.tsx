@@ -3,11 +3,10 @@
 
 // TODO:
 // - Fixare pulsante espandi
-// - Gestire i waypoint, non solo i tracciati
 // - Metterlo a disposizione in tutte le pagine di visualizzazione GPX
 
 import { useEffect, useRef } from 'react'
-import { MapContainer, TileLayer, Polyline, useMap } from 'react-leaflet'
+import { MapContainer, TileLayer, Polyline, Marker, Popup, useMap } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 
@@ -19,14 +18,32 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 })
 
+// Icona personalizzata per i waypoints (arancione)
+const waypointIcon = new L.Icon({
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-orange.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41]
+})
+
 interface GPXPoint {
   lat: number
   lng: number
   elevation?: number
 }
 
+interface GPXWaypoint {
+  lat: number
+  lng: number
+  name?: string
+  elevation?: number
+}
+
 interface GPXMapViewerProps {
   gpxData: GPXPoint[]
+  waypoints?: GPXWaypoint[]
   className?: string
 }
 
@@ -43,12 +60,17 @@ function MapAutoFit({ bounds }: { bounds: L.LatLngBounds | null }) {
   return null
 }
 
-export default function GPXMapViewer({ gpxData, className = '' }: GPXMapViewerProps) {
+export default function GPXMapViewer({ gpxData, waypoints = [], className = '' }: GPXMapViewerProps) {
   const mapRef = useRef<L.Map | null>(null)
   
-  // Calcola i bounds del tracciato
-  const bounds = gpxData.length > 0 
-    ? L.latLngBounds(gpxData.map(point => [point.lat, point.lng]))
+  // Calcola i bounds includendo sia tracciato che waypoints
+  const allPoints = [
+    ...gpxData.map(point => [point.lat, point.lng] as [number, number]),
+    ...waypoints.map(wp => [wp.lat, wp.lng] as [number, number])
+  ]
+  
+  const bounds = allPoints.length > 0 
+    ? L.latLngBounds(allPoints)
     : null
   
   // Centro della mappa
@@ -82,6 +104,30 @@ export default function GPXMapViewer({ gpxData, className = '' }: GPXMapViewerPr
             }}
           />
         )}
+        
+        {waypoints.map((waypoint, index) => (
+          <Marker
+            key={`waypoint-${index}`}
+            position={[waypoint.lat, waypoint.lng]}
+            icon={waypointIcon}
+          >
+            {waypoint.name && (
+              <Popup>
+                <div className="text-sm">
+                  <div className="font-medium">{waypoint.name}</div>
+                  {waypoint.elevation && (
+                    <div className="text-gray-600">
+                      Altitudine: {Math.round(waypoint.elevation)}m
+                    </div>
+                  )}
+                  <div className="text-gray-500 text-xs mt-1">
+                    {waypoint.lat.toFixed(6)}, {waypoint.lng.toFixed(6)}
+                  </div>
+                </div>
+              </Popup>
+            )}
+          </Marker>
+        ))}
         
         <MapAutoFit bounds={bounds} />
       </MapContainer>

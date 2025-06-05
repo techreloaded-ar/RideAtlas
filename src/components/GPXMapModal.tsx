@@ -11,10 +11,18 @@ interface GPXPoint {
   elevation?: number
 }
 
+interface GPXWaypoint {
+  lat: number
+  lng: number
+  name?: string
+  elevation?: number
+}
+
 interface GPXMapModalProps {
   isOpen: boolean
   onClose: () => void
   gpxData: GPXPoint[]
+  waypoints?: GPXWaypoint[]
   tripName?: string
   onDownloadGpx?: () => void
 }
@@ -23,6 +31,7 @@ export default function GPXMapModal({
   isOpen, 
   onClose, 
   gpxData, 
+  waypoints = [],
   tripName = 'Viaggio',
   onDownloadGpx 
 }: GPXMapModalProps) {
@@ -122,7 +131,8 @@ export default function GPXMapModal({
           <div className="flex-1 p-4">
             {gpxData.length > 0 ? (
               <GPXMapViewer 
-                gpxData={gpxData} 
+                gpxData={gpxData}
+                waypoints={waypoints}
                 className="rounded-lg border h-full"
               />
             ) : (
@@ -140,6 +150,12 @@ export default function GPXMapModal({
             <div className="border-t p-4 bg-gray-50">
               <div className="text-sm text-gray-600">
                 <span className="font-medium">Punti tracciato:</span> {gpxData.length.toLocaleString()}
+                {waypoints.length > 0 && (
+                  <>
+                    <span className="mx-3">•</span>
+                    <span className="font-medium">Waypoints:</span> {waypoints.length}
+                  </>
+                )}
                 {gpxData.some(p => p.elevation) && (
                   <>
                     <span className="mx-3">•</span>
