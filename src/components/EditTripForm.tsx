@@ -317,21 +317,7 @@ const EditTripForm = ({ tripId }: EditTripFormProps) => {
           <option value={RecommendedSeason.Tutte}>Tutte</option>
         </select>
         {fieldErrors?.recommended_season && <p className="text-xs text-red-500 mt-1">{fieldErrors.recommended_season.join(', ')}</p>}
-      </div>      {/* GPX Upload Section */}
-      <GPXUpload
-        gpxFile={gpxFile}
-        onGpxUpload={setGpxFile}
-        onGpxRemove={removeGpxFile}
-        isUploading={isLoading}
-      />
-
-      {/* Multimedia Upload Section */}
-      <MultimediaUpload
-        mediaItems={mediaItems}
-        onAddMedia={addMedia}
-        onRemoveMedia={removeMedia}
-        onUpdateCaption={updateMediaCaption}
-      />
+      </div>
 
       <div>
         <label htmlFor="insights" className="block text-sm font-medium text-gray-700">Approfondimenti</label>
@@ -347,6 +333,22 @@ const EditTripForm = ({ tripId }: EditTripFormProps) => {
         />
         {fieldErrors?.insights && <p className="text-xs text-red-500 mt-1">{fieldErrors.insights.join(', ')}</p>}
       </div>
+
+      {/* Multimedia Upload Section */}
+      <MultimediaUpload
+        mediaItems={mediaItems}
+        onAddMedia={addMedia}
+        onRemoveMedia={removeMedia}
+        onUpdateCaption={updateMediaCaption}
+      />
+
+      {/* GPX Upload Section */}
+      <GPXUpload
+        gpxFile={gpxFile}
+        onGpxUpload={setGpxFile}
+        onGpxRemove={removeGpxFile}
+        isUploading={isLoading}
+      />
 
       {/* GPX Map Preview */}
       {gpxFile && gpxFile.url && (
