@@ -1,4 +1,6 @@
 // src/app/edit-trip/[id]/page.tsx
+"use client";
+
 import EditTripForm from '@/components/EditTripForm'
 
 interface EditTripPageProps {
@@ -13,11 +15,4 @@ export default function EditTripPage({ params }: EditTripPageProps) {
       <EditTripForm tripId={params.id} />
     </main>
   )
-}
-
-export async function generateMetadata() {
-  return {
-    title: 'Modifica Viaggio - RideAtlas',
-    description: 'Modifica le informazioni del tuo viaggio'
-  }
 }

@@ -1,6 +1,9 @@
 // src/app/api/gpx/preview/route.ts
 import { NextRequest, NextResponse } from 'next/server'
 
+// Forza la renderizzazione dinamica per questo endpoint
+export const dynamic = 'force-dynamic'
+
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams

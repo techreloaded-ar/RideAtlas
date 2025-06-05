@@ -3,7 +3,17 @@
 
 import { useState, useEffect } from 'react'
 import { X, Download, Maximize2, Minimize2 } from 'lucide-react'
-import GPXMapViewer from './GPXMapViewer'
+import dynamic from 'next/dynamic'
+
+// Import dinamico direttamente qui
+const GPXMapViewer = dynamic(() => import('./GPXMapViewer'), {
+  ssr: false,
+  loading: () => (
+    <div className="h-64 w-full bg-gray-100 flex items-center justify-center rounded-lg">
+      <div className="text-gray-500">Caricamento mappa...</div>
+    </div>
+  )
+})
 
 interface GPXPoint {
   lat: number
@@ -127,8 +137,7 @@ export default function GPXMapModal({
             </div>
           </div>
           
-          {/* Contenuto mappa */}
-          <div className="flex-1 p-4">
+          {/* Contenuto mappa */}            <div className="flex-1 p-4">
             {gpxData.length > 0 ? (
               <GPXMapViewer 
                 gpxData={gpxData}

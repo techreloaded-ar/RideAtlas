@@ -5,28 +5,10 @@
 // - Fixare pulsante espandi
 // - Metterlo a disposizione in tutte le pagine di visualizzazione GPX
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { MapContainer, TileLayer, Polyline, Marker, Popup, useMap } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
-
-// Fix per icone default di Leaflet
-delete (L.Icon.Default.prototype as unknown as { _getIconUrl?: unknown })._getIconUrl
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-})
-
-// Icona personalizzata per i waypoints (arancione)
-const waypointIcon = new L.Icon({
-  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-orange.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41]
-})
 
 interface GPXPoint {
   lat: number
@@ -62,6 +44,40 @@ function MapAutoFit({ bounds }: { bounds: L.LatLngBounds | null }) {
 
 export default function GPXMapViewer({ gpxData, waypoints = [], className = '' }: GPXMapViewerProps) {
   const mapRef = useRef<L.Map | null>(null)
+  const [waypointIcon, setWaypointIcon] = useState<L.Icon | null>(null)
+  
+  // Inizializza Leaflet solo lato client
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      // Fix per icone default di Leaflet
+      delete (L.Icon.Default.prototype as unknown as { _getIconUrl?: unknown })._getIconUrl
+      L.Icon.Default.mergeOptions({
+        iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+        iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+      })
+
+      // Icona personalizzata per i waypoints (arancione)
+      const icon = new L.Icon({
+        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-orange.png',
+        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41]
+      })
+      setWaypointIcon(icon)
+    }
+  }, [])
+  
+  // Se non siamo lato client, mostra un placeholder
+  if (typeof window === 'undefined') {
+    return (
+      <div className={`w-full h-full ${className} bg-gray-100 flex items-center justify-center rounded-lg`}>
+        <div className="text-gray-500">Caricamento mappa...</div>
+      </div>
+    )
+  }
   
   // Calcola i bounds includendo sia tracciato che waypoints
   const allPoints = [
@@ -109,7 +125,7 @@ export default function GPXMapViewer({ gpxData, waypoints = [], className = '' }
           <Marker
             key={`waypoint-${index}`}
             position={[waypoint.lat, waypoint.lng]}
-            icon={waypointIcon}
+            icon={waypointIcon || undefined}
           >
             {waypoint.name && (
               <Popup>
