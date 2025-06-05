@@ -1,18 +1,16 @@
 // src/components/CreateTripForm.tsx
 "use client";
 
-import { FormEvent, useState } from 'react';
+import { FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { RecommendedSeason } from '@/types/trip';
 import { useTripForm } from '@/hooks/useTripForm';
-import { useGPXMap } from '@/hooks/useGPXMap';
 import MultimediaUpload from './MultimediaUpload';
 import GPXUpload from './GPXUpload';
-import GPXMapModal from './GPXMapModal';
+import GPXAutoMapViewer from './GPXAutoMapViewer';
 
 const CreateTripForm = () => {
   const router = useRouter();
-  const [isMapModalOpen, setIsMapModalOpen] = useState(false);
   
   const {
     formData,
@@ -40,7 +38,6 @@ const CreateTripForm = () => {
       alert('Viaggio creato con successo!'); // TODO: Sostituire con toast
     }
   });
-  const { gpxData, routes, waypoints, loadGPXFromUrl, clearData } = useGPXMap();
 
   const characteristicOptions = [
     'Strade sterrate',
@@ -53,23 +50,6 @@ const CreateTripForm = () => {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     await submitForm();
-  };
-
-  const handleViewMap = async () => {
-    if (gpxFile?.url) {
-      try {
-        await loadGPXFromUrl(gpxFile.url);
-        setIsMapModalOpen(true);
-      } catch (error) {
-        console.error('Errore nel caricamento della mappa:', error);
-        alert('Errore nel caricamento della mappa. Riprova più tardi.');
-      }
-    }
-  };
-
-  const handleCloseModal = () => {
-    setIsMapModalOpen(false);
-    clearData();
   };
 
   return (
@@ -241,7 +221,6 @@ const CreateTripForm = () => {
         gpxFile={gpxFile}
         onGpxUpload={setGpxFile}
         onGpxRemove={removeGpxFile}
-        onViewMap={gpxFile ? handleViewMap : undefined}
         isUploading={isLoading}
       />
 
@@ -252,6 +231,18 @@ const CreateTripForm = () => {
         onRemoveMedia={removeMedia}
         onUpdateCaption={updateMediaCaption}
       />
+
+      {/* GPX Map Preview */}
+      {gpxFile && gpxFile.url && (
+        <div>
+          <h3 className="text-lg font-medium text-gray-900 mb-4">Anteprima Tracciato</h3>
+          <GPXAutoMapViewer 
+            gpxUrl={gpxFile.url}
+            tripTitle={formData.title || 'Nuovo viaggio'}
+            className="rounded-lg border"
+          />
+        </div>
+      )}
 
       <div>
         <label htmlFor="insights" className="block text-sm font-medium text-gray-700">Approfondimenti</label>
@@ -266,7 +257,9 @@ const CreateTripForm = () => {
           placeholder="Racconta curiosità, fatti storici, luoghi d'interesse e altre informazioni utili per i motociclisti..."
         />
         {fieldErrors?.insights && <p className="text-xs text-red-500 mt-1">{fieldErrors.insights.join(', ')}</p>}
-      </div>      <div className="pt-5">
+      </div>
+
+      <div className="pt-5">
         <button
           type="submit"
           disabled={isLoading}
@@ -275,16 +268,6 @@ const CreateTripForm = () => {
           {isLoading ? 'Creazione in corso...' : 'Crea Viaggio'}
         </button>
       </div>
-
-      {/* GPX Map Modal */}
-      <GPXMapModal
-        isOpen={isMapModalOpen}
-        onClose={handleCloseModal}
-        gpxData={gpxData}
-        routes={routes}
-        waypoints={waypoints}
-        tripName={formData.title || 'Nuovo Viaggio'}
-      />
     </form>
   );
 };

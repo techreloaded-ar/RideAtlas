@@ -4,17 +4,15 @@
 import { useState, useCallback, DragEvent } from 'react'
 import { GpxFile } from '@/types/trip'
 import { isValidGpxFile, isValidGpxFileSize } from '@/lib/gpx-utils'
-import { Map } from 'lucide-react'
 
 interface GPXUploadProps {
   gpxFile: GpxFile | null | undefined
   onGpxUpload: (gpxFile: GpxFile) => void
   onGpxRemove: () => void
-  onViewMap?: () => void
   isUploading?: boolean
 }
 
-const GPXUpload = ({ gpxFile, onGpxUpload, onGpxRemove, onViewMap, isUploading = false }: GPXUploadProps) => {
+const GPXUpload = ({ gpxFile, onGpxUpload, onGpxRemove, isUploading = false }: GPXUploadProps) => {
   const [isDragging, setIsDragging] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(false)
 
@@ -101,16 +99,7 @@ const GPXUpload = ({ gpxFile, onGpxUpload, onGpxRemove, onViewMap, isUploading =
               )}
             </div>
           </div>
-          <div className="flex flex-col gap-2 ml-4">            {onViewMap && (
-              <button
-                type="button"
-                onClick={onViewMap}
-                className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-green-700 bg-white border border-green-300 rounded-md hover:bg-green-50 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors"
-              >
-                <Map className="w-4 h-4" />
-                Vedi su Mappa
-              </button>
-            )}
+          <div className="flex flex-col gap-2 ml-4">
             <button
               type="button"
               onClick={onGpxRemove}

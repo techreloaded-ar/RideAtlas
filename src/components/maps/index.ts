@@ -30,5 +30,4 @@ export { useGPXMap } from '@/hooks/useGPXMap'
  * Deprecati - usare i nuovi componenti sopra
  */
 export { default as GPXMapViewer } from '../GPXMapViewer'
-export { default as GPXMapModal } from '../GPXMapModal'
 export { default as GPXAutoMapViewer } from '../GPXAutoMapViewer'
