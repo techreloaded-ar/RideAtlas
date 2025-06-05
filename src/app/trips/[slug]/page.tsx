@@ -8,6 +8,7 @@ import { UserRole } from '@/types/profile';
 import { MediaItem, GpxFile } from '@/types/trip';
 import MediaGallery from '@/components/MediaGallery';
 import GPXDownloadButton from '@/components/GPXDownloadButton';
+import GPXAutoMapViewer from '@/components/GPXAutoMapViewer';
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic';
@@ -196,6 +197,14 @@ export default async function TripDetailPage({ params }: { params: { slug: strin
                   </div>
                 )}
               </div>
+            </div>
+            
+            {/* Mappa automatica del percorso */}
+            <div className="mt-6">
+              <GPXAutoMapViewer 
+                gpxUrl={gpxFile.url}
+                tripTitle={trip.title}
+              />
             </div>
           </div>
         )}
