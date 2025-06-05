@@ -241,3 +241,146 @@ export function isValidGpxFileSize(file: File): boolean {
   const maxSize = 20 * 1024 * 1024 // 20MB in bytes
   return file.size <= maxSize
 }
+
+// Tipi per il parsing GPX dal contenuto
+export interface GPXPoint {
+  lat: number
+  lon: number
+  ele?: number
+  time?: string
+}
+
+export interface GPXSegment {
+  points: GPXPoint[]
+}
+
+export interface GPXTrack {
+  name?: string
+  segments: GPXSegment[]
+}
+
+export interface ParsedGPXData {
+  tracks: GPXTrack[]
+  waypoints: GPXPoint[]
+}
+
+/**
+ * Parsa il contenuto GPX da una stringa
+ */
+export function parseGPX(gpxContent: string): ParsedGPXData {
+  const parser = new XMLParser({
+    ignoreAttributes: false,
+    attributeNamePrefix: "@_",
+    parseAttributeValue: true,
+    parseTagValue: true,
+    trimValues: true
+  })
+  
+  const xmlDoc = parser.parse(gpxContent)
+  
+  if (!xmlDoc.gpx) {
+    throw new Error('File non è un GPX valido')
+  }
+
+  const gpx = xmlDoc.gpx
+  const result: ParsedGPXData = {
+    tracks: [],
+    waypoints: []
+  }
+
+  // Parsa le tracce (tracks)
+  let tracks = gpx.trk
+  if (!Array.isArray(tracks)) {
+    tracks = tracks ? [tracks] : []
+  }
+
+  for (const track of tracks) {
+    const gpxTrack: GPXTrack = {
+      name: track.name || undefined,
+      segments: []
+    }
+
+    let segments = track.trkseg
+    if (!Array.isArray(segments)) {
+      segments = segments ? [segments] : []
+    }
+
+    for (const segment of segments) {
+      const gpxSegment: GPXSegment = {
+        points: []
+      }
+
+      let trackPoints = segment.trkpt
+      if (!Array.isArray(trackPoints)) {
+        trackPoints = trackPoints ? [trackPoints] : []
+      }
+
+      for (const point of trackPoints) {
+        const lat = parseFloat(point['@_lat'])
+        const lon = parseFloat(point['@_lon'])
+        
+        if (isNaN(lat) || isNaN(lon)) {
+          continue
+        }
+
+        const gpxPoint: GPXPoint = {
+          lat,
+          lon
+        }
+
+        // Aggiungi elevazione se presente
+        if (point.ele) {
+          const elevation = parseFloat(point.ele)
+          if (!isNaN(elevation)) {
+            gpxPoint.ele = elevation
+          }
+        }
+
+        // Aggiungi timestamp se presente
+        if (point.time) {
+          gpxPoint.time = point.time
+        }
+
+        gpxSegment.points.push(gpxPoint)
+      }
+
+      if (gpxSegment.points.length > 0) {
+        gpxTrack.segments.push(gpxSegment)
+      }
+    }
+
+    if (gpxTrack.segments.length > 0) {
+      result.tracks.push(gpxTrack)
+    }
+  }
+
+  // Parsa i waypoints se presenti
+  let waypoints = gpx.wpt
+  if (!Array.isArray(waypoints)) {
+    waypoints = waypoints ? [waypoints] : []
+  }
+
+  for (const wpt of waypoints) {
+    const lat = parseFloat(wpt['@_lat'])
+    const lon = parseFloat(wpt['@_lon'])
+    
+    if (!isNaN(lat) && !isNaN(lon)) {
+      const waypoint: GPXPoint = { lat, lon }
+      
+      if (wpt.ele) {
+        const elevation = parseFloat(wpt.ele)
+        if (!isNaN(elevation)) {
+          waypoint.ele = elevation
+        }
+      }
+      
+      if (wpt.time) {
+        waypoint.time = wpt.time
+      }
+      
+      result.waypoints.push(waypoint)
+    }
+  }
+
+  return result
+}

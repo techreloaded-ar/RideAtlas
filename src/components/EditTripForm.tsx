@@ -5,9 +5,11 @@ import { useState, useEffect, FormEvent, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { RecommendedSeason, TripCreationData, Trip } from '@/types/trip';
 import { useTripForm } from '@/hooks/useTripForm';
+import { useGPXMap } from '@/hooks/useGPXMap';
 import { useToast } from '@/hooks/useToast';
 import MultimediaUpload from './MultimediaUpload';
 import GPXUpload from './GPXUpload';
+import GPXMapModal from './GPXMapModal';
 
 interface EditTripFormProps {
   tripId: string;
@@ -16,6 +18,7 @@ interface EditTripFormProps {
 const EditTripForm = ({ tripId }: EditTripFormProps) => {
   const router = useRouter();
   const { showSuccess, showError } = useToast();
+  const [isMapModalOpen, setIsMapModalOpen] = useState(false);
   
   const [initialData, setInitialData] = useState<Partial<TripCreationData & Pick<Trip, 'id'>> | null>(null);
   const [loadingTrip, setLoadingTrip] = useState(true);
@@ -51,7 +54,11 @@ const EditTripForm = ({ tripId }: EditTripFormProps) => {
   // Fetch trip data on mount
   useEffect(() => {
     fetchTrip();
-  }, [fetchTrip]);  const {
+  }, [fetchTrip]);
+
+  const { gpxData, loadGPXFromUrl, clearData } = useGPXMap();
+
+  const {
     formData,
     mediaItems,
     gpxFile,
@@ -92,9 +99,25 @@ const EditTripForm = ({ tripId }: EditTripFormProps) => {
     e.preventDefault();
     await submitForm();
   };
-
   const handleCancel = () => {
     router.push('/dashboard');
+  };
+
+  const handleViewMap = async () => {
+    if (gpxFile?.url) {
+      try {
+        await loadGPXFromUrl(gpxFile.url);
+        setIsMapModalOpen(true);
+      } catch (error) {
+        console.error('Errore nel caricamento della mappa:', error);
+        showError('Errore nel caricamento della mappa. Riprova più tardi.');
+      }
+    }
+  };
+
+  const handleCloseModal = () => {
+    setIsMapModalOpen(false);
+    clearData();
   };
 
   // Loading state while fetching trip
@@ -315,13 +338,12 @@ const EditTripForm = ({ tripId }: EditTripFormProps) => {
           <option value={RecommendedSeason.Tutte}>Tutte</option>
         </select>
         {fieldErrors?.recommended_season && <p className="text-xs text-red-500 mt-1">{fieldErrors.recommended_season.join(', ')}</p>}
-      </div>
-
-      {/* GPX Upload Section */}
+      </div>      {/* GPX Upload Section */}
       <GPXUpload
         gpxFile={gpxFile}
         onGpxUpload={setGpxFile}
         onGpxRemove={removeGpxFile}
+        onViewMap={gpxFile ? handleViewMap : undefined}
         isUploading={isLoading}
       />
 
@@ -346,9 +368,7 @@ const EditTripForm = ({ tripId }: EditTripFormProps) => {
           placeholder="Racconta curiosità, fatti storici, luoghi d'interesse e altre informazioni utili per i motociclisti..."
         />
         {fieldErrors?.insights && <p className="text-xs text-red-500 mt-1">{fieldErrors.insights.join(', ')}</p>}
-      </div>
-
-      <div className="flex gap-4 pt-5">
+      </div>      <div className="flex gap-4 pt-5">
         <button
           type="button"
           onClick={handleCancel}
@@ -364,6 +384,14 @@ const EditTripForm = ({ tripId }: EditTripFormProps) => {
           {isLoading ? 'Salvataggio...' : 'Salva Modifiche'}
         </button>
       </div>
+
+      {/* GPX Map Modal */}
+      <GPXMapModal
+        isOpen={isMapModalOpen}
+        onClose={handleCloseModal}
+        gpxData={gpxData}
+        tripName={formData.title || 'Viaggio'}
+      />
     </form>
   );
 };
