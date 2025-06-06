@@ -166,7 +166,7 @@ export default function FullscreenMapModal({
             <div className="flex flex-wrap items-center justify-center text-sm text-gray-600 gap-6">
               <div className="flex items-center space-x-2">
                 <div className="w-3 h-0.5 bg-blue-500 rounded"></div>
-                <span><span className="font-medium">Punti tracciato:</span> {gpxData.length.toLocaleString()}</span>
+                <span><span className="font-medium">Tracce:</span> 1</span>
               </div>
               
               {waypoints.length > 0 && (
@@ -179,7 +179,7 @@ export default function FullscreenMapModal({
               {routes.length > 0 && (
                 <div className="flex items-center space-x-2">
                   <div className="w-3 h-0.5 bg-red-600 rounded border-dashed border border-red-300"></div>
-                  <span><span className="font-medium">Rotte:</span> {routes.length}</span>
+                  <span><span className="font-medium">Percorsi Consigliati:</span> {routes.length}</span>
                 </div>
               )}
             </div>
