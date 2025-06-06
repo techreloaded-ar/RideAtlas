@@ -11,6 +11,8 @@ export { default as UnifiedGPXMapViewer } from '../UnifiedGPXMapViewer'
 export { default as SimpleMapViewer } from './SimpleMapViewer'
 export { default as InteractiveMapModal } from './InteractiveMapModal'
 export { default as AutoLoadMapViewer } from './AutoLoadMapViewer'
+export { default as FullscreenMapModal } from './FullscreenMapModal'
+export { default as MapWithFullscreen } from './MapWithFullscreen'
 
 // Tipi condivisi
 export type {

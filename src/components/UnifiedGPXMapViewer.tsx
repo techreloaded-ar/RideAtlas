@@ -3,7 +3,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { MapContainer, TileLayer, Polyline, Marker, Popup, useMap } from 'react-leaflet'
-import { Download, Maximize2, Minimize2, Route, MapPin } from 'lucide-react'
+import { Download, Route, MapPin, Maximize2 } from 'lucide-react'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import { MapViewerProps } from '@/types/gpx'
@@ -70,11 +70,11 @@ export default function UnifiedGPXMapViewer({
   defaultCenter = [45.0, 7.0], // Default su Piemonte
   defaultZoom = 10,
   title,
-  onDownload
+  onDownload,
+  onFullscreenClick
 }: MapViewerProps) {
   const mapRef = useRef<L.Map | null>(null)
   const waypointIcon = useWaypointIcon()
-  const [isFullscreen, setIsFullscreen] = useState(false)
 
   // Inizializza Leaflet solo lato client
   useEffect(() => {
@@ -110,18 +110,16 @@ export default function UnifiedGPXMapViewer({
   const polylinePositions: [number, number][] = gpxData.map(point => [point.lat, point.lng])
 
   const handleFullscreen = () => {
-    setIsFullscreen(!isFullscreen)
+    if (onFullscreenClick) {
+      onFullscreenClick()
+    }
   }
 
-  const containerClass = isFullscreen 
-    ? 'fixed inset-0 z-50 bg-white'
-    : `w-full ${height} ${className}`
-
   return (
-    <div className={containerClass}>
+    <div className={`w-full ${height} ${className} flex flex-col`}>
       {/* Header con controlli opzionali */}
       {(showControls || title) && (
-        <div className="flex items-center justify-between p-3 border-b bg-white">
+        <div className="flex items-center justify-between p-3 border-b bg-white flex-shrink-0">
           {title && (
             <h3 className="text-lg font-semibold flex items-center text-gray-900">
               <Route className="w-5 h-5 mr-2 text-blue-600" />
@@ -141,15 +139,13 @@ export default function UnifiedGPXMapViewer({
                 </button>
               )}
               
-              {enableFullscreen && (
+              {enableFullscreen && onFullscreenClick && (
                 <button
                   onClick={handleFullscreen}
                   className="flex items-center gap-2 px-3 py-1.5 text-sm border border-gray-300 rounded-md hover:bg-gray-50"
                 >
-                  {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
-                  <span className="hidden sm:inline">
-                    {isFullscreen ? 'Riduci' : 'Espandi'}
-                  </span>
+                  <Maximize2 className="w-4 h-4" />
+                  <span className="hidden sm:inline">Espandi</span>
                 </button>
               )}
             </div>
@@ -158,7 +154,7 @@ export default function UnifiedGPXMapViewer({
       )}
 
       {/* Mappa */}
-      <div className={`${isFullscreen ? 'h-full' : 'h-full'} w-full`}>
+      <div className="flex-1 w-full min-h-0">
         {gpxData.length > 0 ? (
           <MapContainer
             center={center}
@@ -240,24 +236,38 @@ export default function UnifiedGPXMapViewer({
 
       {/* Footer informazioni opzionale */}
       {showInfoFooter && gpxData.length > 0 && (
-        <div className="p-3 bg-gray-50 border-t border-gray-200">
-          <div className="flex flex-wrap items-center text-xs text-gray-600 gap-4">
-            <span>
-              <span className="font-medium">Punti:</span> {gpxData.length.toLocaleString()}
-            </span>
-            {waypoints.length > 0 && (
+        <div className="p-3 bg-gray-50 border-t border-gray-200 flex-shrink-0">
+          <div className="flex items-center justify-between">
+            <div className="flex flex-wrap items-center text-xs text-gray-600 gap-4">
               <span>
-                <span className="font-medium">Waypoints:</span> {waypoints.length}
+                <span className="font-medium">Punti:</span> {gpxData.length.toLocaleString()}
               </span>
-            )}
-            {routes.length > 0 && (
-              <span>
-                <span className="font-medium">Rotte:</span> {routes.length}
+              {waypoints.length > 0 && (
+                <span>
+                  <span className="font-medium">Waypoints:</span> {waypoints.length}
+                </span>
+              )}
+              {routes.length > 0 && (
+                <span>
+                  <span className="font-medium">Rotte:</span> {routes.length}
+                </span>
+              )}
+              <span className="text-blue-600">
+                📍 Traccia GPS (blu) • 🗺️ Rotte pianificate (rosso tratteggiato) • 📍 Waypoints (arancione)
               </span>
+            </div>
+            
+            {/* Icona fullscreen nel footer */}
+            {enableFullscreen && onFullscreenClick && (
+              <button
+                onClick={handleFullscreen}
+                className="flex items-center gap-1 px-2 py-1 text-xs text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                title="Apri in fullscreen"
+              >
+                <Maximize2 className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Fullscreen</span>
+              </button>
             )}
-            <span className="text-blue-600">
-              📍 Traccia GPS (blu) • 🗺️ Rotte pianificate (rosso tratteggiato) • 📍 Waypoints (arancione)
-            </span>
           </div>
         </div>
       )}

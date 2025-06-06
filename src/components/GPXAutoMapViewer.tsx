@@ -5,8 +5,8 @@ import { useGPXMap } from '@/hooks/useGPXMap'
 import dynamic from 'next/dynamic'
 import { MapPin, Route, AlertCircle } from 'lucide-react'
 
-// Import dinamico del GPXMapViewer per evitare problemi SSR
-const GPXMapViewer = dynamic(() => import('./GPXMapViewer'), {
+// Import dinamico del nuovo MapWithFullscreen per evitare problemi SSR
+const MapWithFullscreen = dynamic(() => import('./maps/MapWithFullscreen'), {
   ssr: false,
   loading: () => (
     <div className="h-96 w-full bg-gray-100 flex items-center justify-center rounded-lg">
@@ -103,34 +103,13 @@ export default function GPXAutoMapViewer({
       </div>
       
       <div className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
-        <GPXMapViewer
+        <MapWithFullscreen
           gpxData={gpxData}
           routes={routes}
           waypoints={waypoints}
-          className="h-96"
+          height="h-96"
+          showInfoFooter={true}
         />
-        
-        {/* Footer informazioni */}
-        <div className="p-3 bg-gray-50 border-t border-gray-200">
-          <div className="flex flex-wrap items-center text-xs text-gray-600 gap-4">
-            <span>
-              <span className="font-medium">Punti:</span> {gpxData.length.toLocaleString()}
-            </span>
-            {waypoints.length > 0 && (
-              <span>
-                <span className="font-medium">Waypoints:</span> {waypoints.length}
-              </span>
-            )}
-            {routes.length > 0 && (
-              <span>
-                <span className="font-medium">Rotte:</span> {routes.length}
-              </span>
-            )}
-            <span className="text-blue-600">
-              📍 Traccia GPS (blu) • 🗺️ Rotte pianificate (rosso tratteggiato) • 📍 Waypoints (arancione)
-            </span>
-          </div>
-        </div>
       </div>
     </div>
   )

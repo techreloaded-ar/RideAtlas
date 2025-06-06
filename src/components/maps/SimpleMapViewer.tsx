@@ -6,7 +6,7 @@ import { GPXPoint, GPXWaypoint, GPXRoute } from '@/types/gpx'
 import { MapPin, Route } from 'lucide-react'
 
 // Import dinamico per evitare problemi SSR
-const UnifiedGPXMapViewer = dynamic(() => import('../UnifiedGPXMapViewer'), {
+const MapWithFullscreen = dynamic(() => import('./MapWithFullscreen'), {
   ssr: false,
   loading: () => (
     <div className="h-96 w-full bg-gray-100 flex items-center justify-center rounded-lg">
@@ -72,13 +72,12 @@ export default function SimpleMapViewer({
       )}
       
       <div className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
-        <UnifiedGPXMapViewer
+        <MapWithFullscreen
           gpxData={gpxData}
           routes={routes}
           waypoints={waypoints}
           height={height}
           showInfoFooter={showInfoFooter}
-          autoFit={true}
         />
       </div>
     </div>

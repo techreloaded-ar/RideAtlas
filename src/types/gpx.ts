@@ -46,4 +46,5 @@ export interface MapViewerProps extends MapConfig {
   waypoints?: GPXWaypoint[]
   title?: string
   onDownload?: () => void
+  onFullscreenClick?: () => void
 }
