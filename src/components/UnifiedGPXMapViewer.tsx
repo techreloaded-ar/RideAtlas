@@ -109,7 +109,9 @@ export default function UnifiedGPXMapViewer({
   // Converti i punti GPX in formato per Polyline
   const polylinePositions: [number, number][] = gpxData.map(point => [point.lat, point.lng])
 
-  const handleFullscreen = () => {
+  const handleFullscreen = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
     if (onFullscreenClick) {
       onFullscreenClick()
     }
@@ -131,6 +133,7 @@ export default function UnifiedGPXMapViewer({
             <div className="flex items-center gap-2">
               {enableDownload && onDownload && (
                 <button
+                  type="button"
                   onClick={onDownload}
                   className="flex items-center gap-2 px-3 py-1.5 text-sm border border-gray-300 rounded-md hover:bg-gray-50"
                 >
@@ -141,6 +144,7 @@ export default function UnifiedGPXMapViewer({
               
               {enableFullscreen && onFullscreenClick && (
                 <button
+                  type="button"
                   onClick={handleFullscreen}
                   className="flex items-center gap-2 px-3 py-1.5 text-sm border border-gray-300 rounded-md hover:bg-gray-50"
                 >
@@ -260,6 +264,7 @@ export default function UnifiedGPXMapViewer({
             {/* Icona fullscreen nel footer */}
             {enableFullscreen && onFullscreenClick && (
               <button
+                type="button"
                 onClick={handleFullscreen}
                 className="flex items-center gap-1 px-2 py-1 text-xs text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
                 title="Apri in fullscreen"

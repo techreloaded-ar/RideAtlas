@@ -117,6 +117,7 @@ export default function FullscreenMapModal({
             {/* Pulsante Download se disponibile */}
             {onDownloadGpx && (
               <button
+                type="button"
                 onClick={onDownloadGpx}
                 className="inline-flex items-center px-4 py-2 text-sm font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 hover:border-blue-300 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
               >
@@ -129,6 +130,7 @@ export default function FullscreenMapModal({
             
             {/* Pulsante Chiudi */}
             <button
+              type="button"
               onClick={onClose}
               className="inline-flex items-center p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
               aria-label="Chiudi mappa"
