@@ -95,14 +95,18 @@ export default function FullscreenMapModal({
         isOpen ? 'scale-100 translate-y-0' : 'scale-95 translate-y-4'
       }`}>
         
-        {/* Pulsante Chiudi sovrapposto alla mappa */}
+        {/* Pulsante Chiudi elegante con design ultra-moderno */}
         <button
           type="button"
           onClick={onClose}
-          className="fixed top-4 right-4 z-[10000] inline-flex items-center p-3 text-white bg-black/70 hover:bg-black/90 rounded-full shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-black/50 backdrop-blur-sm"
-          aria-label="Chiudi mappa"
+          className="fixed top-6 right-6 z-[10000] group inline-flex items-center justify-center w-14 h-14 text-white bg-gradient-to-br from-white/15 to-white/5 hover:from-white/25 hover:to-white/10 backdrop-blur-xl border border-white/30 rounded-2xl shadow-2xl transition-all duration-300 ease-out hover:scale-110 hover:rotate-3 focus:outline-none focus:ring-2 focus:ring-white/60 focus:ring-offset-2 focus:ring-offset-transparent active:scale-95"
+          aria-label="Chiudi mappa fullscreen"
         >
-          <X className="w-6 h-6" />
+          <X className="w-6 h-6 group-hover:rotate-90 transition-transform duration-300 drop-shadow-lg" />
+          <span className="absolute -bottom-10 left-1/2 transform -translate-x-1/2 px-3 py-2 bg-black/90 text-white text-xs font-medium rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-300 backdrop-blur-md whitespace-nowrap shadow-xl border border-white/10">
+            Chiudi (ESC)
+            <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1 w-0 h-0 border-l-2 border-r-2 border-b-2 border-transparent border-b-black/90"></div>
+          </span>
         </button>
         
         {/* Contenuto mappa fullscreen */}
@@ -125,28 +129,47 @@ export default function FullscreenMapModal({
           />
         </div>
         
-        {/* Footer informazioni con design elegante */}
+        {/* Footer informazioni con design ultra-premium */}
         {gpxData.length > 0 && (
-          <div className="bg-white/95 backdrop-blur-sm border-t border-gray-200/50 px-6 py-3">
-            <div className="flex flex-wrap items-center justify-center text-sm text-gray-600 gap-6">
-              <div className="flex items-center space-x-2">
-                <div className="w-3 h-0.5 bg-blue-500 rounded"></div>
-                <span><span className="font-medium">Tracce:</span> 1</span>
+          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/95 via-black/80 to-transparent backdrop-blur-2xl border-t border-white/20">
+            <div className="px-8 py-8">
+              <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-white/95">
+                <div className="flex items-center space-x-3 bg-gradient-to-r from-blue-500/20 to-blue-600/20 px-5 py-3 rounded-2xl border border-blue-400/30 backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+                  <div className="w-4 h-1 bg-gradient-to-r from-blue-400 to-blue-500 rounded-full shadow-lg animate-pulse"></div>
+                  <span><span className="font-bold text-white">Tracce GPS:</span> <span className="text-blue-300 font-semibold">1</span></span>
+                </div>
+                
+                {waypoints.length > 0 && (
+                  <div className="flex items-center space-x-3 bg-gradient-to-r from-orange-500/20 to-amber-500/20 px-5 py-3 rounded-2xl border border-orange-400/30 backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+                    <div className="w-4 h-4 bg-gradient-to-br from-orange-400 to-amber-500 rounded-full shadow-lg animate-pulse"></div>
+                    <span><span className="font-bold text-white">Waypoints:</span> <span className="text-orange-300 font-semibold">{waypoints.length}</span></span>
+                  </div>
+                )}
+                
+                {routes.length > 0 && (
+                  <div className="flex items-center space-x-3 bg-gradient-to-r from-red-500/20 to-pink-500/20 px-5 py-3 rounded-2xl border border-red-400/30 backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+                    <div className="w-4 h-1 bg-gradient-to-r from-red-400 to-pink-500 rounded-full shadow-lg animate-pulse"></div>
+                    <span><span className="font-bold text-white">Percorsi:</span> <span className="text-red-300 font-semibold">{routes.length}</span></span>
+                  </div>
+                )}
               </div>
               
-              {waypoints.length > 0 && (
-                <div className="flex items-center space-x-2">
-                  <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
-                  <span><span className="font-medium">Waypoints:</span> {waypoints.length}</span>
+              {/* Indicatore di modalità fullscreen migliorato */}
+              <div className="flex justify-center mt-6">
+                <div className="flex items-center space-x-3 bg-white/10 px-4 py-2 rounded-full border border-white/20 backdrop-blur-md">
+                  <div className="flex space-x-1">
+                    <div className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></div>
+                    <div className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" style={{animationDelay: '0.2s'}}></div>
+                    <div className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" style={{animationDelay: '0.4s'}}></div>
+                  </div>
+                  <span className="text-white/80 text-xs font-medium">Modalità Fullscreen Attiva</span>
+                  <div className="flex space-x-1">
+                    <div className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" style={{animationDelay: '0.6s'}}></div>
+                    <div className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" style={{animationDelay: '0.8s'}}></div>
+                    <div className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" style={{animationDelay: '1s'}}></div>
+                  </div>
                 </div>
-              )}
-              
-              {routes.length > 0 && (
-                <div className="flex items-center space-x-2">
-                  <div className="w-3 h-0.5 bg-red-600 rounded border-dashed border border-red-300"></div>
-                  <span><span className="font-medium">Percorsi Consigliati:</span> {routes.length}</span>
-                </div>
-              )}
+              </div>
             </div>
           </div>
         )}

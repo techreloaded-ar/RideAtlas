@@ -162,10 +162,10 @@ export default function UnifiedGPXMapViewer({
                 <button
                   type="button"
                   onClick={onDownload}
-                  className="flex items-center gap-2 px-3 py-1.5 text-sm border border-gray-300 rounded-md hover:bg-gray-50"
+                  className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 hover:border-blue-300 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 shadow-sm"
                 >
                   <Download className="w-4 h-4" />
-                  <span className="hidden sm:inline">Scarica</span>
+                  <span className="hidden sm:inline">Scarica GPX</span>
                 </button>
               )}
               
@@ -173,10 +173,10 @@ export default function UnifiedGPXMapViewer({
                 <button
                   type="button"
                   onClick={handleFullscreen}
-                  className="flex items-center gap-2 px-3 py-1.5 text-sm border border-gray-300 rounded-md hover:bg-gray-50"
+                  className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-indigo-700 bg-indigo-50 border border-indigo-200 rounded-lg hover:bg-indigo-100 hover:border-indigo-300 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 shadow-sm"
                 >
                   <Maximize2 className="w-4 h-4" />
-                  <span className="hidden sm:inline">Espandi</span>
+                  <span className="hidden sm:inline">Fullscreen</span>
                 </button>
               )}
             </div>
@@ -186,9 +186,9 @@ export default function UnifiedGPXMapViewer({
 
       {/* Mappa */}
       <div className="flex-1 w-full min-h-0 relative">
-        {/* LayerControl avanzato (se abilitato) */}
+        {/* LayerControl avanzato (se abilitato) - Posizionato a sinistra sotto i controlli zoom */}
         {showLayerControls && (allTracks.length > 0 || routes.length > 0 || waypoints.length > 0) && (
-          <div className="absolute top-16 right-4 z-[1000]">
+          <div className="absolute top-20 left-4 z-[1000]">
             <LayerControl
               tracks={allTracks}
               routes={routes}
@@ -199,6 +199,7 @@ export default function UnifiedGPXMapViewer({
               onTrackToggle={handleTrackToggle}
               onRouteToggle={handleRouteToggle}
               onWaypointsToggle={handleWaypointsToggle}
+              className="compact-style"
             />
           </div>
         )}
