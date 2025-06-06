@@ -50,32 +50,39 @@ export default function UnifiedGPXMapViewer({
   // Legacy support
   gpxData = []
 }: MapViewerProps) {
-  // Converti i dati legacy in formato tracks con useMemo per evitare re-render
+  // Converti i dati legacy in formato tracks con useMemo stabile
   const allTracks: GPXTrack[] = useMemo(() => {
     return tracks.length > 0 
       ? tracks 
       : gpxData.length > 0 
         ? [{ name: 'Traccia principale', points: gpxData, color: '#3b82f6' }] 
         : []
-  }, [tracks, gpxData])
+  }, [tracks.length, gpxData.length])
   
-  // Stati per controllare la visibilità dei layer
-  const [visibleTracks, setVisibleTracks] = useState<boolean[]>(
-    allTracks.map(() => defaultShowTracks)
+  // Calcola gli stati iniziali per evitare useEffect
+  const initialVisibleTracks = useMemo(() => 
+    allTracks.map(() => defaultShowTracks), 
+    [allTracks.length, defaultShowTracks]
   )
-  const [visibleRoutes, setVisibleRoutes] = useState<boolean[]>(
-    routes.map(() => defaultShowRoutes)
+  
+  const initialVisibleRoutes = useMemo(() => 
+    routes.map(() => defaultShowRoutes), 
+    [routes.length, defaultShowRoutes]
   )
+  
+  // Stati per controllare la visibilità dei layer - inizializzati correttamente
+  const [visibleTracks, setVisibleTracks] = useState<boolean[]>(initialVisibleTracks)
+  const [visibleRoutes, setVisibleRoutes] = useState<boolean[]>(initialVisibleRoutes)
   const [visibleWaypoints, setVisibleWaypoints] = useState(defaultShowWaypoints)
 
-  // Aggiorna gli stati quando cambiano le props
+  // Aggiorna solo quando cambiano effettivamente i dati
   useEffect(() => {
-    setVisibleTracks(allTracks.map(() => defaultShowTracks))
-  }, [allTracks, defaultShowTracks])
+    setVisibleTracks(initialVisibleTracks)
+  }, [initialVisibleTracks.length])
 
   useEffect(() => {
-    setVisibleRoutes(routes.map(() => defaultShowRoutes))
-  }, [routes, defaultShowRoutes])
+    setVisibleRoutes(initialVisibleRoutes)
+  }, [initialVisibleRoutes.length])
 
   // SSR protection - non renderizzare lato server
   const [isClient, setIsClient] = useState(false)
@@ -181,7 +188,7 @@ export default function UnifiedGPXMapViewer({
       <div className="flex-1 w-full min-h-0 relative">
         {/* LayerControl avanzato (se abilitato) */}
         {showLayerControls && (allTracks.length > 0 || routes.length > 0 || waypoints.length > 0) && (
-          <div className="absolute top-4 left-4 z-[1000]">
+          <div className="absolute top-16 right-4 z-[1000]">
             <LayerControl
               tracks={allTracks}
               routes={routes}

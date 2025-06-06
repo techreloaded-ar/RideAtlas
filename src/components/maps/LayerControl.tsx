@@ -34,7 +34,7 @@ export default function LayerControl({
   onWaypointsToggle,
   className = ''
 }: LayerControlProps) {
-  const [isExpanded, setIsExpanded] = useState(true)
+  const [isExpanded, setIsExpanded] = useState(false)
 
   const hasLayers = tracks.length > 0 || routes.length > 0 || waypoints.length > 0
 
@@ -52,7 +52,6 @@ export default function LayerControl({
       >
         <span className="flex items-center gap-2">
           <Navigation className="w-4 h-4 text-blue-600" />
-          Layer Mappa
         </span>
         {isExpanded ? (
           <ChevronUp className="w-4 h-4" />

@@ -21,7 +21,11 @@ export default function RootLayout({
   return (
     <html lang="it">
       <body className={`${inter.variable} ${montserrat.variable} font-sans min-h-screen flex flex-col`}>
-        <SessionProvider>
+        <SessionProvider 
+          refetchInterval={0}
+          refetchOnWindowFocus={false}
+          refetchWhenOffline={false}
+        >
           <Navbar />
           <div className="flex-grow">
             {children}

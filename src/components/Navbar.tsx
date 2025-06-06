@@ -7,7 +7,12 @@ import { useSession, signOut } from 'next-auth/react';
 import UserAvatar from '@/components/UserAvatar';
 
 export default function Navbar() {
-  const { data: session, status } = useSession();
+  const { data: session, status } = useSession({
+    required: false,
+    onUnauthenticated() {
+      // Don't redirect, just handle the unauthenticated state
+    }
+  });
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
