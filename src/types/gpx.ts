@@ -49,6 +49,7 @@ export interface MapConfig {
   defaultShowTracks?: boolean
   defaultShowRoutes?: boolean
   defaultShowWaypoints?: boolean
+  isFullscreenMode?: boolean
 }
 
 export interface MapViewerProps extends MapConfig {
@@ -58,6 +59,7 @@ export interface MapViewerProps extends MapConfig {
   title?: string
   onDownload?: () => void
   onFullscreenClick?: () => void
+  onFullscreenClose?: () => void
   // Legacy support
   gpxData?: GPXPoint[]
 }

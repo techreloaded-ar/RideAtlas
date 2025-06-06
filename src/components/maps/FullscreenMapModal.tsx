@@ -2,7 +2,6 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { X } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import { GPXPoint, GPXWaypoint, GPXRoute } from '@/types/gpx'
 
@@ -95,20 +94,6 @@ export default function FullscreenMapModal({
         isOpen ? 'scale-100 translate-y-0' : 'scale-95 translate-y-4'
       }`}>
         
-        {/* Pulsante Chiudi elegante con design ultra-moderno */}
-        <button
-          type="button"
-          onClick={onClose}
-          className="fixed top-6 right-6 z-[10000] group inline-flex items-center justify-center w-14 h-14 text-white bg-gradient-to-br from-white/15 to-white/5 hover:from-white/25 hover:to-white/10 backdrop-blur-xl border border-white/30 rounded-2xl shadow-2xl transition-all duration-300 ease-out hover:scale-110 hover:rotate-3 focus:outline-none focus:ring-2 focus:ring-white/60 focus:ring-offset-2 focus:ring-offset-transparent active:scale-95"
-          aria-label="Chiudi mappa fullscreen"
-        >
-          <X className="w-6 h-6 group-hover:rotate-90 transition-transform duration-300 drop-shadow-lg" />
-          <span className="absolute -bottom-10 left-1/2 transform -translate-x-1/2 px-3 py-2 bg-black/90 text-white text-xs font-medium rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-300 backdrop-blur-md whitespace-nowrap shadow-xl border border-white/10">
-            Chiudi (ESC)
-            <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1 w-0 h-0 border-l-2 border-r-2 border-b-2 border-transparent border-b-black/90"></div>
-          </span>
-        </button>
-        
         {/* Contenuto mappa fullscreen */}
         <div className="flex-1 bg-white">
           <UnifiedGPXMapViewer 
@@ -126,6 +111,8 @@ export default function FullscreenMapModal({
             defaultShowTracks={true}
             defaultShowRoutes={true}
             defaultShowWaypoints={true}
+            isFullscreenMode={true}
+            onFullscreenClose={onClose}
           />
         </div>
         

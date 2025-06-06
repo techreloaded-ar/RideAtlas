@@ -2,7 +2,7 @@
 'use client'
 
 import { useEffect, useState, useMemo } from 'react'
-import { Download, Route, MapPin, Maximize2 } from 'lucide-react'
+import { Download, Route, MapPin, Maximize2, X } from 'lucide-react'
 import { MapViewerProps, GPXTrack } from '@/types/gpx'
 import LayerControl from './maps/LayerControl'
 import dynamic from 'next/dynamic'
@@ -43,10 +43,12 @@ export default function UnifiedGPXMapViewer({
   title,
   onDownload,
   onFullscreenClick,
+  onFullscreenClose,
   showLayerControls = false,
   defaultShowTracks = true,
   defaultShowRoutes = true,
   defaultShowWaypoints = true,
+  isFullscreenMode = false,
   // Legacy support
   gpxData = []
 }: MapViewerProps) {
@@ -144,6 +146,14 @@ export default function UnifiedGPXMapViewer({
     }
   }
 
+  const handleFullscreenClose = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    if (onFullscreenClose) {
+      onFullscreenClose()
+    }
+  }
+
   return (
     <div className={`w-full ${height} ${className} flex flex-col`}>
       {/* Header con titolo e controlli opzionali */}
@@ -201,6 +211,41 @@ export default function UnifiedGPXMapViewer({
               onWaypointsToggle={handleWaypointsToggle}
               className="compact-style"
             />
+          </div>
+        )}
+
+        {/* Bottone Fullscreen/Close all'interno della mappa */}
+        {(enableFullscreen || isFullscreenMode) && (
+          <div className="absolute top-[10px] right-[10px] z-[1000]">
+            {isFullscreenMode ? (
+              // Bottone chiusura fullscreen (stile identico a FullscreenMapModal)
+              <button
+                type="button"
+                onClick={handleFullscreenClose}
+                className="group inline-flex items-center justify-center w-14 h-14 text-white bg-gradient-to-br from-white/15 to-white/5 hover:from-white/25 hover:to-white/10 backdrop-blur-xl border border-white/30 rounded-2xl shadow-2xl transition-all duration-300 ease-out hover:scale-110 hover:rotate-3 focus:outline-none focus:ring-2 focus:ring-white/60 focus:ring-offset-2 focus:ring-offset-transparent active:scale-95"
+                aria-label="Chiudi mappa fullscreen"
+              >
+                <X className="w-6 h-6 group-hover:rotate-90 transition-transform duration-300 drop-shadow-lg" />
+                <span className="absolute -bottom-10 left-1/2 transform -translate-x-1/2 px-3 py-2 bg-black/90 text-white text-xs font-medium rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-300 backdrop-blur-md whitespace-nowrap shadow-xl border border-white/10">
+                  Chiudi (ESC)
+                  <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1 w-0 h-0 border-l-2 border-r-2 border-b-2 border-transparent border-b-black/90"></div>
+                </span>
+              </button>
+            ) : (
+              // Bottone apertura fullscreen
+              <button
+                type="button"
+                onClick={handleFullscreen}
+                className="group inline-flex items-center justify-center w-14 h-14 text-gray-700 bg-white/90 hover:bg-white backdrop-blur-xl border border-gray-200/80 hover:border-gray-300 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 ease-out hover:scale-110 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 active:scale-95"
+                aria-label="Apri in fullscreen"
+              >
+                <Maximize2 className="w-6 h-6 transition-transform duration-300 group-hover:scale-110" />
+                <span className="absolute -bottom-10 left-1/2 transform -translate-x-1/2 px-3 py-2 bg-gray-900 text-white text-xs font-medium rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-300 backdrop-blur-md whitespace-nowrap shadow-xl border border-white/10">
+                  Fullscreen
+                  <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1 w-0 h-0 border-l-2 border-r-2 border-b-2 border-transparent border-b-gray-900"></div>
+                </span>
+              </button>
+            )}
           </div>
         )}
 
@@ -268,19 +313,6 @@ export default function UnifiedGPXMapViewer({
                 </div>
               )}
             </div>
-            
-            {/* Icona fullscreen nel footer */}
-            {enableFullscreen && onFullscreenClick && (
-              <button
-                type="button"
-                onClick={handleFullscreen}
-                className="flex items-center gap-1 px-2 py-1 text-xs text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
-                title="Apri in fullscreen"
-              >
-                <Maximize2 className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Fullscreen</span>
-              </button>
-            )}
           </div>
         </div>
       )}
