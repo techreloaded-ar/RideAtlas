@@ -46,17 +46,17 @@ export default function LayerControl({
   const isCompact = className.includes('compact-style')
 
   return (
-    <div className={`bg-white border border-gray-300 shadow-md ${isCompact ? 'rounded-md w-[26px]' : 'rounded-lg shadow-sm'} ${className}`}>
+    <div className={`bg-white border border-gray-300 shadow-md ${isCompact ? 'rounded-md w-[32px]' : 'rounded-lg shadow-sm'} ${className}`}>
       {/* Header del controllo - stile identico ai bottoni zoom */}
       <button
         type="button"
         onClick={() => setIsExpanded(!isExpanded)}
-        className={`${isCompact ? 'w-[26px] h-[26px] flex items-center justify-center p-0 hover:bg-gray-100' : 'w-full flex items-center justify-between p-3 text-sm hover:bg-gray-50'} font-medium text-gray-700 ${isCompact ? 'rounded-md' : 'border-b border-gray-200 rounded-t-lg'} transition-colors duration-200`}
+        className={`${isCompact ? 'w-[32px] h-[32px] flex items-center justify-center p-0 hover:bg-gray-100 relative' : 'w-full flex items-center justify-between p-3 text-sm hover:bg-gray-50'} font-medium text-gray-700 ${isCompact ? 'rounded-md' : 'border-b border-gray-200 rounded-t-lg'} transition-colors duration-200`}
         title="Controlli Layer"
       >
         {isCompact ? (
           // Modalità compatta: icona Navigation blu centrata come bottoni zoom
-          <Navigation className="w-4 h-4 text-blue-600" />
+          <Navigation className="w-4 h-4 text-blue-600 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
         ) : (
           // Modalità normale: layout con testo
           <>

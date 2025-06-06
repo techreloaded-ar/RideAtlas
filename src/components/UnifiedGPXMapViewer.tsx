@@ -186,9 +186,9 @@ export default function UnifiedGPXMapViewer({
 
       {/* Mappa */}
       <div className="flex-1 w-full min-h-0 relative">
-        {/* LayerControl avanzato (se abilitato) - Posizionato a sinistra sotto i controlli zoom */}
+        {/* LayerControl avanzato (se abilitato) - Posizionato perfettamente allineato con i controlli zoom */}
         {showLayerControls && (allTracks.length > 0 || routes.length > 0 || waypoints.length > 0) && (
-          <div className="absolute top-20 left-4 z-[1000]">
+          <div className="absolute top-[80px] left-[10px] z-[1000]">
             <LayerControl
               tracks={allTracks}
               routes={routes}
