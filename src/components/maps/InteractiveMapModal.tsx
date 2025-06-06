@@ -18,11 +18,13 @@ const UnifiedGPXMapViewer = dynamic(() => import('../UnifiedGPXMapViewer'), {
 interface InteractiveMapModalProps {
   isOpen: boolean
   onClose: () => void
-  gpxData: GPXPoint[]
+  tracks?: GPXRoute[] // Support for multiple tracks
   routes?: GPXRoute[]
   waypoints?: GPXWaypoint[]
   tripName?: string
   onDownloadGpx?: () => void
+  // Legacy support
+  gpxData?: GPXPoint[]
 }
 
 /**
@@ -32,11 +34,13 @@ interface InteractiveMapModalProps {
 export default function InteractiveMapModal({
   isOpen,
   onClose,
-  gpxData,
+  tracks = [],
   routes = [],
   waypoints = [],
   tripName = 'Viaggio',
-  onDownloadGpx
+  onDownloadGpx,
+  // Legacy support
+  gpxData = []
 }: InteractiveMapModalProps) {
   
   // Reset fullscreen quando il modal si chiude
@@ -123,7 +127,7 @@ export default function InteractiveMapModal({
               <div className="absolute bottom-0 right-0 w-20 h-20 bg-gradient-to-tl from-indigo-500/10 to-transparent rounded-tl-2xl"></div>
               
               <UnifiedGPXMapViewer 
-                gpxData={gpxData}
+                tracks={tracks}
                 routes={routes}
                 waypoints={waypoints}
                 height="h-full"
@@ -133,6 +137,8 @@ export default function InteractiveMapModal({
                 onDownload={onDownloadGpx}
                 autoFit={true}
                 className="rounded-2xl"
+                // Legacy support
+                gpxData={gpxData}
               />
             </div>
           </div>

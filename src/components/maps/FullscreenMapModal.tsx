@@ -17,9 +17,11 @@ const UnifiedGPXMapViewer = dynamic(() => import('../UnifiedGPXMapViewer'), {
 interface FullscreenMapModalProps {
   isOpen: boolean
   onClose: () => void
-  gpxData: GPXPoint[]
+  tracks?: GPXRoute[] // Support for multiple tracks
   routes?: GPXRoute[]
   waypoints?: GPXWaypoint[]
+  // Legacy support
+  gpxData?: GPXPoint[]
 }
 
 /**
@@ -29,9 +31,11 @@ interface FullscreenMapModalProps {
 export default function FullscreenMapModal({
   isOpen,
   onClose,
-  gpxData,
+  tracks = [],
   routes = [],
-  waypoints = []
+  waypoints = [],
+  // Legacy support
+  gpxData = []
 }: FullscreenMapModalProps) {
   const [isAnimating, setIsAnimating] = useState(false)
 
@@ -97,7 +101,7 @@ export default function FullscreenMapModal({
         {/* Contenuto mappa fullscreen */}
         <div className="flex-1 bg-white">
           <UnifiedGPXMapViewer 
-            gpxData={gpxData}
+            tracks={tracks}
             routes={routes}
             waypoints={waypoints}
             height="h-full"
@@ -112,6 +116,8 @@ export default function FullscreenMapModal({
             defaultShowWaypoints={true}
             isFullscreenMode={true}
             onFullscreenClose={onClose}
+            // Legacy support
+            gpxData={gpxData}
           />
         </div>
       </div>

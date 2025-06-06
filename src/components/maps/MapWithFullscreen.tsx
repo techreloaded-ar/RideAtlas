@@ -17,7 +17,7 @@ const UnifiedGPXMapViewer = dynamic(() => import('../UnifiedGPXMapViewer'), {
 })
 
 interface MapWithFullscreenProps {
-  gpxData: GPXPoint[]
+  tracks?: GPXRoute[] // Support for multiple tracks
   routes?: GPXRoute[]
   waypoints?: GPXWaypoint[]
   title?: string
@@ -31,6 +31,8 @@ interface MapWithFullscreenProps {
   defaultShowTrack?: boolean
   defaultShowRoutes?: boolean
   defaultShowWaypoints?: boolean
+  // Legacy support
+  gpxData?: GPXPoint[]
 }
 
 /**
@@ -38,20 +40,22 @@ interface MapWithFullscreenProps {
  * con il nuovo modal in stile Booking.com
  */
 export default function MapWithFullscreen({
-  gpxData,
+  tracks = [],
   routes = [],
   waypoints = [],
   title,
   className = '',
   height = 'h-96',
-  showInfoFooter = true,
+  showInfoFooter = true, // Keep for API compatibility but not used
   showControls = false,
   enableDownload = false,
   onDownload,
   showLayerControls = true,
   defaultShowTrack = true,
   defaultShowRoutes = true,
-  defaultShowWaypoints = true
+  defaultShowWaypoints = true,
+  // Legacy support
+  gpxData = []
 }: MapWithFullscreenProps) {
   const [isFullscreenOpen, setIsFullscreenOpen] = useState(false)
 
@@ -67,13 +71,12 @@ export default function MapWithFullscreen({
     <>
       {/* Mappa normale */}
       <UnifiedGPXMapViewer
-        gpxData={gpxData}
+        tracks={tracks}
         routes={routes}
         waypoints={waypoints}
         title={title}
         className={className}
         height={height}
-        showInfoFooter={showInfoFooter}
         showControls={showControls}
         enableFullscreen={true}
         enableDownload={enableDownload}
@@ -84,15 +87,19 @@ export default function MapWithFullscreen({
         defaultShowTracks={defaultShowTrack}
         defaultShowRoutes={defaultShowRoutes}
         defaultShowWaypoints={defaultShowWaypoints}
+        // Legacy support
+        gpxData={gpxData}
       />
 
       {/* Modal fullscreen */}
       <FullscreenMapModal
         isOpen={isFullscreenOpen}
         onClose={closeFullscreen}
-        gpxData={gpxData}
+        tracks={tracks}
         routes={routes}
         waypoints={waypoints}
+        // Legacy support
+        gpxData={gpxData}
       />
     </>
   )

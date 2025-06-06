@@ -33,6 +33,7 @@ export default function AutoLoadMapViewer({
   
   const { 
     gpxData, 
+    tracks, // Use tracks for multiple track support
     routes, 
     waypoints, 
     isLoading, 
@@ -100,7 +101,7 @@ export default function AutoLoadMapViewer({
 
   return (
     <SimpleMapViewer
-      gpxData={gpxData}
+      tracks={tracks} // Use tracks instead of gpxData for multiple track support
       routes={routes}
       waypoints={waypoints}
       title={title}

@@ -19,7 +19,8 @@ interface UseGPXMapOptions {
 }
 
 interface UseGPXMapReturn {
-  gpxData: GPXPoint[]
+  gpxData: GPXPoint[] // Legacy support
+  tracks: GPXRouteForMap[] // Multiple tracks support
   routes: GPXRouteForMap[]
   waypoints: GPXWaypointForMap[]
   isLoading: boolean
@@ -28,6 +29,7 @@ interface UseGPXMapReturn {
     totalPoints: number
     totalWaypoints: number
     totalRoutes: number
+    totalTracks: number
     hasElevation: boolean
   }
   loadGPXFromUrl: (blobUrl: string) => Promise<void>
@@ -40,6 +42,7 @@ export function useGPXMap(options: UseGPXMapOptions = {}): UseGPXMapReturn {
   const { onDataLoaded, onError } = options
   
   const [gpxData, setGpxData] = useState<GPXPoint[]>([])
+  const [tracks, setTracks] = useState<GPXRouteForMap[]>([]) // Support for multiple tracks
   const [routes, setRoutes] = useState<GPXRouteForMap[]>([])
   const [waypoints, setWaypoints] = useState<GPXWaypointForMap[]>([])
   const [isLoading, setIsLoading] = useState(false)
@@ -51,6 +54,7 @@ export function useGPXMap(options: UseGPXMapOptions = {}): UseGPXMapReturn {
     totalPoints: gpxData.length,
     totalWaypoints: waypoints.length,
     totalRoutes: routes.length,
+    totalTracks: tracks.length,
     hasElevation: gpxData.some(point => point.elevation !== undefined)
   }
 
@@ -61,7 +65,7 @@ export function useGPXMap(options: UseGPXMapOptions = {}): UseGPXMapReturn {
 
     // Estrai tutti i punti da tutti i tracciati
     const allPoints: GPXPoint[] = []
-    const gpxTracks: GPXRoute[] = []
+    const gpxTracks: GPXRouteForMap[] = []
     
     parsedData.tracks.forEach((track, index) => {
       const trackPoints: GPXPoint[] = track.map(point => ({
@@ -70,11 +74,11 @@ export function useGPXMap(options: UseGPXMapOptions = {}): UseGPXMapReturn {
         elevation: point.elevation
       }))
       
-      // Aggiungi la traccia alla lista
+      // Aggiungi la traccia alla lista delle tracce separate
       gpxTracks.push({
         name: `Traccia ${index + 1}`,
         points: trackPoints,
-        color: '#3b82f6' // colore default blu
+        color: index === 0 ? '#3b82f6' : `hsl(${(index * 60) % 360}, 70%, 50%)` // Colori diversi per tracce multiple
       })
       
       // Aggiungi i punti alla lista totale per backward compatibility
@@ -85,7 +89,8 @@ export function useGPXMap(options: UseGPXMapOptions = {}): UseGPXMapReturn {
       throw new Error('Nessun punto trovato nel tracciato GPX')
     }
 
-    setGpxData(allPoints)
+    setGpxData(allPoints) // Legacy support
+    setTracks(gpxTracks) // Multiple tracks support
 
     // Estrai i waypoints
     const gpxWaypoints: GPXWaypointForMap[] = parsedData.waypoints.map(wp => ({
@@ -176,6 +181,7 @@ export function useGPXMap(options: UseGPXMapOptions = {}): UseGPXMapReturn {
 
   const clearData = useCallback(() => {
     setGpxData([])
+    setTracks([])
     setRoutes([])
     setWaypoints([])
     setError(null)
@@ -190,6 +196,7 @@ export function useGPXMap(options: UseGPXMapOptions = {}): UseGPXMapReturn {
 
   return {
     gpxData,
+    tracks,
     routes,
     waypoints,
     isLoading,

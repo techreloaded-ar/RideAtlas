@@ -16,13 +16,15 @@ const MapWithFullscreen = dynamic(() => import('./MapWithFullscreen'), {
 })
 
 interface SimpleMapViewerProps {
-  gpxData: GPXPoint[]
+  tracks?: GPXRoute[] // Support for multiple tracks
   routes?: GPXRoute[]
   waypoints?: GPXWaypoint[]
   title?: string
   className?: string
   height?: string
   showInfoFooter?: boolean
+  // Legacy support
+  gpxData?: GPXPoint[]
 }
 
 /**
@@ -30,16 +32,21 @@ interface SimpleMapViewerProps {
  * Ideale per pagine di visualizzazione viaggi
  */
 export default function SimpleMapViewer({
-  gpxData,
+  tracks = [],
   routes = [],
   waypoints = [],
   title,
   className = '',
   height = 'h-96',
-  showInfoFooter = true
+  showInfoFooter = true,
+  // Legacy support
+  gpxData = []
 }: SimpleMapViewerProps) {
   
-  if (!gpxData || gpxData.length === 0) {
+  // Check if we have data to display (tracks or legacy gpxData)
+  const hasData = tracks.length > 0 || gpxData.length > 0
+
+  if (!hasData) {
     return (
       <div className={`${className} p-6 bg-gray-50 rounded-lg border border-gray-200`}>
         <div className="flex items-center space-x-3">
@@ -73,11 +80,13 @@ export default function SimpleMapViewer({
       
       <div className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
         <MapWithFullscreen
-          gpxData={gpxData}
+          tracks={tracks}
           routes={routes}
           waypoints={waypoints}
           height={height}
           showInfoFooter={showInfoFooter}
+          // Legacy support
+          gpxData={gpxData}
         />
       </div>
     </div>

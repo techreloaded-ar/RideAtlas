@@ -29,7 +29,7 @@ export default function GPXAutoMapViewer({
   gpxUrl, 
   className = '' 
 }: GPXAutoMapViewerProps) {
-  const { gpxData, routes, waypoints, isLoading, error, loadGPXFromUrl } = useGPXMap()
+  const { gpxData, tracks, routes, waypoints, isLoading, error, loadGPXFromUrl } = useGPXMap()
   const [loadAttempted, setLoadAttempted] = useState(false)
 
   useEffect(() => {
@@ -104,11 +104,13 @@ export default function GPXAutoMapViewer({
       
       <div className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
         <MapWithFullscreen
-          gpxData={gpxData}
+          tracks={tracks}
           routes={routes}
           waypoints={waypoints}
           height="h-96"
           showInfoFooter={true}
+          // Legacy support
+          gpxData={gpxData}
         />
       </div>
     </div>
