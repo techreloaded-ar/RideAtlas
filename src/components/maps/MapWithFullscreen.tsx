@@ -27,6 +27,10 @@ interface MapWithFullscreenProps {
   showControls?: boolean
   enableDownload?: boolean
   onDownload?: () => void
+  showLayerControls?: boolean
+  defaultShowTrack?: boolean
+  defaultShowRoutes?: boolean
+  defaultShowWaypoints?: boolean
 }
 
 /**
@@ -43,7 +47,11 @@ export default function MapWithFullscreen({
   showInfoFooter = true,
   showControls = false,
   enableDownload = false,
-  onDownload
+  onDownload,
+  showLayerControls = true,
+  defaultShowTrack = true,
+  defaultShowRoutes = true,
+  defaultShowWaypoints = true
 }: MapWithFullscreenProps) {
   const [isFullscreenOpen, setIsFullscreenOpen] = useState(false)
 
@@ -72,6 +80,10 @@ export default function MapWithFullscreen({
         onDownload={onDownload}
         onFullscreenClick={openFullscreen}
         autoFit={true}
+        showLayerControls={showLayerControls}
+        defaultShowTrack={defaultShowTrack}
+        defaultShowRoutes={defaultShowRoutes}
+        defaultShowWaypoints={defaultShowWaypoints}
       />
 
       {/* Modal fullscreen */}

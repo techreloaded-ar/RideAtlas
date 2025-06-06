@@ -38,6 +38,10 @@ export interface MapConfig {
   autoFit?: boolean
   defaultCenter?: [number, number]
   defaultZoom?: number
+  showLayerControls?: boolean
+  defaultShowTrack?: boolean
+  defaultShowRoutes?: boolean
+  defaultShowWaypoints?: boolean
 }
 
 export interface MapViewerProps extends MapConfig {

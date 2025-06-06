@@ -153,6 +153,10 @@ export default function FullscreenMapModal({
             enableDownload={false}
             autoFit={true}
             className="rounded-none"
+            showLayerControls={true}
+            defaultShowTrack={true}
+            defaultShowRoutes={true}
+            defaultShowWaypoints={true}
           />
         </div>
         

@@ -71,10 +71,19 @@ export default function UnifiedGPXMapViewer({
   defaultZoom = 10,
   title,
   onDownload,
-  onFullscreenClick
+  onFullscreenClick,
+  showLayerControls = false,
+  defaultShowTrack = true,
+  defaultShowRoutes = true,
+  defaultShowWaypoints = true
 }: MapViewerProps) {
   const mapRef = useRef<L.Map | null>(null)
   const waypointIcon = useWaypointIcon()
+  
+  // Stati per controllare la visibilità dei layer
+  const [showTrack, setShowTrack] = useState(defaultShowTrack)
+  const [showRoutesLayer, setShowRoutesLayer] = useState(defaultShowRoutes)
+  const [showWaypointsLayer, setShowWaypointsLayer] = useState(defaultShowWaypoints)
 
   // Inizializza Leaflet solo lato client
   useEffect(() => {
@@ -120,13 +129,66 @@ export default function UnifiedGPXMapViewer({
   return (
     <div className={`w-full ${height} ${className} flex flex-col`}>
       {/* Header con controlli opzionali */}
-      {(showControls || title) && (
+      {(showControls || title || showLayerControls) && (
         <div className="flex items-center justify-between p-3 border-b bg-white flex-shrink-0">
           {title && (
             <h3 className="text-lg font-semibold flex items-center text-gray-900">
               <Route className="w-5 h-5 mr-2 text-blue-600" />
               {title}
             </h3>
+          )}
+          
+          {/* Controlli layer visibilità */}
+          {showLayerControls && (gpxData.length > 0 || routes.length > 0 || waypoints.length > 0) && (
+            <div className="flex items-center gap-4">
+              {/* Toggle Traccia GPS */}
+              {gpxData.length > 0 && (
+                <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={showTrack}
+                    onChange={(e) => setShowTrack(e.target.checked)}
+                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  />
+                  <div className="flex items-center gap-1">
+                    <div className="w-3 h-0.5 bg-blue-500 rounded"></div>
+                    <span>Traccia GPS</span>
+                  </div>
+                </label>
+              )}
+              
+              {/* Toggle Rotte */}
+              {routes.length > 0 && (
+                <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={showRoutesLayer}
+                    onChange={(e) => setShowRoutesLayer(e.target.checked)}
+                    className="w-4 h-4 text-red-600 border-gray-300 rounded focus:ring-red-500"
+                  />
+                  <div className="flex items-center gap-1">
+                    <div className="w-3 h-0.5 bg-red-600 border-t border-dashed border-red-600"></div>
+                    <span>Percorsi</span>
+                  </div>
+                </label>
+              )}
+              
+              {/* Toggle Waypoints */}
+              {waypoints.length > 0 && (
+                <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={showWaypointsLayer}
+                    onChange={(e) => setShowWaypointsLayer(e.target.checked)}
+                    className="w-4 h-4 text-orange-600 border-gray-300 rounded focus:ring-orange-500"
+                  />
+                  <div className="flex items-center gap-1">
+                    <MapPin className="w-3 h-3 text-orange-600" />
+                    <span>Waypoints</span>
+                  </div>
+                </label>
+              )}
+            </div>
           )}
           
           {showControls && (
@@ -172,7 +234,7 @@ export default function UnifiedGPXMapViewer({
             />
 
             {/* Tracciato principale */}
-            {polylinePositions.length > 0 && (
+            {showTrack && polylinePositions.length > 0 && (
               <Polyline
                 positions={polylinePositions}
                 pathOptions={{
@@ -184,7 +246,7 @@ export default function UnifiedGPXMapViewer({
             )}
 
             {/* Routes (tracciate) */}
-            {routes.map((route, routeIndex) => {
+            {showRoutesLayer && routes.map((route, routeIndex) => {
               const routePositions: [number, number][] = route.points.map(point => [point.lat, point.lng])
               return routePositions.length > 0 ? (
                 <Polyline
@@ -201,7 +263,7 @@ export default function UnifiedGPXMapViewer({
             })}
 
             {/* Waypoints */}
-            {waypoints.map((waypoint, index) => (
+            {showWaypointsLayer && waypoints.map((waypoint, index) => (
               <Marker
                 key={`waypoint-${index}`}
                 position={[waypoint.lat, waypoint.lng]}
@@ -243,21 +305,27 @@ export default function UnifiedGPXMapViewer({
         <div className="p-3 bg-gray-50 border-t border-gray-200 flex-shrink-0">
           <div className="flex items-center justify-between">
             <div className="flex flex-wrap items-center text-xs text-gray-600 gap-4">
-              <span>
-                <span className="font-medium">Punti:</span> {gpxData.length.toLocaleString()}
-              </span>
-              {waypoints.length > 0 && (
+              {showTrack && gpxData.length > 0 && (
+                <span>
+                  <span className="font-medium">Punti:</span> {gpxData.length.toLocaleString()}
+                </span>
+              )}
+              {showWaypointsLayer && waypoints.length > 0 && (
                 <span>
                   <span className="font-medium">Waypoints:</span> {waypoints.length}
                 </span>
               )}
-              {routes.length > 0 && (
+              {showRoutesLayer && routes.length > 0 && (
                 <span>
                   <span className="font-medium">Rotte:</span> {routes.length}
                 </span>
               )}
               <span className="text-blue-600">
-                📍 Traccia GPS (blu) • 🗺️ Rotte pianificate (rosso tratteggiato) • 📍 Waypoints (arancione)
+                {showTrack && "📍 Traccia GPS (blu)"}
+                {showTrack && showRoutesLayer && " • "}
+                {showRoutesLayer && "🗺️ Rotte pianificate (rosso tratteggiato)"}
+                {(showTrack || showRoutesLayer) && showWaypointsLayer && " • "}
+                {showWaypointsLayer && "📍 Waypoints (arancione)"}
               </span>
             </div>
             
