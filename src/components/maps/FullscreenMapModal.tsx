@@ -2,7 +2,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { X, Maximize2 } from 'lucide-react'
+import { X } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import { GPXPoint, GPXWaypoint, GPXRoute } from '@/types/gpx'
 
@@ -21,8 +21,6 @@ interface FullscreenMapModalProps {
   gpxData: GPXPoint[]
   routes?: GPXRoute[]
   waypoints?: GPXWaypoint[]
-  tripName?: string
-  onDownloadGpx?: () => void
 }
 
 /**
@@ -34,9 +32,7 @@ export default function FullscreenMapModal({
   onClose,
   gpxData,
   routes = [],
-  waypoints = [],
-  tripName = 'Viaggio',
-  onDownloadGpx
+  waypoints = []
 }: FullscreenMapModalProps) {
   const [isAnimating, setIsAnimating] = useState(false)
 
@@ -99,46 +95,15 @@ export default function FullscreenMapModal({
         isOpen ? 'scale-100 translate-y-0' : 'scale-95 translate-y-4'
       }`}>
         
-        {/* Header sticky con controlli */}
-        <div className="bg-white/95 backdrop-blur-sm border-b border-gray-200/50 px-6 py-4 flex items-center justify-between shadow-sm">
-          <div className="flex items-center space-x-3">
-            <div className="p-2 bg-blue-50 rounded-lg">
-              <Maximize2 className="w-5 h-5 text-blue-600" />
-            </div>
-            <div>
-              <h2 className="text-lg font-semibold text-gray-900">
-                Mappa del tracciato
-              </h2>
-              <p className="text-sm text-gray-600">{tripName}</p>
-            </div>
-          </div>
-          
-          <div className="flex items-center space-x-2">
-            {/* Pulsante Download se disponibile */}
-            {onDownloadGpx && (
-              <button
-                type="button"
-                onClick={onDownloadGpx}
-                className="inline-flex items-center px-4 py-2 text-sm font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 hover:border-blue-300 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-              >
-                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                Scarica GPX
-              </button>
-            )}
-            
-            {/* Pulsante Chiudi */}
-            <button
-              type="button"
-              onClick={onClose}
-              className="inline-flex items-center p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
-              aria-label="Chiudi mappa"
-            >
-              <X className="w-6 h-6" />
-            </button>
-          </div>
-        </div>
+        {/* Pulsante Chiudi sovrapposto alla mappa */}
+        <button
+          type="button"
+          onClick={onClose}
+          className="fixed top-4 right-4 z-[10000] inline-flex items-center p-3 text-white bg-black/70 hover:bg-black/90 rounded-full shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-black/50 backdrop-blur-sm"
+          aria-label="Chiudi mappa"
+        >
+          <X className="w-6 h-6" />
+        </button>
         
         {/* Contenuto mappa fullscreen */}
         <div className="flex-1 bg-white">

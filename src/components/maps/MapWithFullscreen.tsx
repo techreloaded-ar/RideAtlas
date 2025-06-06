@@ -93,8 +93,6 @@ export default function MapWithFullscreen({
         gpxData={gpxData}
         routes={routes}
         waypoints={waypoints}
-        tripName={title}
-        onDownloadGpx={onDownload}
       />
     </>
   )
