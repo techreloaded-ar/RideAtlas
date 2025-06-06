@@ -46,7 +46,6 @@ export default function MapWithFullscreen({
   title,
   className = '',
   height = 'h-96',
-  showInfoFooter = true, // Keep for API compatibility but not used
   showControls = false,
   enableDownload = false,
   onDownload,

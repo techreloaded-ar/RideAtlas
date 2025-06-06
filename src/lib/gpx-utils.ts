@@ -1,21 +1,7 @@
 // src/lib/gpx-utils.ts - Unified GPX Processing Library
 import { GpxFile } from '@/types/trip'
+import { GPXPoint, GPXTrack, GPXRoute, GPXWaypoint } from '@/types/gpx'
 import { XMLParser } from 'fast-xml-parser'
-
-export interface GPXPoint {
-  lat: number
-  lon: number  // Usiamo 'lon' per essere coerenti con il formato GPX
-  elevation?: number
-}
-
-export interface GPXWaypoint extends GPXPoint {
-  name?: string
-}
-
-export interface GPXRoute {
-  name?: string
-  points: GPXPoint[]
-}
 
 export interface GpxMetadata {
   filename: string
@@ -65,7 +51,7 @@ interface GPXRouteData {
  * Risultato del parsing completo di un file GPX
  */
 export interface GPXParseResult {
-  tracks: GPXPoint[][]  // Array di tracciati (ogni tracciato è un array di punti)
+  tracks: GPXTrack[]    // Array di tracciati completi con nomi
   routes: GPXRoute[]    // Array di route 
   waypoints: GPXWaypoint[]  // Array di waypoints
   metadata: GpxMetadata
@@ -107,13 +93,13 @@ function toRadians(degrees: number): number {
 /**
  * Parse coordinates from GPX point with validation
  */
-function parseCoordinates(point: { '@_lat'?: string; '@_lon'?: string }): { lat: number; lon: number; valid: boolean } {
+function parseCoordinates(point: { '@_lat'?: string; '@_lon'?: string }): { lat: number; lng: number; valid: boolean } {
   const lat = parseFloat(point['@_lat'] || '')
-  const lon = parseFloat(point['@_lon'] || '')
+  const lng = parseFloat(point['@_lon'] || '')
   return {
     lat,
-    lon,
-    valid: !isNaN(lat) && !isNaN(lon)
+    lng,
+    valid: !isNaN(lat) && !isNaN(lng)
   }
 }
 
@@ -171,7 +157,7 @@ function parseWaypoints(gpx: GPXStructure): GPXWaypoint[] {
 
     const waypoint: GPXWaypoint = {
       lat: coords.lat,
-      lon: coords.lon
+      lng: coords.lng
     }
 
     const elevation = parseElevation(wpt)
@@ -231,7 +217,7 @@ function calculateElevationMetrics(
  * Core GPX parsing function - processes tracks and routes with shared logic
  */
 function parseTracksAndRoutes(gpx: GPXStructure): {
-  tracks: GPXPoint[][]
+  tracks: GPXTrack[]
   routes: GPXRoute[]
   totalDistance: number
   elevationGain: number
@@ -241,7 +227,7 @@ function parseTracksAndRoutes(gpx: GPXStructure): {
   startTime: string | undefined
   endTime: string | undefined
 } {
-  const tracks: GPXPoint[][] = []
+  const tracks: GPXTrack[] = []
   const routes: GPXRoute[] = []
   
   let totalDistance = 0
@@ -255,13 +241,17 @@ function parseTracksAndRoutes(gpx: GPXStructure): {
   // Parse tracks (tracciati)
   const gpxTracks = normalizeArray(gpx.trk)
   
-  for (const track of gpxTracks) {
+  for (let trackIndex = 0; trackIndex < gpxTracks.length; trackIndex++) {
+    const track = gpxTracks[trackIndex]
     const segments = normalizeArray(track.trkseg)
+    
+    // Extract track name from GPX
+    const trackName = track.name || `Traccia ${trackIndex + 1}`
 
     for (const segment of segments) {
       const trackPoints = normalizeArray(segment.trkpt)
       const trackPointsArray: GPXPoint[] = []
-      let previousPoint: { lat: number; lon: number; ele?: number; time?: Date } | null = null
+      let previousPoint: { lat: number; lng: number; ele?: number; time?: Date } | null = null
 
       for (const point of trackPoints) {
         const coords = parseCoordinates(point)
@@ -272,7 +262,7 @@ function parseTracksAndRoutes(gpx: GPXStructure): {
 
         trackPointsArray.push({ 
           lat: coords.lat, 
-          lon: coords.lon, 
+          lng: coords.lng, 
           elevation 
         })
 
@@ -290,7 +280,7 @@ function parseTracksAndRoutes(gpx: GPXStructure): {
 
         // Calculate distance and elevation changes
         if (previousPoint) {
-          const distance = calculateDistance(previousPoint.lat, previousPoint.lon, coords.lat, coords.lon)
+          const distance = calculateDistance(previousPoint.lat, previousPoint.lng, coords.lat, coords.lng)
           totalDistance += distance
 
           if (previousPoint.ele !== undefined && elevation !== undefined) {
@@ -306,14 +296,17 @@ function parseTracksAndRoutes(gpx: GPXStructure): {
 
         previousPoint = { 
           lat: coords.lat, 
-          lon: coords.lon, 
+          lng: coords.lng, 
           ele: elevation, 
           time: timestamp.date 
         }
       }
 
       if (trackPointsArray.length > 0) {
-        tracks.push(trackPointsArray)
+        tracks.push({
+          name: trackName,
+          points: trackPointsArray
+        })
       }
     }
   }
@@ -324,7 +317,7 @@ function parseTracksAndRoutes(gpx: GPXStructure): {
   for (const route of gpxRoutes) {
     const routePoints = normalizeArray(route.rtept)
     const routePointsArray: GPXPoint[] = []
-    let previousPoint: { lat: number; lon: number; ele?: number } | null = null
+    let previousPoint: { lat: number; lng: number; ele?: number } | null = null
 
     for (const point of routePoints) {
       const coords = parseCoordinates(point)
@@ -333,13 +326,13 @@ function parseTracksAndRoutes(gpx: GPXStructure): {
       const elevation = parseElevation(point)
       routePointsArray.push({ 
         lat: coords.lat, 
-        lon: coords.lon, 
+        lng: coords.lng, 
         elevation 
       })
 
       // Update distance and elevation bounds
       if (previousPoint) {
-        const distance = calculateDistance(previousPoint.lat, previousPoint.lon, coords.lat, coords.lon)
+        const distance = calculateDistance(previousPoint.lat, previousPoint.lng, coords.lat, coords.lng)
         totalDistance += distance
       }
 
@@ -348,7 +341,7 @@ function parseTracksAndRoutes(gpx: GPXStructure): {
         minElevation = Math.min(minElevation, elevation)
       }
 
-      previousPoint = { lat: coords.lat, lon: coords.lon, ele: elevation }
+      previousPoint = { lat: coords.lat, lng: coords.lng, ele: elevation }
     }
 
     if (routePointsArray.length > 0) {

@@ -68,15 +68,15 @@ export function useGPXMap(options: UseGPXMapOptions = {}): UseGPXMapReturn {
     const gpxTracks: GPXRouteForMap[] = []
     
     parsedData.tracks.forEach((track, index) => {
-      const trackPoints: GPXPoint[] = track.map(point => ({
+      const trackPoints: GPXPoint[] = track.points.map(point => ({
         lat: point.lat,
-        lng: point.lon,
+        lng: point.lng,
         elevation: point.elevation
       }))
       
-      // Aggiungi la traccia alla lista delle tracce separate
+      // Aggiungi la traccia alla lista delle tracce separate - usa il nome reale dal GPX
       gpxTracks.push({
-        name: `Traccia ${index + 1}`,
+        name: track.name || `Traccia ${index + 1}`, // Use actual track name from GPX
         points: trackPoints,
         color: index === 0 ? '#3b82f6' : `hsl(${(index * 60) % 360}, 70%, 50%)` // Colori diversi per tracce multiple
       })
@@ -95,7 +95,7 @@ export function useGPXMap(options: UseGPXMapOptions = {}): UseGPXMapReturn {
     // Estrai i waypoints
     const gpxWaypoints: GPXWaypointForMap[] = parsedData.waypoints.map(wp => ({
       lat: wp.lat,
-      lng: wp.lon,
+      lng: wp.lng,
       name: wp.name,
       elevation: wp.elevation
     }))
@@ -107,7 +107,7 @@ export function useGPXMap(options: UseGPXMapOptions = {}): UseGPXMapReturn {
       name: route.name,
       points: route.points.map(point => ({
         lat: point.lat,
-        lng: point.lon,
+        lng: point.lng,
         elevation: point.elevation
       }))
     }))

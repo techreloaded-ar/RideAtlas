@@ -32,7 +32,6 @@ export default function AutoLoadMapViewer({
   const [loadAttempted, setLoadAttempted] = useState(false)
   
   const { 
-    gpxData, 
     tracks, // Use tracks for multiple track support
     routes, 
     waypoints, 
