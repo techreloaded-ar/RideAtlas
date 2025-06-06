@@ -1,63 +1,34 @@
 // src/components/UnifiedGPXMapViewer.tsx
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
-import { MapContainer, TileLayer, Polyline, Marker, Popup, useMap } from 'react-leaflet'
+import { useEffect, useState, useMemo } from 'react'
 import { Download, Route, MapPin, Maximize2 } from 'lucide-react'
-import L from 'leaflet'
-import 'leaflet/dist/leaflet.css'
-import { MapViewerProps } from '@/types/gpx'
+import { MapViewerProps, GPXTrack } from '@/types/gpx'
+import LayerControl from './maps/LayerControl'
+import dynamic from 'next/dynamic'
+
+// Componente mappa con import dinamico per evitare problemi SSR
+const DynamicMap = dynamic(() => import('./maps/LeafletMapRenderer').then(mod => ({ default: mod.default })), { 
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-full bg-gray-100 flex items-center justify-center rounded-lg">
+      <div className="text-gray-500">Caricamento mappa...</div>
+    </div>
+  )
+})
 
 // Componente per auto-fit della mappa
-function MapAutoFit({ bounds, autoFit = true }: { bounds: L.LatLngBounds | null; autoFit?: boolean }) {
-  const map = useMap()
-  
-  useEffect(() => {
-    if (bounds && bounds.isValid() && autoFit) {
-      map.fitBounds(bounds, { padding: [20, 20] })
-    }
-  }, [bounds, map, autoFit])
-  
-  return null
-}
+// NOTA: Spostato in LeafletMapRenderer per evitare problemi SSR
 
-// Configurazione icone Leaflet
-function initializeLeafletIcons() {
-  if (typeof window !== 'undefined') {
-    // Fix per icone default di Leaflet
-    delete (L.Icon.Default.prototype as unknown as { _getIconUrl?: unknown })._getIconUrl
-    L.Icon.Default.mergeOptions({
-      iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-      iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-      shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-    })
-  }
-}
+// Configurazione icone Leaflet 
+// NOTA: Spostato in LeafletMapRenderer per evitare problemi SSR
 
 // Hook per icona waypoint personalizzata
-function useWaypointIcon() {
-  const [waypointIcon, setWaypointIcon] = useState<L.Icon | null>(null)
-  
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const icon = new L.Icon({
-        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-orange.png',
-        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-        iconSize: [25, 41],
-        iconAnchor: [12, 41],
-        popupAnchor: [1, -34],
-        shadowSize: [41, 41]
-      })
-      setWaypointIcon(icon)
-    }
-  }, [])
-  
-  return waypointIcon
-}
+// NOTA: Spostato in LeafletMapRenderer per evitare problemi SSR
 
 // Componente principale unificato
 export default function UnifiedGPXMapViewer({
-  gpxData,
+  tracks = [],
   routes = [],
   waypoints = [],
   className = '',
@@ -73,50 +44,90 @@ export default function UnifiedGPXMapViewer({
   onDownload,
   onFullscreenClick,
   showLayerControls = false,
-  defaultShowTrack = true,
+  defaultShowTracks = true,
   defaultShowRoutes = true,
-  defaultShowWaypoints = true
+  defaultShowWaypoints = true,
+  // Legacy support
+  gpxData = []
 }: MapViewerProps) {
-  const mapRef = useRef<L.Map | null>(null)
-  const waypointIcon = useWaypointIcon()
+  // Converti i dati legacy in formato tracks con useMemo per evitare re-render
+  const allTracks: GPXTrack[] = useMemo(() => {
+    return tracks.length > 0 
+      ? tracks 
+      : gpxData.length > 0 
+        ? [{ name: 'Traccia principale', points: gpxData, color: '#3b82f6' }] 
+        : []
+  }, [tracks, gpxData])
   
   // Stati per controllare la visibilità dei layer
-  const [showTrack, setShowTrack] = useState(defaultShowTrack)
-  const [showRoutesLayer, setShowRoutesLayer] = useState(defaultShowRoutes)
-  const [showWaypointsLayer, setShowWaypointsLayer] = useState(defaultShowWaypoints)
+  const [visibleTracks, setVisibleTracks] = useState<boolean[]>(
+    allTracks.map(() => defaultShowTracks)
+  )
+  const [visibleRoutes, setVisibleRoutes] = useState<boolean[]>(
+    routes.map(() => defaultShowRoutes)
+  )
+  const [visibleWaypoints, setVisibleWaypoints] = useState(defaultShowWaypoints)
 
-  // Inizializza Leaflet solo lato client
+  // Aggiorna gli stati quando cambiano le props
   useEffect(() => {
-    initializeLeafletIcons()
+    setVisibleTracks(allTracks.map(() => defaultShowTracks))
+  }, [allTracks, defaultShowTracks])
+
+  useEffect(() => {
+    setVisibleRoutes(routes.map(() => defaultShowRoutes))
+  }, [routes, defaultShowRoutes])
+
+  // SSR protection - non renderizzare lato server
+  const [isClient, setIsClient] = useState(false)
+  
+  useEffect(() => {
+    setIsClient(true)
   }, [])
 
-  // SSR protection
-  if (typeof window === 'undefined') {
-    return (
-      <div className={`w-full ${height} ${className} bg-gray-100 flex items-center justify-center rounded-lg`}>
-        <div className="text-gray-500">Caricamento mappa...</div>
-      </div>
-    )
-  }
-
-  // Calcola i bounds includendo tracciato, routes e waypoints
+  // Calcola i bounds includendo tracce, routes e waypoints
   const allPoints = [
-    ...gpxData.map(point => [point.lat, point.lng] as [number, number]),
+    ...allTracks.flatMap(track => track.points.map(point => [point.lat, point.lng] as [number, number])),
     ...routes.flatMap(route => route.points.map(point => [point.lat, point.lng] as [number, number])),
     ...waypoints.map(wp => [wp.lat, wp.lng] as [number, number])
   ]
 
-  const bounds = allPoints.length > 0 
-    ? L.latLngBounds(allPoints)
-    : null
+  // Calcola bounds manualmente per evitare dipendenza da L
+  const bounds = allPoints.length > 0 ? {
+    southwest: {
+      lat: Math.min(...allPoints.map(p => p[0])),
+      lng: Math.min(...allPoints.map(p => p[1]))
+    },
+    northeast: {
+      lat: Math.max(...allPoints.map(p => p[0])),
+      lng: Math.max(...allPoints.map(p => p[1]))
+    }
+  } : null
 
   // Centro della mappa
   const center: [number, number] = bounds 
-    ? [bounds.getCenter().lat, bounds.getCenter().lng]
+    ? [(bounds.southwest.lat + bounds.northeast.lat) / 2, (bounds.southwest.lng + bounds.northeast.lng) / 2]
     : defaultCenter
 
-  // Converti i punti GPX in formato per Polyline
-  const polylinePositions: [number, number][] = gpxData.map(point => [point.lat, point.lng])
+  // Handler per i toggle dei layer
+  const handleTrackToggle = (index: number) => {
+    setVisibleTracks(prev => {
+      const newVisible = [...prev]
+      newVisible[index] = !newVisible[index]
+      return newVisible
+    })
+  }
+
+  const handleRouteToggle = (index: number) => {
+    setVisibleRoutes(prev => {
+      const newVisible = [...prev]
+      newVisible[index] = !newVisible[index]
+      return newVisible
+    })
+  }
+
+  const handleWaypointsToggle = () => {
+    setVisibleWaypoints(!visibleWaypoints)
+  }
 
   const handleFullscreen = (e: React.MouseEvent) => {
     e.preventDefault()
@@ -167,75 +178,42 @@ export default function UnifiedGPXMapViewer({
       )}
 
       {/* Mappa */}
-      <div className="flex-1 w-full min-h-0">
-        {gpxData.length > 0 ? (
-          <MapContainer
-            center={center}
-            zoom={defaultZoom}
-            className="w-full h-full"
-            ref={mapRef}
-          >
-            <TileLayer
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+      <div className="flex-1 w-full min-h-0 relative">
+        {/* LayerControl avanzato (se abilitato) */}
+        {showLayerControls && (allTracks.length > 0 || routes.length > 0 || waypoints.length > 0) && (
+          <div className="absolute top-4 left-4 z-[1000]">
+            <LayerControl
+              tracks={allTracks}
+              routes={routes}
+              waypoints={waypoints}
+              visibleTracks={visibleTracks}
+              visibleRoutes={visibleRoutes}
+              visibleWaypoints={visibleWaypoints}
+              onTrackToggle={handleTrackToggle}
+              onRouteToggle={handleRouteToggle}
+              onWaypointsToggle={handleWaypointsToggle}
             />
+          </div>
+        )}
 
-            {/* Tracciato principale */}
-            {showTrack && polylinePositions.length > 0 && (
-              <Polyline
-                positions={polylinePositions}
-                pathOptions={{
-                  color: '#3b82f6', // blue-500 for tracks
-                  weight: 4,
-                  opacity: 0.8
-                }}
-              />
-            )}
-
-            {/* Routes (tracciate) */}
-            {showRoutesLayer && routes.map((route, routeIndex) => {
-              const routePositions: [number, number][] = route.points.map(point => [point.lat, point.lng])
-              return routePositions.length > 0 ? (
-                <Polyline
-                  key={`route-${routeIndex}`}
-                  positions={routePositions}
-                  pathOptions={{
-                    color: '#dc2626', // red-600 for routes
-                    weight: 4,
-                    opacity: 0.8,
-                    dashArray: '10, 10' // dashed line to distinguish from tracks
-                  }}
-                />
-              ) : null
-            })}
-
-            {/* Waypoints */}
-            {showWaypointsLayer && waypoints.map((waypoint, index) => (
-              <Marker
-                key={`waypoint-${index}`}
-                position={[waypoint.lat, waypoint.lng]}
-                icon={waypointIcon || undefined}
-              >
-                {waypoint.name && (
-                  <Popup>
-                    <div className="text-sm">
-                      <div className="font-medium">{waypoint.name}</div>
-                      {waypoint.elevation && (
-                        <div className="text-gray-600">
-                          Altitudine: {Math.round(waypoint.elevation)}m
-                        </div>
-                      )}
-                      <div className="text-gray-500 text-xs mt-1">
-                        {waypoint.lat.toFixed(6)}, {waypoint.lng.toFixed(6)}
-                      </div>
-                    </div>
-                  </Popup>
-                )}
-              </Marker>
-            ))}
-
-            <MapAutoFit bounds={bounds} autoFit={autoFit} />
-          </MapContainer>
+        {/* Mappa dinamica per evitare problemi SSR */}
+        {isClient && (allTracks.length > 0 || routes.length > 0 || waypoints.length > 0) ? (
+          <DynamicMap
+            allTracks={allTracks}
+            routes={routes}
+            waypoints={waypoints}
+            visibleTracks={visibleTracks}
+            visibleRoutes={visibleRoutes}
+            visibleWaypoints={visibleWaypoints}
+            center={center}
+            bounds={bounds}
+            defaultZoom={defaultZoom}
+            autoFit={autoFit}
+          />
+        ) : !isClient ? (
+          <div className="w-full h-full bg-gray-100 flex items-center justify-center rounded-lg">
+            <div className="text-gray-500">Caricamento mappa...</div>
+          </div>
         ) : (
           <div className="h-full flex items-center justify-center bg-gray-50">
             <div className="text-center text-gray-500">
@@ -247,74 +225,37 @@ export default function UnifiedGPXMapViewer({
         )}
       </div>
 
-      {/* Footer informazioni e controlli opzionale */}
-      {showInfoFooter && gpxData.length > 0 && (
+      {/* Footer informazioni e controlli legacy */}
+      {showInfoFooter && (allTracks.length > 0 || routes.length > 0 || waypoints.length > 0) && (
         <div className="p-3 bg-gray-50 border-t border-gray-200 flex-shrink-0">
           <div className="flex items-center justify-between">
             <div className="flex flex-wrap items-center text-xs text-gray-600 gap-6">
-              {/* Informazioni con controlli layer integrati */}
-              {gpxData.length > 0 && (
+              {/* Tracce */}
+              {allTracks.length > 0 && (
                 <div className="flex items-center gap-2">
-                  {showLayerControls ? (
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={showTrack}
-                        onChange={(e) => setShowTrack(e.target.checked)}
-                        className="w-3 h-3 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                      />
-                      <div className="w-3 h-0.5 bg-blue-500 rounded"></div>
-                      <span className="font-medium">Tracce:</span>
-                    </label>
-                  ) : (
-                    <span>
-                      <span className="font-medium">Tracce:</span>
-                    </span>
-                  )}
-                  <span>1</span>
+                  <span>
+                    <span className="font-medium">Tracce:</span>
+                  </span>
+                  <span>{allTracks.length}</span>
                 </div>
               )}
               
+              {/* Waypoints */}
               {waypoints.length > 0 && (
                 <div className="flex items-center gap-2">
-                  {showLayerControls ? (
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={showWaypointsLayer}
-                        onChange={(e) => setShowWaypointsLayer(e.target.checked)}
-                        className="w-3 h-3 text-orange-600 border-gray-300 rounded focus:ring-orange-500"
-                      />
-                      <MapPin className="w-3 h-3 text-orange-600" />
-                      <span className="font-medium">Waypoints:</span>
-                    </label>
-                  ) : (
-                    <span>
-                      <span className="font-medium">Waypoints:</span>
-                    </span>
-                  )}
+                  <span>
+                    <span className="font-medium">Waypoints:</span>
+                  </span>
                   <span>{waypoints.length}</span>
                 </div>
               )}
               
+              {/* Routes */}
               {routes.length > 0 && (
                 <div className="flex items-center gap-2">
-                  {showLayerControls ? (
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={showRoutesLayer}
-                        onChange={(e) => setShowRoutesLayer(e.target.checked)}
-                        className="w-3 h-3 text-red-600 border-gray-300 rounded focus:ring-red-500"
-                      />
-                      <div className="w-3 h-0.5 bg-red-600 border-t border-dashed border-red-600"></div>
-                      <span className="font-medium">Percorsi Consigliati:</span>
-                    </label>
-                  ) : (
-                    <span>
-                      <span className="font-medium">Percorsi Consigliati:</span>
-                    </span>
-                  )}
+                  <span>
+                    <span className="font-medium">Percorsi Consigliati:</span>
+                  </span>
                   <span>{routes.length}</span>
                 </div>
               )}

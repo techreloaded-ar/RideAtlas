@@ -20,10 +20,17 @@ export interface GPXWaypoint {
 export interface GPXRoute {
   name?: string
   points: GPXPoint[]
+  color?: string
+}
+
+export interface GPXTrack {
+  name?: string
+  points: GPXPoint[]
+  color?: string
 }
 
 export interface GPXData {
-  points: GPXPoint[]
+  tracks: GPXTrack[]
   routes: GPXRoute[]
   waypoints: GPXWaypoint[]
 }
@@ -39,16 +46,18 @@ export interface MapConfig {
   defaultCenter?: [number, number]
   defaultZoom?: number
   showLayerControls?: boolean
-  defaultShowTrack?: boolean
+  defaultShowTracks?: boolean
   defaultShowRoutes?: boolean
   defaultShowWaypoints?: boolean
 }
 
 export interface MapViewerProps extends MapConfig {
-  gpxData: GPXPoint[]
+  tracks?: GPXTrack[]
   routes?: GPXRoute[]
   waypoints?: GPXWaypoint[]
   title?: string
   onDownload?: () => void
   onFullscreenClick?: () => void
+  // Legacy support
+  gpxData?: GPXPoint[]
 }

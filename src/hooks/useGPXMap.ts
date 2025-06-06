@@ -61,15 +61,24 @@ export function useGPXMap(options: UseGPXMapOptions = {}): UseGPXMapReturn {
 
     // Estrai tutti i punti da tutti i tracciati
     const allPoints: GPXPoint[] = []
+    const gpxTracks: GPXRoute[] = []
     
-    parsedData.tracks.forEach((track) => {
-      track.forEach((point) => {
-        allPoints.push({
-          lat: point.lat,
-          lng: point.lon,
-          elevation: point.elevation
-        })
+    parsedData.tracks.forEach((track, index) => {
+      const trackPoints: GPXPoint[] = track.map(point => ({
+        lat: point.lat,
+        lng: point.lon,
+        elevation: point.elevation
+      }))
+      
+      // Aggiungi la traccia alla lista
+      gpxTracks.push({
+        name: `Traccia ${index + 1}`,
+        points: trackPoints,
+        color: '#3b82f6' // colore default blu
       })
+      
+      // Aggiungi i punti alla lista totale per backward compatibility
+      allPoints.push(...trackPoints)
     })
 
     if (allPoints.length === 0) {
@@ -103,7 +112,7 @@ export function useGPXMap(options: UseGPXMapOptions = {}): UseGPXMapReturn {
     // Callback di successo
     if (onDataLoaded) {
       onDataLoaded({
-        points: allPoints,
+        tracks: gpxTracks,
         routes: gpxRoutes,
         waypoints: gpxWaypoints
       })

@@ -81,7 +81,7 @@ export default function MapWithFullscreen({
         onFullscreenClick={openFullscreen}
         autoFit={true}
         showLayerControls={showLayerControls}
-        defaultShowTrack={defaultShowTrack}
+        defaultShowTracks={defaultShowTrack}
         defaultShowRoutes={defaultShowRoutes}
         defaultShowWaypoints={defaultShowWaypoints}
       />
