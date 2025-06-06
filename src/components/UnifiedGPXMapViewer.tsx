@@ -34,7 +34,6 @@ export default function UnifiedGPXMapViewer({
   className = '',
   height = 'h-96',
   showControls = false,
-  showInfoFooter = true,
   enableFullscreen = false,
   enableDownload = false,
   autoFit = true,
@@ -277,45 +276,6 @@ export default function UnifiedGPXMapViewer({
           </div>
         )}
       </div>
-
-      {/* Footer informazioni e controlli legacy */}
-      {showInfoFooter && (allTracks.length > 0 || routes.length > 0 || waypoints.length > 0) && (
-        <div className="p-3 bg-gray-50 border-t border-gray-200 flex-shrink-0">
-          <div className="flex items-center justify-between">
-            <div className="flex flex-wrap items-center text-xs text-gray-600 gap-6">
-              {/* Tracce */}
-              {allTracks.length > 0 && (
-                <div className="flex items-center gap-2">
-                  <span>
-                    <span className="font-medium">Tracce:</span>
-                  </span>
-                  <span>{allTracks.length}</span>
-                </div>
-              )}
-              
-              {/* Waypoints */}
-              {waypoints.length > 0 && (
-                <div className="flex items-center gap-2">
-                  <span>
-                    <span className="font-medium">Waypoints:</span>
-                  </span>
-                  <span>{waypoints.length}</span>
-                </div>
-              )}
-              
-              {/* Routes */}
-              {routes.length > 0 && (
-                <div className="flex items-center gap-2">
-                  <span>
-                    <span className="font-medium">Percorsi Consigliati:</span>
-                  </span>
-                  <span>{routes.length}</span>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }

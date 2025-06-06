@@ -39,7 +39,6 @@ export interface MapConfig {
   className?: string
   height?: string | number
   showControls?: boolean
-  showInfoFooter?: boolean
   enableFullscreen?: boolean
   enableDownload?: boolean
   autoFit?: boolean
