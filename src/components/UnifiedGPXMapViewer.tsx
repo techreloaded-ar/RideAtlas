@@ -320,13 +320,6 @@ export default function UnifiedGPXMapViewer({
                   <span className="font-medium">Rotte:</span> {routes.length}
                 </span>
               )}
-              <span className="text-blue-600">
-                {showTrack && "📍 Traccia GPS (blu)"}
-                {showTrack && showRoutesLayer && " • "}
-                {showRoutesLayer && "🗺️ Rotte pianificate (rosso tratteggiato)"}
-                {(showTrack || showRoutesLayer) && showWaypointsLayer && " • "}
-                {showWaypointsLayer && "📍 Waypoints (arancione)"}
-              </span>
             </div>
             
             {/* Icona fullscreen nel footer */}

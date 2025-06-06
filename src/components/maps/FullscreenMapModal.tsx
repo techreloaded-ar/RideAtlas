@@ -182,10 +182,6 @@ export default function FullscreenMapModal({
                   <span><span className="font-medium">Rotte:</span> {routes.length}</span>
                 </div>
               )}
-              
-              <div className="text-gray-500 text-xs">
-                📍 Traccia GPS • 🗺️ Rotte pianificate • 📍 Waypoints
-              </div>
             </div>
           </div>
         )}
