@@ -1,10 +1,59 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { MapContainer, TileLayer, Polyline, Marker, Popup, useMap } from 'react-leaflet'
+import { MapContainer, Polyline, Marker, Popup, useMap } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import { GPXTrack, GPXRoute, GPXWaypoint } from '@/types/gpx'
+
+// Componente per gestire i base layers (Street/Satellite)
+function BaseLayers() {
+  const map = useMap()
+  
+  useEffect(() => {
+    // Definisco i tile layers
+    const streetLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      maxZoom: 19
+    })
+    
+    const satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+      attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
+      maxZoom: 19
+    })
+    
+    // Aggiungo il layer street come default
+    streetLayer.addTo(map)
+    
+    // Creo l'oggetto con i base layers
+    const baseMaps = {
+      "Street": streetLayer,
+      "Satellite": satelliteLayer
+    }
+    
+    // Aggiungo il controllo layer in alto a destra, spostato sotto il pulsante fullscreen
+    const layerControl = L.control.layers(baseMaps, {}, {
+      position: 'topright'
+    }).addTo(map)
+    
+    // Applico stili personalizzati per ridurre dimensione e spostare posizione
+    const layerControlElement = layerControl.getContainer()
+    if (layerControlElement) {
+      layerControlElement.style.marginTop = '60px' // Sposta sotto il pulsante fullscreen
+      layerControlElement.style.transform = 'scale(0.8)' // Riduce dimensione
+      layerControlElement.style.transformOrigin = 'top right' // Mantiene allineamento a destra
+    }
+    
+    // Cleanup quando il componente viene smontato
+    return () => {
+      map.removeControl(layerControl)
+      map.removeLayer(streetLayer)
+      map.removeLayer(satelliteLayer)
+    }
+  }, [map])
+  
+  return null
+}
 
 // Componente per auto-fit della mappa
 function MapAutoFit({ 
@@ -109,10 +158,7 @@ export default function LeafletMapRenderer({
       className="w-full h-full"
       ref={mapRef}
     >
-      <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
+      <BaseLayers />
       
       {/* Tracce multiple */}
       {allTracks.map((track, trackIndex) => {
