@@ -58,17 +58,17 @@ export default function UnifiedGPXMapViewer({
       : gpxData.length > 0 
         ? [{ name: 'Traccia principale', points: gpxData, color: '#3b82f6' }] 
         : []
-  }, [tracks.length, gpxData.length])
+  }, [tracks, gpxData])
   
   // Calcola gli stati iniziali per evitare useEffect
   const initialVisibleTracks = useMemo(() => 
     allTracks.map(() => defaultShowTracks), 
-    [allTracks.length, defaultShowTracks]
+    [allTracks, defaultShowTracks]
   )
   
   const initialVisibleRoutes = useMemo(() => 
     routes.map(() => defaultShowRoutes), 
-    [routes.length, defaultShowRoutes]
+    [routes, defaultShowRoutes]
   )
   
   // Stati per controllare la visibilità dei layer - inizializzati correttamente
@@ -79,11 +79,11 @@ export default function UnifiedGPXMapViewer({
   // Aggiorna solo quando cambiano effettivamente i dati
   useEffect(() => {
     setVisibleTracks(initialVisibleTracks)
-  }, [initialVisibleTracks.length])
+  }, [initialVisibleTracks])
 
   useEffect(() => {
     setVisibleRoutes(initialVisibleRoutes)
-  }, [initialVisibleRoutes.length])
+  }, [initialVisibleRoutes])
 
   // SSR protection - non renderizzare lato server
   const [isClient, setIsClient] = useState(false)

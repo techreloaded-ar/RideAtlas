@@ -153,12 +153,12 @@ describe('GPX Utils', () => {
       const result = parseGPXContent(validGpxContent, 'test.gpx')
       
       expect(result.tracks).toHaveLength(1)
-      expect(result.tracks[0]).toHaveLength(3) // 3 track points
+      expect(result.tracks[0].points).toHaveLength(3) // 3 track points
       
       // Check first track point
-      expect(result.tracks[0][0]).toEqual({
+      expect(result.tracks[0].points[0]).toEqual({
         lat: 43.6142,
-        lon: 13.5173,
+        lng: 13.5173,
         elevation: 100
       })
     })
@@ -173,7 +173,7 @@ describe('GPX Utils', () => {
       // Check first route point
       expect(result.routes[0].points[0]).toEqual({
         lat: 43.6172,
-        lon: 13.5203,
+        lng: 13.5203,
         elevation: 130
       })
     })
@@ -184,7 +184,7 @@ describe('GPX Utils', () => {
       expect(result.waypoints).toHaveLength(2)
       expect(result.waypoints[0]).toEqual({
         lat: 43.6142,
-        lon: 13.5173,
+        lng: 13.5173,
         elevation: 100,
         name: 'Waypoint 1'
       })
@@ -414,14 +414,14 @@ describe('GPX Utils', () => {
       
       // Verify we have tracks with many points (but these don't count as waypoints)
       expect(result.tracks).toHaveLength(1)
-      expect(result.tracks[0].length).toBeGreaterThan(3)
+      expect(result.tracks[0].points.length).toBeGreaterThan(3)
       
       // Verify we have routes with points (but these don't count as waypoints)
       expect(result.routes).toHaveLength(1)
       expect(result.routes[0].points.length).toBe(5)
       
       // REGRESSION TEST: The sum of track points + route points should NOT equal waypoints
-      const totalTrackPoints = result.tracks.reduce((sum, track) => sum + track.length, 0)
+      const totalTrackPoints = result.tracks.reduce((sum, track) => sum + track.points.length, 0)
       const totalRoutePoints = result.routes.reduce((sum, route) => sum + route.points.length, 0)
       const totalCoordinatePoints = totalTrackPoints + totalRoutePoints
       
@@ -438,7 +438,7 @@ describe('GPX Utils', () => {
       
       // But should still have track data
       expect(result.tracks).toHaveLength(1)
-      expect(result.tracks[0].length).toBe(10)
+      expect(result.tracks[0].points.length).toBe(10)
     })
 
     it('should handle parseGpxMetadata consistently with parseGPXContent', async () => {
@@ -482,7 +482,7 @@ describe('GPX Utils', () => {
       expect(result.waypoints).toHaveLength(2)
       
       // Track points should still be parsed
-      expect(result.tracks[0].length).toBe(2)
+      expect(result.tracks[0].points.length).toBe(2)
     })
 
     it('PERFORMANCE: should handle large GPX files efficiently', () => {
@@ -519,7 +519,7 @@ describe('GPX Utils', () => {
       // Waypoint count should be correct regardless of track size
       expect(result.metadata.waypoints).toBe(5)
       expect(result.waypoints).toHaveLength(5)
-      expect(result.tracks[0].length).toBe(100)
+      expect(result.tracks[0].points.length).toBe(100)
       
       // Should process reasonably quickly (less than 1 second for 100 points)
       expect(endTime - startTime).toBeLessThan(1000)
@@ -564,7 +564,7 @@ describe('GPX Utils', () => {
       expect(result.waypoints).toHaveLength(19)
       
       // Verify the track has the expected number of points
-      expect(result.tracks[0].length).toBe(2238)
+      expect(result.tracks[0].points.length).toBe(2238)
     })
   })
 
@@ -620,7 +620,7 @@ describe('GPX Utils', () => {
       
       expect(result.metadata.elevationGain).toBeUndefined()
       expect(result.metadata.maxElevation).toBeUndefined()
-      expect(result.tracks[0][0].elevation).toBeUndefined()
+      expect(result.tracks[0].points[0].elevation).toBeUndefined()
     })
 
     it('should handle malformed XML gracefully', () => {

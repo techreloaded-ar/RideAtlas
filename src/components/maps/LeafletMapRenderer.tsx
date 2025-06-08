@@ -36,12 +36,104 @@ function BaseLayers() {
       position: 'topright'
     }).addTo(map)
     
-    // Applico stili personalizzati per ridurre dimensione e spostare posizione
+    // Applico stili personalizzati per uniformare con LayerControl
     const layerControlElement = layerControl.getContainer()
     if (layerControlElement) {
+      // Reset degli stili di default di Leaflet e dimensioni identiche a LayerControl
+      layerControlElement.style.background = 'white'
+      layerControlElement.style.border = '1px solid #d1d5db' // border-gray-300
+      layerControlElement.style.borderRadius = '6px' // rounded-md
+      layerControlElement.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)' // shadow-md
       layerControlElement.style.marginTop = '60px' // Sposta sotto il pulsante fullscreen
-      layerControlElement.style.transform = 'scale(0.8)' // Riduce dimensione
-      layerControlElement.style.transformOrigin = 'top right' // Mantiene allineamento a destra
+      layerControlElement.style.padding = '6px' // Padding per centrare meglio l'icona
+      layerControlElement.style.width = '32px' // w-[32px] come LayerControl
+      layerControlElement.style.height = '32px' // h-[32px] come LayerControl
+      layerControlElement.style.minWidth = '32px'
+      layerControlElement.style.overflow = 'visible' // Per permettere espansione del dropdown
+      layerControlElement.style.fontSize = '12px' // Aumentato per leggibilità
+      layerControlElement.style.display = 'flex'
+      layerControlElement.style.alignItems = 'center'
+      layerControlElement.style.justifyContent = 'center'
+      layerControlElement.style.position = 'relative'
+      
+      // Aggiungi un'icona personalizzata per il toggle
+      const toggleIcon = document.createElement('div')
+      toggleIcon.innerHTML = '🗺️' // Icona mappa emoji
+      toggleIcon.style.fontSize = '14px'
+      toggleIcon.style.cursor = 'pointer'
+      toggleIcon.style.display = 'flex'
+      toggleIcon.style.alignItems = 'center'
+      toggleIcon.style.justifyContent = 'center'
+      toggleIcon.style.width = '100%'
+      toggleIcon.style.height = '100%'
+      
+      // Nascondi il contenuto originale e aggiungi la nostra icona
+      const originalContent = layerControlElement.querySelector('.leaflet-control-layers-toggle') as HTMLElement | null
+      if (originalContent) {
+        originalContent.style.display = 'none'
+      }
+      layerControlElement.appendChild(toggleIcon)
+      
+      // Stili per il contenuto interno (dropdown)
+      const form = layerControlElement.querySelector('.leaflet-control-layers-list') as HTMLElement
+      if (form) {
+        form.style.position = 'absolute'
+        form.style.top = '0'
+        form.style.right = '100%' // Apre a sinistra
+        form.style.marginRight = '8px' // Spazio dal controllo principale
+        form.style.margin = '0'
+        form.style.padding = '12px' // Più spazio interno
+        form.style.minWidth = '160px' // Più largo
+        form.style.background = 'white'
+        form.style.border = '1px solid #d1d5db'
+        form.style.borderRadius = '6px'
+        form.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+        form.style.zIndex = '1000'
+      }
+      
+      // Stili per le label dei layer
+      const labels = layerControlElement.querySelectorAll('label')
+      labels.forEach((label) => {
+        const labelElement = label as HTMLLabelElement
+        labelElement.style.display = 'flex'
+        labelElement.style.alignItems = 'center'
+        labelElement.style.gap = '8px' // Più spazio per leggibilità
+        labelElement.style.padding = '4px 8px'
+        labelElement.style.fontSize = '12px' // Più leggibile
+        labelElement.style.fontWeight = '500'
+        labelElement.style.color = '#374151' // text-gray-700
+        labelElement.style.cursor = 'pointer'
+        labelElement.style.borderRadius = '4px'
+        labelElement.style.transition = 'background-color 0.15s ease'
+        labelElement.style.margin = '2px 0'
+        
+        // Hover effect
+        labelElement.addEventListener('mouseenter', () => {
+          labelElement.style.backgroundColor = '#f3f4f6' // hover:bg-gray-100
+        })
+        labelElement.addEventListener('mouseleave', () => {
+          labelElement.style.backgroundColor = 'transparent'
+        })
+      })
+      
+      // Stili per gli input radio
+      const inputs = layerControlElement.querySelectorAll('input[type="radio"]')
+      inputs.forEach((input) => {
+        const inputElement = input as HTMLInputElement
+        inputElement.style.width = '14px' // Più grande per usabilità
+        inputElement.style.height = '14px'
+        inputElement.style.accentColor = '#2563eb' // text-blue-600
+        inputElement.style.margin = '0'
+      })
+      
+      // Stili per il testo dei layer
+      const spans = layerControlElement.querySelectorAll('span')
+      spans.forEach((span) => {
+        const spanElement = span as HTMLSpanElement
+        spanElement.style.fontSize = '12px' // Più leggibile
+        spanElement.style.lineHeight = '1.3'
+        spanElement.style.fontWeight = '500'
+      })
     }
     
     // Cleanup quando il componente viene smontato
