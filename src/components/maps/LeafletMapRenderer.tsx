@@ -58,7 +58,14 @@ function BaseLayers() {
       
       // Aggiungi un'icona personalizzata per il toggle
       const toggleIcon = document.createElement('div')
-      toggleIcon.innerHTML = '🗺️' // Icona mappa emoji
+      // Icona classica dei livelli come Google Maps (SVG)
+      toggleIcon.innerHTML = `
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="12,2 22,8.5 12,15 2,8.5 12,2"></polygon>
+          <polyline points="2,17 12,23.5 22,17"></polyline>
+          <polyline points="2,12 12,18.5 22,12"></polyline>
+        </svg>
+      `
       toggleIcon.style.fontSize = '14px'
       toggleIcon.style.cursor = 'pointer'
       toggleIcon.style.display = 'flex'
@@ -66,6 +73,7 @@ function BaseLayers() {
       toggleIcon.style.justifyContent = 'center'
       toggleIcon.style.width = '100%'
       toggleIcon.style.height = '100%'
+      toggleIcon.style.color = '#374151' // Colore grigio scuro
       
       // Nascondi il contenuto originale e aggiungi la nostra icona
       const originalContent = layerControlElement.querySelector('.leaflet-control-layers-toggle') as HTMLElement | null
