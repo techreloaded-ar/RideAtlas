@@ -1,12 +1,12 @@
 // src/components/EditTripForm.tsx
 "use client";
 
-import { useState, useEffect, FormEvent, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { TripCreationData, Trip } from '@/types/trip';
 import { useTripForm } from '@/hooks/useTripForm';
 import { useToast } from '@/hooks/useToast';
-import TripFormFields from './TripFormFields';
+import TripFormContainer from './TripFormContainer';
 
 interface EditTripFormProps {
   tripId: string;
@@ -70,22 +70,21 @@ const EditTripForm = ({ tripId }: EditTripFormProps) => {
     updateMediaCaption,
     setGpxFile,
     removeGpxFile,
-    submitForm,  } = useTripForm({
+    submitForm,
+  } = useTripForm({
     mode: 'edit',
     tripId,
     initialData: initialData || undefined,
     onSuccess: () => {
       showSuccess('Viaggio aggiornato con successo!');
       router.push('/dashboard');
-    }  });
+    }
+  });
 
-  const handleSubmit = async (e: FormEvent) => {
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     await submitForm();
-  };
-  const handleCancel = () => {
-    router.push('/dashboard');
-  };
+  }, [submitForm]);
 
   // Loading state while fetching trip
   if (loadingTrip) {
@@ -132,21 +131,19 @@ const EditTripForm = ({ tripId }: EditTripFormProps) => {
       </div>
     );
   }
-  return (
-    <form onSubmit={handleSubmit} className="space-y-6 p-4 max-w-2xl mx-auto bg-white shadow-md rounded-lg">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-semibold text-gray-700">Modifica Viaggio</h2>
-        <button
-          type="button"
-          onClick={handleCancel}
-          className="text-sm text-gray-500 hover:text-gray-700"
-        >
-          Annulla
-        </button>
-      </div>
 
-      {error && <div className="p-3 bg-red-100 text-red-700 border border-red-400 rounded">{error}</div>}      <TripFormFields
-        formData={formData}
+  // Render TripFormContainer for edit mode
+  return (
+    <>
+      {error && (
+        <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 mb-4">
+          <div className="p-3 bg-red-100 text-red-700 border border-red-400 rounded">
+            {error}
+          </div>
+        </div>
+      )}
+      <TripFormContainer
+        initialData={formData}
         mediaItems={mediaItems}
         gpxFile={gpxFile || null}
         tagInput={tagInput}
@@ -162,25 +159,13 @@ const EditTripForm = ({ tripId }: EditTripFormProps) => {
         updateMediaCaption={updateMediaCaption}
         setGpxFile={setGpxFile}
         removeGpxFile={removeGpxFile}
+        onSubmit={handleSubmit}
+        mode="edit"
+        tripId={tripId}
+        title="Modifica Viaggio"
+        submitButtonText="Salva Modifiche"
       />
-
-      <div className="flex gap-4 pt-5">
-        <button
-          type="button"
-          onClick={handleCancel}
-          className="flex-1 py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
-        >
-          Annulla
-        </button>
-        <button
-          type="submit"
-          disabled={isLoading}
-          className="flex-1 flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50"
-        >
-          {isLoading ? 'Salvataggio...' : 'Salva Modifiche'}
-        </button>
-      </div>
-    </form>
+    </>
   );
 };
 

@@ -1,6 +1,7 @@
 // src/components/TripFormFields.tsx
 "use client";
 
+import React, { useCallback } from 'react';
 import { RecommendedSeason, TripCreationData, MediaItem, GpxFile } from '@/types/trip';
 import { characteristicOptions, formFieldClasses } from '@/constants/tripForm';
 import MultimediaUpload from './MultimediaUpload';
@@ -13,30 +14,34 @@ interface FormErrors {
 
 interface TripFormFieldsProps {
   formData: TripCreationData;
-  mediaItems: MediaItem[];
-  gpxFile: GpxFile | null;
-  tagInput: string;
-  fieldErrors: FormErrors | null;
-  isLoading: boolean;
+  mediaItems?: MediaItem[];
+  gpxFile?: GpxFile | null;
+  tagInput?: string;
+  fieldErrors?: FormErrors | null;
+  isLoading?: boolean;
   handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
-  handleTagInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  addTag: () => void;
-  removeTag: (tag: string) => void;
-  handleCharacteristicChange: (characteristic: string, checked: boolean) => void;
-  addMedia: (mediaItem: Omit<MediaItem, 'id'>) => void;
-  removeMedia: (mediaId: string) => void;
-  updateMediaCaption: (mediaId: string, caption: string) => void;
-  setGpxFile: (gpxFile: GpxFile) => void;
-  removeGpxFile: () => void;
+  handleTagInputChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  addTag?: () => void;
+  removeTag?: (tag: string) => void;
+  handleCharacteristicChange?: (characteristic: string, checked: boolean) => void;
+  addMedia?: (mediaItem: Omit<MediaItem, 'id'>) => void;
+  removeMedia?: (mediaId: string) => void;
+  updateMediaCaption?: (mediaId: string, caption: string) => void;
+  setGpxFile?: (gpxFile: GpxFile) => void;
+  removeGpxFile?: () => void;
+  // Props opzionali per maggiore flessibilità
+  showMediaUpload?: boolean;
+  showGpxUpload?: boolean;
+  showGpxPreview?: boolean;
 }
 
-const TripFormFields = ({
+const TripFormFields = React.memo(({
   formData,
-  mediaItems,
-  gpxFile,
-  tagInput,
-  fieldErrors,
-  isLoading,
+  mediaItems = [],
+  gpxFile = null,
+  tagInput = '',
+  fieldErrors = null,
+  isLoading = false,
   handleChange,
   handleTagInputChange,
   addTag,
@@ -46,8 +51,58 @@ const TripFormFields = ({
   removeMedia,
   updateMediaCaption,
   setGpxFile,
-  removeGpxFile
+  removeGpxFile,
+  showMediaUpload = true,
+  showGpxUpload = true,
+  showGpxPreview = true
 }: TripFormFieldsProps) => {
+  // Helper functions per gestire le props opzionali
+  const handleTagKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (addTag) addTag();
+    }
+  }, [addTag]);
+
+  const handleTagAdd = useCallback(() => {
+    if (addTag) addTag();
+  }, [addTag]);
+
+  const handleTagRemove = useCallback((tag: string) => {
+    if (removeTag) removeTag(tag);
+  }, [removeTag]);
+
+  const handleCharacteristicToggle = useCallback((characteristic: string, checked: boolean) => {
+    if (handleCharacteristicChange) handleCharacteristicChange(characteristic, checked);
+  }, [handleCharacteristicChange]);
+
+  // Safe handlers per i componenti figli
+  const safeGpxUpload = useCallback((gpxFile: GpxFile) => {
+    if (setGpxFile) setGpxFile(gpxFile);
+  }, [setGpxFile]);
+
+  const safeGpxRemove = useCallback(() => {
+    if (removeGpxFile) removeGpxFile();
+  }, [removeGpxFile]);
+
+  const safeAddMedia = useCallback((mediaItem: Omit<MediaItem, 'id'>) => {
+    if (addMedia) addMedia(mediaItem);
+  }, [addMedia]);
+
+  const safeRemoveMedia = useCallback((mediaId: string) => {
+    if (removeMedia) removeMedia(mediaId);
+  }, [removeMedia]);
+
+  const safeUpdateMediaCaption = useCallback((mediaId: string, caption: string) => {
+    if (updateMediaCaption) updateMediaCaption(mediaId, caption);
+  }, [updateMediaCaption]);
+
+  // Memoized error display helper
+  const renderFieldError = useCallback((fieldName: string) => {
+    const errors = fieldErrors?.[fieldName];
+    return errors ? <p className={formFieldClasses.error}>{errors.join(', ')}</p> : null;
+  }, [fieldErrors]);
+
   return (
     <>
       {/* Title */}
@@ -62,7 +117,7 @@ const TripFormFields = ({
           required
           className={formFieldClasses.input}
         />
-        {fieldErrors?.title && <p className={formFieldClasses.error}>{fieldErrors.title.join(', ')}</p>}
+        {renderFieldError('title')}
       </div>
 
       {/* Summary */}
@@ -77,7 +132,7 @@ const TripFormFields = ({
           required
           className={formFieldClasses.textarea}
         />
-        {fieldErrors?.summary && <p className={formFieldClasses.error}>{fieldErrors.summary.join(', ')}</p>}
+        {renderFieldError('summary')}
       </div>
 
       {/* Destination */}
@@ -92,7 +147,7 @@ const TripFormFields = ({
           required
           className={formFieldClasses.input}
         />
-        {fieldErrors?.destination && <p className={formFieldClasses.error}>{fieldErrors.destination.join(', ')}</p>}
+        {renderFieldError('destination')}
       </div>
 
       {/* Duration */}
@@ -109,7 +164,7 @@ const TripFormFields = ({
             required
             className={formFieldClasses.input}
           />
-          {fieldErrors?.duration_days && <p className={formFieldClasses.error}>{fieldErrors.duration_days.join(', ')}</p>}
+          {renderFieldError('duration_days')}
         </div>
         <div>
           <label htmlFor="duration_nights" className={formFieldClasses.label}>Durata (Notti)</label>
@@ -123,7 +178,7 @@ const TripFormFields = ({
             required
             className={formFieldClasses.input}
           />
-          {fieldErrors?.duration_nights && <p className={formFieldClasses.error}>{fieldErrors.duration_nights.join(', ')}</p>}
+          {renderFieldError('duration_nights')}
         </div>
       </div>
       
@@ -139,7 +194,7 @@ const TripFormFields = ({
           required
           className={formFieldClasses.input}
         />
-        {fieldErrors?.theme && <p className={formFieldClasses.error}>{fieldErrors.theme.join(', ')}</p>}
+        {renderFieldError('theme')}
       </div>
 
       {/* Characteristics */}
@@ -151,14 +206,15 @@ const TripFormFields = ({
               <input
                 type="checkbox"
                 checked={formData.characteristics.includes(characteristic)}
-                onChange={(e) => handleCharacteristicChange(characteristic, e.target.checked)}
+                onChange={(e) => handleCharacteristicToggle(characteristic, e.target.checked)}
                 className={formFieldClasses.checkbox}
+                disabled={!handleCharacteristicChange}
               />
               <span className="ml-2 text-sm text-gray-700">{characteristic}</span>
             </label>
           ))}
         </div>
-        {fieldErrors?.characteristics && <p className={formFieldClasses.error}>{fieldErrors.characteristics.join(', ')}</p>}
+        {renderFieldError('characteristics')}
       </div>
 
       {/* Tags */}
@@ -170,30 +226,35 @@ const TripFormFields = ({
             id="tag-input"
             value={tagInput}
             onChange={handleTagInputChange}
-            onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addTag(); } }}
+            onKeyDown={handleTagKeyDown}
             className={formFieldClasses.tagInput}
+            disabled={!addTag}
           />
           <button
             type="button"
-            onClick={addTag}
+            onClick={handleTagAdd}
             className={formFieldClasses.tagButton}
+            disabled={!addTag || isLoading}
           >
             Aggiungi Tag
           </button>
         </div>
-        {fieldErrors?.tags && <p className={formFieldClasses.error}>{fieldErrors.tags.join(', ')}</p>}
+        {renderFieldError('tags')}
         <div className="mt-2 flex flex-wrap gap-2">
           {formData.tags.map((tag: string) => (
             <span key={tag} className={formFieldClasses.tagSpan}>
               {tag}
-              <button
-                type="button"
-                onClick={() => removeTag(tag)}
-                className={formFieldClasses.tagRemoveButton}
-              >
-                <span className="sr-only">Rimuovi tag</span>
-                &times;
-              </button>
+              {removeTag && (
+                <button
+                  type="button"
+                  onClick={() => handleTagRemove(tag)}
+                  className={formFieldClasses.tagRemoveButton}
+                  disabled={isLoading}
+                >
+                  <span className="sr-only">Rimuovi tag</span>
+                  &times;
+                </button>
+              )}
             </span>
           ))}
         </div>
@@ -216,27 +277,31 @@ const TripFormFields = ({
           <option value={RecommendedSeason.Inverno}>Inverno</option>
           <option value={RecommendedSeason.Tutte}>Tutte</option>
         </select>
-        {fieldErrors?.recommended_season && <p className={formFieldClasses.error}>{fieldErrors.recommended_season.join(', ')}</p>}
+        {renderFieldError('recommended_season')}
       </div>
 
       {/* GPX Upload Section */}
-      <GPXUpload
-        gpxFile={gpxFile}
-        onGpxUpload={setGpxFile}
-        onGpxRemove={removeGpxFile}
-        isUploading={isLoading}
-      />
+      {showGpxUpload && (
+        <GPXUpload
+          gpxFile={gpxFile}
+          onGpxUpload={safeGpxUpload}
+          onGpxRemove={safeGpxRemove}
+          isUploading={isLoading}
+        />
+      )}
 
       {/* Multimedia Upload Section */}
-      <MultimediaUpload
-        mediaItems={mediaItems}
-        onAddMedia={addMedia}
-        onRemoveMedia={removeMedia}
-        onUpdateCaption={updateMediaCaption}
-      />
+      {showMediaUpload && (
+        <MultimediaUpload
+          mediaItems={mediaItems}
+          onAddMedia={safeAddMedia}
+          onRemoveMedia={safeRemoveMedia}
+          onUpdateCaption={safeUpdateMediaCaption}
+        />
+      )}
 
       {/* GPX Map Preview */}
-      {gpxFile && gpxFile.url && (
+      {showGpxPreview && gpxFile && gpxFile.url && (
         <div>
           <h3 className="text-lg font-medium text-gray-900 mb-4">Anteprima Tracciato</h3>
           <GPXAutoMapViewer 
@@ -260,10 +325,12 @@ const TripFormFields = ({
           className={formFieldClasses.textarea}
           placeholder="Racconta curiosità, fatti storici, luoghi d'interesse e altre informazioni utili per i motociclisti..."
         />
-        {fieldErrors?.insights && <p className={formFieldClasses.error}>{fieldErrors.insights.join(', ')}</p>}
+        {renderFieldError('insights')}
       </div>
     </>
   );
-};
+});
+
+TripFormFields.displayName = 'TripFormFields';
 
 export default TripFormFields;
