@@ -1,9 +1,8 @@
 import { prisma } from '@/lib/prisma';
+import { TripStatus } from '@prisma/client';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Calendar, MapPin, Tag, User, Clock, Navigation } from 'lucide-react';
-import { auth } from '@/auth';
-import { UserRole } from '@/types/profile';
 import { castToGpxFile, castToMediaItems } from '@/types/trip'; // Importa la funzione helper
 
 
@@ -45,40 +44,9 @@ const formatDate = (date: Date) => {
 };
 
 export default async function PacchettiPage() {
-  // Get current session to determine user role
-  const session = await auth();
-  
-  // Build query based on user role
-  let whereClause = {};
-  
-  if (!session?.user) {
-    // Non-logged users: only show published trips
-    whereClause = { status: 'Pubblicato' };
-  } else {
-    const userRole = session.user.role as UserRole;
-    const userId = session.user.id;
-    
-    if (userRole === UserRole.Explorer) {
-      // Explorer: only show published trips
-      whereClause = { status: 'Pubblicato' };
-    } else if (userRole === UserRole.Ranger) {
-      // Ranger: show published trips + their own draft trips
-      whereClause = {
-        OR: [
-          { status: 'Pubblicato' },
-          { 
-            AND: [
-              { status: 'Bozza' },
-              { user_id: userId }
-            ]
-          }
-        ]
-      };
-    } else if (userRole === UserRole.Sentinel) {
-      // Sentinel: show all trips regardless of status
-      whereClause = {};
-    }
-  }
+  // La pagina /trips mostra solo i viaggi pubblicati per tutti gli utenti
+  // I viaggi in bozza sono visibili solo in Dashboard ("I miei Viaggi") e nel pannello Admin
+  const whereClause = { status: TripStatus.Pubblicato };
   // Recupera i viaggi dal database con filtri basati sui ruoli
   const trips = await prisma.trip.findMany({
     where: whereClause,
