@@ -34,8 +34,8 @@ const mediaItemSchema = z.object({
 const gpxFileSchema = z.object({
   url: z.string().url({ message: "L'URL del file GPX non è valido" }),
   filename: z.string(),
-  waypoints: z.number().int().positive(),
-  distance: z.number().positive(),
+  waypoints: z.number().int().nonnegative(),
+  distance: z.number().nonnegative(),
   elevationGain: z.number().optional(),
   elevationLoss: z.number().optional(),
   duration: z.number().optional(),
