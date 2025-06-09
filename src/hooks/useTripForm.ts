@@ -26,7 +26,6 @@ export const useTripForm = ({
   tripId 
 }: UseTripFormProps) => {
 
-
   const [formData, setFormData] = useState<TripCreationData>({
     title: '',
     summary: '',
@@ -36,7 +35,7 @@ export const useTripForm = ({
     tags: [],
     theme: '',
     characteristics: [],
-    recommended_season: RecommendedSeason.Tutte,
+    recommended_seasons: [],
     insights: '',
     media: [],
     gpxFile: null
@@ -132,7 +131,14 @@ export const useTripForm = ({
         : prev.characteristics.filter(c => c !== characteristic)
     }));
   }, []);
-  const resetForm = useCallback(() => {
+  const handleSeasonChange = useCallback((season: RecommendedSeason, checked: boolean) => {
+    setFormData(prev => ({
+      ...prev,
+      recommended_seasons: checked
+        ? [...prev.recommended_seasons, season]
+        : prev.recommended_seasons.filter(s => s !== season)
+    }));
+  }, []);  const resetForm = useCallback(() => {
     setFormData({
       title: '',
       summary: '',
@@ -142,7 +148,7 @@ export const useTripForm = ({
       tags: [],
       theme: '',
       characteristics: [],
-      recommended_season: RecommendedSeason.Tutte,
+      recommended_seasons: [],
       insights: '',
       media: [],
       gpxFile: null
@@ -239,6 +245,7 @@ export const useTripForm = ({
     setGpxFile,
     removeGpxFile,
     handleCharacteristicChange,
+    handleSeasonChange,
     addMedia,
     removeMedia,
     updateMediaCaption,

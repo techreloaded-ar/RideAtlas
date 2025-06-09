@@ -67,10 +67,9 @@ describe('Trip API con Media Integration', () => {
     destination: 'Destinazione test',
     duration_days: 5,
     duration_nights: 4,
-    tags: ['test', 'media', 'integrazione'],
-    theme: 'Avventura',
+    tags: ['test', 'media', 'integrazione'],    theme: 'Avventura',
     characteristics: ['Percorso panoramico', 'Strade di montagna'],
-    recommended_season: 'Estate',
+    recommended_seasons: ['Estate'],
     media: mockMediaItems,
     slug: 'viaggio-test-con-media',
     status: 'Bozza',
@@ -108,10 +107,9 @@ describe('Trip API con Media Integration', () => {
         destination: 'Destinazione test',
         duration_days: 5,
         duration_nights: 4,
-        tags: ['test', 'media', 'integrazione'],
-        theme: 'Avventura',
+        tags: ['test', 'media', 'integrazione'],        theme: 'Avventura',
         characteristics: ['Percorso panoramico', 'Strade di montagna'],
-        recommended_season: 'Estate',
+        recommended_seasons: ['Estate'],
         media: mockMediaItems
       };
       
@@ -139,9 +137,8 @@ describe('Trip API con Media Integration', () => {
         duration_days: 3,
         duration_nights: 2,
         tags: ['test', 'senza-media'],
-        theme: 'Relax',
-        characteristics: ['Spiaggia', 'Mare'],
-        recommended_season: 'Estate'
+        theme: 'Relax',        characteristics: ['Spiaggia', 'Mare'],
+        recommended_seasons: ['Estate']
       };
       
       const request = createMockRequest(tripData);
@@ -253,9 +250,8 @@ describe('Trip API con Media Integration', () => {
       duration_days: 7,
       duration_nights: 6,
       tags: ['toscana', 'cultura', 'vino'],
-      theme: 'Culturale',
-      characteristics: ['Città storiche', 'Strade panoramiche'],
-      recommended_season: 'Primavera',
+      theme: 'Culturale',      characteristics: ['Città storiche', 'Strade panoramiche'],
+      recommended_seasons: ['Primavera'],
       insights: 'La Toscana è una regione ricca di storia e cultura. Durante questo viaggio potrai visitare luoghi famosi come Firenze, Siena e San Gimignano, conoscere la loro storia e assaporare la cucina locale.',
       media: [],
       slug: 'viaggio-toscana-insights',
@@ -281,9 +277,8 @@ describe('Trip API con Media Integration', () => {
         duration_days: tripWithInsights.duration_days,
         duration_nights: tripWithInsights.duration_nights,
         tags: tripWithInsights.tags,
-        theme: tripWithInsights.theme,
-        characteristics: tripWithInsights.characteristics,
-        recommended_season: tripWithInsights.recommended_season,
+        theme: tripWithInsights.theme,        characteristics: tripWithInsights.characteristics,
+        recommended_seasons: tripWithInsights.recommended_seasons,
         insights: tripWithInsights.insights,
         media: []
       };

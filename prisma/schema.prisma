@@ -94,7 +94,7 @@ model Trip {
   tags               String[]
   theme              String
   characteristics    String[]
-  recommended_season RecommendedSeason
+  recommended_seasons RecommendedSeason[]
   media              Json[]            @default([])
   gpxFile            Json?             // Aggiunto campo per il file GPX
   insights           String?           @db.Text
@@ -113,7 +113,6 @@ enum RecommendedSeason {
   Estate
   Autunno
   Inverno
-  Tutte
 }
 
 enum TripStatus {

@@ -3,7 +3,7 @@
 
 import React, { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { TripCreationData, MediaItem, GpxFile } from '@/types/trip';
+import { TripCreationData, MediaItem, GpxFile, RecommendedSeason } from '@/types/trip';
 import TripFormFields from './TripFormFields';
 
 interface FormErrors {
@@ -18,13 +18,13 @@ interface TripFormContainerProps {
   tagInput: string;
   fieldErrors: FormErrors | null;
   isLoading: boolean;
-
   // Handlers per i campi form
   handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
   handleTagInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   addTag: () => void;
   removeTag: (tag: string) => void;
   handleCharacteristicChange: (characteristic: string, checked: boolean) => void;
+  handleSeasonChange: (season: RecommendedSeason, checked: boolean) => void;
 
   // Handlers per media e GPX
   addMedia: (mediaItem: Omit<MediaItem, 'id'>) => void;
@@ -58,6 +58,7 @@ const TripFormContainer: React.FC<TripFormContainerProps> = ({
   addTag,
   removeTag,
   handleCharacteristicChange,
+  handleSeasonChange,
   addMedia,
   removeMedia,
   updateMediaCaption,
@@ -120,8 +121,7 @@ const TripFormContainer: React.FC<TripFormContainerProps> = ({
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-8">
           <div className="bg-white shadow-lg rounded-lg overflow-hidden">
-            <div className="px-6 py-8 space-y-6">
-              <TripFormFields
+            <div className="px-6 py-8 space-y-6">              <TripFormFields
                 formData={initialData}
                 mediaItems={mediaItems}
                 gpxFile={gpxFile}
@@ -133,6 +133,7 @@ const TripFormContainer: React.FC<TripFormContainerProps> = ({
                 addTag={addTag}
                 removeTag={removeTag}
                 handleCharacteristicChange={handleCharacteristicChange}
+                handleSeasonChange={handleSeasonChange}
                 addMedia={addMedia}
                 removeMedia={removeMedia}
                 updateMediaCaption={updateMediaCaption}

@@ -10,8 +10,7 @@ import TripFormContainer from './TripFormContainer';
 const CreateTripForm = () => {
   const router = useRouter();
   const { showSuccess } = useToast();
-  
-  const {
+    const {
     formData,
     mediaItems,
     gpxFile,
@@ -24,6 +23,7 @@ const CreateTripForm = () => {
     addTag,
     removeTag,
     handleCharacteristicChange,
+    handleSeasonChange,
     addMedia,
     removeMedia,
     updateMediaCaption,
@@ -67,12 +67,12 @@ const CreateTripForm = () => {
       gpxFile={gpxFile || null}
       tagInput={tagInput}
       fieldErrors={fieldErrors}
-      isLoading={isLoading}
-      handleChange={handleChange}
+      isLoading={isLoading}      handleChange={handleChange}
       handleTagInputChange={handleTagInputChange}
       addTag={addTag}
       removeTag={removeTag}
       handleCharacteristicChange={handleCharacteristicChange}
+      handleSeasonChange={handleSeasonChange}
       addMedia={addMedia}
       removeMedia={removeMedia}
       updateMediaCaption={updateMediaCaption}

@@ -37,7 +37,6 @@ describe('POST /api/trips - Creazione Viaggi', () => {
       body: JSON.stringify(body),
     })
   }
-
   const validTripData = {
     title: 'Viaggio in Toscana',
     summary: 'Un bellissimo viaggio attraverso le colline toscane con panorami mozzafiato',
@@ -47,7 +46,7 @@ describe('POST /api/trips - Creazione Viaggi', () => {
     tags: ['natura', 'panorami', 'cultura'],
     theme: 'Turismo naturalistico',
     characteristics: ['Strade sterrate', 'Bel paesaggio'],
-    recommended_season: RecommendedSeason.Primavera,
+    recommended_seasons: [RecommendedSeason.Primavera],
   }
 
   const mockUser = {
@@ -73,9 +72,9 @@ describe('POST /api/trips - Creazione Viaggi', () => {
       mockAuth.mockResolvedValue({
         user: mockUser,
         expires: '2024-12-31T23:59:59.999Z',
-      })
-      mockEnsureUserExists.mockResolvedValue(mockUser)
-      ;(prisma.trip.create as jest.Mock).mockResolvedValue(mockCreatedTrip)
+      });
+      mockEnsureUserExists.mockResolvedValue(mockUser);
+      (prisma.trip.create as jest.Mock).mockResolvedValue(mockCreatedTrip);
 
       const request = createMockRequest(validTripData)
       const response = await POST(request)
@@ -96,8 +95,7 @@ describe('POST /api/trips - Creazione Viaggi', () => {
           user_id: 'user-123',
         },
       })
-    })
-
+    })    
     it('should create trip with minimal required data', async () => {
       const minimalData = {
         title: 'Viaggio Minimo',
@@ -107,7 +105,7 @@ describe('POST /api/trips - Creazione Viaggi', () => {
         duration_nights: 1,
         tags: ['roma'],
         theme: 'Città',
-        recommended_season: RecommendedSeason.Tutte,
+        recommended_seasons: [RecommendedSeason.Primavera],
       }
 
       mockAuth.mockResolvedValue({
@@ -234,7 +232,6 @@ describe('POST /api/trips - Creazione Viaggi', () => {
         duration_days: -1,
         duration_nights: -1,
       }
-
       const request = createMockRequest(invalidData)
       const response = await POST(request)
       const data = await response.json()
@@ -248,7 +245,7 @@ describe('POST /api/trips - Creazione Viaggi', () => {
     it('should reject trip with invalid recommended season', async () => {
       const invalidData = {
         ...validTripData,
-        recommended_season: 'Invalid Season' as any,
+        recommended_seasons: ['Invalid Season' as any],
       }
 
       const request = createMockRequest(invalidData)
@@ -257,25 +254,36 @@ describe('POST /api/trips - Creazione Viaggi', () => {
 
       expect(response.status).toBe(400)
       expect(data.error).toBe('Dati non validi.')
-      expect(data.details.recommended_season).toBeDefined()
+      expect(data.details.recommended_seasons).toBeDefined()
     })
 
-    it('should accept valid recommended seasons', async () => {
-      mockEnsureUserExists.mockResolvedValue(mockUser)
-      ;(prisma.trip.create as jest.Mock).mockResolvedValue(mockCreatedTrip)
+    it('should reject trip with empty recommended seasons array', async () => {
+      const invalidData = {
+        ...validTripData,
+        recommended_seasons: [],
+      }
 
-      const seasons = [
+      const request = createMockRequest(invalidData)
+      const response = await POST(request)
+      const data = await response.json()      
+      expect(response.status).toBe(400)
+      expect(data.error).toBe('Dati non validi.')
+      expect(data.details.recommended_seasons).toContain('Devi selezionare almeno una stagione.')
+    })
+
+      it('should accept valid recommended seasons', async () => {
+      mockEnsureUserExists.mockResolvedValue(mockUser);
+      (prisma.trip.create as jest.Mock).mockResolvedValue(mockCreatedTrip);      const seasons = [
         RecommendedSeason.Primavera,
         RecommendedSeason.Estate,
         RecommendedSeason.Autunno,
         RecommendedSeason.Inverno,
-        RecommendedSeason.Tutte,
       ]
-
+      
       for (const season of seasons) {
         const dataWithSeason = {
           ...validTripData,
-          recommended_season: season,
+          recommended_seasons: [season],
         }
 
         const request = createMockRequest(dataWithSeason)

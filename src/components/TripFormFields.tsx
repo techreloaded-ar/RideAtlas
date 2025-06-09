@@ -22,8 +22,8 @@ interface TripFormFieldsProps {
   handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
   handleTagInputChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   addTag?: () => void;
-  removeTag?: (tag: string) => void;
-  handleCharacteristicChange?: (characteristic: string, checked: boolean) => void;
+  removeTag?: (tag: string) => void;  handleCharacteristicChange?: (characteristic: string, checked: boolean) => void;
+  handleSeasonChange?: (season: RecommendedSeason, checked: boolean) => void;
   addMedia?: (mediaItem: Omit<MediaItem, 'id'>) => void;
   removeMedia?: (mediaId: string) => void;
   updateMediaCaption?: (mediaId: string, caption: string) => void;
@@ -45,8 +45,8 @@ const TripFormFields = React.memo(({
   handleChange,
   handleTagInputChange,
   addTag,
-  removeTag,
-  handleCharacteristicChange,
+  removeTag,  handleCharacteristicChange,
+  handleSeasonChange,
   addMedia,
   removeMedia,
   updateMediaCaption,
@@ -71,10 +71,13 @@ const TripFormFields = React.memo(({
   const handleTagRemove = useCallback((tag: string) => {
     if (removeTag) removeTag(tag);
   }, [removeTag]);
-
   const handleCharacteristicToggle = useCallback((characteristic: string, checked: boolean) => {
     if (handleCharacteristicChange) handleCharacteristicChange(characteristic, checked);
   }, [handleCharacteristicChange]);
+
+  const handleSeasonToggle = useCallback((season: RecommendedSeason, checked: boolean) => {
+    if (handleSeasonChange) handleSeasonChange(season, checked);
+  }, [handleSeasonChange]);
 
   // Safe handlers per i componenti figli
   const safeGpxUpload = useCallback((gpxFile: GpxFile) => {
@@ -258,26 +261,23 @@ const TripFormFields = React.memo(({
             </span>
           ))}
         </div>
-      </div>
-
-      {/* Recommended Season */}
+      </div>      {/* Recommended Seasons */}
       <div>
-        <label htmlFor="recommended_season" className={formFieldClasses.label}>Stagione Consigliata</label>
-        <select
-          name="recommended_season"
-          id="recommended_season"
-          value={formData.recommended_season}
-          onChange={handleChange}
-          required
-          className={formFieldClasses.select}
-        >
-          <option value={RecommendedSeason.Primavera}>Primavera</option>
-          <option value={RecommendedSeason.Estate}>Estate</option>
-          <option value={RecommendedSeason.Autunno}>Autunno</option>
-          <option value={RecommendedSeason.Inverno}>Inverno</option>
-          <option value={RecommendedSeason.Tutte}>Tutte</option>
-        </select>
-        {renderFieldError('recommended_season')}
+        <label className={`${formFieldClasses.label} mb-3`}>Stagioni Consigliate</label>
+        <div className="space-y-2">
+          {Object.values(RecommendedSeason).map((season) => (
+            <label key={season} className="flex items-center">              <input
+                type="checkbox"
+                checked={formData.recommended_seasons.includes(season)}
+                onChange={(e) => handleSeasonToggle(season, e.target.checked)}
+                className={formFieldClasses.checkbox}
+                disabled={!handleSeasonChange}
+              />
+              <span className="ml-2 text-sm text-gray-700">{season}</span>
+            </label>
+          ))}
+        </div>
+        {renderFieldError('recommended_seasons')}
       </div>
 
       {/* GPX Upload Section */}

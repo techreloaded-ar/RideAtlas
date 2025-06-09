@@ -29,7 +29,6 @@ const getSeasonColor = (season: string) => {
     'Estate': 'bg-yellow-100 text-yellow-700',
     'Autunno': 'bg-orange-100 text-orange-700',
     'Inverno': 'bg-blue-100 text-blue-700',
-    'Tutte': 'bg-gray-100 text-gray-700',
   };
   return colors[season] || 'bg-gray-100 text-gray-700';
 };
@@ -229,13 +228,15 @@ export default async function PacchettiPage() {
                         )}
                       </div>
                     </div>
-                  )}
-
-                  {/* Stagione consigliata */}
+                  )}                  {/* Stagioni consigliate */}
                   <div className="mb-4">
-                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${getSeasonColor(trip.recommended_season)}`}>
-                      📅 {trip.recommended_season}
-                    </span>
+                    <div className="flex flex-wrap gap-2">
+                      {trip.recommended_seasons.map((season, index) => (
+                        <span key={index} className={`px-3 py-1 rounded-full text-sm font-medium ${getSeasonColor(season)}`}>
+                          📅 {season}
+                        </span>
+                      ))}
+                    </div>
                   </div>
 
                   {/* Creatore del viaggio */}

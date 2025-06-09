@@ -59,12 +59,12 @@ const EditTripForm = ({ tripId }: EditTripFormProps) => {
     tagInput,
     error,
     fieldErrors,
-    isLoading,
-    handleChange,
+    isLoading,    handleChange,
     handleTagInputChange,
     addTag,
     removeTag,
     handleCharacteristicChange,
+    handleSeasonChange,
     addMedia,
     removeMedia,
     updateMediaCaption,
@@ -149,11 +149,11 @@ const EditTripForm = ({ tripId }: EditTripFormProps) => {
         tagInput={tagInput}
         fieldErrors={fieldErrors}
         isLoading={isLoading}
-        handleChange={handleChange}
-        handleTagInputChange={handleTagInputChange}
+        handleChange={handleChange}        handleTagInputChange={handleTagInputChange}
         addTag={addTag}
         removeTag={removeTag}
         handleCharacteristicChange={handleCharacteristicChange}
+        handleSeasonChange={handleSeasonChange}
         addMedia={addMedia}
         removeMedia={removeMedia}
         updateMediaCaption={updateMediaCaption}

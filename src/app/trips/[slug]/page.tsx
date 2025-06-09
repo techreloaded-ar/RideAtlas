@@ -81,16 +81,18 @@ export default async function TripDetailPage({ params }: { params: { slug: strin
               <MapPin className="w-3 h-3 mr-1" />
               {trip.destination}
             </span>
-            
-            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
               <Award className="w-3 h-3 mr-1" />
               {trip.theme}
             </span>
             
-            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
-              <Calendar className="w-3 h-3 mr-1" />
-              {trip.recommended_season}
-            </span>
+            {/* Multiple seasons support */}
+            {trip.recommended_seasons.map((season, index) => (
+              <span key={index} className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
+                <Calendar className="w-3 h-3 mr-1" />
+                {season}
+              </span>
+            ))}
           </div>
           
           <div className="mt-4 text-sm text-gray-500">

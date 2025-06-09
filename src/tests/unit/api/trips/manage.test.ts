@@ -51,7 +51,6 @@ describe('API /api/trips/[id] - Gestione Singolo Viaggio', () => {
     email: 'sentinel@example.com',
     role: UserRole.Sentinel,
   }
-
   const mockTrip = {
     id: 'trip-123',
     title: 'Viaggio in Toscana',
@@ -62,7 +61,7 @@ describe('API /api/trips/[id] - Gestione Singolo Viaggio', () => {
     tags: ['natura', 'panorami'],
     theme: 'Turismo naturalistico',
     characteristics: ['Strade sterrate', 'Bel paesaggio'],
-    recommended_season: RecommendedSeason.Primavera,
+    recommended_seasons: [RecommendedSeason.Primavera],
     user_id: 'user-123',
     status: 'Bozza',
     slug: 'viaggio-in-toscana',
@@ -186,8 +185,7 @@ describe('API /api/trips/[id] - Gestione Singolo Viaggio', () => {
     })
   })
 
-  describe('PUT /api/trips/[id] - Aggiornamento Viaggio', () => {
-    const validUpdateData = {
+  describe('PUT /api/trips/[id] - Aggiornamento Viaggio', () => {    const validUpdateData = {
       title: 'Viaggio in Toscana - Aggiornato',
       summary: 'Descrizione aggiornata del viaggio',
       destination: 'Siena, Toscana',
@@ -196,7 +194,7 @@ describe('API /api/trips/[id] - Gestione Singolo Viaggio', () => {
       tags: ['natura', 'cultura', 'enogastronomia'],
       theme: 'Turismo culturale',
       characteristics: ['Strade sterrate', 'Bel paesaggio', 'Curve strette'],
-      recommended_season: RecommendedSeason.Estate,
+      recommended_seasons: [RecommendedSeason.Estate],
     }
 
     const mockExistingTrip = {
@@ -353,7 +351,7 @@ describe('API /api/trips/[id] - Gestione Singolo Viaggio', () => {
           duration_nights: 0, // Zero
           tags: [], // Empty array
           theme: 'X', // Too short
-          recommended_season: 'Invalid' as any,
+          recommended_seasons: ['Invalid' as any],
         }
 
         const request = createMockRequest(invalidData)
