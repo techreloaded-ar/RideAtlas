@@ -38,12 +38,12 @@ const CreateTripForm = () => {
       alert('Viaggio creato con successo!'); // TODO: Sostituire con toast
     }
   });
-
   const characteristicOptions = [
     'Strade sterrate',
     'Curve strette',
-    'No pedaggi',
-    'No Autostrada',
+    'Evita pedaggi',
+    'Evita traghetti',
+    'Autostrada',
     'Bel paesaggio'
   ];
 

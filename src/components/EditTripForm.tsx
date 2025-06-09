@@ -80,14 +80,14 @@ const EditTripForm = ({ tripId }: EditTripFormProps) => {
     onSuccess: () => {
       showSuccess('Viaggio aggiornato con successo!');
       router.push('/dashboard');
-    }
-  });
+    }  });
 
   const characteristicOptions = [
     'Strade sterrate',
     'Curve strette',
-    'No pedaggi',
-    'No Autostrada',
+    'Evita pedaggi',
+    'Evita traghetti',
+    'Autostrada',
     'Bel paesaggio'
   ];
 
