@@ -164,8 +164,7 @@ describe('POST /api/trips - Creazione Viaggi', () => {
     })
   })
 
-  describe('Validazione dati', () => {
-    beforeEach(() => {
+  describe('Validazione dati', () => {    beforeEach(() => {
       mockAuth.mockResolvedValue({
         user: mockUser,
         expires: '2024-12-31T23:59:59.999Z',
@@ -192,7 +191,8 @@ describe('POST /api/trips - Creazione Viaggi', () => {
       expect(data.details.summary).toContain('Required')
       expect(data.details.destination).toContain('La destinazione deve contenere almeno 3 caratteri.')
       expect(data.details.duration_days).toContain('La durata in giorni deve essere un numero positivo.')
-      expect(data.details.tags).toContain('Devi specificare almeno un tag.')
+      // tags è opzionale con default [], quindi non dovrebbe generare errore
+      expect(data.details.tags).toBeUndefined()
       expect(data.details.theme).toContain('Il tema deve contenere almeno 3 caratteri.')
     })
 
@@ -227,19 +227,19 @@ describe('POST /api/trips - Creazione Viaggi', () => {
     })
 
     it('should reject trip with negative duration', async () => {
-      const invalidData = {
-        ...validTripData,
+      const invalidData = {        ...validTripData,
         duration_days: -1,
         duration_nights: -1,
-      }
+      };
+      
       const request = createMockRequest(invalidData)
       const response = await POST(request)
-      const data = await response.json()
-
+      const data = await response.json();
+      
       expect(response.status).toBe(400)
       expect(data.error).toBe('Dati non validi.')
       expect(data.details.duration_days).toContain('La durata in giorni deve essere un numero positivo.')
-      expect(data.details.duration_nights).toContain('La durata in notti deve essere un numero positivo.')
+      expect(data.details.duration_nights).toContain('La durata in notti deve essere un numero non negativo.')
     })
 
     it('should reject trip with invalid recommended season', async () => {

@@ -51,7 +51,7 @@ const tripCreationSchema = z.object({
   summary: z.string().min(10, { message: 'Il sommario deve contenere almeno 10 caratteri.' }).max(500),
   destination: z.string().min(3, { message: 'La destinazione deve contenere almeno 3 caratteri.' }).max(100),  
   duration_days: z.number().int().positive({ message: 'La durata in giorni deve essere un numero positivo.' }),
-  duration_nights: z.number().int().positive({ message: 'La durata in notti deve essere un numero positivo.' }),
+  duration_nights: z.number().int().nonnegative({ message: 'La durata in notti deve essere un numero non negativo.' }),
   tags: z.array(z.string().min(1)).optional().default([]),
   theme: z.string().min(3, { message: 'Il tema deve contenere almeno 3 caratteri.' }).max(50),
   characteristics: z.array(z.string()).optional().default([]),

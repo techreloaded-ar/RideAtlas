@@ -38,7 +38,7 @@ const tripUpdateSchema = z.object({
   summary: z.string().min(10, { message: 'Il sommario deve contenere almeno 10 caratteri.' }).max(500).optional(),
   destination: z.string().min(3, { message: 'La destinazione deve contenere almeno 3 caratteri.' }).max(100).optional(),  
   duration_days: z.number().int().positive({ message: 'La durata in giorni deve essere un numero positivo.' }).optional(),
-  duration_nights: z.number().int().positive({ message: 'La durata in notti deve essere un numero positivo.' }).optional(),
+  duration_nights: z.number().int().nonnegative({ message: 'La durata in notti deve essere un numero non negativo.' }).optional(),
   tags: z.array(z.string().min(1)).optional().default([]),
   theme: z.string().min(3, { message: 'Il tema deve contenere almeno 3 caratteri.' }).max(50).optional(),
   characteristics: z.array(z.string()).optional(),

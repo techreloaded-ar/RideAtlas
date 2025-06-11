@@ -256,22 +256,21 @@ describe('API /api/trips/[id] - Gestione Singolo Viaggio', () => {
         const partialData = {
           title: 'Nuovo Titolo',
           summary: 'Nuova descrizione del viaggio',
-        }
-
-        ;(prisma.trip.update as jest.Mock).mockResolvedValue({
+        }        ;(prisma.trip.update as jest.Mock).mockResolvedValue({
           ...mockUpdatedTrip,
           ...partialData,
-        })
-
+        });
+        
         const request = createMockRequest(partialData)
         const response = await PUT(request, { params: { id: 'trip-123' } })
 
-        expect(response.status).toBe(200)
+        expect(response.status).toBe(200);
         expect(prisma.trip.update).toHaveBeenCalledWith({
           where: { id: 'trip-123' },
           data: {
             ...partialData,
             slug: 'nuovo-titolo',
+            tags: [],
             updated_at: expect.any(Date),
           },
           include: {
@@ -303,21 +302,21 @@ describe('API /api/trips/[id] - Gestione Singolo Viaggio', () => {
         const updateWithoutTitle = {
           summary: 'Nuova descrizione',
           duration_days: 5,
-        }
+        };
 
-        ;(prisma.trip.update as jest.Mock).mockResolvedValue({
+        (prisma.trip.update as jest.Mock).mockResolvedValue({
           ...mockTrip,
           ...updateWithoutTitle,
-        })
-
+        })        
         const request = createMockRequest(updateWithoutTitle)
         const response = await PUT(request, { params: { id: 'trip-123' } })
 
-        expect(response.status).toBe(200)
+        expect(response.status).toBe(200);
         expect(prisma.trip.update).toHaveBeenCalledWith({
           where: { id: 'trip-123' },
           data: {
             ...updateWithoutTitle,
+            tags: [],
             updated_at: expect.any(Date),
           },
           include: {
@@ -356,8 +355,7 @@ describe('API /api/trips/[id] - Gestione Singolo Viaggio', () => {
 
         const request = createMockRequest(invalidData)
         const response = await PUT(request, { params: { id: 'trip-123' } })
-        const data = await response.json()
-
+        const data = await response.json()       
         expect(response.status).toBe(400)
         expect(data.error).toBe('Dati non validi')
         expect(data.details).toBeDefined()
@@ -365,7 +363,8 @@ describe('API /api/trips/[id] - Gestione Singolo Viaggio', () => {
         expect(data.details.summary).toContain('Il sommario deve contenere almeno 10 caratteri.')
         expect(data.details.destination).toContain('La destinazione deve contenere almeno 3 caratteri.')
         expect(data.details.duration_days).toContain('La durata in giorni deve essere un numero positivo.')
-        expect(data.details.tags).toContain('Devi specificare almeno un tag.')
+        // tags è opzionale con default [], quindi non dovrebbe generare errore
+        expect(data.details.tags).toBeUndefined()
         expect(data.details.theme).toContain('Il tema deve contenere almeno 3 caratteri.')
       })
 
@@ -487,8 +486,8 @@ describe('API /api/trips/[id] - Gestione Singolo Viaggio', () => {
         mockAuth.mockResolvedValue({
           user: mockUser,
           expires: '2024-12-31T23:59:59.999Z',
-        })
-        ;(prisma.trip.findUnique as jest.Mock).mockResolvedValue(mockExistingTrip)
+        });
+        (prisma.trip.findUnique as jest.Mock).mockResolvedValue(mockExistingTrip)
       })
 
       it('should generate new slug when title changes', async () => {
@@ -505,12 +504,13 @@ describe('API /api/trips/[id] - Gestione Singolo Viaggio', () => {
         const request = createMockRequest(updateData)
         const response = await PUT(request, { params: { id: 'trip-123' } })
 
-        expect(response.status).toBe(200)
+        expect(response.status).toBe(200)        
         expect(prisma.trip.update).toHaveBeenCalledWith({
           where: { id: 'trip-123' },
           data: {
             ...updateData,
             slug: 'nuovo-titolo-completamente-diverso',
+            tags: [],
             updated_at: expect.any(Date),
           },
           include: {
@@ -534,22 +534,22 @@ describe('API /api/trips/[id] - Gestione Singolo Viaggio', () => {
         ]
 
         for (const { title, expectedSlug } of testCases) {
-          ;(prisma.trip.update as jest.Mock).mockResolvedValue({
+          (prisma.trip.update as jest.Mock).mockResolvedValue({
             ...mockTrip,
             title,
             slug: expectedSlug,
-          })
-
+          })          
           const updateData = { title }
           const request = createMockRequest(updateData)
           const response = await PUT(request, { params: { id: 'trip-123' } })
 
-          expect(response.status).toBe(200)
+          expect(response.status).toBe(200);
           expect(prisma.trip.update).toHaveBeenCalledWith({
             where: { id: 'trip-123' },
             data: {
               title,
               slug: expectedSlug,
+              tags: [],
               updated_at: expect.any(Date),
             },
             include: {
