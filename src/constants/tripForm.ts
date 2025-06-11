@@ -3,10 +3,13 @@
 export const characteristicOptions = [
   'Strade sterrate',
   'Curve strette',
-  'Evita pedaggi',
-  'Evita traghetti',
+  'Presenza pedaggi',
+  'Presenza traghetti',
   'Autostrada',
-  'Bel paesaggio'
+  'Bel paesaggio',
+  'Visita prolungata',
+  'Interesse gastronomico',
+  'Interesse storico-culturale'
 ];
 
 export const formFieldClasses = {

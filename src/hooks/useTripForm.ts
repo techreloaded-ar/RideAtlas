@@ -183,13 +183,6 @@ export const useTripForm = ({
     setError(null);
     setFieldErrors(null);
 
-    // Validazione base
-    if (formData.tags.length === 0) {
-      setError('Devi aggiungere almeno un tag.');
-      setIsLoading(false);
-      return false;
-    }
-
     try {
       const url = mode === 'create' ? '/api/trips' : `/api/trips/${tripId}`;
       const method = mode === 'create' ? 'POST' : 'PUT';

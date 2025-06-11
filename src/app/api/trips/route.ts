@@ -49,10 +49,11 @@ const gpxFileSchema = z.object({
 const tripCreationSchema = z.object({
   title: z.string().min(3, { message: 'Il titolo deve contenere almeno 3 caratteri.' }).max(100),
   summary: z.string().min(10, { message: 'Il sommario deve contenere almeno 10 caratteri.' }).max(500),
-  destination: z.string().min(3, { message: 'La destinazione deve contenere almeno 3 caratteri.' }).max(100),
+  destination: z.string().min(3, { message: 'La destinazione deve contenere almeno 3 caratteri.' }).max(100),  
   duration_days: z.number().int().positive({ message: 'La durata in giorni deve essere un numero positivo.' }),
   duration_nights: z.number().int().positive({ message: 'La durata in notti deve essere un numero positivo.' }),
-  tags: z.array(z.string().min(1)).min(1, { message: 'Devi specificare almeno un tag.' }),    theme: z.string().min(3, { message: 'Il tema deve contenere almeno 3 caratteri.' }).max(50),
+  tags: z.array(z.string().min(1)).optional().default([]),
+  theme: z.string().min(3, { message: 'Il tema deve contenere almeno 3 caratteri.' }).max(50),
   characteristics: z.array(z.string()).optional().default([]),
   recommended_seasons: z.array(z.nativeEnum(RecommendedSeason)).min(1, { message: 'Devi selezionare almeno una stagione.' }),
   insights: z.string().max(10000, { message: 'Il testo esteso non può superare 10000 caratteri.' }).nullable().optional(),

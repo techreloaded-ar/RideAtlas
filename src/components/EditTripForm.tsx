@@ -70,14 +70,20 @@ const EditTripForm = ({ tripId }: EditTripFormProps) => {
     updateMediaCaption,
     setGpxFile,
     removeGpxFile,
-    submitForm,
-  } = useTripForm({
+    submitForm,  } = useTripForm({
     mode: 'edit',
     tripId,
     initialData: initialData || undefined,
     onSuccess: () => {
       showSuccess('Viaggio aggiornato con successo!');
-      router.push('/dashboard');
+      // Reindirizza alla pagina del viaggio usando lo slug dai dati iniziali
+      if (initialData && 'slug' in initialData && initialData.slug) {
+        router.push(`/trips/${initialData.slug}`);
+      } else {
+        // Fallback alla dashboard se non abbiamo lo slug
+        console.error('Slug non trovato per il reindirizzamento');
+        router.push('/dashboard');
+      }
     }
   });
 
