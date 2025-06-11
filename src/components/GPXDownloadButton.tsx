@@ -24,6 +24,15 @@ export default function GPXDownloadButton({ tripId, tripTitle, className = "" }:
       
       if (!response.ok) {
         const errorData = await response.json()
+        
+        // Gestione specifica per errori di autenticazione
+        if (response.status === 401) {
+          alert('È necessario effettuare il login per scaricare le tracce GPX.')
+          // Potresti anche reindirizzare alla pagina di login
+          // window.location.href = '/auth/signin'
+          return
+        }
+        
         throw new Error(errorData.error || 'Errore durante il download')
       }
 

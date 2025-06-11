@@ -99,9 +99,23 @@ describe('GET /api/trips/[id]/gpx - Download GPX', () => {
   })
 
   describe('Controlli di Permessi', () => {
-    it('deve permettere il download per viaggio pubblico senza autenticazione', async () => {
+    it('deve negare il download per viaggio pubblico senza autenticazione', async () => {
       mockPrisma.mockResolvedValue(mockTrip)
       mockAuth.mockResolvedValue(null) // Utente non autenticato
+      
+      const request = createMockRequest()
+      const response = await GET(request, { params: { id: 'trip-123' } })
+      
+      expect(response.status).toBe(401)
+      const body = await response.json()
+      expect(body.error).toBe('Accesso negato. È necessario effettuare il login per scaricare le tracce GPX.')
+    })
+
+    it('deve permettere il download per viaggio pubblico con utente autenticato', async () => {
+      mockPrisma.mockResolvedValue(mockTrip)
+      mockAuth.mockResolvedValue({
+        user: { id: 'another-user', role: 'User' }
+      })
       mockFetch.mockResolvedValue({
         ok: true,
         text: () => Promise.resolve(mockGpxContent)
@@ -124,9 +138,9 @@ describe('GET /api/trips/[id]/gpx - Download GPX', () => {
       const request = createMockRequest()
       const response = await GET(request, { params: { id: 'trip-123' } })
       
-      expect(response.status).toBe(403)
+      expect(response.status).toBe(401)
       const body = await response.json()
-      expect(body.error).toBe('Non hai i permessi per scaricare questo file GPX')
+      expect(body.error).toBe('Accesso negato. È necessario effettuare il login per scaricare le tracce GPX.')
     })
 
     it('deve permettere il download al proprietario del viaggio', async () => {
@@ -146,6 +160,24 @@ describe('GET /api/trips/[id]/gpx - Download GPX', () => {
       const response = await GET(request, { params: { id: 'trip-123' } })
       
       expect(response.status).toBe(200)
+    })
+
+    it('deve negare il download a utenti autenticati per viaggi privati di altri', async () => {
+      mockPrisma.mockResolvedValue({
+        ...mockTrip,
+        status: 'Bozza',
+        user_id: 'other-user'
+      })
+      mockAuth.mockResolvedValue({
+        user: { id: 'user-123', role: 'User' }
+      })
+      
+      const request = createMockRequest()
+      const response = await GET(request, { params: { id: 'trip-123' } })
+      
+      expect(response.status).toBe(403)
+      const body = await response.json()
+      expect(body.error).toBe('Non hai i permessi per scaricare questo file GPX')
     })
 
     it('deve permettere il download ai Sentinel', async () => {

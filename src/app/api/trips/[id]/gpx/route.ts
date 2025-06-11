@@ -57,14 +57,22 @@ export async function GET(
       )
     }
 
-    // Controllo permessi di accesso
+    // Controllo autenticazione obbligatoria
     const session = await auth()
-    const isOwner = session?.user?.id === trip.user_id
-    const isSentinel = session?.user?.role === UserRole.Sentinel
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { error: 'Accesso negato. È necessario effettuare il login per scaricare le tracce GPX.' },
+        { status: 401 }
+      )
+    }
+
+    // Controllo permessi di accesso per utenti autenticati
+    const isOwner = session.user.id === trip.user_id
+    const isSentinel = session.user.role === UserRole.Sentinel
     const isPublished = trip.status === 'Pubblicato'
 
-    // Permetti l'accesso se:
-    // - Il viaggio è pubblicato (accesso pubblico)
+    // Permetti l'accesso solo se:
+    // - Il viaggio è pubblicato E l'utente è autenticato
     // - L'utente è il proprietario del viaggio
     // - L'utente è un Sentinel (admin)
     if (!isPublished && !isOwner && !isSentinel) {
@@ -131,7 +139,7 @@ export async function GET(
     }
 
     // Log dell'operazione di download
-    console.log(`Download GPX completato - Viaggio: ${trip.id}, File: ${filename}, Utente: ${session?.user?.id || 'anonimo'}`)
+    console.log(`Download GPX completato - Viaggio: ${trip.id}, File: ${filename}, Utente autenticato: ${session.user.id} (${session.user.email})`)
 
     // Restituisce il file GPX con headers appropriati
     const response = NextResponse.json({gpxContent} , {
