@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma"
 import bcrypt from "bcryptjs"
 import { z } from "zod"
 import { UserRole } from "@/types/profile"
+import { passwordSchema } from "@/lib/password-validation"
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: PrismaAdapter(prisma),
@@ -21,12 +22,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         password: { label: "Password", type: "password" }
       },
       async authorize(credentials) {
-        try {
-          // Validate input
+        try {          // Validate input
           const parsedCredentials = z
             .object({
               email: z.string().email(),
-              password: z.string().min(6),
+              password: passwordSchema,
             })
             .safeParse(credentials)
 

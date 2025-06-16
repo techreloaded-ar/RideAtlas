@@ -6,6 +6,7 @@ import { prisma } from '@/lib/prisma';
 import { sendVerificationEmail } from '@/lib/email';
 import { z } from 'zod';
 import { Prisma } from '@prisma/client';
+import { passwordSchema } from '@/lib/password-validation';
 
 // Schema di validazione per la creazione di un nuovo utente da parte del Sentinel
 const createUserSchema = z.object({
@@ -13,6 +14,7 @@ const createUserSchema = z.object({
   email: z.string().email('Inserisci un indirizzo email valido'),
   role: z.nativeEnum(UserRole).optional().default(UserRole.Explorer),
   sendWelcomeEmail: z.boolean().optional().default(true),
+  password: passwordSchema.optional(), // Password opzionale che deve seguire gli stessi standard
 });
 
 // GET - Lista tutti gli utenti (solo per Sentinel)

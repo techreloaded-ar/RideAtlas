@@ -1,21 +1,21 @@
 import { z } from 'zod';
+import { passwordSchema } from '@/lib/password-validation';
 
 // Import the validation schemas from the actual API routes
 // We'll test the validation logic by recreating the schemas as they are defined
 
-describe('Validation Schemas', () => {
-  describe('registerSchema (from /api/auth/register)', () => {
+describe('Validation Schemas', () => {  describe('registerSchema (from /api/auth/register)', () => {
     const registerSchema = z.object({
       name: z.string().min(2, 'Il nome deve contenere almeno 2 caratteri'),
       email: z.string().email('Inserisci un indirizzo email valido'),
-      password: z.string().min(8, 'La password deve contenere almeno 8 caratteri'),
-    });
-
+      password: passwordSchema,
+    });    
+    
     it('should validate correct registration data', () => {
       const validData = {
         name: 'John Doe',
         email: 'john@example.com',
-        password: 'password123'
+        password: 'Password123'
       };
 
       const result = registerSchema.safeParse(validData);
@@ -23,13 +23,13 @@ describe('Validation Schemas', () => {
       if (result.success) {
         expect(result.data).toEqual(validData);
       }
-    });
+    });    
 
     it('should reject name too short', () => {
       const invalidData = {
         name: 'J',
         email: 'john@example.com',
-        password: 'password123'
+        password: 'Password123'
       };
 
       const result = registerSchema.safeParse(invalidData);
@@ -43,7 +43,7 @@ describe('Validation Schemas', () => {
       const invalidData = {
         name: 'John Doe',
         email: 'invalid-email',
-        password: 'password123'
+        password: 'Password123'
       };
 
       const result = registerSchema.safeParse(invalidData);
@@ -58,12 +58,10 @@ describe('Validation Schemas', () => {
         name: 'John Doe',
         email: 'john@example.com',
         password: '123'
-      };
-
-      const result = registerSchema.safeParse(invalidData);
+      };      const result = registerSchema.safeParse(invalidData);
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.issues[0].message).toBe('La password deve contenere almeno 8 caratteri');
+        expect(result.error.issues[0].message).toContain('La password deve contenere');
       }
     });
 
@@ -279,17 +277,14 @@ describe('Validation Schemas', () => {
       }
     });
   });
-
   describe('Auth Credentials Schema (from auth.ts)', () => {
     const credentialsSchema = z.object({
       email: z.string().email(),
-      password: z.string().min(6),
-    });
-
-    it('should validate correct credentials', () => {
+      password: passwordSchema,
+    });    it('should validate correct credentials', () => {
       const validData = {
         email: 'user@example.com',
-        password: 'password123'
+        password: 'Password123'
       };
 
       const result = credentialsSchema.safeParse(validData);
@@ -299,7 +294,7 @@ describe('Validation Schemas', () => {
     it('should reject invalid email', () => {
       const invalidData = {
         email: 'invalid-email',
-        password: 'password123'
+        password: 'Password123'
       };
 
       const result = credentialsSchema.safeParse(invalidData);
