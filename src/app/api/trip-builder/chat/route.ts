@@ -2,6 +2,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { TripAnalysisService } from '@/lib/tripAnalysisService';
+import { ConstraintValidationService } from '@/lib/constraintValidationService';
+import { DurationValidationService } from '@/lib/durationValidationService';
 
 export const dynamic = 'force-dynamic';
 
@@ -54,6 +56,12 @@ export async function POST(request: NextRequest) {
 
     console.log('Processing chatbot request for user:', session.user.id);
 
+    // Extract user constraints before processing
+    const userConstraints = ConstraintValidationService.extractConstraints(message);
+    const durationConstraint = DurationValidationService.extractDurationConstraint(message);
+
+    console.log('Extracted constraints:', { userConstraints, durationConstraint });
+
     // Fetch available trips for AI analysis
     const tripsResponse = await fetch(`${process.env.NEXTAUTH_URL}/api/trip-builder/trips`, {
       headers: {
@@ -66,12 +74,42 @@ export async function POST(request: NextRequest) {
     }
 
     const tripsData = await tripsResponse.json();
-    const trips = tripsData.trips;
+    let trips = tripsData.trips;
 
-    // Prepare the system prompt with trip data
-    const systemPrompt = `Sei un esperto organizzatore di viaggi in moto con una conoscenza approfondita di tutti i viaggi disponibili nel sistema RideAtlas. 
+    // Pre-filter trips based on constraints
+    if (userConstraints.region || userConstraints.location) {
+      const constraintValidation = ConstraintValidationService.validateTripCollection(trips, userConstraints);
+      trips = constraintValidation.validTrips;
 
-Il tuo compito è aiutare gli utenti a pianificare viaggi in moto personalizzati analizzando le loro richieste e suggerendo combinazioni di viaggi esistenti.
+      if (constraintValidation.violations.length > 0) {
+        console.log('Constraint violations found:', constraintValidation.violations);
+      }
+    }
+
+    // Generate dynamic constraint information
+    const constraintInfo = [];
+    if (durationConstraint) {
+      constraintInfo.push(DurationValidationService.generateDurationPrompt(durationConstraint));
+    }
+    if (userConstraints.region || userConstraints.location) {
+      constraintInfo.push(ConstraintValidationService.generateConstraintSummary(userConstraints));
+    }
+
+    // Prepare the system prompt with trip data and strict constraints
+    const systemPrompt = `Sei un esperto organizzatore di viaggi in moto con una conoscenza approfondita di tutti i viaggi disponibili nel sistema RideAtlas.
+
+Il tuo compito è aiutare gli utenti a pianificare viaggi in moto personalizzati analizzando le loro richieste e suggerendo ESCLUSIVAMENTE combinazioni di viaggi esistenti nel database.
+
+⚠️ VINCOLI ASSOLUTI - NON VIOLARE MAI:
+1. DURATA: Se l'utente specifica un numero di giorni (es. "3 giorni", "una settimana"), NON SUPERARE MAI questo limite
+2. GEOGRAFIA: Suggerisci SOLO viaggi nella regione/area specificata dall'utente (es. se dice "Marche", solo viaggi nelle Marche)
+3. RAGGIO: Mantieni i viaggi entro 30km dalla località specificata o nella stessa regione amministrativa
+4. DATABASE: Suggerisci SOLO viaggi presenti in questo elenco - NON inventare viaggi inesistenti
+
+${constraintInfo.length > 0 ? `
+🎯 VINCOLI SPECIFICI PER QUESTA RICHIESTA:
+${constraintInfo.join('\n')}
+` : ''}
 
 VIAGGI DISPONIBILI:
 ${trips.map((trip: any) => `
@@ -85,27 +123,37 @@ ${trips.map((trip: any) => `
 - Riassunto: ${trip.summary}
 - Insights: ${trip.insights || 'N/A'}
 - GPX disponibile: ${trip.gpxData?.hasGpx ? 'Sì' : 'No'}
-${trip.gpxData?.hasGpx ? `- Distanza GPX: ${trip.gpxData.distance}km` : ''}
+${trip.gpxData?.hasGpx ? `- Distanza GPX: ${trip.gpxData.distance}km (DATO PRECISO)` : ''}
 ${trip.gpxData?.hasGpx ? `- Dislivello: ${trip.gpxData.elevationGain}m` : ''}
+${trip.gpxData?.hasGpx ? `- Tempo stimato: ${Math.round((trip.gpxData.distance || 0) / 50 * 60)} minuti di guida` : ''}
+${trip.gpxData?.hasGpx ? `- Difficoltà tecnica: ${trip.gpxData.elevationGain > 1000 ? 'Alta' : trip.gpxData.elevationGain > 500 ? 'Media' : 'Bassa'}` : ''}
 `).join('\n')}
 
-ISTRUZIONI:
-1. Analizza la richiesta dell'utente per capire le sue preferenze (destinazione, durata, tipo di esperienza, stagione, ecc.)
-2. Suggerisci viaggi specifici che corrispondono alle sue esigenze
-3. Se possibile, crea itinerari collegando più viaggi
-4. Calcola le distanze approssimative tra le destinazioni dei viaggi
-5. IMPORTANTE: Avvisa sempre l'utente quando la distanza tra due viaggi supera i 30km
-6. Fornisci consigli pratici e personalizzati
-7. Mantieni un tono amichevole ed esperto
+PROCESSO DI VALIDAZIONE OBBLIGATORIO:
+1. Estrai i vincoli dall'utente (durata massima, regione/località)
+2. Filtra i viaggi che rispettano TUTTI i vincoli geografici
+3. Calcola la durata totale e assicurati che NON superi il limite
+4. Se la durata supera il limite, rimuovi viaggi fino a rientrare nel limite
+5. Usa i dati GPX per calcoli di distanza accurati quando disponibili
+
+ISTRUZIONI OPERATIVE:
+1. Analizza la richiesta dell'utente per capire le sue preferenze
+2. Applica RIGOROSAMENTE i vincoli geografici e di durata
+3. Suggerisci SOLO viaggi che rispettano tutti i vincoli
+4. Se devi escludere viaggi per rispettare i vincoli, spiegalo chiaramente
+5. Calcola distanze usando i dati GPX quando disponibili
+6. Avvisa se la distanza tra viaggi supera i 30km
+7. Fornisci consigli pratici basati sui dati reali dei viaggi
 
 FORMATO RISPOSTA:
 - Rispondi in italiano
-- Sii specifico sui viaggi che suggerisci
-- Includi sempre i titoli esatti dei viaggi
-- Menziona le caratteristiche rilevanti (curve, sterrato, paesaggio, ecc.)
-- Se suggerisci più viaggi, spiega come collegarli logicamente
+- Sii specifico sui viaggi che suggerisci (usa i titoli esatti)
+- Menziona sempre la durata totale e verifica che rispetti il limite
+- Spiega eventuali esclusioni dovute ai vincoli
+- Includi informazioni sui dati GPX quando disponibili
+- Mantieni un tono professionale ma amichevole
 
-Rispondi sempre come un esperto motociclista che conosce perfettamente tutti questi itinerari.`;
+RICORDA: È meglio suggerire meno viaggi che rispettano i vincoli piuttosto che violare i limiti dell'utente.`;
 
     // Prepare messages for OpenRouter
     const messages: Message[] = [
@@ -167,16 +215,61 @@ Rispondi sempre come un esperto motociclista che conosce perfettamente tutti que
       }
     });
 
-    // Combine AI-mentioned trips with analysis recommendations
-    const allRecommendations = [...mentionedTrips];
+    // Validate mentioned trips against constraints
+    let validatedTrips = mentionedTrips;
+    let validationWarnings: string[] = [];
+
+    if (durationConstraint && mentionedTrips.length > 0) {
+      const durationValidation = DurationValidationService.validateTripDuration(
+        mentionedTrips.map(trip => ({
+          id: trip.id,
+          title: trip.title,
+          duration_days: trip.duration_days,
+          relevanceScore: analysisResult.recommendations.find(r => r.id === trip.id)?.relevanceScore
+        })),
+        durationConstraint
+      );
+
+      if (!durationValidation.isValid || durationValidation.exceedsLimit) {
+        validatedTrips = durationValidation.validTrips.map(vt =>
+          mentionedTrips.find(mt => mt.id === vt.id)!
+        ).filter(Boolean);
+        validationWarnings.push(...durationValidation.warnings);
+      }
+    }
+
+    // Combine validated AI-mentioned trips with analysis recommendations
+    const allRecommendations = [...validatedTrips];
     analysisResult.recommendations.forEach(rec => {
       if (!allRecommendations.find(t => t.id === rec.id)) {
         allRecommendations.push(rec);
       }
     });
 
-    // Limit to top recommendations and optimize order
-    let finalRecommendations = allRecommendations.slice(0, 5);
+    // Apply final constraint validation to all recommendations
+    let finalRecommendations = allRecommendations;
+
+    if (durationConstraint) {
+      const finalValidation = DurationValidationService.validateTripDuration(
+        allRecommendations.map(trip => ({
+          id: trip.id,
+          title: trip.title,
+          duration_days: trip.duration_days,
+          relevanceScore: analysisResult.recommendations.find(r => r.id === trip.id)?.relevanceScore
+        })),
+        durationConstraint
+      );
+
+      if (finalValidation.isValid) {
+        finalRecommendations = finalValidation.validTrips.map(vt =>
+          allRecommendations.find(ar => ar.id === vt.id)!
+        ).filter(Boolean);
+        validationWarnings.push(...finalValidation.warnings);
+      }
+    }
+
+    // Limit to top recommendations
+    finalRecommendations = finalRecommendations.slice(0, 5);
 
     // If multiple trips, optimize the order for better travel flow
     if (finalRecommendations.length > 1) {
@@ -196,8 +289,14 @@ Rispondi sempre come un esperto motociclista che conosce perfettamente tutti que
       ).filter(Boolean);
     }
 
+    // Append validation warnings to AI message if any
+    let finalMessage = aiMessage;
+    if (validationWarnings.length > 0) {
+      finalMessage += '\n\n⚠️ ' + validationWarnings.join('\n⚠️ ');
+    }
+
     const response: ChatResponse = {
-      message: aiMessage,
+      message: finalMessage,
       tripRecommendations: finalRecommendations.length > 0 ? finalRecommendations : undefined,
       distanceWarnings: analysisResult.distanceWarnings.length > 0 ? analysisResult.distanceWarnings : undefined,
     };

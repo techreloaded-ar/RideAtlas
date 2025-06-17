@@ -59,6 +59,17 @@ export function getApproximateCoordinates(destination: string): { lat: number; l
     'genova': { lat: 44.4056, lng: 8.9463 },
     'palermo': { lat: 38.1157, lng: 13.3615 },
     'bari': { lat: 41.1171, lng: 16.8719 },
+
+    // Marche region cities (enhanced for better detection)
+    'ancona': { lat: 43.6158, lng: 13.5189 },
+    'pesaro': { lat: 43.9102, lng: 12.9132 },
+    'urbino': { lat: 43.7262, lng: 12.6363 },
+    'macerata': { lat: 43.3009, lng: 13.4531 },
+    'ascoli piceno': { lat: 42.8543, lng: 13.5765 },
+    'fermo': { lat: 43.1605, lng: 13.7186 },
+    'senigallia': { lat: 43.7071, lng: 13.2137 },
+    'jesi': { lat: 43.5230, lng: 13.2445 },
+    'fabriano': { lat: 43.3359, lng: 12.9044 },
     
     // Regions
     'toscana': { lat: 43.7711, lng: 11.2486 },
@@ -137,4 +148,62 @@ export function formatDistance(distance: number): string {
     return `${Math.round(distance * 1000)}m`;
   }
   return `${distance}km`;
+}
+
+/**
+ * Check if a destination is within a specific Italian region
+ */
+export function isDestinationInRegion(destination: string, region: string): boolean {
+  const destinationLower = destination.toLowerCase();
+  const regionLower = region.toLowerCase();
+
+  // Direct region name match
+  if (destinationLower.includes(regionLower)) {
+    return true;
+  }
+
+  // Check against known cities in the region
+  const regionCities: Record<string, string[]> = {
+    'marche': ['ancona', 'pesaro', 'urbino', 'macerata', 'ascoli piceno', 'fermo', 'senigallia', 'jesi', 'fabriano'],
+    'toscana': ['firenze', 'siena', 'pisa', 'livorno', 'arezzo', 'grosseto', 'prato', 'pistoia', 'lucca', 'massa'],
+    'umbria': ['perugia', 'terni', 'assisi', 'foligno', 'città di castello', 'spoleto', 'orvieto'],
+    'lazio': ['roma', 'latina', 'frosinone', 'rieti', 'viterbo'],
+    'campania': ['napoli', 'salerno', 'caserta', 'benevento', 'avellino', 'amalfi', 'sorrento', 'capri'],
+    'sicilia': ['palermo', 'catania', 'messina', 'siracusa', 'trapani', 'agrigento', 'caltanissetta', 'enna', 'ragusa'],
+    'sardegna': ['cagliari', 'sassari', 'nuoro', 'oristano', 'olbia', 'alghero', 'carbonia'],
+    'calabria': ['catanzaro', 'reggio calabria', 'cosenza', 'crotone', 'vibo valentia'],
+    'puglia': ['bari', 'lecce', 'taranto', 'foggia', 'brindisi', 'andria', 'trani', 'barletta'],
+    'basilicata': ['potenza', 'matera'],
+    'abruzzo': ['l\'aquila', 'pescara', 'chieti', 'teramo'],
+    'molise': ['campobasso', 'isernia'],
+    'emilia-romagna': ['bologna', 'modena', 'parma', 'reggio emilia', 'ferrara', 'ravenna', 'forlì', 'cesena', 'rimini', 'piacenza'],
+    'veneto': ['venezia', 'verona', 'padova', 'vicenza', 'treviso', 'rovigo', 'belluno'],
+    'friuli-venezia giulia': ['trieste', 'udine', 'pordenone', 'gorizia'],
+    'trentino-alto adige': ['trento', 'bolzano', 'merano', 'rovereto'],
+    'lombardia': ['milano', 'bergamo', 'brescia', 'como', 'cremona', 'mantova', 'pavia', 'sondrio', 'varese'],
+    'piemonte': ['torino', 'alessandria', 'asti', 'biella', 'cuneo', 'novara', 'verbania', 'vercelli'],
+    'liguria': ['genova', 'la spezia', 'savona', 'imperia', 'cinque terre', 'portofino', 'sanremo'],
+    'valle d\'aosta': ['aosta', 'courmayeur', 'cervinia']
+  };
+
+  const cities = regionCities[regionLower];
+  if (cities) {
+    return cities.some(city => destinationLower.includes(city));
+  }
+
+  return false;
+}
+
+/**
+ * Calculate distance from a destination to a region center
+ */
+export function calculateDistanceToRegion(destination: string, region: string): number | null {
+  const regionCoords = getApproximateCoordinates(region);
+  const destCoords = getApproximateCoordinates(destination);
+
+  if (!regionCoords || !destCoords) {
+    return null;
+  }
+
+  return calculateDistance(regionCoords.lat, regionCoords.lng, destCoords.lat, destCoords.lng);
 }
