@@ -87,7 +87,12 @@ export default function UnifiedGPXMapViewer({
 
   // SSR protection - non renderizzare lato server
   const [isClient, setIsClient] = useState(false)
-  
+
+  // Generate unique key to prevent Leaflet container reuse issues
+  const mapKey = useMemo(() => {
+    return `map-${allTracks.length}-${routes.length}-${waypoints.length}-${Date.now()}`
+  }, [allTracks.length, routes.length, waypoints.length])
+
   useEffect(() => {
     setIsClient(true)
   }, [])
@@ -251,6 +256,7 @@ export default function UnifiedGPXMapViewer({
         {/* Mappa dinamica per evitare problemi SSR */}
         {isClient && (allTracks.length > 0 || routes.length > 0 || waypoints.length > 0) ? (
           <DynamicMap
+            key={mapKey}
             allTracks={allTracks}
             routes={routes}
             waypoints={waypoints}

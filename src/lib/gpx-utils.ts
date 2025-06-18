@@ -478,6 +478,98 @@ export function parseGPXContent(gpxContent: string, filename: string = 'unknown.
 }
 
 /**
+ * Extract key geographic points from GPX tracks and routes
+ * Simple approach: start, points every 30km, end
+ */
+export function extractKeyPoints(tracks: GPXTrack[], routes: GPXRoute[], intervalKm: number = 30) {
+  // Combine all points from tracks and routes
+  const allPoints: GPXPoint[] = []
+  tracks.forEach(track => allPoints.push(...track.points))
+  routes.forEach(route => allPoints.push(...route.points))
+
+  console.log(`extractKeyPoints: Found ${allPoints.length} total points from ${tracks.length} tracks and ${routes.length} routes`)
+
+  if (allPoints.length === 0) {
+    console.log('extractKeyPoints: No points found, returning empty array')
+    return []
+  }
+
+  if (allPoints.length === 1) {
+    // Single point - just return it as start/end
+    const point = allPoints[0]
+    return [{
+      lat: point.lat,
+      lng: point.lng,
+      elevation: point.elevation,
+      distanceFromStart: 0,
+      type: 'start',
+      description: 'Punto unico'
+    }]
+  }
+
+  const keyPoints = []
+  let cumulativeDistance = 0
+  let lastKeyPointDistance = 0
+
+  // Add start point
+  const startPoint = allPoints[0]
+  keyPoints.push({
+    lat: startPoint.lat,
+    lng: startPoint.lng,
+    elevation: startPoint.elevation,
+    distanceFromStart: 0,
+    type: 'start',
+    description: 'Partenza'
+  })
+
+  // Process intermediate points
+  for (let i = 1; i < allPoints.length; i++) {
+    const currentPoint = allPoints[i]
+    const previousPoint = allPoints[i - 1]
+
+    // Calculate distance from previous point
+    const segmentDistance = calculateDistance(
+      previousPoint.lat, previousPoint.lng,
+      currentPoint.lat, currentPoint.lng
+    )
+
+    cumulativeDistance += segmentDistance
+
+    // Check if we should add a key point (every intervalKm)
+    const distanceSinceLastKey = cumulativeDistance - lastKeyPointDistance
+
+    if (distanceSinceLastKey >= intervalKm) {
+      keyPoints.push({
+        lat: currentPoint.lat,
+        lng: currentPoint.lng,
+        elevation: currentPoint.elevation,
+        distanceFromStart: cumulativeDistance,
+        type: 'intermediate',
+        description: `${Math.round(cumulativeDistance)}km`
+      })
+
+      lastKeyPointDistance = cumulativeDistance
+    }
+  }
+
+  // Add end point (if different from start)
+  if (allPoints.length > 1) {
+    const endPoint = allPoints[allPoints.length - 1]
+    keyPoints.push({
+      lat: endPoint.lat,
+      lng: endPoint.lng,
+      elevation: endPoint.elevation,
+      distanceFromStart: cumulativeDistance,
+      type: 'end',
+      description: `Arrivo (${Math.round(cumulativeDistance)}km)`
+    })
+  }
+
+  console.log(`extractKeyPoints: Generated ${keyPoints.length} key points, total distance: ${cumulativeDistance.toFixed(2)}km`)
+  return keyPoints
+}
+
+/**
  * Converte i metadati GPX in un oggetto GpxFile
  */
 export function createGpxFileFromMetadata(metadata: GpxMetadata, url: string, isValid: boolean): GpxFile {

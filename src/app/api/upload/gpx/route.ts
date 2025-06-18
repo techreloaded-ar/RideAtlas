@@ -1,7 +1,7 @@
 // src/app/api/upload/gpx/route.ts
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/auth'
-import { parseGpxMetadata, createGpxFileFromMetadata, isValidGpxFile, isValidGpxFileSize } from '@/lib/gpx-utils'
+import { parseGpxMetadata, createGpxFileFromMetadata, isValidGpxFile, isValidGpxFileSize, parseGPXContent, extractKeyPoints } from '@/lib/gpx-utils'
 import { put } from '@vercel/blob'
 
 // Funzione per l'upload su Vercel Blob Storage
@@ -86,8 +86,20 @@ export async function POST(request: NextRequest) {
     const uploadResult = await uploadFileToStorage(file, 'gpx', session.user.id)
     console.log(`Upload completato: ${uploadResult.url}`)
 
-    // Crea l'oggetto GpxFile completo
-    const gpxFile = createGpxFileFromMetadata(metadata, uploadResult.url, true)
+    // Parse GPX content per estrarre punti chiave
+    const gpxContent = await file.text()
+    const gpxParseResult = parseGPXContent(gpxContent, file.name)
+
+    console.log(`GPX parsing result: tracks=${gpxParseResult.tracks.length}, routes=${gpxParseResult.routes.length}`)
+
+    // Estrai punti chiave ogni 30km
+    const keyPoints = extractKeyPoints(gpxParseResult.tracks, gpxParseResult.routes, 30)
+    console.log(`Punti chiave estratti: ${keyPoints.length} punti`)
+    console.log('Key points:', keyPoints)
+
+    // Crea l'oggetto GpxFile completo con punti chiave
+    const baseGpxFile = createGpxFileFromMetadata(metadata, uploadResult.url, true)
+    const gpxFile = { ...baseGpxFile, keyPoints }
 
     return NextResponse.json(gpxFile, { status: 200 })
 

@@ -25,6 +25,16 @@ export interface GpxFile {
   startTime?: string
   endTime?: string
   isValid: boolean
+
+  // Key geographic points every 30km for route understanding
+  keyPoints?: Array<{
+    lat: number
+    lng: number
+    elevation?: number
+    distanceFromStart: number
+    type: 'start' | 'intermediate' | 'end'
+    description: string
+  }>
 }
 
 // Usa i tipi generati da Prisma
