@@ -6,6 +6,7 @@ import { RecommendedSeason } from '@/types/trip';
 import { auth } from '@/auth';
 import { ensureUserExists } from '@/lib/user-sync';
 import { UserRole } from '@/types/profile';
+import { prepareJsonFieldsUpdate } from '@/lib/trip-utils';
 
 // Funzione di utilità per generare lo slug
 function slugify(text: string): string {
@@ -43,7 +44,15 @@ const gpxFileSchema = z.object({
   minElevation: z.number().optional(),
   startTime: z.string().optional(),
   endTime: z.string().optional(),
-  isValid: z.boolean()
+  isValid: z.boolean(),
+  keyPoints: z.array(z.object({
+    lat: z.number(),
+    lng: z.number(),
+    elevation: z.number().optional(),
+    distanceFromStart: z.number(),
+    type: z.enum(['start', 'intermediate', 'end']),
+    description: z.string()
+  })).optional()
 }).nullable().optional();
 
 const tripCreationSchema = z.object({
@@ -176,31 +185,21 @@ export async function POST(request: NextRequest) {
           user_id: user.id,
         },
       });
-        // Aggiorna media e gpxFile in una seconda operazione per evitare conflitti
-      const updateData: {
-        media?: typeof body.media;
-        gpxFile?: typeof body.gpxFile;
-      } = {};
-      
-      // Aggiungi media se presenti
-      if (body.media && Array.isArray(body.media)) {
-        updateData.media = body.media;
-      }
-      
-      // Aggiungi gpxFile solo se non è null
-      if (body.gpxFile) {
-        updateData.gpxFile = body.gpxFile;
-      }
-      
+        // Aggiorna media e gpxFile usando logica condivisa
+      const jsonFieldsUpdate = prepareJsonFieldsUpdate({
+        media: body.media,
+        gpxFile: body.gpxFile
+      });
+
       // Esegui update solo se ci sono dati da aggiornare
-      if (Object.keys(updateData).length > 0) {
+      if (Object.keys(jsonFieldsUpdate).length > 0) {
         await prisma.trip.update({
           where: { id: newTrip.id },
-          data: updateData
+          data: jsonFieldsUpdate
         });
-        console.log('Viaggio creato con media:', newTrip.id);
+        console.log('Viaggio creato con dati JSON:', newTrip.id);
       } else {
-        console.log('Viaggio creato senza media:', newTrip.id);
+        console.log('Viaggio creato senza dati JSON:', newTrip.id);
       }
 
       

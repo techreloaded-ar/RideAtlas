@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma'
 import { auth } from '@/auth'
 import { UserRole } from '@/types/profile'
 import { RecommendedSeason } from '@/types/trip'
+import { prepareJsonFieldsUpdate } from '@/lib/trip-utils'
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic'
@@ -29,7 +30,15 @@ const gpxFileSchema = z.object({
   maxElevation: z.number().optional(),
   minElevation: z.number().optional(),
   startTime: z.string().optional(),
-  endTime: z.string().optional()
+  endTime: z.string().optional(),
+  keyPoints: z.array(z.object({
+    lat: z.number(),
+    lng: z.number(),
+    elevation: z.number().optional(),
+    distanceFromStart: z.number(),
+    type: z.enum(['start', 'intermediate', 'end']),
+    description: z.string()
+  })).optional()
 });
 
 // Schema di validazione per l'aggiornamento del viaggio
@@ -210,16 +219,9 @@ export async function PUT(
       updated_at: new Date()
     }
 
-    // Aggiungi i campi JSON condizionalmente con il casting corretto
-    const updatePayload: Record<string, unknown> = baseUpdateData
-    
-    if (media !== undefined) {
-      updatePayload.media = media
-    }
-    
-    if (gpxFile !== undefined) {
-      updatePayload.gpxFile = gpxFile
-    }
+    // Aggiungi i campi JSON usando logica condivisa
+    const jsonFieldsUpdate = prepareJsonFieldsUpdate({ media, gpxFile });
+    const updatePayload: Record<string, unknown> = { ...baseUpdateData, ...jsonFieldsUpdate };
 
     // Aggiorna il viaggio con tutti i dati in un'unica chiamata
     const updatedTrip = await prisma.trip.update({
