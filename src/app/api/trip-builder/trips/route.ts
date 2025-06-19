@@ -26,6 +26,14 @@ interface TripForAI {
     waypoints?: number;
     startPoint?: { lat: number; lng: number };
     endPoint?: { lat: number; lng: number };
+    keyPoints?: Array<{
+      lat: number;
+      lng: number;
+      elevation?: number;
+      distanceFromStart: number;
+      type: 'start' | 'intermediate' | 'end';
+      description: string;
+    }>;
   };
 }
 
@@ -95,6 +103,12 @@ export async function GET(request: NextRequest) {
           elevationGain: gpxFile.elevationGain,
           waypoints: gpxFile.waypoints,
         };
+
+        // Add key points if available (simple geographic points every 30km)
+        if (gpxFile.keyPoints && gpxFile.keyPoints.length > 0) {
+          processedTrip.gpxData.keyPoints = gpxFile.keyPoints;
+          console.log(`✅ Added ${gpxFile.keyPoints.length} keyPoints to trip "${trip.title}" for AI`);
+        }
 
         // Extract start and end points from GPX if available
         // Note: This is a simplified approach. In a real implementation,
