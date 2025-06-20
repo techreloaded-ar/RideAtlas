@@ -82,74 +82,29 @@ export async function GET(
       )
     }
 
-    // Scarica il file GPX originale dall'URL del cloud storage
-    let gpxContent: string
-    let filename: string
-
+    // Verifica che il file esista sulla CDN prima del redirect
     try {
-      console.log(`Recupero del file GPX da Vercel Blob Storage: ${gpxFile.url}`)
-      
-      // Fetch del file originale dall'URL con timeout
-      const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), 15000) // 15 secondi timeout per Vercel Blob
-      
-      const gpxResponse = await fetch(gpxFile.url, {
-        signal: controller.signal,
-        headers: {
-          'User-Agent': 'RideAtlas/1.0',
-          'Cache-Control': 'no-cache', // Forza il fetch fresco per Vercel Blob
-        }
-      })
-      
-      clearTimeout(timeoutId)
-      
-      if (!gpxResponse.ok) {
-        console.error(`Errore nel recupero del file GPX da ${gpxFile.url}: ${gpxResponse.status} ${gpxResponse.statusText}`)
-        throw new Error(`Impossibile recuperare il file GPX: ${gpxResponse.status} ${gpxResponse.statusText}`)
-      }
-
-      // Usa il contenuto originale del file
-      gpxContent = await gpxResponse.text()
-      
-      // Verifica che il contenuto sia un GPX valido
-      if (!gpxContent.includes('<gpx') || !gpxContent.includes('</gpx>')) {
-        throw new Error('Il file scaricato non è un GPX valido')
-      }
-
-      // Usa il filename originale se disponibile, altrimenti genera uno sicuro
-      filename = gpxFile.filename || generateSafeFilename(trip.title, trip.id)
-      console.log(`File GPX originale recuperato con successo da Vercel Blob: ${filename}`)
-
-    } catch (error) {
-      console.error('Errore nel fetch del file GPX da Vercel Blob:', error)
-      
-      if (error instanceof Error && error.name === 'AbortError') {
-        console.error('Timeout nel download del file GPX da Vercel Blob')
+      const headResponse = await fetch(gpxFile.url, { method: 'HEAD' });
+      if (!headResponse.ok) {
+        console.error(`File GPX non trovato sulla CDN: ${gpxFile.url} - Status: ${headResponse.status}`);
         return NextResponse.json(
-          { error: 'Timeout durante il download del file GPX. Riprova più tardi.' },
-          { status: 504 }
-        )
+          { error: 'File GPX non disponibile. Il file potrebbe essere stato rimosso.' },
+          { status: 404 }
+        );
       }
-      
-      // Ritorna errore invece di fallback
+    } catch (error) {
+      console.error(`Errore nella verifica del file GPX: ${error}`);
       return NextResponse.json(
-        { error: 'File GPX non disponibile o danneggiato' },
-        { status: 404 }
-      )
+        { error: 'Impossibile verificare la disponibilità del file GPX.' },
+        { status: 503 }
+      );
     }
 
     // Log dell'operazione di download
-    console.log(`Download GPX completato - Viaggio: ${trip.id}, File: ${filename}, Utente autenticato: ${session.user.id} (${session.user.email})`)
+    console.log(`Download GPX richiesto - Viaggio: ${trip.id}, Utente: ${session.user.id} (${session.user.email})`)
 
-    // Restituisce il file GPX con headers appropriati
-    const response = NextResponse.json({gpxContent} , {
-      status: 200
-    })
-    response.headers.set('Content-Type', 'application/gpx+xml')
-    response.headers.set('Content-Disposition', `attachment; filename="${filename}"`)
-    response.headers.set('Cache-Control', 'public, max-age=3600') // Cache per 1 ora
-    response.headers.set('X-Content-Type-Options', 'nosniff') // Sicurezza per evitare sniffing del tipo di contenuto
-    return response;
+    // Redirect diretto al file originale sulla CDN
+    return NextResponse.redirect(gpxFile.url);
 
   } catch (error) {
     console.error('Errore durante il download GPX:', error)
@@ -160,18 +115,4 @@ export async function GET(
   }
 }
 
-/**
- * Genera un nome file sicuro per il download
- */
-function generateSafeFilename(tripTitle: string, tripId: string, originalFilename?: string): string {
-  if (originalFilename && originalFilename.endsWith('.gpx')) {
-    return originalFilename
-  }
-  
-  const safeTitle = tripTitle
-    .replace(/[^a-zA-Z0-9\s-]/g, '') // Rimuove caratteri speciali
-    .replace(/\s+/g, '-') // Sostituisce spazi con trattini
-    .toLowerCase()
-  
-  return `${safeTitle}-${tripId}.gpx`
-}
+
