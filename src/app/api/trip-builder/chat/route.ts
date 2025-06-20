@@ -1,4 +1,5 @@
 // src/app/api/trip-builder/chat/route.ts
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { TripAnalysisService } from '@/lib/tripAnalysisService';
@@ -217,7 +218,7 @@ RICORDA: È meglio suggerire meno viaggi che rispettano i vincoli piuttosto che 
 
     // Validate mentioned trips against constraints
     let validatedTrips = mentionedTrips;
-    let validationWarnings: string[] = [];
+    const validationWarnings: string[] = [];
 
     if (durationConstraint && mentionedTrips.length > 0) {
       const durationValidation = DurationValidationService.validateTripDuration(

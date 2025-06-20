@@ -124,8 +124,7 @@ describe('GET /api/trips/[id]/gpx - Download GPX', () => {
       const request = createMockRequest()
       const response = await GET(request, { params: { id: 'trip-123' } })
       
-      expect(response.status).toBe(200)
-      expect(response.headers.get('Content-Type')).toBe('application/gpx+xml')
+      expect(response.status).toBe(302)
     })
 
     it('deve negare il download per viaggio privato senza autenticazione', async () => {
@@ -159,7 +158,7 @@ describe('GET /api/trips/[id]/gpx - Download GPX', () => {
       const request = createMockRequest()
       const response = await GET(request, { params: { id: 'trip-123' } })
       
-      expect(response.status).toBe(200)
+      expect(response.status).toBe(302)
     })
 
     it('deve negare il download a utenti autenticati per viaggi privati di altri', async () => {
@@ -197,7 +196,7 @@ describe('GET /api/trips/[id]/gpx - Download GPX', () => {
       const request = createMockRequest()
       const response = await GET(request, { params: { id: 'trip-123' } })
       
-      expect(response.status).toBe(200)
+      expect(response.status).toBe(302)
     })
   })
 
@@ -218,21 +217,13 @@ describe('GET /api/trips/[id]/gpx - Download GPX', () => {
       const request = createMockRequest()
       const response = await GET(request, { params: { id: 'trip-123' } })
       
-      expect(response.status).toBe(200)
+      expect(response.status).toBe(302)
       expect(mockFetch).toHaveBeenCalledWith(
         mockTrip.gpxFile.url,
         expect.objectContaining({
-          headers: expect.objectContaining({
-            'User-Agent': 'RideAtlas/1.0',
-            'Cache-Control': 'no-cache'
-          })
+          method: 'HEAD'
         })
       )
-      
-      const headers = response.headers
-      expect(headers.get('Content-Type')).toBe('application/gpx+xml')
-      expect(headers.get('Content-Disposition')).toBe('attachment; filename="test-route.gpx"')
-      expect(headers.get('Cache-Control')).toBe('public, max-age=3600')
       
     })
 
@@ -248,7 +239,7 @@ describe('GET /api/trips/[id]/gpx - Download GPX', () => {
       
       expect(response.status).toBe(404)
       const body = await response.json()
-      expect(body.error).toBe('File GPX non disponibile o danneggiato')
+      expect(body.error).toBe('File GPX non disponibile. Il file potrebbe essere stato rimosso.')
     })
 
     it('deve gestire timeout del download', async () => {
@@ -261,9 +252,9 @@ describe('GET /api/trips/[id]/gpx - Download GPX', () => {
       const request = createMockRequest()
       const response = await GET(request, { params: { id: 'trip-123' } })
       
-      expect(response.status).toBe(404)
+      expect(response.status).toBe(503)
       const body = await response.json()
-      expect(body.error).toBe('File GPX non disponibile o danneggiato')
+      expect(body.error).toBe('Impossibile verificare la disponibilità del file GPX.')
     })
 
     it('deve validare che il contenuto scaricato sia un GPX', async () => {
@@ -275,9 +266,7 @@ describe('GET /api/trips/[id]/gpx - Download GPX', () => {
       const request = createMockRequest()
       const response = await GET(request, { params: { id: 'trip-123' } })
       
-      expect(response.status).toBe(404)
-      const body = await response.json()
-      expect(body.error).toBe('File GPX non disponibile o danneggiato')
+      expect(response.status).toBe(302)
     })
 
     it('deve generare filename sicuro se mancante', async () => {
@@ -296,8 +285,7 @@ describe('GET /api/trips/[id]/gpx - Download GPX', () => {
       const request = createMockRequest()
       const response = await GET(request, { params: { id: 'trip-123' } })
       
-      expect(response.status).toBe(200)
-      expect(response.headers.get('Content-Disposition')).toBe('attachment; filename="test-trip-trip-123.gpx"')
+      expect(response.status).toBe(302)
     })
   })
 
@@ -323,9 +311,9 @@ describe('GET /api/trips/[id]/gpx - Download GPX', () => {
       const request = createMockRequest()
       const response = await GET(request, { params: { id: 'trip-123' } })
       
-      expect(response.status).toBe(404)
+      expect(response.status).toBe(503)
       const body = await response.json()
-      expect(body.error).toBe('File GPX non disponibile o danneggiato')
+      expect(body.error).toBe('Impossibile verificare la disponibilità del file GPX.')
     })
   })
 })

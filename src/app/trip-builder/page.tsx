@@ -1,14 +1,14 @@
 // src/app/trip-builder/page.tsx
 "use client";
 
-import { useState } from 'react';
+
 import { useSession } from 'next-auth/react';
 import { MessageSquare, Route, MapPin, Clock, AlertTriangle } from 'lucide-react';
 import TripBuilderChat from '@/components/TripBuilderChat';
 
 export default function TripBuilderPage() {
   const { data: session, status } = useSession();
-  const [isLoading, setIsLoading] = useState(false);
+;
 
   if (status === 'loading') {
     return (
@@ -72,7 +72,7 @@ export default function TripBuilderPage() {
               </h2>
               <p className="text-gray-600 mb-6">
                 Per utilizzare il Trip Builder AI e accedere a tutti i viaggi disponibili, 
-                è necessario effettuare l'accesso al tuo account.
+                è necessario effettuare l&apos;accesso al tuo account.
               </p>
               <a
                 href="/auth/signin"
@@ -110,7 +110,7 @@ export default function TripBuilderPage() {
               </div>
               <h3 className="text-xl font-semibold mb-2">Descrivi il tuo viaggio</h3>
               <p className="text-gray-600">
-                Racconta all'AI dove vuoi andare, quanto tempo hai e che tipo di esperienza cerchi
+                Racconta all&apos;AI dove vuoi andare, quanto tempo hai e che tipo di esperienza cerchi
               </p>
             </div>
             
@@ -120,7 +120,7 @@ export default function TripBuilderPage() {
               </div>
               <h3 className="text-xl font-semibold mb-2">Analisi intelligente</h3>
               <p className="text-gray-600">
-                L'AI analizza tutti i viaggi e le tracce GPX per trovare le migliori combinazioni
+                L&apos;AI analizza tutti i viaggi e le tracce GPX per trovare le migliori combinazioni
               </p>
             </div>
             

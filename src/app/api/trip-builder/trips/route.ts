@@ -1,5 +1,5 @@
 // src/app/api/trip-builder/trips/route.ts
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import { castToGpxFile } from '@/types/trip';
@@ -38,7 +38,7 @@ interface TripForAI {
 }
 
 // GET - Fetch all published trips with GPX data for AI analysis
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const session = await auth();
     

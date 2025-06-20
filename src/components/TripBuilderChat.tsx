@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from 'react';
-import { Send, Bot, User, Loader2, MapPin, Route, AlertTriangle } from 'lucide-react';
+import { Send, Bot, User, Loader2, Route, AlertTriangle } from 'lucide-react';
 import TripRecommendationCard from './TripRecommendationCard';
 import DistanceWarningCard from './DistanceWarningCard';
 import SuggestedPrompts from './SuggestedPrompts';
@@ -230,7 +230,7 @@ export default function TripBuilderChat() {
             <div className="bg-gray-100 rounded-lg p-3 flex items-center gap-2">
               <Bot className="w-5 h-5" />
               <Loader2 className="w-4 h-4 animate-spin" />
-              <span className="text-sm text-gray-600">L'AI sta pensando...</span>
+              <span className="text-sm text-gray-600">L&apos;AI sta pensando...</span>
             </div>
           </div>
         )}
@@ -252,7 +252,7 @@ export default function TripBuilderChat() {
             disabled={isLoading}
           />
           <button
-            onClick={handleSendMessage}
+            onClick={() => handleSendMessage()}
             disabled={!inputMessage.trim() || isLoading}
             className="bg-primary-600 text-white p-2 rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center min-w-[44px]"
           >

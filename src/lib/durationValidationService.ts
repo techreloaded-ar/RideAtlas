@@ -1,4 +1,5 @@
 // src/lib/durationValidationService.ts
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export interface DurationConstraint {
   maxDays: number;
   strictMode: boolean; // If true, never exceed maxDays under any circumstances

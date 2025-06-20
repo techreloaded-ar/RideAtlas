@@ -1,5 +1,6 @@
 // src/lib/constraintValidationService.ts
-import { calculateTripDistance, getApproximateCoordinates } from './geoUtils';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { calculateTripDistance } from './geoUtils';
 
 export interface UserConstraints {
   maxDays?: number;
