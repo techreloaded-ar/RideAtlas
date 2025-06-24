@@ -151,6 +151,7 @@ ISTRUZIONI OPERATIVE:
 5. Calcola distanze usando i dati GPX quando disponibili
 6. Avvisa se la distanza tra viaggi supera i 30km
 7. Fornisci consigli pratici basati sui dati reali dei viaggi
+8. Fornisci il link per aprire il viaggio
 
 FORMATO RISPOSTA:
 - Rispondi in italiano

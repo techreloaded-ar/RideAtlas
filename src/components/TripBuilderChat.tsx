@@ -7,6 +7,7 @@ import TripRecommendationCard from './TripRecommendationCard';
 import DistanceWarningCard from './DistanceWarningCard';
 import SuggestedPrompts from './SuggestedPrompts';
 import ItineraryDisplay from './ItineraryDisplay';
+import MarkdownRenderer from './MarkdownRenderer';
 
 interface Message {
   id: string;
@@ -167,7 +168,7 @@ export default function TripBuilderChat() {
                   <User className="w-5 h-5 mt-0.5 flex-shrink-0" />
                 )}
                 <div className="flex-1">
-                  <p className="whitespace-pre-wrap">{message.content}</p>
+                  <MarkdownRenderer content={message.content} />
                   
                   {/* Trip Recommendations */}
                   {message.tripRecommendations && message.tripRecommendations.length > 0 && (
