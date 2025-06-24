@@ -23,7 +23,12 @@ interface TripForAI {
     hasGpx: boolean;
     distance?: number;
     elevationGain?: number;
+    elevationLoss?: number;
     waypoints?: number;
+    maxElevation?: number;
+    minElevation?: number;
+    startTime?: string;
+    endTime?: string;
     startPoint?: { lat: number; lng: number };
     endPoint?: { lat: number; lng: number };
     keyPoints?: Array<{
@@ -101,23 +106,30 @@ export async function GET() {
           hasGpx: true,
           distance: gpxFile.distance,
           elevationGain: gpxFile.elevationGain,
+          elevationLoss: gpxFile.elevationLoss,
           waypoints: gpxFile.waypoints,
+          maxElevation: gpxFile.maxElevation,
+          minElevation: gpxFile.minElevation,
+          startTime: gpxFile.startTime,
+          endTime: gpxFile.endTime,
         };
 
-        // Add key points if available (simple geographic points every 30km)
+        // Add key points if available (geographic coordinates every 30km)
         if (gpxFile.keyPoints && gpxFile.keyPoints.length > 0) {
           processedTrip.gpxData.keyPoints = gpxFile.keyPoints;
-          console.log(`✅ Added ${gpxFile.keyPoints.length} keyPoints to trip "${trip.title}" for AI`);
-        }
 
-        // Extract start and end points from GPX if available
-        // Note: This is a simplified approach. In a real implementation,
-        // you might want to parse the actual GPX file to get precise coordinates
-        if (gpxFile.url) {
-          // For now, we'll indicate that GPX data exists
-          // The actual coordinate extraction would require parsing the GPX file
-          processedTrip.gpxData.startPoint = undefined;
-          processedTrip.gpxData.endPoint = undefined;
+          // Extract start and end points from keyPoints for easy access
+          const startPoint = gpxFile.keyPoints.find(p => p.type === 'start');
+          const endPoint = gpxFile.keyPoints.find(p => p.type === 'end');
+
+          if (startPoint) {
+            processedTrip.gpxData.startPoint = { lat: startPoint.lat, lng: startPoint.lng };
+          }
+          if (endPoint) {
+            processedTrip.gpxData.endPoint = { lat: endPoint.lat, lng: endPoint.lng };
+          }
+
+          console.log(`✅ Added ${gpxFile.keyPoints.length} keyPoints to trip "${trip.title}" for AI`);
         }
       } else {
         processedTrip.gpxData = {

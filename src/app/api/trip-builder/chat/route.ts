@@ -125,9 +125,15 @@ ${trips.map((trip: any) => `
 - Insights: ${trip.insights || 'N/A'}
 - GPX disponibile: ${trip.gpxData?.hasGpx ? 'Sì' : 'No'}
 ${trip.gpxData?.hasGpx ? `- Distanza GPX: ${trip.gpxData.distance}km (DATO PRECISO)` : ''}
-${trip.gpxData?.hasGpx ? `- Dislivello: ${trip.gpxData.elevationGain}m` : ''}
+${trip.gpxData?.hasGpx && trip.gpxData.elevationGain ? `- Dislivello positivo: ${trip.gpxData.elevationGain}m` : ''}
+${trip.gpxData?.hasGpx && trip.gpxData.elevationLoss ? `- Dislivello negativo: ${trip.gpxData.elevationLoss}m` : ''}
+${trip.gpxData?.hasGpx && trip.gpxData.maxElevation ? `- Altitudine massima: ${trip.gpxData.maxElevation}m` : ''}
+${trip.gpxData?.hasGpx && trip.gpxData.minElevation ? `- Altitudine minima: ${trip.gpxData.minElevation}m` : ''}
 ${trip.gpxData?.hasGpx ? `- Tempo stimato: ${Math.round((trip.gpxData.distance || 0) / 50 * 60)} minuti di guida` : ''}
-${trip.gpxData?.hasGpx ? `- Difficoltà tecnica: ${trip.gpxData.elevationGain > 1000 ? 'Alta' : trip.gpxData.elevationGain > 500 ? 'Media' : 'Bassa'}` : ''}
+${trip.gpxData?.hasGpx && trip.gpxData.elevationGain ? `- Difficoltà tecnica: ${trip.gpxData.elevationGain > 1000 ? 'Alta' : trip.gpxData.elevationGain > 500 ? 'Media' : 'Bassa'}` : ''}
+${trip.gpxData?.hasGpx && trip.gpxData.startPoint ? `- Punto di partenza: ${trip.gpxData.startPoint.lat.toFixed(4)}, ${trip.gpxData.startPoint.lng.toFixed(4)}` : ''}
+${trip.gpxData?.hasGpx && trip.gpxData.endPoint ? `- Punto di arrivo: ${trip.gpxData.endPoint.lat.toFixed(4)}, ${trip.gpxData.endPoint.lng.toFixed(4)}` : ''}
+${trip.gpxData?.hasGpx && trip.gpxData.keyPoints ? `- Punti chiave del percorso: ${trip.gpxData.keyPoints.map((p: any) => `${p.description} (${p.lat.toFixed(4)}, ${p.lng.toFixed(4)})`).join(', ')}` : ''}
 `).join('\n')}
 
 PROCESSO DI VALIDAZIONE OBBLIGATORIO:
