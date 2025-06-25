@@ -1,0 +1,586 @@
+{
+  "project": {
+    "name": "RideAtlas",
+    "description": "Motorcycle travel platform for riders over 50",
+    "version": "0.4"
+  },
+  "userStories": {
+    "US1.1": {
+      "id": "US1.1",
+      "title": "REGISTRAZIONE RAPIDA",
+      "description": "In qualità di motociclista, desidero registrarmi via e‑mail, Apple o Google in meno di 60 secondi affinché possa iniziare subito a usare la piattaforma.",
+      "storyPoints": 1,
+      "category": "Authentication"
+    },
+    "US1.2": {
+      "id": "US1.2", 
+      "title": "CONSULTAZIONE LIBRERIA CON FILTRI",
+      "description": "In qualità di motociclista, desidero filtrare la libreria pubblica per destinazione, durata, difficoltà, tema e tipologia di strada/moto affinché possa vedere solo i viaggi che rispondono alle mie esigenze.",
+      "storyPoints": 3,
+      "category": "Trip Discovery"
+    },
+    "US1.3": {
+      "id": "US1.3",
+      "title": "DETTAGLIO VIAGGI", 
+      "description": "In qualità di motociclista, desidero visualizzare il dettaglio di un singolo viaggio affinché possa capire se è di mio interesse.",
+      "storyPoints": 2,
+      "category": "Trip Discovery"
+    },
+    "US1.4": {
+      "id": "US1.4",
+      "title": "CONDIVISIONE SOCIAL",
+      "description": "In qualità di motociclista, desidero condividere il viaggio sui social (Facebook, Instagram, WhatsApp) affinché possa far conoscere il percorso ad altri motociclisti.",
+      "storyPoints": 2,
+      "category": "Social Features"
+    },
+    "US1.5": {
+      "id": "US1.5",
+      "title": "DOWNLOAD PACCHETTO",
+      "description": "In qualità di motociclista, desidero scaricare il pacchetto base (GPX, POI, PDF) affinché possa consultarlo offline e installarlo sul mio dispositivo di navigazione.",
+      "storyPoints": 3,
+      "category": "Trip Download"
+    },
+    "US4.1": {
+      "id": "US4.1",
+      "title": "CREAZIONE VIAGGIO BASE",
+      "description": "In qualità di ranger, desidero creare un nuovo pacchetto viaggio affinché poi possa aggiungere contenuti multimediali, associare tracce GPX e definire i POI.",
+      "storyPoints": 3,
+      "category": "Content Creation"
+    },
+    "US4.2": {
+      "id": "US4.2",
+      "title": "CREA NUOVO VIAGGIO",
+      "description": "In qualità di ranger, desidero caricare tracce GPX, foto e video e associare i POI affinché possa pubblicare contenuti di qualità sulla piattaforma.",
+      "storyPoints": 5,
+      "category": "Content Creation"
+    },
+    "US4.3": {
+      "id": "US4.3",
+      "title": "CREAZIONE VIAGGIO PERSONALIZZATO",
+      "description": "In qualità di motociclista, desidero creare un viaggio personalizzato indicando durata, destinazione, limite di trasferimento e chilometri giornalieri affinché possa andare dove desidero.",
+      "storyPoints": 5,
+      "category": "Trip Builder"
+    },
+    "US5.1": {
+      "id": "US5.1",
+      "title": "ASSEGNAZIONE POI",
+      "description": "In qualità di ranger, desidero assegnare POI a un viaggio e alle sue tracce di interesse affinché i punti di interesse siano visibili agli utenti durante la pianificazione e la navigazione.",
+      "storyPoints": 3,
+      "category": "POI Management"
+    },
+    "US5.2": {
+      "id": "US5.2",
+      "title": "ASSEGNAZIONE TRACCIA",
+      "description": "In qualità di ranger, desidero assegnare una traccia GPX a un viaggio esistente affinché il percorso sia georeferenziato e pronto per la validazione.",
+      "storyPoints": 3,
+      "category": "GPX Management"
+    },
+    "US5.3": {
+      "id": "US5.3",
+      "title": "VALIDAZIONE AUTOMATICA",
+      "description": "In qualità di ranger, desidero che la piattaforma validi automaticamente i file caricati affinché i contenuti pubblicati rispettino gli standard di qualità.",
+      "storyPoints": 5,
+      "category": "Content Validation"
+    },
+    "US5.4": {
+      "id": "US5.4",
+      "title": "AGGIUNTA POI/SEGMENTO",
+      "description": "In qualità di ranger, desidero aggiungere singoli POI o segmenti di traccia affinché gli utenti possano arricchire i propri viaggi personalizzati.",
+      "storyPoints": 3,
+      "category": "Content Creation"
+    },
+    "US5.5": {
+      "id": "US5.5",
+      "title": "SELEZIONE ELEMENTI",
+      "description": "In qualità di motociclista, desidero selezionare o modificare i POI, i segmenti di traccia e le strutture proposte affinché il viaggio rispecchi i miei interessi.",
+      "storyPoints": 3,
+      "category": "Trip Customization"
+    },
+    "US6.1": {
+      "id": "US6.1",
+      "title": "PREVIEW VIAGGIO",
+      "description": "In qualità di motociclista, desidero vedere un'anteprima del viaggio personalizzato affinché possa valutarne la coerenza con i miei parametri.",
+      "storyPoints": 2,
+      "category": "Trip Preview"
+    },
+    "US7.1": {
+      "id": "US7.1",
+      "title": "PROGRAMMA PUBBLICAZIONE",
+      "description": "In qualità di ranger, desidero programmare la pubblicazione di un pacchetto viaggio affinché possa promuoverlo in anticipo sui social.",
+      "storyPoints": 3,
+      "category": "Content Publishing"
+    },
+    "US8.1": {
+      "id": "US8.1",
+      "title": "CERTIFICAZIONE RANGER",
+      "description": "In qualità di ranger senior, desidero nominare un power user come ranger junior affinché possa pubblicare le proprie tracce e contribuire alla community.",
+      "storyPoints": 2,
+      "category": "User Management"
+    },
+    "US9.1": {
+      "id": "US9.1",
+      "title": "TRIP BUILDER",
+      "description": "In qualità di motociclista, desidero utilizzare il Trip Builder per creare un itinerario personalizzato basato su viaggi esistenti e ottimizzato per le mie esigenze.",
+      "storyPoints": 8,
+      "category": "Trip Builder"
+    }
+  },
+  "tasks": {
+    "TASK-001": {
+      "id": "TASK-001",
+      "userStoryId": "FOUNDATION",
+      "title": "Project Setup and Infrastructure",
+      "description": "Set up the basic project structure with Next.js, configure development environment, and establish core dependencies",
+      "status": "done",
+      "dependencies": [],
+      "estimatedHours": 8,
+      "category": "Infrastructure"
+    },
+    "TASK-002": {
+      "id": "TASK-002", 
+      "userStoryId": "FOUNDATION",
+      "title": "Database Schema Design",
+      "description": "Design and implement the complete database schema for users, trips, POIs, GPX tracks, and media using Prisma and Supabase",
+      "status": "done",
+      "dependencies": ["TASK-001"],
+      "estimatedHours": 12,
+      "category": "Database"
+    },
+    "TASK-003": {
+      "id": "TASK-003",
+      "userStoryId": "US1.1",
+      "title": "Authentication Setup with Clerk",
+      "description": "Integrate Clerk for email, Apple, and Google authentication with user registration flow",
+      "status": "done", 
+      "dependencies": ["TASK-001"],
+      "estimatedHours": 6,
+      "category": "Authentication"
+    },
+    "TASK-004": {
+      "id": "TASK-004",
+      "userStoryId": "US1.1",
+      "title": "User Registration Flow",
+      "description": "Implement rapid user registration process completing in under 60 seconds",
+      "status": "done",
+      "dependencies": ["TASK-003", "TASK-002"],
+      "estimatedHours": 4,
+      "category": "Authentication"
+    },
+    "TASK-005": {
+      "id": "TASK-005",
+      "userStoryId": "FOUNDATION",
+      "title": "Basic UI Components and Layout",
+      "description": "Create reusable UI components using TailwindCSS and establish the main application layout",
+      "status": "done",
+      "dependencies": ["TASK-001"],
+      "estimatedHours": 8,
+      "category": "UI/UX"
+    },
+    "TASK-006": {
+      "id": "TASK-006",
+      "userStoryId": "US1.2",
+      "title": "Trip Library Data Model",
+      "description": "Implement the data model for trips with all filterable attributes (destination, duration, difficulty, theme, road type)",
+      "status": "done",
+      "dependencies": ["TASK-002"],
+      "estimatedHours": 4,
+      "category": "Data Model"
+    },
+    "TASK-007": {
+      "id": "TASK-007",
+      "userStoryId": "US1.2",
+      "title": "Trip Library Filtering System",
+      "description": "Build the filtering interface and backend logic for trip discovery with all specified filter criteria",
+      "status": "done",
+      "dependencies": ["TASK-006", "TASK-005"],
+      "estimatedHours": 8,
+      "category": "Trip Discovery"
+    },
+    "TASK-008": {
+      "id": "TASK-008",
+      "userStoryId": "US1.2",
+      "title": "Trip Library Display",
+      "description": "Create the trip library page with filtered results display showing title and description with links to detail pages",
+      "status": "done",
+      "dependencies": ["TASK-007"],
+      "estimatedHours": 6,
+      "category": "Trip Discovery"
+    },
+    "TASK-009": {
+      "id": "TASK-009",
+      "userStoryId": "US1.3",
+      "title": "Trip Detail Page Structure",
+      "description": "Create the trip detail page layout with sections for description, media, and action buttons",
+      "status": "done",
+      "dependencies": ["TASK-005"],
+      "estimatedHours": 4,
+      "category": "Trip Discovery"
+    },
+    "TASK-010": {
+      "id": "TASK-010",
+      "userStoryId": "US1.3",
+      "title": "Video Player Integration",
+      "description": "Implement video playback functionality for trip-associated videos on detail pages",
+      "status": "done",
+      "dependencies": ["TASK-009"],
+      "estimatedHours": 6,
+      "category": "Media"
+    },
+    "TASK-011": {
+      "id": "TASK-011",
+      "userStoryId": "US1.3",
+      "title": "Download and GPX Install Links",
+      "description": "Add download package and GPX installation links to trip detail pages",
+      "status": "done",
+      "dependencies": ["TASK-009"],
+      "estimatedHours": 3,
+      "category": "Trip Discovery"
+    },
+    "TASK-012": {
+      "id": "TASK-012",
+      "userStoryId": "US1.4",
+      "title": "Social Sharing Integration",
+      "description": "Implement social sharing buttons for Facebook, Instagram, and WhatsApp with public preview links",
+      "status": "done",
+      "dependencies": ["TASK-009"],
+      "estimatedHours": 6,
+      "category": "Social Features"
+    },
+    "TASK-013": {
+      "id": "TASK-013",
+      "userStoryId": "US1.4",
+      "title": "Public Trip Preview Mode",
+      "description": "Create public/preview mode for trip pages accessible via shared links",
+      "status": "done",
+      "dependencies": ["TASK-012"],
+      "estimatedHours": 4,
+      "category": "Social Features"
+    },
+    "TASK-014": {
+      "id": "TASK-014",
+      "userStoryId": "US1.5",
+      "title": "File Storage Setup",
+      "description": "Configure Supabase storage for GPX files, PDFs, images, and videos with proper access controls",
+      "status": "done",
+      "dependencies": ["TASK-002"],
+      "estimatedHours": 4,
+      "category": "File Management"
+    },
+    "TASK-015": {
+      "id": "TASK-015",
+      "userStoryId": "US1.5",
+      "title": "Package Generation System",
+      "description": "Build system to generate downloadable packages containing GPX, PDF, and video links",
+      "status": "done",
+      "dependencies": ["TASK-014"],
+      "estimatedHours": 8,
+      "category": "Trip Download"
+    },
+    "TASK-016": {
+      "id": "TASK-016",
+      "userStoryId": "US1.5",
+      "title": "PDF Generation for Trips",
+      "description": "Implement PDF generation with trip description, map, POI list, and recommended accommodations",
+      "status": "done",
+      "dependencies": ["TASK-015"],
+      "estimatedHours": 10,
+      "category": "Trip Download"
+    },
+    "TASK-017": {
+      "id": "TASK-017",
+      "userStoryId": "FOUNDATION",
+      "title": "Mapbox Integration",
+      "description": "Integrate Mapbox for interactive maps displaying tracks and POIs",
+      "status": "done",
+      "dependencies": ["TASK-001"],
+      "estimatedHours": 6,
+      "category": "Maps"
+    },
+    "TASK-018": {
+      "id": "TASK-018",
+      "userStoryId": "US4.1",
+      "title": "Ranger Dashboard Setup",
+      "description": "Create ranger dashboard with trip creation and management interface",
+      "status": "done",
+      "dependencies": ["TASK-005", "TASK-003"],
+      "estimatedHours": 6,
+      "category": "Content Creation"
+    },
+    "TASK-019": {
+      "id": "TASK-019",
+      "userStoryId": "US4.1",
+      "title": "Basic Trip Creation Form",
+      "description": "Implement form for creating trips with title, summary, destination, duration, difficulty, tags, and season",
+      "status": "done",
+      "dependencies": ["TASK-018"],
+      "estimatedHours": 6,
+      "category": "Content Creation"
+    },
+    "TASK-020": {
+      "id": "TASK-020",
+      "userStoryId": "US4.1",
+      "title": "Trip State Management",
+      "description": "Implement trip state system (Draft, Ready for Review, Published) with automatic slug generation",
+      "status": "done",
+      "dependencies": ["TASK-019"],
+      "estimatedHours": 4,
+      "category": "Content Creation"
+    },
+    "TASK-021": {
+      "id": "TASK-021",
+      "userStoryId": "US4.2",
+      "title": "File Upload System",
+      "description": "Build file upload system for GPX (≤20MB), images (≥1280×720px), and videos (≤500MB) with drag-and-drop",
+      "status": "done",
+      "dependencies": ["TASK-014", "TASK-018"],
+      "estimatedHours": 8,
+      "category": "File Management"
+    },
+    "TASK-022": {
+      "id": "TASK-022",
+      "userStoryId": "US4.2",
+      "title": "Media-POI Association",
+      "description": "Implement system to associate uploaded media with waypoints/POIs on the map via click interaction",
+      "status": "done",
+      "dependencies": ["TASK-021", "TASK-017"],
+      "estimatedHours": 8,
+      "category": "Content Creation"
+    },
+    "TASK-023": {
+      "id": "TASK-023",
+      "userStoryId": "US5.1",
+      "title": "POI Creation Interface",
+      "description": "Build interface for creating POIs with map click/long-press, coordinate search, title, and description (max 250 chars)",
+      "status": "done",
+      "dependencies": ["TASK-017", "TASK-018"],
+      "estimatedHours": 6,
+      "category": "POI Management"
+    },
+    "TASK-024": {
+      "id": "TASK-024",
+      "userStoryId": "US5.1",
+      "title": "POI-Trip Association",
+      "description": "Implement system to associate POIs with trips and display them in trip POI summary",
+      "status": "done",
+      "dependencies": ["TASK-023"],
+      "estimatedHours": 4,
+      "category": "POI Management"
+    },
+    "TASK-025": {
+      "id": "TASK-025",
+      "userStoryId": "US5.2",
+      "title": "GPX Upload and Validation",
+      "description": "Implement GPX file upload with basic validation and georeferenced map display",
+      "status": "done",
+      "dependencies": ["TASK-021", "TASK-017"],
+      "estimatedHours": 6,
+      "category": "GPX Management"
+    },
+    "TASK-026": {
+      "id": "TASK-026",
+      "userStoryId": "US5.2",
+      "title": "GPX-Trip Association",
+      "description": "Build system to associate GPX tracks with trips and save them in Draft state",
+      "status": "done",
+      "dependencies": ["TASK-025", "TASK-020"],
+      "estimatedHours": 4,
+      "category": "GPX Management"
+    },
+    "TASK-027": {
+      "id": "TASK-027",
+      "userStoryId": "US5.3",
+      "title": "GPX Validation Engine",
+      "description": "Build automatic validation for GPX files ensuring continuous tracks >5km without coordinate errors",
+      "status": "done",
+      "dependencies": ["TASK-025"],
+      "estimatedHours": 8,
+      "category": "Content Validation"
+    },
+    "TASK-028": {
+      "id": "TASK-028",
+      "userStoryId": "US5.3",
+      "title": "Media Validation System",
+      "description": "Implement validation for image and video format, dimensions, and file size requirements",
+      "status": "done",
+      "dependencies": ["TASK-021"],
+      "estimatedHours": 6,
+      "category": "Content Validation"
+    },
+    "TASK-029": {
+      "id": "TASK-029",
+      "userStoryId": "US5.3",
+      "title": "Validation Error Reporting",
+      "description": "Create detailed error messaging system for validation failures and state transition to 'Ready for Review'",
+      "status": "done",
+      "dependencies": ["TASK-027", "TASK-028"],
+      "estimatedHours": 4,
+      "category": "Content Validation"
+    },
+    "TASK-030": {
+      "id": "TASK-030",
+      "userStoryId": "US5.4",
+      "title": "Individual POI Creation",
+      "description": "Build standalone POI creation with map coordinates, title, description, and photo upload",
+      "status": "done",
+      "dependencies": ["TASK-023", "TASK-021"],
+      "estimatedHours": 6,
+      "category": "Content Creation"
+    },
+    "TASK-031": {
+      "id": "TASK-031",
+      "userStoryId": "US5.4",
+      "title": "GPX Segment Upload",
+      "description": "Implement upload system for GPX segments ≤30km with tagging and description capabilities",
+      "status": "done",
+      "dependencies": ["TASK-025"],
+      "estimatedHours": 6,
+      "category": "Content Creation"
+    },
+    "TASK-032": {
+      "id": "TASK-032",
+      "userStoryId": "US5.4",
+      "title": "Content Indexing for Trip Builder",
+      "description": "Build indexing system to make new POIs and segments available to Trip Builder within 15 minutes",
+      "status": "done",
+      "dependencies": ["TASK-030", "TASK-031"],
+      "estimatedHours": 4,
+      "category": "Content Creation"
+    },
+    "TASK-033": {
+      "id": "TASK-033",
+      "userStoryId": "US4.3",
+      "title": "OpenRouter AI Integration",
+      "description": "Integrate OpenRouter API for LLM-powered trip planning and route optimization",
+      "status": "done",
+      "dependencies": ["TASK-001"],
+      "estimatedHours": 6,
+      "category": "AI Integration"
+    },
+    "TASK-034": {
+      "id": "TASK-034",
+      "userStoryId": "US4.3",
+      "title": "Custom Trip Parameters Form",
+      "description": "Create form for custom trip creation with duration, destination, max transfer time, and daily km limits",
+      "status": "done",
+      "dependencies": ["TASK-005"],
+      "estimatedHours": 4,
+      "category": "Trip Builder"
+    },
+    "TASK-035": {
+      "id": "TASK-035",
+      "userStoryId": "US9.1",
+      "title": "Trip Builder AI Engine",
+      "description": "Build AI-powered trip builder that suggests optimal combinations from existing RideAtlas trips",
+      "status": "done",
+      "dependencies": ["TASK-033", "TASK-034"],
+      "estimatedHours": 12,
+      "category": "Trip Builder"
+    },
+    "TASK-036": {
+      "id": "TASK-036",
+      "userStoryId": "US9.1",
+      "title": "Transfer Distance Validation",
+      "description": "Implement warning system for transfers >30km between suggested trips",
+      "status": "done",
+      "dependencies": ["TASK-035"],
+      "estimatedHours": 4,
+      "category": "Trip Builder"
+    },
+    "TASK-037": {
+      "id": "TASK-037",
+      "userStoryId": "US5.5",
+      "title": "POI Selection Interface",
+      "description": "Build interface for selecting/modifying POIs with color coding and add/remove functionality",
+      "status": "done",
+      "dependencies": ["TASK-023", "TASK-017"],
+      "estimatedHours": 6,
+      "category": "Trip Customization"
+    },
+    "TASK-038": {
+      "id": "TASK-038",
+      "userStoryId": "US5.5",
+      "title": "Track Segment Management",
+      "description": "Implement interface for managing track segments and accommodation structures in custom trips",
+      "status": "done",
+      "dependencies": ["TASK-025", "TASK-037"],
+      "estimatedHours": 6,
+      "category": "Trip Customization"
+    },
+    "TASK-039": {
+      "id": "TASK-039",
+      "userStoryId": "US6.1",
+      "title": "Trip Preview Interface",
+      "description": "Create trip preview with complete route map, distance summary, and confirmation options",
+      "status": "done",
+      "dependencies": ["TASK-017", "TASK-035"],
+      "estimatedHours": 6,
+      "category": "Trip Preview"
+    },
+    "TASK-040": {
+      "id": "TASK-040",
+      "userStoryId": "US7.1",
+      "title": "Publication Scheduling System",
+      "description": "Build scheduling system with calendar interface for trip publication and social promotion",
+      "status": "done",
+      "dependencies": ["TASK-020"],
+      "estimatedHours": 6,
+      "category": "Content Publishing"
+    },
+    "TASK-041": {
+      "id": "TASK-041",
+      "userStoryId": "US7.1",
+      "title": "Subscriber Notification System",
+      "description": "Implement notification system for scheduled trip publications to subscribers",
+      "status": "done",
+      "dependencies": ["TASK-040"],
+      "estimatedHours": 4,
+      "category": "Content Publishing"
+    },
+    "TASK-042": {
+      "id": "TASK-042",
+      "userStoryId": "US8.1",
+      "title": "User Role Management",
+      "description": "Implement user role system with Ranger Junior/Senior roles and promotion capabilities",
+      "status": "done",
+      "dependencies": ["TASK-003"],
+      "estimatedHours": 6,
+      "category": "User Management"
+    },
+    "TASK-043": {
+      "id": "TASK-043",
+      "userStoryId": "US8.1",
+      "title": "Ranger Certification Interface",
+      "description": "Build interface for user search, role assignment, notifications, and admin revocation",
+      "status": "done",
+      "dependencies": ["TASK-042"],
+      "estimatedHours": 6,
+      "category": "User Management"
+    },
+    "TASK-044": {
+      "id": "TASK-044",
+      "userStoryId": "FOUNDATION",
+      "title": "Testing Infrastructure",
+      "description": "Set up comprehensive testing framework with unit, integration, and E2E tests",
+      "status": "done",
+      "dependencies": ["TASK-001"],
+      "estimatedHours": 8,
+      "category": "Testing"
+    },
+    "TASK-045": {
+      "id": "TASK-045",
+      "userStoryId": "FOUNDATION",
+      "title": "Deployment and CI/CD",
+      "description": "Configure deployment pipeline and continuous integration for production deployment",
+      "status": "done",
+      "dependencies": ["TASK-044"],
+      "estimatedHours": 6,
+      "category": "DevOps"
+    }
+  },
+  "metadata": {
+    "totalTasks": 45,
+    "totalEstimatedHours": 267,
+    "lastUpdated": "2025-06-25",
+    "nextTaskId": "TASK-046"
+  }
+}
