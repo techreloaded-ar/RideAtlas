@@ -18,9 +18,10 @@ yarn-error.log*
 out/
 dist/
 
-# File IDE
+# IDE configuration folders
 .idea/
 .vscode/
+.cursor/
 
 # File di test
 coverage/

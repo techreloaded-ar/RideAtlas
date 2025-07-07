@@ -12,7 +12,7 @@ async function createSentinelUser() {
     const sentinelData = {
       name: 'Admin Sentinel',
       email: 'admin@rideatlas.com',
-      password: 'admin123456', // Password temporanea - cambiarla dopo il primo accesso
+      password: 'Admin123456', // Password temporanea - cambiarla dopo il primo accesso
       role: UserRole.Sentinel
     }
 
