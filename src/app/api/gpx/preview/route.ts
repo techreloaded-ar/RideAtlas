@@ -16,15 +16,10 @@ export async function GET(request: NextRequest) {
       )
     }
     
-    // Verifica che l'URL sia valido e punti a Vercel Blob
+    // Verifica che l'URL sia formalmente valido
     try {
-      const url = new URL(blobUrl)
-      if (!url.hostname.includes('vercel-storage.com')) {
-        return NextResponse.json(
-          { error: 'URL non valido' },
-          { status: 400 }
-        )
-      }
+      new URL(blobUrl) // Validazione formale dell'URL
+      console.log(`URL validato: ${blobUrl}`)
     } catch {
       return NextResponse.json(
         { error: 'URL malformato' },
