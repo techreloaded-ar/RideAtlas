@@ -8,7 +8,7 @@ export const getStorageConfig = (): StorageConfig => {
   const provider = (process.env.STORAGE_PROVIDER as StorageProviderType) || 'vercel-blob';
   
   // Validazione del provider supportato
-  const supportedProviders: StorageProviderType[] = ['vercel-blob', 'aws-s3'];
+  const supportedProviders: StorageProviderType[] = ['vercel-blob', 'aws-s3', 'aws-cloudfront'];
   
   if (!supportedProviders.includes(provider)) {
     console.warn(`Provider storage non supportato: ${provider}. Fallback a 'vercel-blob'`);

@@ -2,7 +2,7 @@
  * Tipi per il sistema di storage multi-provider
  */
 
-export type StorageProviderType = 'vercel-blob' | 'aws-s3';
+export type StorageProviderType = 'vercel-blob' | 'aws-s3' | 'aws-cloudfront';
 
 export interface StorageConfig {
   provider: StorageProviderType;

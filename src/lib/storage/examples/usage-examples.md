@@ -19,6 +19,19 @@ AWS_ACCESS_KEY_ID=AKIA...
 AWS_SECRET_ACCESS_KEY=xxx...
 ```
 
+### Produzione con AWS CloudFront (Raccomandato)
+```env
+# .env.production
+STORAGE_PROVIDER=aws-cloudfront
+AWS_REGION=eu-west-1
+AWS_S3_BUCKET=rideatlas-production-media
+AWS_ACCESS_KEY_ID=AKIA...
+AWS_SECRET_ACCESS_KEY=xxx...
+AWS_CLOUDFRONT_DOMAIN=d1234567890.cloudfront.net
+# Opzionale: dominio personalizzato
+AWS_CLOUDFRONT_CUSTOM_DOMAIN=cdn.rideatlas.com
+```
+
 ### Sviluppo con MinIO (locale)
 ```env
 # .env.local

@@ -2,6 +2,7 @@ import { IFileStorageProvider } from './interfaces/IFileStorageProvider';
 import { getStorageConfig } from './config/storageConfig';
 import { VercelBlobProvider } from './providers/VercelBlobProvider';
 import { AWSS3Provider } from './providers/AWSS3Provider';
+import { AWSCloudFrontProvider } from './providers/AWSCloudFrontProvider';
 
 /**
  * Factory per la creazione e gestione dei provider di storage
@@ -24,6 +25,9 @@ export class StorageFactory {
           break;
         case 'aws-s3':
           this.instance = new AWSS3Provider();
+          break;
+        case 'aws-cloudfront':
+          this.instance = new AWSCloudFrontProvider();
           break;
         default:
           throw new Error(`Provider storage non supportato: ${config.provider}`);

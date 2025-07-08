@@ -15,7 +15,10 @@ src/lib/storage/
 │   └── IFileStorageProvider.ts       # Interfaccia comune
 ├── providers/
 │   ├── VercelBlobProvider.ts         # Implementazione Vercel Blob
-│   └── AWSS3Provider.ts              # Implementazione AWS S3 (futura)
+│   ├── AWSS3Provider.ts              # Implementazione AWS S3
+│   ├── AWSCloudFrontProvider.ts      # Implementazione AWS CloudFront
+│   └── base/
+│       └── AWSBaseProvider.ts        # Classe base comune AWS
 ├── types/
 │   └── storage.ts                    # Tipi TypeScript
 ├── config/
@@ -30,7 +33,7 @@ src/lib/storage/
 Aggiungi al tuo file `.env.local`:
 
 ```env
-# Provider storage: 'vercel-blob' (default) | 'aws-s3'
+# Provider storage: 'vercel-blob' (default) | 'aws-s3' | 'aws-cloudfront'
 STORAGE_PROVIDER=vercel-blob
 ```
 
@@ -60,6 +63,32 @@ STORAGE_PROVIDER=vercel-blob
   - Supporto endpoint personalizzati per servizi S3-compatible
   - Validazione bucket al primo upload (lazy initialization)
   - Metadata automatici (nome originale, timestamp)
+
+#### 3. AWS CloudFront ✅
+- **Configurazione**: Manuale tramite variabili d'ambiente
+- **Variabili richieste**:
+  ```env
+  # Configurazione AWS base (identica a S3)
+  AWS_REGION=eu-west-3
+  AWS_S3_BUCKET=ride-atlas-dev-bucket
+  AWS_ACCESS_KEY_ID=your-access-key
+  AWS_SECRET_ACCESS_KEY=your-secret-key
+
+  # Configurazione CloudFront specifica
+  AWS_CLOUDFRONT_DOMAIN=d1234567890.cloudfront.net
+  ```
+- **Variabili opzionali**:
+  ```env
+  # Dominio personalizzato (se configurato)
+  AWS_CLOUDFRONT_CUSTOM_DOMAIN=cdn.rideatlas.com
+  ```
+- **Caratteristiche**:
+  - Upload su S3, serve tramite CloudFront CDN
+  - Cache globale per performance ottimali
+  - Latenza ridotta tramite edge locations
+  - SSL/TLS automatico e protezione DDoS
+  - Costi ottimizzati per il traffico
+  - Supporto domini personalizzati
 
 ## Utilizzo
 
@@ -169,7 +198,22 @@ beforeEach(() => {
      break;
    ```
 
-## Vantaggi
+## Architettura
+
+### Classe Base AWS
+I provider AWS (S3 e CloudFront) condividono una classe base `AWSBaseProvider` che implementa:
+- Configurazione AWS comune (credenziali, region, bucket)
+- Operazioni S3 (upload, delete, validation)
+- Gestione S3 Client e inizializzazione bucket
+- Pattern Template Method per URL generation
+
+### Vantaggi Architettura
+- ✅ **DRY Principle**: Codice comune condiviso tra provider AWS
+- ✅ **Single Responsibility**: Ogni provider gestisce solo la propria logica specifica
+- ✅ **Open/Closed**: Facile aggiungere nuovi provider AWS (es. CloudFlare R2)
+- ✅ **Template Method**: Algoritmo comune, implementazione specifica delegata
+
+## Vantaggi Generali
 
 - ✅ **Zero Breaking Changes**: Il codice esistente continua a funzionare
 - ✅ **Configurazione Runtime**: Cambio provider senza rebuild
