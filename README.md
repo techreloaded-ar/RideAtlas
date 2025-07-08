@@ -324,6 +324,124 @@ Per problemi tecnici:
    - `GOOGLE_OAUTH_SETUP.md` 
    - `NEXTAUTH_TESTING_GUIDE.md`
 
+
+## Appunti Deployment RaidAtalas su AWS
+
+## Overview
+
+
+## Stack Utilizzato
+
+- **Database:** Amazon RDS PostgreSQL (free tier)
+- **Hosting/CI/CD:** AWS Amplify Hosting
+
+## Database: Amazon RDS PostgreSQL
+
+- **Tipo:** RDS PostgreSQL “classico”
+- **Piano:** Free tier (gratuito per il primo anno)
+- **Risorse:** Istanza estremamente basic, con risorse minime (CPU, RAM, storage)
+- **Considerazioni sui costi:**  
+  Dopo il primo anno gratuito, sarà necessario valutare i costi di rinnovo e scegliere se mantenere la soluzione o effettuare un upgrade/downgrade.
+- **Accessibilità:**  
+  Per consentire l’accesso dall’esterno, è stato necessario modificare le regole di inbound del security group, aprendo la porta a tutti gli IP (⚠️ attenzione ai rischi di sicurezza! Da restringere appena possibile).
+
+## Deployment Applicazione: AWS Amplify
+
+- **Motivazione:**  
+  Scelta per la semplicità di deploy, la gestione integrata di CI/CD, SSL, dominio e la compatibilità con Next.js.
+
+### Problemi riscontrati e workaround adottati
+
+#### 1. Variabili d’Ambiente
+
+- **Problema:**  
+  Le variabili d’ambiente impostate nella console di AWS Amplify sono disponibili solo durante la fase di build, ma **non vengono propagate correttamente nell’ambiente runtime** (ad esempio, nelle API routes SSR di Next.js e in NextAuth).
+- **Soluzione:**  
+  È stato necessario aggiungere comandi custom nei build settings (`amplify.yml`) per scrivere le variabili d’ambiente in un file `.env` durante la build:
+
+build:
+commands:
+- echo "NEXTAUTH_SECRET=$NEXTAUTH_SECRET" >> .env
+- echo "NEXTAUTH_URL=$NEXTAUTH_URL" >> .env
+# ...altre variabili se necessario
+- npm run build
+
+text
+
+Questo garantisce che le variabili siano visibili sia in fase di build che in runtime lato server.
+
+#### 2. Prisma Client e Compatibilità Binari
+
+- **Problema:**  
+Prisma genera binari specifici per il sistema operativo e la versione di OpenSSL. L’ambiente di AWS Amplify richiede il target `"rhel-openssl-1.0.x"`, mentre localmente viene spesso generato per `"rhel-openssl-3.0.x"`.
+- **Soluzione:**  
+Modificare il file `prisma/schema.prisma` aggiungendo:
+
+generator client {
+provider = "prisma-client-js"
+binaryTargets = ["native", "rhel-openssl-1.0.x"]
+}
+
+text
+Poi eseguire `npx prisma generate` e includere i file generati nel repository.
+
+#### 3. Sicurezza Database
+
+- **Nota importante:**  
+Per facilitare lo sviluppo e il test, la porta del database è stata temporaneamente aperta a tutti gli IP. **Questa configurazione è insicura** e va ristretto l’accesso solo agli IP necessari appena possibile.
+
+## Esempio di `amplify.yml`
+
+version: 1
+frontend:
+phases:
+preBuild:
+commands:
+- npm ci
+build:
+commands:
+- echo "NEXTAUTH_SECRET=$NEXTAUTH_SECRET" >> .env
+- echo "NEXTAUTH_URL=$NEXTAUTH_URL" >> .env
+# Aggiungere qui altre variabili d'ambiente se necessario
+- npx prisma generate
+- npm run build
+artifacts:
+baseDirectory: .next
+files:
+- '/*'
+cache:
+paths:
+- node_modules//*
+
+text
+
+## Checklist Deployment
+
+- [x] Creazione istanza RDS PostgreSQL (free tier)
+- [x] Configurazione security group per accesso esterno
+- [x] Deploy Next.js su AWS Amplify
+- [x] Impostazione variabili d’ambiente in Amplify **e** scrittura su `.env` in fase di build
+- [x] Configurazione Prisma per compatibilità binari
+- [ ] Da fare: restringere accesso DB a IP sicuri dopo sviluppo
+
+## Considerazioni Finali
+
+- **AWS Amplify** è rapido per deploy Next.js, ma servono workaround per le variabili d’ambiente e la compatibilità binari di Prisma.
+- **RDS Free Tier** è ottimo per partire, ma attenzione ai costi dopo il primo anno.
+- **Sicurezza:**  
+  Evitare di lasciare il database esposto a tutti gli IP in produzione.
+
+## TODO
+
+- Monitorare costi RDS dopo il periodo free tier.
+- Migliorare la sicurezza restringendo le regole di accesso al database.
+- Automatizzare ulteriormente la gestione delle variabili d’ambiente.
+
+**Questi appunti possono essere usati come README per la documentazione interna del deployment di RaiDatalas su AWS.**
+
+
 ## 📄 Licenza
 
 Tutti i diritti riservati © 2025 RideAtlas
+
+

@@ -2,31 +2,27 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/auth'
 import { parseGpxMetadata, createGpxFileFromMetadata, isValidGpxFile, isValidGpxFileSize, parseGPXContent, extractKeyPoints } from '@/lib/gpx-utils'
-import { put } from '@vercel/blob'
+import { getStorageProvider } from '@/lib/storage'
 
-// Funzione per l'upload su Vercel Blob Storage
+// Funzione per l'upload tramite storage provider configurato
 async function uploadFileToStorage(file: File, folder: string, userId: string): Promise<{ url: string; publicId: string }> {
   try {
-    // Genera un nome file unico
-    const timestamp = Date.now()
-    const sanitizedFilename = file.name.replace(/[^a-zA-Z0-9.-]/g, '_')
-    const filename = `${userId}-${timestamp}-${sanitizedFilename}`
-    const pathname = `${folder}/${userId}/${filename}`
-    
-    // Upload su Vercel Blob Storage
-    const blob = await put(pathname, file, {
+    const storageProvider = getStorageProvider()
+    const uploadResult = await storageProvider.uploadFile(file, file.name, {
       access: 'public',
+      folder,
+      userId,
       addRandomSuffix: false,
     })
     
-    console.log(`File GPX caricato su Vercel Blob: ${blob.url}`)
+    console.log(`File GPX caricato: ${uploadResult.url}`)
     
     return {
-      url: blob.url,
-      publicId: pathname
+      url: uploadResult.url,
+      publicId: uploadResult.publicId
     }
   } catch (error) {
-    console.error('Errore durante l\'upload su Vercel Blob:', error)
+    console.error('Errore durante l\'upload:', error)
     throw new Error('Errore durante l\'upload del file su cloud storage')
   }
 }

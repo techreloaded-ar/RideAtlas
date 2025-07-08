@@ -1,7 +1,7 @@
 // src/app/api/upload/route.ts
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/auth'
-import { put } from '@vercel/blob'
+import { getStorageProvider } from '@/lib/storage'
 
 export async function POST(request: NextRequest) {
   try {
@@ -42,16 +42,17 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Upload su Vercel Blob
-    const blob = await put(file.name, file, {
+    // Upload tramite storage provider configurato
+    const storageProvider = getStorageProvider()
+    const uploadResult = await storageProvider.uploadFile(file, file.name, {
       access: 'public'
     })
 
     return NextResponse.json({
-      url: blob.url,
-      filename: file.name,
-      size: file.size,
-      type: file.type
+      url: uploadResult.url,
+      filename: uploadResult.fileName,
+      size: uploadResult.size,
+      type: uploadResult.type
     })
 
   } catch (error) {
