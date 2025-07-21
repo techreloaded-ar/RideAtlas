@@ -18,16 +18,16 @@ const mockTrips = [
   },
   {
     id: '2',
-    title: 'Avventura nelle Dolomiti',
-    summary: 'Percorso mozzafiato tra le vette delle Dolomiti',
-    destination: 'Dolomiti',
+    title: 'Avventura in Veneto',
+    summary: 'Percorso mozzafiato nel Veneto',
+    destination: 'Veneto',
     duration_days: 5,
     duration_nights: 4,
     tags: ['montagna', 'avventura'],
     theme: 'Montagna e avventura',
     characteristics: ['Curve strette', 'Strade sterrate'],
     recommended_seasons: ['Estate', 'Autunno'],
-    slug: 'avventura-dolomiti',
+    slug: 'avventura-veneto',
     gpxData: { hasGpx: true, distance: 400, elevationGain: 2500, waypoints: 25 }
   },
   {
@@ -124,17 +124,17 @@ describe('TripAnalysisService', () => {
     });
 
     it('should calculate total duration', () => {
-      const message = 'Vorrei visitare Toscana e Dolomiti';
+      const message = 'Vorrei visitare Toscana e Veneto';
       const result = TripAnalysisService.analyzeTrips(mockTrips, message);
       
       expect(result.totalDuration).toBeGreaterThan(0);
     });
 
     it('should provide distance warnings for far destinations', () => {
-      const message = 'Vorrei visitare Toscana e Dolomiti';
+      const message = 'Vorrei visitare Toscana e Veneto';
       const result = TripAnalysisService.analyzeTrips(mockTrips, message);
       
-      // Toscana and Dolomiti are far apart, should generate warning
+      // Toscana and Veneto are far apart, should generate warning
       expect(result.distanceWarnings.length).toBeGreaterThan(0);
     });
   });
