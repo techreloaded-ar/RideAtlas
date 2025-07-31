@@ -4,6 +4,7 @@ import { Inter, Montserrat } from 'next/font/google';
 import { SessionProvider } from 'next-auth/react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import CookieBanner from '@/components/CookieBanner';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 const montserrat = Montserrat({ subsets: ['latin'], variable: '--font-montserrat' });
@@ -31,6 +32,7 @@ export default function RootLayout({
             {children}
           </div>
           <Footer />
+          <CookieBanner />
         </SessionProvider>
       </body>
     </html>
