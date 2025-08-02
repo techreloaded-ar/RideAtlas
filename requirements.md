@@ -2,7 +2,7 @@
 
 ## 1. Elevator Pitch
 
-Per i **motoviaggiatori over‑50**, spesso poco tecnologici ma desiderosi d’avventura, **RideAtlas** è una piattaforma **web e mobile** che permette di **scaricare percorsi certificati** o **creare itinerari personalizzati** senza doversi occupare di aspetti tecnici. Offre pacchetti curati da ranger che hanno davvero percorso quelle strade, completi di GPX, punti imperdibili, soste consigliate e strutture prenotabili. Quando il viaggiatore ha esigenze particolari (es. “9 notti in Slovacchia, tappe max 200 km”), il nostro Trip Builder AI genera un percorso su misura, integrando i POI scelti dall’utente. “**Noi lo facciamo per te. Tu guidi l’avventura.**”
+Per i **motoviaggiatori over‑50**, spesso poco tecnologici ma desiderosi d’avventura, **RideAtlas** è una piattaforma **web e mobile** che permette di **scaricare percorsi certificati** o **creare itinerari personalizzati** senza doversi occupare di aspetti tecnici. Offre viaggi curati da ranger che hanno davvero percorso quelle strade, completi di GPX, punti imperdibili, soste consigliate e strutture prenotabili. Quando il viaggiatore ha esigenze particolari (es. “9 notti in Slovacchia, tappe max 200 km”), il nostro Trip Builder AI genera un percorso su misura, integrando i POI scelti dall’utente. “**Noi lo facciamo per te. Tu guidi l’avventura.**”
 
 ---
 
@@ -10,10 +10,10 @@ Per i **motoviaggiatori over‑50**, spesso poco tecnologici ma desiderosi d’a
 
 | Sezione                 | Dettagli                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 | ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Segmenti target**     | • **Explorer** motociclista base 50‑60 anni, pigro tech, vuole pacchetti pronti • **Explorer Pro** explorer che fornisce parametri ed è disposto a pagare di più per avere itinerario sartoriali.           • **Ranger** esploratore che produce contenuti. Viene remunerato. **• Sentinel** amministratore di sistema                                                                                                                        |
+| **Segmenti target**     | • **Explorer** motociclista base 50‑60 anni, pigro tech, vuole viaggi pronti • **Explorer Pro** explorer che fornisce parametri ed è disposto a pagare di più per avere itinerario sartoriali.           • **Ranger** esploratore che produce contenuti. Viene remunerato. **• Sentinel** amministratore di sistema                                                                                                                        |
 | **Problemi / Esigenze** | **Explorer**: ottenere velocemente una traccia affidabile, con info su cosa vedere, dove mangiare/dormire, senza doversi sbattere. **Explorer PRO**: definire parametri (date, durata, trasferimento ≤ X h, tappe ≤ Y km) e ricevere percorso ottimizzato con POI filtrabili (viola/verde/blu). **Ranger**: monetizzare/condividere i propri viaggi reali, mantenere reputazione. **Sentinel**: gestire utenti, ruoli, pagamenti e contenuti. |
-| **Proposta di Valore**  | • Pacchetti "pronti all’uso" testati sul campo  • Trip Builder AI che adatta tracce esistenti o ne crea di nuove  • Libreria gratuita 1° anno → abbonamento mensile  • Booking integrato di strutture moto‑friendly                                                                                                                                                                                                                           |
-| **Differenziatori**     | 1. Percorsi realmente percorsi da ranger  2. Pacchetto base con POI, soste food‑&‑sleep verificate  3. Personalizzazione che tiene conto di tempi di guida, preferenze e tappe  4. L’utente rimane la “guida” della propria avventura                                                                                                                                                                                                         |
+| **Proposta di Valore**  | • Viaggi "pronti all'uso" testati sul campo  • Trip Builder AI che adatta tracce esistenti o ne crea di nuove  • Libreria gratuita 1° anno → abbonamento mensile  • Booking integrato di strutture moto‑friendly                                                                                                                                                                                                                           |
+| **Differenziatori**     | 1. Percorsi realmente percorsi da ranger  2. Viaggio base con POI, soste food‑&‑sleep verificate  3. Personalizzazione che tiene conto di tempi di guida, preferenze e tappe  4. L’utente rimane la “guida” della propria avventura                                                                                                                                                                                                         |
 | **Metriche Obiettivo**  | • 10 k utenti registrati alla fine del periodo free  • 3 k abbonati paganti a +12 mesi  • ARPU > €9/mese  • NPS ≥ 50  • 300 percorsi certificati                                                                                                                                                                                                                                                                                              |
 
 ---
@@ -34,7 +34,7 @@ Per i **motoviaggiatori over‑50**, spesso poco tecnologici ma desiderosi d’a
 
   1. Vedo testo descrittivo completo del viaggio.
   2. Posso riprodurre i video associati al viaggio.
-  3. È presente il link per scaricare il pacchetto.
+  3. È presente il link per scaricare il viaggio.
   4. È presente il link per installare il GPX.
 * **US 1.4 CONDIVISIONE SOCIAL**
   *In qualità di motociclista, desidero condividere il viaggio sui social (Facebook, Instagram, WhatsApp) affinché possa far conoscere il percorso ad altri motociclisti.* **Criteri di accettazione** 
@@ -42,14 +42,14 @@ Per i **motoviaggiatori over‑50**, spesso poco tecnologici ma desiderosi d’a
   1. Dal dettaglio viaggio sono presenti i pulsanti di condivisione Facebook, Instagram e WhatsApp.
   2. Il link condiviso apre la pagina del viaggio in modalità pubblico/anteprima.
   3. Il sistema mostra un messaggio di conferma di condivisione riuscita.
-* **US 1.5  DOWNLOAD PACCHETTO**
-  *In qualità di motociclista, desidero scaricare il pacchetto base (GPX, POI, PDF) affinché possa consultarlo offline e installarlo sul mio dispositivo di navigazione.* **Criteri di accettazione** 
+* **US 1.5  DOWNLOAD VIAGGIO**
+  *In qualità di motociclista, desidero scaricare il viaggio base (GPX, POI, PDF) affinché possa consultarlo offline e installarlo sul mio dispositivo di navigazione.* **Criteri di accettazione** 
 
   1. Il download fornisce un archivio compresso con GPX, PDF e link ai video.
   2. Il file PDF contiene descrizione, mappa, elenco POI, strutture consigliate.
-  3. Il pacchetto scaricato corrisponde esattamente al viaggio visualizzato.
+  3. Il viaggio scaricato corrisponde esattamente al viaggio visualizzato.
 * **US 4.1 CREAZIONE VIAGGIO BASE**
-  *In qualità di ranger, desidero creare un nuovo pacchetto viaggio affinché poi possa aggiungere contenuti multimediali, associare tracce GPX e definire i POI.* **Criteri di accettazione** 
+  *In qualità di ranger, desidero creare un nuovo viaggio affinché poi possa aggiungere contenuti multimediali, associare tracce GPX e definire i POI.* **Criteri di accettazione** 
 
   1. Posso inserire titolo, sommario, destinazione/area geografica e durata (giorni/notti).
   2. Posso impostare difficoltà, tag/tema e stagione consigliata.
@@ -110,7 +110,7 @@ Per i **motoviaggiatori over‑50**, spesso poco tecnologici ma desiderosi d’a
 
   1. Mappa con percorso completo e riepilogo distanze; possibilità di conferma.
 * **US 7.1  PROGRAMMA PUBBLICAZIONE**
-  *In qualità di ranger, desidero programmare la pubblicazione di un pacchetto viaggio affinché possa promuoverlo in anticipo sui social.* 
+  *In qualità di ranger, desidero programmare la pubblicazione di un viaggio affinché possa promuoverlo in anticipo sui social.* 
   **Criteri di accettazione** (sintesi)
 
   1. Calendario data/ora; stato programmato; notifica agli abbonati.

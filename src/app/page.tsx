@@ -30,7 +30,7 @@ export default function HomePage() {
                 </div>
               </div>              <div className="pt-4 flex flex-wrap gap-4">
                 <Link href="/trips" className="btn-primary">
-                  Esplora Pacchetti
+                  Esplora Viaggi
                 </Link>
                 <Link href="/trip-builder" className="bg-white text-secondary-800 hover:bg-gray-100 font-semibold py-2 px-4 rounded-md transition-colors">
                   Crea Itinerario
@@ -74,7 +74,7 @@ export default function HomePage() {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 6.75V15m6-6v8.25m.503 3.498l4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 00-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-bold mb-2 text-secondary-800">Pacchetti Viaggio Curati & Certificati</h3>
+              <h3 className="text-xl font-bold mb-2 text-secondary-800">Viaggi Curati & Certificati</h3>
               <p className="text-secondary-600 mb-3">Itinerari di qualità con tracce GPX <strong>testati e verificati</strong> da ranger esperti, completi di storytelling e punti di interesse.</p>
               
               {/* Indicatori di qualità */}

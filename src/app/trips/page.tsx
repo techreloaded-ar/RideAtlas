@@ -42,7 +42,7 @@ const formatDate = (date: Date) => {
   }).format(date);
 };
 
-export default async function PacchettiPage() {
+export default async function TripsPage() {
   // La pagina /trips mostra solo i viaggi pubblicati per tutti gli utenti
   // I viaggi in bozza sono visibili solo in Dashboard ("I miei Viaggi") e nel pannello Admin
   const whereClause = { status: TripStatus.Pubblicato };
@@ -82,7 +82,7 @@ export default async function PacchettiPage() {
         <div className="container mx-auto px-4">
           <div className="text-center">
             <h1 className="text-4xl md:text-5xl font-display font-bold mb-4">
-              Tutti i Pacchetti Viaggio
+              Tutti i Viaggi
             </h1>
             <p className="text-xl text-primary-100 max-w-2xl mx-auto">
               Scopri tutti gli itinerari creati dalla nostra community di motociclisti appassionati
@@ -100,7 +100,7 @@ export default async function PacchettiPage() {
               <div className="mb-8">
                 <Navigation className="w-24 h-24 text-gray-300 mx-auto mb-4" />
                 <h2 className="text-2xl font-bold text-gray-600 mb-2">
-                  Nessun pacchetto disponibile
+                  Nessun viaggio disponibile
                 </h2>
                 <p className="text-gray-500">
                   Non ci sono ancora viaggi pubblicati. Sii il primo a creare un itinerario!
@@ -311,6 +311,6 @@ export default async function PacchettiPage() {
 
 // Metadata per SEO
 export const metadata = {
-  title: 'Tutti i Pacchetti Viaggio | RideAtlas',
+  title: 'Tutti i Viaggi | RideAtlas',
   description: 'Esplora tutti gli itinerari in moto creati dalla community di RideAtlas. Trova il tuo prossimo viaggio perfetto.',
 };

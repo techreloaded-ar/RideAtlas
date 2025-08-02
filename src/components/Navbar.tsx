@@ -40,7 +40,7 @@ export default function Navbar() {
 
   const navigation = [
     { name: 'Home', href: '/' },
-    { name: 'Pacchetti', href: '/trips' },
+    { name: 'Viaggi', href: '/trips' },
     { name: 'Trip Builder', href: '/trip-builder' },
     { name: 'Community', href: '/community' },
   ];

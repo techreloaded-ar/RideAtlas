@@ -35,15 +35,15 @@
     },
     "US1.5": {
       "id": "US1.5",
-      "title": "DOWNLOAD PACCHETTO",
-      "description": "In qualità di motociclista, desidero scaricare il pacchetto base (GPX, POI, PDF) affinché possa consultarlo offline e installarlo sul mio dispositivo di navigazione.",
+      "title": "DOWNLOAD VIAGGIO",
+      "description": "In qualità di motociclista, desidero scaricare il viaggio base (GPX, POI, PDF) affinché possa consultarlo offline e installarlo sul mio dispositivo di navigazione.",
       "storyPoints": 3,
       "category": "Trip Download"
     },
     "US4.1": {
       "id": "US4.1",
       "title": "CREAZIONE VIAGGIO BASE",
-      "description": "In qualità di ranger, desidero creare un nuovo pacchetto viaggio affinché poi possa aggiungere contenuti multimediali, associare tracce GPX e definire i POI.",
+      "description": "In qualità di ranger, desidero creare un nuovo viaggio affinché poi possa aggiungere contenuti multimediali, associare tracce GPX e definire i POI.",
       "storyPoints": 3,
       "category": "Content Creation"
     },
@@ -106,7 +106,7 @@
     "US7.1": {
       "id": "US7.1",
       "title": "PROGRAMMA PUBBLICAZIONE",
-      "description": "In qualità di ranger, desidero programmare la pubblicazione di un pacchetto viaggio affinché possa promuoverlo in anticipo sui social.",
+      "description": "In qualità di ranger, desidero programmare la pubblicazione di un viaggio affinché possa promuoverlo in anticipo sui social.",
       "storyPoints": 3,
       "category": "Content Publishing"
     },

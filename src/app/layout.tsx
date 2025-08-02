@@ -11,7 +11,7 @@ const montserrat = Montserrat({ subsets: ['latin'], variable: '--font-montserrat
 
 export const metadata: Metadata = {
   title: 'RideAtlas - Itinerari in moto personalizzati',
-  description: 'Piattaforma per appassionati di viaggi in moto con itinerari curati e personalizzabili, pacchetti viaggio multimediali e costruttore di percorsi assistito da AI.',
+  description: 'Piattaforma per appassionati di viaggi in moto con itinerari curati e personalizzabili, viaggi multimediali e costruttore di percorsi assistito da AI.',
 };
 
 export default function RootLayout({

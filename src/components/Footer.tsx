@@ -39,7 +39,7 @@ export default function Footer() {
             <h3 className="text-lg font-semibold mb-4">Esplora</h3>
             <ul className="space-y-2">              <li>
                 <Link href="/trips" className="text-gray-300 hover:text-white">
-                  Pacchetti Viaggio
+                  Viaggi
                 </Link>
               </li>
               <li>
@@ -94,7 +94,7 @@ export default function Footer() {
           <div>
             <h3 className="text-lg font-semibold mb-4">Newsletter</h3>
             <p className="text-gray-300 mb-4">
-              Iscriviti per ricevere aggiornamenti sui nuovi pacchetti e offerte speciali.
+              Iscriviti per ricevere aggiornamenti sui nuovi viaggi e offerte speciali.
             </p>
             <form className="flex flex-col sm:flex-row gap-2">
               <input

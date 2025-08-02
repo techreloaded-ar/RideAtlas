@@ -17,7 +17,7 @@ describe('HomePage', () => {
     expect(screen.getByText(/Verificati dai nostri ranger esperti/i)).toBeInTheDocument();
     
     // Verifica che i pulsanti di call-to-action siano presenti
-    expect(screen.getByText('Esplora Pacchetti')).toBeInTheDocument();
+    expect(screen.getByText('Esplora Viaggi')).toBeInTheDocument();
     expect(screen.getByText('Crea Itinerario')).toBeInTheDocument();
   });
 
@@ -28,7 +28,7 @@ describe('HomePage', () => {
     expect(screen.getByText('Caratteristiche Principali')).toBeInTheDocument();
     
     // Verifica che le tre caratteristiche principali siano presenti
-    expect(screen.getByText('Pacchetti Viaggio Curati & Certificati')).toBeInTheDocument();
+    expect(screen.getByText('Viaggi Curati & Certificati')).toBeInTheDocument();
     expect(screen.getByText('Trip Builder con AI')).toBeInTheDocument();
     expect(screen.getByText('Comunità di Ranger')).toBeInTheDocument();
     
