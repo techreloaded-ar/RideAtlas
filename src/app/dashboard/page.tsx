@@ -7,11 +7,13 @@ import Link from 'next/link';
 import { UserRole, UserRoleLabels, UserRoleDescriptions, UserPermissions } from '@/types/profile';
 import { useEffect, useState, Suspense } from 'react';
 import UserTrips from '@/components/UserTrips';
+import ChangePasswordForm from '@/components/ChangePasswordForm';
 
 function DashboardContent() {
   const { data: session, status } = useSession();
   const searchParams = useSearchParams();
   const [showError, setShowError] = useState(false);
+  const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
 
   useEffect(() => {
     if (searchParams.get('error') === 'insufficient-permissions') {
@@ -181,6 +183,31 @@ function DashboardContent() {
                 </div>
               )}
 
+              {/* Sicurezza Account - Disponibile per tutti */}
+              <div className="bg-orange-50 border border-orange-200 rounded-lg p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-lg font-medium text-orange-900">
+                      Sicurezza Account
+                    </h3>
+                    <p className="text-orange-700 mt-1">
+                      Gestisci la sicurezza del tuo account
+                    </p>
+                  </div>
+                  <svg className="w-8 h-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                </div>
+                <div className="mt-4">
+                  <button
+                    onClick={() => setShowChangePasswordModal(true)}
+                    className="inline-flex items-center text-sm font-medium text-orange-600 hover:text-orange-500"
+                  >
+                    Cambia password →
+                  </button>
+                </div>
+              </div>
+
               {/* I tuoi viaggi - Solo per utenti che possono creare viaggi */}
               {UserPermissions.canCreateTrips(userRole) && (
                 <div className="md:col-span-2 lg:col-span-3">
@@ -190,6 +217,20 @@ function DashboardContent() {
             </div>
           </div>
         </div>
+
+        {/* Modal per Cambio Password */}
+        {showChangePasswordModal && (
+          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+            <div className="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 xl:w-2/5 shadow-lg rounded-md bg-white">
+              <ChangePasswordForm
+                onSuccess={() => {
+                  setTimeout(() => setShowChangePasswordModal(false), 2000);
+                }}
+                onCancel={() => setShowChangePasswordModal(false)}
+              />
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

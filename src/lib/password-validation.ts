@@ -22,6 +22,22 @@ export const validatePasswordComplexity = (password: string): string[] => {
   return errors;
 };
 
+/**
+ * Validates that the new password is different from the current one
+ * @param newPassword - New password to validate
+ * @param currentPassword - Current password to compare against
+ * @returns string[] - Array of validation errors (empty if valid)
+ */
+export const validatePasswordChange = (newPassword: string, currentPassword: string): string[] => {
+  const complexityErrors = validatePasswordComplexity(newPassword);
+  
+  if (newPassword === currentPassword) {
+    complexityErrors.push('La nuova password deve essere diversa da quella attuale');
+  }
+  
+  return complexityErrors;
+};
+
 export const passwordSchema = z.string().superRefine((password, ctx) => {
   const errors = validatePasswordComplexity(password);
   
@@ -31,6 +47,22 @@ export const passwordSchema = z.string().superRefine((password, ctx) => {
       message: errors.join('. ')
     });
   }
+});
+
+/**
+ * Zod schema for password change validation
+ * Includes both current and new password validation
+ */
+export const changePasswordSchema = z.object({
+  currentPassword: z.string().min(1, 'Password attuale richiesta'),
+  newPassword: passwordSchema,
+  confirmPassword: z.string().min(1, 'Conferma password richiesta'),
+}).refine((data) => data.newPassword === data.confirmPassword, {
+  message: 'Le password non coincidono',
+  path: ['confirmPassword'],
+}).refine((data) => data.newPassword !== data.currentPassword, {
+  message: 'La nuova password deve essere diversa da quella attuale',
+  path: ['newPassword'],
 });
 
 export const isPasswordValid = (password: string): boolean => {
