@@ -107,9 +107,27 @@ model Trip {
   updated_at         DateTime          @updatedAt
   user_id            String
   user               User              @relation(fields: [user_id], references: [id])
+  stages             Stage[]           // Relazione con le tappe
   purchases          TripPurchase[]
 
   @@map("trips")
+}
+
+model Stage {
+  id                String     @id @default(cuid())
+  tripId            String
+  orderIndex        Int        // Numero ordinale della tappa (1, 2, 3...)
+  title             String
+  description       String?    @db.Text
+  routeType         String?    // Tipo di percorso (testo libero)
+  media             Json[]     @default([])
+  gpxFile           Json?      // Traccia GPX della singola tappa
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+  trip              Trip       @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  
+  @@unique([tripId, orderIndex])
+  @@map("stages")
 }
 
 enum RecommendedSeason {
