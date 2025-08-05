@@ -35,10 +35,20 @@ function toRadians(degrees: number): number {
 }
 
 /**
- * Extract approximate coordinates from destination string
+ * Extract approximate coordinates from a destination string
+ * Handles destinations that include additional details like
+ * regions or countries (e.g. "Roma, Italia" or "Roma (Lazio)").
  */
 export function getApproximateCoordinates(destination: string): { lat: number; lng: number } | null {
-  return getLocationCoordinates(destination);
+  // Remove any additional location details after a comma, opening
+  // parenthesis or a dash surrounded by spaces (" - ") to improve
+  // lookup reliability.
+  const primaryLocation = destination
+    .split(/[,(]/)[0]      // remove text after comma or (
+    .split(' - ')[0]       // handle patterns like "City - Region"
+    .trim();
+
+  return getLocationCoordinates(primaryLocation);
 }
 
 /**

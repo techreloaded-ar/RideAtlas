@@ -50,6 +50,17 @@ describe('GeoUtils', () => {
       const romaUpper = getApproximateCoordinates('ROMA');
       expect(romaLower).toEqual(romaUpper);
     });
+
+    it('should handle destinations with extra details', () => {
+      const withCountry = getApproximateCoordinates('Roma, Italia');
+      expect(withCountry).toEqual({ lat: 41.9028, lng: 12.4964 });
+
+      const withRegion = getApproximateCoordinates('Roma (Lazio)');
+      expect(withRegion).toEqual({ lat: 41.9028, lng: 12.4964 });
+
+      const withDash = getApproximateCoordinates('Roma - Lazio');
+      expect(withDash).toEqual({ lat: 41.9028, lng: 12.4964 });
+    });
   });
 
   describe('calculateTripDistance', () => {
