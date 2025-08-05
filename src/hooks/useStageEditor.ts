@@ -1,245 +1,428 @@
-import { useState, useCallback } from 'react';
-import { Stage, MediaItem, GpxFile } from '@/types/trip';
+// src/hooks/useStageEditor.ts
+// Hook per gestione form di creazione/modifica stage con validazione e file upload
 
-interface StageFormData {
-  title: string;
-  description?: string;
-  routeType?: string;
-  orderIndex: number;
-  mainImageFile?: File;
-  mediaFiles?: File[];
-  gpxFileUpload?: File;
-  existingMedia?: MediaItem[];
-  existingGpx?: GpxFile | null;
+import { useState, useEffect, useCallback } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { Stage, StageCreationData, StageUpdateData, MediaItem, GpxFile } from '@/types/trip';
+import { useStages } from '@/hooks/useStages';
+
+// Schema di validazione Zod per Stage
+const stageValidationSchema = z.object({
+  orderIndex: z.number().min(0, 'Order index deve essere >= 0'),
+  title: z.string()
+    .min(1, 'Titolo è obbligatorio')
+    .max(200, 'Titolo non può superare 200 caratteri'),
+  description: z.string().optional(),
+  routeType: z.string()
+    .max(500, 'Tipo percorso non può superare 500 caratteri')
+    .optional(),
+  media: z.array(z.object({
+    id: z.string(),
+    type: z.enum(['image', 'video']),
+    url: z.string().url('URL non valido'),
+    caption: z.string().optional(),
+    thumbnailUrl: z.string().url('URL thumbnail non valido').optional()
+  })),
+  gpxFile: z.object({
+    url: z.string().url('URL GPX non valido'),
+    filename: z.string().min(1, 'Nome file richiesto'),
+    waypoints: z.number().min(0),
+    distance: z.number().min(0),
+    elevationGain: z.number().min(0).optional(),
+    elevationLoss: z.number().min(0).optional(),
+    duration: z.number().min(0).optional(),
+    maxElevation: z.number().optional(),
+    minElevation: z.number().optional(),
+    startTime: z.string().optional(),
+    endTime: z.string().optional(),
+    isValid: z.boolean(),
+    keyPoints: z.array(z.object({
+      lat: z.number(),
+      lng: z.number(),
+      elevation: z.number().optional(),
+      distanceFromStart: z.number(),
+      type: z.enum(['start', 'intermediate', 'end']),
+      description: z.string()
+    })).optional()
+  }).nullable()
+});
+
+type StageFormData = z.infer<typeof stageValidationSchema>;
+
+// Interfaccia per lo stato degli upload
+interface UploadProgress {
+  media: { [key: string]: number };
+  gpx: number | null;
+}
+
+interface UseStageEditorProps {
+  tripId: string;
+  stageId?: string; // Se presente, modalità edit
+  autoFetch?: boolean; // Auto-fetch stage in modalità edit
 }
 
 interface UseStageEditorReturn {
+  // Form state
+  form: ReturnType<typeof useForm<StageFormData>>;
   isLoading: boolean;
-  uploadProgress: { [key: string]: number };
-  error: string | null;
-  saveStage: (formData: StageFormData) => Promise<void>;
-  deleteStage: (stageId: string) => Promise<void>;
-  clearError: () => void;
+  isSaving: boolean;
+  isInitialized: boolean;
+  
+  // Upload state
+  uploadProgress: UploadProgress;
+  isUploading: boolean;
+  
+  // Data state
+  currentStage: Stage | null;
+  
+  // Operations
+  saveStage: () => Promise<Stage | null>;
+  resetForm: () => void;
+  
+  // File upload operations
+  uploadMedia: (files: FileList) => Promise<MediaItem[]>;
+  removeMedia: (mediaId: string) => void;
+  uploadGpx: (file: File) => Promise<GpxFile | null>;
+  removeGpx: () => void;
+  
+  // Error handling
+  errors: {
+    form: string | null;
+    upload: string | null;
+    save: string | null;
+  };
+  clearErrors: () => void;
 }
 
-export function useStageEditor(tripId: string, stageId?: string): UseStageEditorReturn {
-  const [isLoading, setIsLoading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState<{ [key: string]: number }>({});
-  const [error, setError] = useState<string | null>(null);
-
-  const clearError = useCallback(() => {
-    setError(null);
-  }, []);
-
-  // Upload singolo file verso storage
-  const uploadFile = async (file: File, type: 'image' | 'gpx'): Promise<{ url: string; filename: string }> => {
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('type', type);
-    formData.append('tripId', tripId);
-
-    // Simula upload con progress tracking
-    const response = await fetch('/api/upload', {
-      method: 'POST',
-      body: formData,
-    });
-
-    if (!response.ok) {
-      throw new Error(`Errore upload ${type}: ${response.statusText}`);
+export function useStageEditor({ 
+  tripId, 
+  stageId, 
+  autoFetch = true 
+}: UseStageEditorProps): UseStageEditorReturn {
+  // Integration con useStages per operazioni CRUD
+  const { 
+    stages, 
+    createStage, 
+    updateStage, 
+    getStageById,
+    isLoading: stagesLoading 
+  } = useStages({ tripId, autoFetch: false });
+  
+  // Form state
+  const form = useForm<StageFormData>({
+    resolver: zodResolver(stageValidationSchema),
+    defaultValues: {
+      orderIndex: 0,
+      title: '',
+      description: '',
+      routeType: '',
+      media: [],
+      gpxFile: null
     }
+  });
+  
+  // Local state
+  const [isSaving, setIsSaving] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
+  const [currentStage, setCurrentStage] = useState<Stage | null>(null);
+  const [uploadProgress, setUploadProgress] = useState<UploadProgress>({
+    media: {},
+    gpx: null
+  });
+  const [isUploading, setIsUploading] = useState(false);
+  const [errors, setErrors] = useState({
+    form: null as string | null,
+    upload: null as string | null,
+    save: null as string | null
+  });
 
-    const result = await response.json();
-    return {
-      url: result.url,
-      filename: file.name
-    };
-  };
+  // Fetch stage in modalità edit
+  useEffect(() => {
+    if (stageId && autoFetch && !stagesLoading) {
+      const stage = getStageById(stageId);
+      if (stage) {
+        setCurrentStage(stage);
+        // Popola il form con i dati dello stage
+        form.reset({
+          orderIndex: stage.orderIndex,
+          title: stage.title,
+          description: stage.description || '',
+          routeType: stage.routeType || '',
+          media: stage.media,
+          gpxFile: stage.gpxFile
+        });
+        setIsInitialized(true);
+      }
+    } else if (!stageId) {
+      // Modalità creazione: calcola il prossimo orderIndex
+      const nextOrderIndex = stages.length;
+      form.setValue('orderIndex', nextOrderIndex);
+      setIsInitialized(true);
+    }
+  }, [stageId, stages, autoFetch, stagesLoading, getStageById, form]);
+  
+  // Clear errors function
+  const clearErrors = useCallback(() => {
+    setErrors({
+      form: null,
+      upload: null,
+      save: null
+    });
+  }, []);
+  
+  // Reset form function
+  const resetForm = useCallback(() => {
+    if (currentStage) {
+      form.reset({
+        orderIndex: currentStage.orderIndex,
+        title: currentStage.title,
+        description: currentStage.description || '',
+        routeType: currentStage.routeType || '',
+        media: currentStage.media,
+        gpxFile: currentStage.gpxFile
+      });
+    } else {
+      form.reset({
+        orderIndex: stages.length,
+        title: '',
+        description: '',
+        routeType: '',
+        media: [],
+        gpxFile: null
+      });
+    }
+    clearErrors();
+  }, [currentStage, stages.length, form, clearErrors]);
 
-  // Upload multipli file immagini
-  const uploadImages = async (files: File[]): Promise<MediaItem[]> => {
-    const uploadPromises = files.map(async (file, index) => {
-      try {
-        setUploadProgress(prev => ({ ...prev, [`image_${index}`]: 0 }));
+  // Upload media files
+  const uploadMedia = useCallback(async (files: FileList): Promise<MediaItem[]> => {
+    if (!files.length) return [];
+    
+    setIsUploading(true);
+    clearErrors();
+    
+    try {
+      const uploadedMedia: MediaItem[] = [];
+      
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const tempId = `temp-${Date.now()}-${i}`;
         
-        const result = await uploadFile(file, 'image');
+        // Validazione file
+        if (!file.type.startsWith('image/')) {
+          throw new Error(`File ${file.name} non è un'immagine valida`);
+        }
         
-        setUploadProgress(prev => ({ ...prev, [`image_${index}`]: 100 }));
+        if (file.size > 10 * 1024 * 1024) { // 10MB limit
+          throw new Error(`File ${file.name} è troppo grande (max 10MB)`);
+        }
         
-        return {
-          id: `uploaded_${Date.now()}_${index}`,
-          type: 'image' as const,
-          url: result.url,
+        // Simula upload con progress tracking
+        setUploadProgress(prev => ({
+          ...prev,
+          media: { ...prev.media, [tempId]: 0 }
+        }));
+        
+        // Mock upload API call
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('tripId', tripId);
+        formData.append('type', 'stage-media');
+        
+        // Simula progress
+        for (let progress = 0; progress <= 100; progress += 10) {
+          setUploadProgress(prev => ({
+            ...prev,
+            media: { ...prev.media, [tempId]: progress }
+          }));
+          await new Promise(resolve => setTimeout(resolve, 100));
+        }
+        
+        // TODO: Implementare chiamata API reale
+        // const response = await fetch('/api/upload/media', {
+        //   method: 'POST',
+        //   body: formData
+        // });
+        
+        // Mock response per ora
+        const mockMediaItem: MediaItem = {
+          id: `media-${Date.now()}-${i}`,
+          type: 'image',
+          url: URL.createObjectURL(file),
           caption: ''
         };
-      } catch (error) {
-        console.error(`Errore upload immagine ${index}:`, error);
-        throw error;
+        
+        uploadedMedia.push(mockMediaItem);
+        
+        // Remove progress tracking
+        setUploadProgress(prev => {
+          const newMedia = { ...prev.media };
+          delete newMedia[tempId];
+          return { ...prev, media: newMedia };
+        });
       }
-    });
-
-    return Promise.all(uploadPromises);
-  };
-
-  // Upload file GPX con parsing
-  const uploadGpx = async (file: File): Promise<GpxFile> => {
-    try {
-      setUploadProgress(prev => ({ ...prev, gpx: 0 }));
       
-      const result = await uploadFile(file, 'gpx');
+      // Aggiorna il form con i nuovi media
+      const currentMedia = form.getValues('media');
+      form.setValue('media', [...currentMedia, ...uploadedMedia]);
       
-      setUploadProgress(prev => ({ ...prev, gpx: 50 }));
-      
-      // Parse GPX per estrarre metadati
-      const parseResponse = await fetch('/api/gpx/parse', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: result.url })
-      });
-
-      if (!parseResponse.ok) {
-        throw new Error('Errore parsing GPX');
-      }
-
-      const gpxData = await parseResponse.json();
-      
-      setUploadProgress(prev => ({ ...prev, gpx: 100 }));
-
-      return {
-        url: result.url,
-        filename: result.filename,
-        waypoints: gpxData.waypoints || 0,
-        distance: gpxData.distance || 0,
-        elevationGain: gpxData.elevationGain,
-        elevationLoss: gpxData.elevationLoss,
-        duration: gpxData.duration,
-        maxElevation: gpxData.maxElevation,
-        minElevation: gpxData.minElevation,
-        isValid: gpxData.isValid || true,
-        keyPoints: gpxData.keyPoints || []
-      };
+      return uploadedMedia;
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Errore durante upload media';
+      setErrors(prev => ({ ...prev, upload: errorMessage }));
+      return [];
+    } finally {
+      setIsUploading(false);
+    }
+  }, [tripId, form, clearErrors]);
+  
+  // Remove media item
+  const removeMedia = useCallback((mediaId: string) => {
+    const currentMedia = form.getValues('media');
+    const updatedMedia = currentMedia.filter(item => item.id !== mediaId);
+    form.setValue('media', updatedMedia);
+  }, [form]);
+
+  // Upload GPX file
+  const uploadGpx = useCallback(async (file: File): Promise<GpxFile | null> => {
+    if (!file.name.toLowerCase().endsWith('.gpx')) {
+      setErrors(prev => ({ ...prev, upload: 'Il file deve essere un GPX valido' }));
+      return null;
+    }
+    
+    if (file.size > 5 * 1024 * 1024) { // 5MB limit
+      setErrors(prev => ({ ...prev, upload: 'File GPX troppo grande (max 5MB)' }));
+      return null;
+    }
+    
+    setIsUploading(true);
+    clearErrors();
+    
+    try {
       setUploadProgress(prev => ({ ...prev, gpx: 0 }));
-      throw error;
-    }
-  };
-
-  // Converti form data in Stage data
-  const convertFormDataToStageData = async (formData: StageFormData) => {
-    let uploadedMedia: MediaItem[] = [];
-    let uploadedGpx: GpxFile | null = null;
-
-    // Upload nuove immagini se presenti
-    if (formData.mediaFiles && formData.mediaFiles.length > 0) {
-      uploadedMedia = await uploadImages(formData.mediaFiles);
-    }
-
-    // Upload main image se presente (aggiunta come primo elemento media)
-    if (formData.mainImageFile) {
-      const mainImageMedia = await uploadImages([formData.mainImageFile]);
-      uploadedMedia = [...mainImageMedia, ...uploadedMedia];
-    }
-
-    // Upload GPX se presente
-    if (formData.gpxFileUpload) {
-      uploadedGpx = await uploadGpx(formData.gpxFileUpload);
-    }
-
-    // Combina media esistenti e nuovi
-    const allMedia = [
-      ...(formData.existingMedia || []),
-      ...uploadedMedia
-    ];
-
-    // Usa GPX esistente se non caricato nuovo
-    const finalGpx = uploadedGpx || formData.existingGpx || null;
-
-    return {
-      title: formData.title,
-      description: formData.description || null,
-      routeType: formData.routeType || null,
-      orderIndex: formData.orderIndex,
-      media: allMedia,
-      gpxFile: finalGpx
-    };
-  };
-
-  // Salva/aggiorna stage
-  const saveStage = useCallback(async (formData: StageFormData) => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      setUploadProgress({ overall: 0 });
-
-      // Converti e upload files
-      const stageData = await convertFormDataToStageData(formData);
       
-      setUploadProgress({ overall: 80 });
-
-      // API call
-      const endpoint = stageId 
-        ? `/api/trips/${tripId}/stages/${stageId}`
-        : `/api/trips/${tripId}/stages`;
-      
-      const method = stageId ? 'PUT' : 'POST';
-
-      const response = await fetch(endpoint, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(stageData)
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || `Errore ${stageId ? 'aggiornamento' : 'creazione'} tappa`);
+      // Mock upload con progress
+      for (let progress = 0; progress <= 100; progress += 20) {
+        setUploadProgress(prev => ({ ...prev, gpx: progress }));
+        await new Promise(resolve => setTimeout(resolve, 150));
       }
-
-      setUploadProgress({ overall: 100 });
       
-      // Clear progress after success
-      setTimeout(() => {
-        setUploadProgress({});
-      }, 1000);
-
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Errore sconosciuto';
-      setError(errorMessage);
-      setUploadProgress({});
-      throw err; // Re-throw per permettere handling nel componente
+      // TODO: Implementare parsing GPX reale e upload
+      const mockGpxFile: GpxFile = {
+        url: URL.createObjectURL(file),
+        filename: file.name,
+        waypoints: 150,
+        distance: 142.5,
+        elevationGain: 2350,
+        elevationLoss: 1980,
+        isValid: true
+      };
+      
+      form.setValue('gpxFile', mockGpxFile);
+      setUploadProgress(prev => ({ ...prev, gpx: null }));
+      
+      return mockGpxFile;
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Errore durante upload GPX';
+      setErrors(prev => ({ ...prev, upload: errorMessage }));
+      return null;
     } finally {
-      setIsLoading(false);
+      setIsUploading(false);
     }
-  }, [tripId, stageId]);
+  }, [form, clearErrors]);
+  
+  // Remove GPX file
+  const removeGpx = useCallback(() => {
+    form.setValue('gpxFile', null);
+  }, [form]);
 
-  // Elimina stage
-  const deleteStage = useCallback(async (stageIdToDelete: string) => {
+  // Save stage (create or update)
+  const saveStage = useCallback(async (): Promise<Stage | null> => {
+    clearErrors();
+    
+    // Trigger form validation
+    const isValid = await form.trigger();
+    if (!isValid) {
+      setErrors(prev => ({ ...prev, form: 'Correggi i campi evidenziati' }));
+      return null;
+    }
+    
+    setIsSaving(true);
+    
     try {
-      setIsLoading(true);
-      setError(null);
-
-      const response = await fetch(`/api/trips/${tripId}/stages/${stageIdToDelete}`, {
-        method: 'DELETE'
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Errore eliminazione tappa');
+      const formData = form.getValues();
+      
+      if (stageId && currentStage) {
+        // Modalità update
+        const updateData: StageUpdateData = {
+          orderIndex: formData.orderIndex,
+          title: formData.title,
+          description: formData.description || undefined,
+          routeType: formData.routeType || undefined,
+          media: formData.media,
+          gpxFile: formData.gpxFile
+        };
+        
+        const updatedStage = await updateStage(stageId, updateData);
+        if (updatedStage) {
+          setCurrentStage(updatedStage);
+        }
+        return updatedStage;
+      } else {
+        // Modalità create
+        const createData: StageCreationData = {
+          orderIndex: formData.orderIndex,
+          title: formData.title,
+          description: formData.description || undefined,
+          routeType: formData.routeType || undefined,
+          media: formData.media,
+          gpxFile: formData.gpxFile
+        };
+        
+        const newStage = await createStage(createData);
+        if (newStage) {
+          setCurrentStage(newStage);
+        }
+        return newStage;
       }
-
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Errore sconosciuto';
-      setError(errorMessage);
-      throw err;
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Errore durante il salvataggio';
+      setErrors(prev => ({ ...prev, save: errorMessage }));
+      return null;
     } finally {
-      setIsLoading(false);
+      setIsSaving(false);
     }
-  }, [tripId]);
+  }, [form, stageId, currentStage, updateStage, createStage, clearErrors]);
+
 
   return {
-    isLoading,
+    // Form state
+    form,
+    isLoading: stagesLoading,
+    isSaving,
+    isInitialized,
+    
+    // Upload state
     uploadProgress,
-    error,
+    isUploading,
+    
+    // Data state
+    currentStage,
+    
+    // Operations
     saveStage,
-    deleteStage,
-    clearError
+    resetForm,
+    
+    // File upload operations
+    uploadMedia,
+    removeMedia,
+    uploadGpx,
+    removeGpx,
+    
+    // Error handling
+    errors,
+    clearErrors
   };
 }
