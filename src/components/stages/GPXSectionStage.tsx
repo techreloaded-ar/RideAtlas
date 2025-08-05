@@ -2,7 +2,7 @@
 
 import { Download, Route, MapPin, Mountain } from 'lucide-react';
 import { useGPXMap } from '@/hooks/useGPXMap';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import UnifiedGPXMapViewer from '@/components/UnifiedGPXMapViewer';
 
 interface GPXSectionStageProps {
@@ -46,24 +46,26 @@ export default function GPXSectionStage({
     }
   };
 
-  // Calcola la distanza totale dai metadati
-  const totalDistance = tracks.reduce((total, track) => {
-    let trackDistance = 0;
-    for (let i = 1; i < track.points.length; i++) {
-      const prev = track.points[i - 1];
-      const curr = track.points[i];
-      // Calcolo haversine semplificato
-      const R = 6371;
-      const dLat = (curr.lat - prev.lat) * Math.PI / 180;
-      const dLon = (curr.lng - prev.lng) * Math.PI / 180;
-      const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-        Math.cos(prev.lat * Math.PI / 180) * Math.cos(curr.lat * Math.PI / 180) *
-        Math.sin(dLon / 2) * Math.sin(dLon / 2);
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-      trackDistance += R * c;
-    }
-    return total + trackDistance;
-  }, 0);
+  // Calcola la distanza totale dai metadati - Memoizzato per performance
+  const totalDistance = useMemo(() => {
+    return tracks.reduce((total, track) => {
+      let trackDistance = 0;
+      for (let i = 1; i < track.points.length; i++) {
+        const prev = track.points[i - 1];
+        const curr = track.points[i];
+        // Calcolo haversine semplificato
+        const R = 6371;
+        const dLat = (curr.lat - prev.lat) * Math.PI / 180;
+        const dLon = (curr.lng - prev.lng) * Math.PI / 180;
+        const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+          Math.cos(prev.lat * Math.PI / 180) * Math.cos(curr.lat * Math.PI / 180) *
+          Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        trackDistance += R * c;
+      }
+      return total + trackDistance;
+    }, 0);
+  }, [tracks]);
 
   if (isLoading) {
     return (
@@ -99,23 +101,24 @@ export default function GPXSectionStage({
         </div>
         <button
           onClick={handleDownload}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition-colors duration-200 flex items-center gap-2"
+          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition-colors duration-200 flex items-center gap-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          aria-label={`Scarica traccia GPX ${filename}`}
         >
-          <Download className="w-4 h-4" />
+          <Download className="w-4 h-4" aria-hidden="true" />
           Download
         </button>
       </div>
 
-      {/* Container blu con le informazioni */}
+      {/* Container blu con le informazioni - Responsive design */}
       <div className="bg-blue-50 border border-blue-100 rounded-lg p-6">
-        <div className="flex gap-6 h-32">
-          {/* Sezione metriche */}
+        <div className="flex flex-col lg:flex-row gap-6">
+          {/* Sezione metriche - Stack verticale su mobile, griglia su desktop */}
           <div className="flex-1">
-            <div className="grid grid-cols-2 gap-8 h-full">
+            <div className="space-y-4 lg:grid lg:grid-cols-2 lg:gap-8 lg:space-y-0 lg:h-32">
               {/* Distanza */}
               <div className="flex items-center gap-3">
                 <div className="bg-blue-100 p-2 rounded-lg">
-                  <Route className="w-6 h-6 text-blue-600" />
+                  <Route className="w-6 h-6 text-blue-600" aria-hidden="true" />
                 </div>
                 <div>
                   <p className="text-sm text-gray-600">Distanza</p>
@@ -128,7 +131,7 @@ export default function GPXSectionStage({
               {/* Waypoints (punti traccia) */}
               <div className="flex items-center gap-3">
                 <div className="bg-blue-100 p-2 rounded-lg">
-                  <MapPin className="w-6 h-6 text-blue-600" />
+                  <MapPin className="w-6 h-6 text-blue-600" aria-hidden="true" />
                 </div>
                 <div>
                   <p className="text-sm text-gray-600">Punti traccia</p>
@@ -140,19 +143,21 @@ export default function GPXSectionStage({
             </div>
           </div>
 
-          {/* Mappa preview */}
-          <div className="w-48 flex-shrink-0">
+          {/* Mappa preview - Stack sotto su mobile */}
+          <div className="w-full lg:w-48 lg:flex-shrink-0">
             {tracks.length > 0 && (
-              <UnifiedGPXMapViewer
-                tracks={tracks}
-                routes={routes}
-                waypoints={waypoints}
-                height="h-32"
-                showControls={false}
-                enableFullscreen={false}
-                autoFit={true}
-                className="rounded-lg overflow-hidden"
-              />
+              <div className="h-48 lg:h-32">
+                <UnifiedGPXMapViewer
+                  tracks={tracks}
+                  routes={routes}
+                  waypoints={waypoints}
+                  height="h-full"
+                  showControls={false}
+                  enableFullscreen={false}
+                  autoFit={true}
+                  className="rounded-lg overflow-hidden"
+                />
+              </div>
             )}
           </div>
         </div>

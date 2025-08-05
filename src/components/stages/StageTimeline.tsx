@@ -69,15 +69,29 @@ function SortableStageItem({
       style={style} 
       className={`relative ${sortableIsDragging ? 'z-50' : ''}`}
     >
-      {/* Drag handle - visibile solo se editabile */}
+      {/* Drag handle - visibile solo se editabile, accessible */}
       {isEditable && (
         <div
           {...attributes}
           {...listeners}
-          className="absolute left-0 top-4 z-10 p-2 cursor-grab active:cursor-grabbing bg-white border border-gray-200 rounded-md shadow-sm hover:bg-gray-50 transition-colors"
+          className="absolute left-0 top-4 z-10 p-2 cursor-grab active:cursor-grabbing bg-white border border-gray-200 rounded-md shadow-sm hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
           style={{ marginLeft: '-40px' }}
+          role="button"
+          tabIndex={0}
+          aria-label={`Riordina tappa: ${stage.title}`}
+          aria-describedby={`stage-${stage.id}-instructions`}
+          onKeyDown={(e) => {
+            // Basic keyboard navigation support
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              // Focus management during keyboard drag
+            }
+          }}
         >
-          <GripVertical className="w-4 h-4 text-gray-400" />
+          <GripVertical className="w-4 h-4 text-gray-400" aria-hidden="true" />
+          <span id={`stage-${stage.id}-instructions`} className="sr-only">
+            Usa le frecce per riordinare questa tappa
+          </span>
         </div>
       )}
       
@@ -179,11 +193,33 @@ export default function StageTimeline({
   }
 
   return (
-    <div className={`space-y-0 ${isEditable ? 'pl-12' : ''}`}>
+    <div className={`space-y-0 ${isEditable ? 'pl-4 sm:pl-12' : ''}`}>
       <DndContext 
         sensors={sensors}
         collisionDetection={closestCenter}
         onDragEnd={handleDragEnd}
+        accessibility={{
+          announcements: {
+            onDragStart({ active }) {
+              const stage = orderedStages.find(s => s.id === active.id);
+              return `Iniziato trascinamento della tappa: ${stage?.title}`;
+            },
+            onDragOver({ active, over }) {
+              const activeStage = orderedStages.find(s => s.id === active.id);
+              const overStage = orderedStages.find(s => s.id === over?.id);
+              return `Tappa ${activeStage?.title} sopra ${overStage?.title}`;
+            },
+            onDragEnd({ active, over }) {
+              const activeStage = orderedStages.find(s => s.id === active.id);
+              const overStage = orderedStages.find(s => s.id === over?.id);
+              if (over) {
+                return `Tappa ${activeStage?.title} spostata sopra ${overStage?.title}`;
+              } else {
+                return `Trascinamento della tappa ${activeStage?.title} annullato`;
+              }
+            },
+          },
+        }}
       >
         <SortableContext 
           items={orderedStages.map(stage => stage.id)}

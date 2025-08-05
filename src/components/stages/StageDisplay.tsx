@@ -35,8 +35,9 @@ export default function StageDisplay({
             {onEdit && (
               <button
                 onClick={onEdit}
-                className="p-2 text-gray-500 hover:text-blue-600 transition-colors"
+                className="p-2 text-gray-500 hover:text-blue-600 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-md"
                 title="Modifica tappa"
+                aria-label={`Modifica tappa ${stageNumber}: ${stage.title}`}
               >
                 <Edit className="w-4 h-4" />
               </button>
@@ -44,8 +45,9 @@ export default function StageDisplay({
             {onDelete && (
               <button
                 onClick={onDelete}
-                className="p-2 text-gray-500 hover:text-red-600 transition-colors"
+                className="p-2 text-gray-500 hover:text-red-600 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 rounded-md"
                 title="Elimina tappa"
+                aria-label={`Elimina tappa ${stageNumber}: ${stage.title}`}
               >
                 <Trash2 className="w-4 h-4" />
               </button>
@@ -54,33 +56,33 @@ export default function StageDisplay({
         )}
       </div>
 
-      {/* Metadati strutturati */}
+      {/* Metadati strutturati - Design responsive */}
       <div className="space-y-1 mb-6">
         {stage.distance && (
-          <div className="flex items-center text-sm">
-            <span className="font-medium text-gray-700 w-32">Distanza:</span>
-            <span className="text-gray-900">{stage.distance}</span>
+          <div className="flex flex-col sm:flex-row sm:items-center text-sm">
+            <span className="font-medium text-gray-700 sm:w-32 flex-shrink-0">Distanza:</span>
+            <span className="text-gray-900 mt-1 sm:mt-0">{stage.distance}</span>
           </div>
         )}
         
         {stage.duration && (
-          <div className="flex items-center text-sm">
-            <span className="font-medium text-gray-700 w-32">Durata stimata:</span>
-            <span className="text-gray-900">{stage.duration}</span>
+          <div className="flex flex-col sm:flex-row sm:items-center text-sm">
+            <span className="font-medium text-gray-700 sm:w-32 flex-shrink-0">Durata stimata:</span>
+            <span className="text-gray-900 mt-1 sm:mt-0">{stage.duration}</span>
           </div>
         )}
         
         {stage.elevation && (
-          <div className="flex items-center text-sm">
-            <span className="font-medium text-gray-700 w-32">Dislivello:</span>
-            <span className="text-gray-900">{stage.elevation}</span>
+          <div className="flex flex-col sm:flex-row sm:items-center text-sm">
+            <span className="font-medium text-gray-700 sm:w-32 flex-shrink-0">Dislivello:</span>
+            <span className="text-gray-900 mt-1 sm:mt-0">{stage.elevation}</span>
           </div>
         )}
         
         {stage.routeType && (
-          <div className="flex items-start text-sm">
-            <span className="font-medium text-gray-700 w-32 flex-shrink-0">Tipo di percorso:</span>
-            <span className="text-gray-900">{stage.routeType}</span>
+          <div className="flex flex-col sm:flex-row sm:items-start text-sm">
+            <span className="font-medium text-gray-700 sm:w-32 flex-shrink-0">Tipo di percorso:</span>
+            <span className="text-gray-900 mt-1 sm:mt-0">{stage.routeType}</span>
           </div>
         )}
       </div>
@@ -94,7 +96,7 @@ export default function StageDisplay({
         </div>
       )}
 
-      {/* Immagine principale */}
+      {/* Immagine principale - Performance optimized */}
       {stage.mainImage && (
         <div className="mb-6">
           <div className="relative w-full h-64 rounded-lg overflow-hidden">
@@ -103,6 +105,8 @@ export default function StageDisplay({
               alt={stage.mainImage.caption || `Immagine tappa ${stageNumber}`}
               fill
               className="object-cover"
+              loading="lazy"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             />
           </div>
           {stage.mainImage.caption && (
@@ -129,7 +133,7 @@ export default function StageDisplay({
         />
       )}
 
-      {/* Galleria immagini aggiuntive */}
+      {/* Galleria immagini aggiuntive - Performance optimized */}
       {stage.media && stage.media.length > 0 && (
         <div className="mt-6">
           <h4 className="text-lg font-semibold mb-3">Galleria</h4>
@@ -138,9 +142,11 @@ export default function StageDisplay({
               <div key={media.id} className="relative aspect-square rounded-lg overflow-hidden">
                 <Image
                   src={media.url}
-                  alt={media.caption || `Immagine ${mediaIndex + 1}`}
+                  alt={media.caption || `Immagine ${mediaIndex + 1} della tappa ${stageNumber}`}
                   fill
-                  className="object-cover"
+                  className="object-cover hover:scale-105 transition-transform duration-200"
+                  loading="lazy"
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                 />
               </div>
             ))}
