@@ -1,4 +1,4 @@
-import { extractCharacteristicsFromTags } from '@/lib/tripUtils';
+import { extractCharacteristicsFromTags } from '@/lib/trip-utils';
 
 describe('Simple tripUtils test', () => {
   test('should extract characteristics from tags', () => {

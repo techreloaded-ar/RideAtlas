@@ -4,7 +4,7 @@ import {
   calculateTripDuration,
   validateStageOrder,
   reorderStages
-} from '../../../lib/tripUtils';
+} from '../../../lib/trip-utils';
 import { Trip, Stage, TripStatus, RecommendedSeason } from '../../../types/trip';
 
 // Mock data per i test

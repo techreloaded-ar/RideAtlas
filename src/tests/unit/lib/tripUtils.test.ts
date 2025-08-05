@@ -2,7 +2,7 @@ import {
   extractCharacteristicsFromTags,
   filterOutCharacteristicTags,
   enrichTripWithCharacteristics
-} from '@/lib/tripUtils';
+} from '@/lib/trip-utils';
 
 describe('tripUtils', () => {
   describe('extractCharacteristicsFromTags', () => {
