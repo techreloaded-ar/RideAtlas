@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Clock, MapPin, Award, User, CreditCard, CheckCircle, AlertCircle, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
-import MockPaymentForm from '@/components/MockPaymentForm';
+import StripePaymentForm from '@/components/StripePaymentForm';
 
 interface TripData {
   id: string;
@@ -166,7 +166,7 @@ export default function PurchasePageClient({ trip }: PurchasePageClientProps) {
                 </div>
               </div>
 
-              <MockPaymentForm
+              <StripePaymentForm
                 purchaseId={purchaseId}
                 amount={trip.price}
                 onSuccess={handlePaymentSuccess}

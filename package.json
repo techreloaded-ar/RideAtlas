@@ -31,6 +31,8 @@
     "@headlessui/react": "^1.7.17",
     "@heroicons/react": "^2.0.18",
     "@prisma/client": "^6.8.2",
+    "@stripe/react-stripe-js": "^3.9.0",
+    "@stripe/stripe-js": "^7.8.0",
     "@types/nodemailer": "^6.4.17",
     "@vercel/blob": "^1.1.1",
     "bcryptjs": "^3.0.2",
@@ -48,6 +50,7 @@
     "react-leaflet": "^4.2.1",
     "react-map-gl": "^7.1.6",
     "react-markdown": "^10.1.0",
+    "stripe": "^18.4.0",
     "zod": "^3.22.4"
   },
   "devDependencies": {
@@ -60,6 +63,7 @@
     "@types/node": "^20.10.4",
     "@types/react": "^18.2.45",
     "@types/react-dom": "^18.2.17",
+    "@types/stripe": "^8.0.416",
     "autoprefixer": "^10.4.16",
     "eslint": "^8.55.0",
     "eslint-config-next": "14.2.28",
