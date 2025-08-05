@@ -87,7 +87,6 @@ function SortableStageItem({
           stage={stage}
           index={index}
           isEditable={isEditable}
-          showGPX={true}
           onEdit={onEdit}
           onDelete={onDelete}
         />

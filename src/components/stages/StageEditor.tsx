@@ -3,7 +3,8 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Stage, MediaItem, GpxFile } from '@/types/trip';
-import { PlusIcon, XMarkIcon, PhotoIcon, DocumentIcon, ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/outline';
+import { useStageEditor } from '@/hooks/useStageEditor';
+import { PlusIcon, XMarkIcon, PhotoIcon, DocumentIcon, ChevronDownIcon, ChevronUpIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 
 interface StageEditorProps {
   tripId: string;
@@ -29,6 +30,7 @@ interface StageFormData {
 }
 
 export default function StageEditor({
+  tripId,
   stageId,
   initialData,
   onSave,
@@ -36,6 +38,16 @@ export default function StageEditor({
   onDelete
 }: StageEditorProps) {
   const isEditMode = !!stageId && !!initialData;
+  
+  // Hook per gestione business logic
+  const { 
+    isLoading, 
+    uploadProgress, 
+    error, 
+    saveStage, 
+    deleteStage, 
+    clearError 
+  } = useStageEditor(tripId, stageId);
   
   // Collapsible sections state
   const [expandedSections, setExpandedSections] = useState({
@@ -66,7 +78,6 @@ export default function StageEditor({
   // File upload states
   const [previewImages, setPreviewImages] = useState<string[]>([]);
   const [gpxFileName, setGpxFileName] = useState<string>(initialData?.gpxFile?.filename || '');
-  const [uploadProgress, setUploadProgress] = useState<{ [key: string]: number }>({});
 
   // Toggle section visibility
   const toggleSection = (section: keyof typeof expandedSections) => {
@@ -133,20 +144,25 @@ export default function StageEditor({
   // Submit handler
   const onSubmit = async (data: StageFormData) => {
     try {
-      setUploadProgress({ overall: 0 });
-      
-      // Simulate upload progress
-      for (let i = 0; i <= 100; i += 20) {
-        setUploadProgress({ overall: i });
-        await new Promise(resolve => setTimeout(resolve, 100));
-      }
-      
-      onSave(data);
-      setUploadProgress({});
+      await saveStage(data);
+      onSave(data); // Callback per parent component
     } catch (error) {
-      console.error('Errore durante il salvataggio:', error);
-      alert('Errore durante il salvataggio della tappa');
-      setUploadProgress({});
+      // Error già gestito dal hook
+      console.error('Errore salvataggio tappa:', error);
+    }
+  };
+
+  // Delete handler
+  const handleDelete = async () => {
+    if (!stageId || !onDelete) return;
+    
+    if (confirm('Sei sicuro di voler eliminare questa tappa? L\'operazione non può essere annullata.')) {
+      try {
+        await deleteStage(stageId);
+        onDelete();
+      } catch (error) {
+        console.error('Errore eliminazione tappa:', error);
+      }
     }
   };
 
@@ -167,8 +183,9 @@ export default function StageEditor({
           {isEditMode && onDelete && (
             <button
               type="button"
-              onClick={onDelete}
-              className="px-3 py-1.5 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 rounded border border-red-200"
+              onClick={handleDelete}
+              disabled={isLoading}
+              className="px-3 py-1.5 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 rounded border border-red-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Elimina
             </button>
@@ -182,13 +199,31 @@ export default function StageEditor({
           </button>
           <button
             type="submit"
-            disabled={isSubmitting}
+            disabled={isSubmitting || isLoading}
             className="px-4 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isSubmitting ? 'Salvataggio...' : 'Salva Tappa'}
+            {isSubmitting || isLoading ? 'Salvataggio...' : 'Salva Tappa'}
           </button>
         </div>
       </div>
+
+      {/* Error message */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <ExclamationTriangleIcon className="w-5 h-5 text-red-600 mr-2" />
+              <span className="text-sm text-red-700">{error}</span>
+            </div>
+            <button
+              onClick={clearError}
+              className="text-red-600 hover:text-red-700"
+            >
+              <XMarkIcon className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Progress bar during upload */}
       {uploadProgress.overall !== undefined && (

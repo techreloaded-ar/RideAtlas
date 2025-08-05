@@ -5,11 +5,12 @@ import { Calendar, MapPin, Tag, User, Clock, Award, Route, TrendingUp } from 'lu
 import { auth } from '@/auth';
 import Link from 'next/link';
 import { UserRole } from '@/types/profile';
-import { MediaItem, GpxFile } from '@/types/trip';
+import { MediaItem, GpxFile, isMultiStageTrip } from '@/types/trip';
 import MediaGallery from '@/components/MediaGallery';
 import GPXDownloadButton from '@/components/GPXDownloadButton';
 import GPXAutoMapViewer from '@/components/GPXAutoMapViewer';
 import AccessGate from '@/components/AccessGate';
+import StageTimeline from '@/components/stages/StageTimeline';
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic';
@@ -34,6 +35,11 @@ export default async function TripDetailPage({ params }: { params: { slug: strin
           name: true,
           email: true
         }
+      },
+      stages: {
+        orderBy: {
+          orderIndex: 'asc'
+        }
       }
     }
   });
@@ -48,10 +54,18 @@ export default async function TripDetailPage({ params }: { params: { slug: strin
   // Cast GPX file safely
   const gpxFile = trip.gpxFile as GpxFile | null;
 
+  // Cast stages data and check if multi-stage trip
+  const tripWithStages = {
+    ...trip,
+    stages: trip.stages || []
+  };
+  const isMultiStage = isMultiStageTrip(tripWithStages);
+
   // Controlla se l'utente è il creatore o un Sentinel
   const isOwner = session?.user?.id === trip.user_id;
   const isSentinel = session?.user?.role === UserRole.Sentinel;
   const canEdit = isOwner || isSentinel;
+
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
@@ -75,8 +89,18 @@ export default async function TripDetailPage({ params }: { params: { slug: strin
           <div className="mt-4 flex flex-wrap gap-2">
             <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
               <Clock className="w-3 h-3 mr-1" />
-              {trip.duration_days} giorni / {trip.duration_nights} notti
+              {isMultiStage 
+                ? `${tripWithStages.stages.length} giorni / ${Math.max(0, tripWithStages.stages.length - 1)} notti`
+                : `${trip.duration_days} giorni / ${trip.duration_nights} notti`
+              }
             </span>
+            
+            {isMultiStage && (
+              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                <Route className="w-3 h-3 mr-1" />
+                Multi-tappa ({tripWithStages.stages.length} tappe)
+              </span>
+            )}
             
             <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
               <MapPin className="w-3 h-3 mr-1" />
@@ -119,6 +143,72 @@ export default async function TripDetailPage({ params }: { params: { slug: strin
               <Route className="w-5 h-5 mr-2 text-blue-600" />
               Traccia GPX
             </h2>
+        {/* Sezione Tappe del Viaggio (per viaggi multi-tappa) */}
+        {isMultiStage && tripWithStages.stages.length > 0 && (
+          <div className="p-6 border-b">
+            <h2 className="text-xl font-semibold mb-4 flex items-center">
+              <Route className="w-5 h-5 mr-2 text-blue-600" />
+              Tappe del Viaggio
+            </h2>
+            <div className="bg-blue-50 rounded-lg p-4 mb-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                <div className="flex items-center">
+                  <Route className="w-4 h-4 text-blue-600 mr-2" />
+                  <div>
+                    <div className="font-medium text-gray-700">Numero Tappe</div>
+                    <div className="text-lg font-semibold text-blue-800">{tripWithStages.stages.length}</div>
+                  </div>
+                </div>
+                <div className="flex items-center">
+                  <Clock className="w-4 h-4 text-blue-600 mr-2" />
+                  <div>
+                    <div className="font-medium text-gray-700">Durata Totale</div>
+                    <div className="text-lg font-semibold text-blue-800">
+                      {tripWithStages.stages.length} giorni / {Math.max(0, tripWithStages.stages.length - 1)} notti
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center">
+                  <MapPin className="w-4 h-4 text-blue-600 mr-2" />
+                  <div>
+                    <div className="font-medium text-gray-700">Destinazioni</div>
+                    <div className="text-lg font-semibold text-blue-800">Percorso multiplo</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <StageTimeline
+              stages={tripWithStages.stages}
+              isEditable={false}
+            />
+          </div>
+        )}
+
+        {/* GPX Section (solo per viaggi single-stage legacy) */}
+        {!isMultiStage && gpxFile && gpxFile.isValid && (
+          <div className="p-6 border-b">            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-semibold flex items-center">
+                <Route className="w-5 h-5 mr-2 text-blue-600" />
+                Traccia GPX
+              </h2>
+              {session?.user ? (
+                <GPXDownloadButton 
+                  tripId={trip.id} 
+                  tripTitle={trip.title}
+                />
+              ) : (
+                <div className="flex items-center text-sm text-gray-600 bg-gray-100 rounded-lg px-4 py-2">
+                  <Route className="w-4 h-4 mr-2" />
+                  <span>
+                    <Link href="/auth/signin" className="text-blue-600 hover:text-blue-800 font-medium">
+                      Effettua il login
+                    </Link>
+                    {" "}per scaricare la traccia GPX
+                  </span>
+                </div>
+              )}
+            </div>
             
             <AccessGate 
               tripId={trip.id} 

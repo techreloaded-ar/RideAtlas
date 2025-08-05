@@ -9,7 +9,6 @@ interface StageDisplayProps {
   stage: Stage;
   index: number;
   isEditable?: boolean;
-  showGPX?: boolean;
   onEdit?: () => void;
   onDelete?: () => void;
 }
@@ -18,7 +17,6 @@ export default function StageDisplay({
   stage,
   index,
   isEditable = false,
-  showGPX = true,
   onEdit,
   onDelete
 }: StageDisplayProps) {
@@ -116,7 +114,7 @@ export default function StageDisplay({
       )}
 
       {/* Sezione GPX con nuovo componente */}
-      {showGPX && stage.gpxFile && stage.gpxFile.isValid && (
+      {stage.gpxFile && stage.gpxFile.isValid && (
         <GPXSectionStage
           gpxUrl={stage.gpxFile.url}
           filename={stage.gpxFile.filename}
@@ -149,6 +147,7 @@ export default function StageDisplay({
           </div>
         </div>
       )}
+
     </div>
   );
 }
