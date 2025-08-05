@@ -6,6 +6,13 @@ import {
 
 describe('tripUtils', () => {
   describe('extractCharacteristicsFromTags', () => {
+
+    it('should extract characteristics from tags', () => {
+      const tags = ['char:mountain', 'adventure'];
+      const result = extractCharacteristicsFromTags(tags);
+      expect(result).toEqual(['mountain']);
+    });
+
     it('should extract characteristics from tags with char: prefix', () => {
       const tags = ['char:mountain', 'char:scenic', 'adventure', 'char:difficult'];
       const result = extractCharacteristicsFromTags(tags);
