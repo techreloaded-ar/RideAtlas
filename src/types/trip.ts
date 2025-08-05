@@ -37,21 +37,49 @@ export interface GpxFile {
   }>
 }
 
-// Usa i tipi generati da Prisma
-export type Trip = PrismaTrip
+// Interfaccia per una singola tappa di un viaggio
+export interface Stage {
+  id: string
+  tripId: string
+  orderIndex: number
+  title: string
+  description?: string
+  routeType?: string
+  media: MediaItem[]
+  gpxFile: GpxFile | null
+  createdAt: Date
+  updatedAt: Date
+}
+
+// Tipo per la creazione di una tappa (esclude campi auto-generati)
+export type StageCreationData = Omit<Stage, 'id' | 'tripId' | 'createdAt' | 'updatedAt'>
+
+// Tipo per l'aggiornamento di una tappa
+export type StageUpdateData = Partial<StageCreationData>
+
+// Estende il tipo Trip di Prisma per supportare stages
+export type Trip = PrismaTrip & {
+  stages?: Stage[]
+}
 
 // Tipo per la creazione di un viaggio (esclude campi auto-generati)
 // Sostituiamo il campo media JsonValue[] con MediaItem[] per facilitare il lavoro nel frontend
-// Aggiungiamo support per GPX file
-export type TripCreationData = Omit<Trip, 'id' | 'slug' | 'status' | 'created_at' | 'updated_at' | 'user_id' | 'media' | 'gpxFile' | 'price'> & {
+// Aggiungiamo support per GPX file e stages
+export type TripCreationData = Omit<Trip, 'id' | 'slug' | 'status' | 'created_at' | 'updated_at' | 'user_id' | 'media' | 'gpxFile' | 'stages' | 'price'> & {
   media: MediaItem[]
   gpxFile?: GpxFile | null
+  stages?: StageCreationData[]
   price?: number // Reso opzionale per permettere al DB di gestire il default
 }
 
 // Tipo per l'aggiornamento di un viaggio
 export type TripUpdateData = Partial<TripCreationData> & {
   status?: TripStatus;
+}
+
+// Utility function per identificare viaggi multi-tappa
+export const isMultiStageTrip = (trip: Trip): boolean => {
+  return trip.stages != null && trip.stages.length > 0
 }
 
 // Helper per type casting dei media
@@ -72,6 +100,15 @@ export const castToGpxFile = (gpxFile: JsonValue | null): GpxFile | null => {
 export const castGpxFileToJsonValue = (gpxFile: GpxFile | null): JsonValue | null => {
   if (!gpxFile) return null
   return gpxFile as unknown as JsonValue
+}
+
+// Helper per type casting dei Stage
+export const castToStages = (stages: JsonValue[]): Stage[] => {
+  return stages as unknown as Stage[]
+}
+
+export const castStagesToJsonValue = (stages: Stage[]): JsonValue[] => {
+  return stages as unknown as JsonValue[]
 }
 
 // Esporta gli enum per facilità d'uso

@@ -45,7 +45,12 @@ export default function UserManagement() {
   const [userToDelete, setUserToDelete] = useState<User | null>(null)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [showCreateModal, setShowCreateModal] = useState(false)
-  const [createFormData, setCreateFormData] = useState({
+  const [createFormData, setCreateFormData] = useState<{
+    name: string;
+    email: string;
+    role: UserRole;
+    sendWelcomeEmail: boolean;
+  }>({
     name: '',
     email: '',
     role: UserRole.Explorer,
@@ -638,7 +643,10 @@ export default function UserManagement() {
                       <select
                         id="createRole"
                         value={createFormData.role}
-                        onChange={(e) => setCreateFormData({ ...createFormData, role: e.target.value as UserRole })}
+                        onChange={(e) => {
+                          const value = e.target.value as UserRole
+                          setCreateFormData({ ...createFormData, role: value })
+                        }}
                         className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                       >
                         <option value={UserRole.Explorer}>Explorer</option>

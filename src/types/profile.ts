@@ -1,12 +1,8 @@
 // src/types/profile.ts
-import { User as PrismaUser } from '@prisma/client'
+import { User as PrismaUser, UserRole } from '@prisma/client'
 
-// Definisco l'enum UserRole che corrisponde a quello nel database
-export enum UserRole {
-  Explorer = 'Explorer',
-  Ranger = 'Ranger',
-  Sentinel = 'Sentinel'
-}
+// Re-esporta l'enum UserRole da Prisma per mantenere l'API esistente
+export { UserRole } from '@prisma/client'
 
 // Usa i tipi generati da Prisma
 export type User = PrismaUser
