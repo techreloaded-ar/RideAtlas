@@ -39,6 +39,7 @@ export const useTripForm = ({
     insights: '',
     media: [],
     gpxFile: null
+    // price rimosso - sarà gestito dal database default o dai dati esistenti
   });
 
   // Stato separato per i media items come MediaItem[]
@@ -68,13 +69,15 @@ export const useTripForm = ({
   useEffect(() => {
     if (initialData && 'id' in initialData && initialData.id && !isInitialized) {
       // Estrai media e gpx separatamente per gestirli diversamente
-      const { media, gpxFile, ...restData } = initialData;
+      const { media, gpxFile, price, ...restData } = initialData;
       
       // Aggiorna il form con i dati base
       setFormData(prev => ({
         ...prev,
         ...restData,
         media: [], // Resetta media nel formData dato che lo gestiamo separatamente
+        // Converti price da Decimal a number se presente
+        ...(price !== undefined && { price: Number(price) }),
       }));
       
       // Se ci sono media iniziali, convertili in MediaItem[]
@@ -101,10 +104,21 @@ export const useTripForm = ({
 
   const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
+    
+    // Gestione campi numerici speciali
+    let processedValue: string | number = value;
+    
+    if (name === 'duration_days' || name === 'duration_nights') {
+      processedValue = Math.max(1, parseInt(value, 10) || 1);
+    } else if (name === 'price') {
+      // Gestisce il prezzo come numero decimale, minimo 0
+      const numericValue = parseFloat(value);
+      processedValue = isNaN(numericValue) ? 0 : Math.max(0, numericValue);
+    }
+    
     setFormData(prev => ({
       ...prev,
-      [name]: name === 'duration_days' || name === 'duration_nights' ? 
-        Math.max(1, parseInt(value, 10) || 1) : value,
+      [name]: processedValue,
     }));
   }, []);
 
@@ -152,6 +166,7 @@ export const useTripForm = ({
       insights: '',
       media: [],
       gpxFile: null
+      // price rimosso - sarà gestito dal database default
     });
     setMediaItems([]);
     setTagInput('');

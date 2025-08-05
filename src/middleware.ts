@@ -16,13 +16,22 @@ export default auth((req) => {
   // Routes that require Sentinel role
   const sentinelRoutes = ['/admin', '/api/admin']
   
+  // Check if this is an API endpoint that handles its own auth
+  const isCustomAuthApiEndpoint = (
+    nextUrl.pathname.match(/^\/api\/trips\/[^\/]+\/access$/) ||  // /api/trips/{id}/access
+    nextUrl.pathname.match(/^\/api\/trips\/[^\/]+\/purchase$/) ||  // /api/trips/{id}/purchase
+    nextUrl.pathname.match(/^\/api\/trips\/[^\/]+\/gpx$/) ||  // /api/trips/{id}/gpx
+    nextUrl.pathname.startsWith('/api/payments/') ||
+    nextUrl.pathname.startsWith('/api/user/purchases')
+  )
+  
   const isProtectedRoute = protectedRoutes.some(route => 
     nextUrl.pathname.startsWith(route)
-  )
+  ) && !isCustomAuthApiEndpoint  // Exclude custom auth endpoints
   
   const isRangerRoute = rangerRoutes.some(route => 
     nextUrl.pathname.startsWith(route)
-  )
+  ) && !isCustomAuthApiEndpoint  // Exclude custom auth endpoints
   
   const isSentinelRoute = sentinelRoutes.some(route => 
     nextUrl.pathname.startsWith(route)

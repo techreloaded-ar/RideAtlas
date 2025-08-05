@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma'
 import { auth } from '@/auth'
 import { UserRole } from '@/types/profile'
 import { castToGpxFile } from '@/types/trip'
+import { PurchaseService } from '@/lib/purchaseService'
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic'
@@ -66,16 +67,27 @@ export async function GET(
       )
     }
 
-    // Controllo permessi di accesso per utenti autenticati
-    const isOwner = session.user.id === trip.user_id
-    const isSentinel = session.user.role === UserRole.Sentinel
-    const isPublished = trip.status === 'Pubblicato'
+    // Controllo permessi usando il nuovo sistema di acquisti
+    const canAccess = await PurchaseService.canAccessPremiumContent(
+      session.user.id,
+      trip.id
+    );
+
+    const isSentinel = session.user.role === UserRole.Sentinel;
+    const isPublished = trip.status === 'Pubblicato';
 
     // Permetti l'accesso solo se:
-    // - Il viaggio è pubblicato E l'utente è autenticato
-    // - L'utente è il proprietario del viaggio
+    // - L'utente può accedere al contenuto premium (proprietario o ha acquistato)
     // - L'utente è un Sentinel (admin)
-    if (!isPublished && !isOwner && !isSentinel) {
+    // - Il viaggio deve essere pubblicato (tranne per proprietari e admin)
+    if (!canAccess && !isSentinel) {
+      return NextResponse.json(
+        { error: 'È necessario acquistare questo viaggio per scaricare il file GPX' },
+        { status: 403 }
+      )
+    }
+
+    if (!isPublished && !canAccess && !isSentinel) {
       return NextResponse.json(
         { error: 'Non hai i permessi per scaricare questo file GPX' },
         { status: 403 }

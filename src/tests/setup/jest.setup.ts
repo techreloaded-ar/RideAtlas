@@ -134,6 +134,117 @@ jest.mock('next/navigation', () => ({
   usePathname: () => '/',
 }));
 
+// Mock Prisma Client
+const mockPrisma: any = {
+  trip: {
+    findUnique: jest.fn(),
+    findMany: jest.fn(),
+    create: jest.fn(),
+    update: jest.fn(),
+    delete: jest.fn(),
+    deleteMany: jest.fn(),
+    upsert: jest.fn(),
+    count: jest.fn()
+  },
+  tripPurchase: {
+    findUnique: jest.fn(),
+    findMany: jest.fn(),
+    create: jest.fn(),
+    update: jest.fn(),
+    delete: jest.fn(),
+    deleteMany: jest.fn(),
+    upsert: jest.fn(),
+    count: jest.fn()
+  },
+  user: {
+    findUnique: jest.fn(),
+    findMany: jest.fn(),
+    create: jest.fn(),
+    update: jest.fn(),
+    delete: jest.fn(),
+    deleteMany: jest.fn(),
+    upsert: jest.fn(),
+    count: jest.fn()
+  },
+  account: {
+    findUnique: jest.fn(),
+    findMany: jest.fn(),
+    create: jest.fn(),
+    update: jest.fn(),
+    delete: jest.fn(),
+    deleteMany: jest.fn()
+  },
+  session: {
+    findUnique: jest.fn(),
+    findMany: jest.fn(),
+    create: jest.fn(),
+    update: jest.fn(),
+    delete: jest.fn(),
+    deleteMany: jest.fn()
+  },
+  verificationToken: {
+    findUnique: jest.fn(),
+    findMany: jest.fn(),
+    create: jest.fn(),
+    update: jest.fn(),
+    delete: jest.fn(),
+    deleteMany: jest.fn()
+  },
+  emailVerificationToken: {
+    findUnique: jest.fn(),
+    findMany: jest.fn(),
+    create: jest.fn(),
+    update: jest.fn(),
+    delete: jest.fn(),
+    deleteMany: jest.fn()
+  },
+  tripPurchaseTransaction: {
+    findUnique: jest.fn(),
+    findMany: jest.fn(),
+    create: jest.fn(),
+    update: jest.fn(),
+    delete: jest.fn(),
+    deleteMany: jest.fn()
+  },
+  $disconnect: jest.fn(),
+  $connect: jest.fn(),
+  $transaction: jest.fn((callback) => callback(mockPrisma))
+};
+
+// Make mockPrisma available globally for tests
+if (typeof global !== 'undefined') {
+  (global as any).mockPrisma = mockPrisma;
+}
+
+jest.mock('@/lib/prisma', () => ({
+  prisma: mockPrisma
+}));
+
+// Mock PurchaseService will be available globally but unit tests can override it
+const mockPurchaseService = {
+  hasPurchasedTrip: jest.fn(),
+  canAccessPremiumContent: jest.fn(),
+  getUserPurchases: jest.fn(),
+  getUserPurchasesWithTrips: jest.fn(),
+  createPurchase: jest.fn(),
+  completePurchase: jest.fn(),
+  failPurchase: jest.fn(),
+  getTripWithPurchaseInfo: jest.fn()
+};
+
+// Make mockPurchaseService available globally for integration tests
+if (typeof global !== 'undefined') {
+  (global as any).mockPurchaseService = mockPurchaseService;
+}
+
+// Only mock PurchaseService for integration tests, not unit tests
+// Unit tests will mock Prisma directly and test the real PurchaseService
+
+// Mock auth
+jest.mock('@/auth', () => ({
+  auth: jest.fn(() => Promise.resolve(null))
+}));
+
 // Mock console per test più puliti (opzionale)
 const originalError = console.error;
 const originalWarn = console.warn;

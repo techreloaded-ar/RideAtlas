@@ -15,6 +15,9 @@ jest.mock('@/lib/prisma', () => ({
     trip: {
       findUnique: jest.fn(),
     },
+    tripPurchase: {
+      findUnique: jest.fn(),
+    },
   },
 }))
 
@@ -22,7 +25,8 @@ jest.mock('@/lib/prisma', () => ({
 global.fetch = jest.fn()
 
 const mockAuth = auth as jest.Mock
-const mockPrisma = prisma.trip.findUnique as jest.Mock
+const mockPrismaTrip = prisma.trip.findUnique as jest.Mock
+const mockPrismaTripPurchase = prisma.tripPurchase.findUnique as jest.Mock
 const mockFetch = global.fetch as jest.Mock
 
 describe('GET /api/trips/[id]/gpx - Download GPX', () => {
@@ -73,7 +77,7 @@ describe('GET /api/trips/[id]/gpx - Download GPX', () => {
     })
 
     it('deve restituire errore 404 per viaggio non esistente', async () => {
-      mockPrisma.mockResolvedValue(null)
+      mockPrismaTrip.mockResolvedValue(null)
       
       const request = createMockRequest()
       const response = await GET(request, { params: { id: 'nonexistent' } })
@@ -84,7 +88,7 @@ describe('GET /api/trips/[id]/gpx - Download GPX', () => {
     })
 
     it('deve restituire errore 404 se non esiste file GPX', async () => {
-      mockPrisma.mockResolvedValue({
+      mockPrismaTrip.mockResolvedValue({
         ...mockTrip,
         gpxFile: null
       })
@@ -100,7 +104,7 @@ describe('GET /api/trips/[id]/gpx - Download GPX', () => {
 
   describe('Controlli di Permessi', () => {
     it('deve negare il download per viaggio pubblico senza autenticazione', async () => {
-      mockPrisma.mockResolvedValue(mockTrip)
+      mockPrismaTrip.mockResolvedValue(mockTrip)
       mockAuth.mockResolvedValue(null) // Utente non autenticato
       
       const request = createMockRequest()
@@ -111,24 +115,23 @@ describe('GET /api/trips/[id]/gpx - Download GPX', () => {
       expect(body.error).toBe('Accesso negato. È necessario effettuare il login per scaricare le tracce GPX.')
     })
 
-    it('deve permettere il download per viaggio pubblico con utente autenticato', async () => {
-      mockPrisma.mockResolvedValue(mockTrip)
+    it('deve richiedere acquisto per viaggio pubblico con utente non proprietario', async () => {
+      mockPrismaTrip.mockResolvedValue(mockTrip)
+      mockPrismaTripPurchase.mockResolvedValue(null) // No purchase found
       mockAuth.mockResolvedValue({
         user: { id: 'another-user', role: 'User' }
-      })
-      mockFetch.mockResolvedValue({
-        ok: true,
-        text: () => Promise.resolve(mockGpxContent)
       })
       
       const request = createMockRequest()
       const response = await GET(request, { params: { id: 'trip-123' } })
       
-      expect(response.status).toBe(302)
+      expect(response.status).toBe(403)
+      const body = await response.json()
+      expect(body.error).toBe('È necessario acquistare questo viaggio per scaricare il file GPX')
     })
 
     it('deve negare il download per viaggio privato senza autenticazione', async () => {
-      mockPrisma.mockResolvedValue({
+      mockPrismaTrip.mockResolvedValue({
         ...mockTrip,
         status: 'Bozza'
       })
@@ -143,7 +146,7 @@ describe('GET /api/trips/[id]/gpx - Download GPX', () => {
     })
 
     it('deve permettere il download al proprietario del viaggio', async () => {
-      mockPrisma.mockResolvedValue({
+      mockPrismaTrip.mockResolvedValue({
         ...mockTrip,
         status: 'Bozza'
       })
@@ -162,11 +165,12 @@ describe('GET /api/trips/[id]/gpx - Download GPX', () => {
     })
 
     it('deve negare il download a utenti autenticati per viaggi privati di altri', async () => {
-      mockPrisma.mockResolvedValue({
+      mockPrismaTrip.mockResolvedValue({
         ...mockTrip,
         status: 'Bozza',
         user_id: 'other-user'
       })
+      mockPrismaTripPurchase.mockResolvedValue(null) // No purchase found
       mockAuth.mockResolvedValue({
         user: { id: 'user-123', role: 'User' }
       })
@@ -176,15 +180,16 @@ describe('GET /api/trips/[id]/gpx - Download GPX', () => {
       
       expect(response.status).toBe(403)
       const body = await response.json()
-      expect(body.error).toBe('Non hai i permessi per scaricare questo file GPX')
+      expect(body.error).toBe('È necessario acquistare questo viaggio per scaricare il file GPX')
     })
 
     it('deve permettere il download ai Sentinel', async () => {
-      mockPrisma.mockResolvedValue({
+      mockPrismaTrip.mockResolvedValue({
         ...mockTrip,
         status: 'Bozza',
         user_id: 'other-user'
       })
+      mockPrismaTripPurchase.mockResolvedValue(null) // Not needed for Sentinel
       mockAuth.mockResolvedValue({
         user: { id: 'admin-123', role: UserRole.Sentinel }
       })
@@ -202,7 +207,7 @@ describe('GET /api/trips/[id]/gpx - Download GPX', () => {
 
   describe('Download del File', () => {
     beforeEach(() => {
-      mockPrisma.mockResolvedValue(mockTrip)
+      mockPrismaTrip.mockResolvedValue(mockTrip)
       mockAuth.mockResolvedValue({
         user: { id: 'user-123', role: 'User' }
       })
@@ -270,7 +275,7 @@ describe('GET /api/trips/[id]/gpx - Download GPX', () => {
     })
 
     it('deve generare filename sicuro se mancante', async () => {
-      mockPrisma.mockResolvedValue({
+      mockPrismaTrip.mockResolvedValue({
         ...mockTrip,
         gpxFile: {
           ...mockTrip.gpxFile,
@@ -291,7 +296,7 @@ describe('GET /api/trips/[id]/gpx - Download GPX', () => {
 
   describe('Gestione Errori', () => {
     it('deve gestire errori del database', async () => {
-      mockPrisma.mockRejectedValue(new Error('Database error'))
+      mockPrismaTrip.mockRejectedValue(new Error('Database error'))
       
       const request = createMockRequest()
       const response = await GET(request, { params: { id: 'trip-123' } })
@@ -302,7 +307,7 @@ describe('GET /api/trips/[id]/gpx - Download GPX', () => {
     })
 
     it('deve gestire errori di rete', async () => {
-      mockPrisma.mockResolvedValue(mockTrip)
+      mockPrismaTrip.mockResolvedValue(mockTrip)
       mockAuth.mockResolvedValue({
         user: { id: 'user-123', role: 'User' }
       })

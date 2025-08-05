@@ -25,6 +25,7 @@ model User {
   accounts      Account[]
   sessions      Session[]
   trips         Trip[]
+  purchases     TripPurchase[]
 
   @@map("users")
 }
@@ -101,10 +102,12 @@ model Trip {
   insights           String?           @db.Text
   slug               String            @unique
   status             TripStatus        @default(Bozza)
+  price              Decimal           @default(5.00) @db.Decimal(10,2)
   created_at         DateTime          @default(now())
   updated_at         DateTime          @updatedAt
   user_id            String
   user               User              @relation(fields: [user_id], references: [id])
+  purchases          TripPurchase[]
 
   @@map("trips")
 }
@@ -121,4 +124,47 @@ enum TripStatus {
   Pronto_per_revisione @map("Pronto per revisione")
   Pubblicato
   Archiviato
+}
+
+model TripPurchase {
+  id              String          @id @default(cuid())
+  userId          String
+  tripId          String
+  amount          Decimal         @db.Decimal(10,2)
+  status          PurchaseStatus  @default(PENDING)
+  paymentMethod   String?         // "mock", "stripe", etc.
+  stripePaymentId String?         // ID Stripe per future implementazioni
+  purchasedAt     DateTime?       // Quando l'acquisto è stato completato
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  
+  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  trip            Trip            @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  transactions    TripPurchaseTransaction[]
+
+  @@unique([userId, tripId])
+  @@map("trip_purchases")
+}
+
+model TripPurchaseTransaction {
+  id                String            @id @default(cuid())
+  purchaseId        String
+  amount            Decimal           @db.Decimal(10,2)
+  status            PurchaseStatus
+  paymentMethod     String?           // "mock", "stripe", etc.
+  stripePaymentId   String?           // ID Stripe per questo tentativo
+  failureReason     String?           // Motivo del fallimento
+  metadata          Json?             // Dati aggiuntivi per debugging
+  createdAt         DateTime          @default(now())
+  
+  purchase          TripPurchase      @relation(fields: [purchaseId], references: [id], onDelete: Cascade)
+
+  @@map("trip_purchase_transactions")
+}
+
+enum PurchaseStatus {
+  PENDING   // Acquisto iniziato ma non completato
+  COMPLETED // Acquisto completato con successo
+  FAILED    // Acquisto fallito
+  REFUNDED  // Acquisto rimborsato
 }

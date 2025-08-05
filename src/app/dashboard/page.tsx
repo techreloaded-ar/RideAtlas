@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { UserRole, UserRoleLabels, UserRoleDescriptions, UserPermissions } from '@/types/profile';
 import { useEffect, useState, Suspense } from 'react';
 import UserTrips from '@/components/UserTrips';
+import PurchasedTrips from '@/components/PurchasedTrips';
 import ChangePasswordForm from '@/components/ChangePasswordForm';
 
 function DashboardContent() {
@@ -214,6 +215,11 @@ function DashboardContent() {
                   <UserTrips />
                 </div>
               )}
+
+              {/* Viaggi acquistati - Per tutti gli utenti */}
+              <div className="md:col-span-2 lg:col-span-3">
+                <PurchasedTrips />
+              </div>
             </div>
           </div>
         </div>

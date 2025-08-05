@@ -43,9 +43,10 @@ export type Trip = PrismaTrip
 // Tipo per la creazione di un viaggio (esclude campi auto-generati)
 // Sostituiamo il campo media JsonValue[] con MediaItem[] per facilitare il lavoro nel frontend
 // Aggiungiamo support per GPX file
-export type TripCreationData = Omit<Trip, 'id' | 'slug' | 'status' | 'created_at' | 'updated_at' | 'user_id' | 'media' | 'gpxFile'> & {
+export type TripCreationData = Omit<Trip, 'id' | 'slug' | 'status' | 'created_at' | 'updated_at' | 'user_id' | 'media' | 'gpxFile' | 'price'> & {
   media: MediaItem[]
   gpxFile?: GpxFile | null
+  price?: number // Reso opzionale per permettere al DB di gestire il default
 }
 
 // Tipo per l'aggiornamento di un viaggio
