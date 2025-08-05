@@ -22,6 +22,9 @@ jest.mock('@/lib/prisma', () => ({
   },
 }));
 
+const mockPrisma = prisma as jest.Mocked<typeof prisma>
+
+
 jest.mock('@/lib/user-sync', () => ({
   ensureUserExists: jest.fn(),
 }));
@@ -77,12 +80,15 @@ describe('Trip API - Optional Fields Support', () => {
         insights: '', // Campo descrizione vuoto
       };
 
-      (prisma.trip.create as jest.Mock).mockResolvedValue({
+      const fullTripInfo = {
         id: 'trip-123',
         ...tripDataWithEmptyDescription,
         slug: 'viaggio-senza-descrizione',
         user_id: 'user-123',
-      });
+      };
+
+      mockPrisma.trip.findUnique.mockResolvedValue(fullTripInfo)
+      mockPrisma.trip.create.mockResolvedValue(fullTripInfo);
 
       const request = createMockRequest(tripDataWithEmptyDescription);
       const response = await POST(request);
@@ -112,7 +118,7 @@ describe('Trip API - Optional Fields Support', () => {
         insights: null, // Campo descrizione null
       };
 
-      (prisma.trip.create as jest.Mock).mockResolvedValue({
+      mockPrisma.trip.create.mockResolvedValue({
         id: 'trip-124',
         ...tripDataWithNullDescription,
         slug: 'viaggio-con-null-description',
@@ -164,7 +170,7 @@ describe('Trip API - Optional Fields Support', () => {
         insights: 'Dettagli del viaggio qui',
       };
 
-      (prisma.trip.create as jest.Mock).mockResolvedValue({
+      mockPrisma.trip.create.mockResolvedValue({
         id: 'trip-125',
         ...tripDataWithEmptyTags,
         slug: 'viaggio-senza-tag',
@@ -221,7 +227,7 @@ describe('Trip API - Optional Fields Support', () => {
         // tags field omesso completamente
       };
 
-      (prisma.trip.create as jest.Mock).mockResolvedValue({
+      mockPrisma.trip.create.mockResolvedValue({
         id: 'trip-126',
         ...tripDataWithoutTags,
         tags: [], // Dovrebbe default a array vuoto
@@ -251,12 +257,15 @@ describe('Trip API - Optional Fields Support', () => {
         insights: '',
       };
 
-      (prisma.trip.create as jest.Mock).mockResolvedValue({
-        id: 'trip-127',
+      const fullTripInfo = {
+         id: 'trip-127',
         ...minimalTripData,
         slug: 'viaggio-minimo',
         user_id: 'user-123',
-      });
+      };
+
+      mockPrisma.trip.findUnique.mockResolvedValue(fullTripInfo)
+      mockPrisma.trip.create.mockResolvedValue(fullTripInfo);
 
       const request = createMockRequest(minimalTripData);
       const response = await POST(request);

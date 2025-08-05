@@ -6,7 +6,7 @@ import { RecommendedSeason } from '@/types/trip';
 import { auth } from '@/auth';
 import { ensureUserExists } from '@/lib/user-sync';
 import { UserRole } from '@/types/profile';
-import { prepareJsonFieldsUpdate } from '@/lib/trip-utils';
+import { prepareJsonFieldsUpdate, isMultiStageTripUtil, calculateTotalDistance, calculateTripDuration } from '@/lib/trip-utils';
 
 // Funzione di utilità per generare lo slug
 function slugify(text: string): string {
@@ -120,6 +120,11 @@ export async function GET() {
             email: true,
             image: true
           }
+        },
+        stages: {
+          orderBy: {
+            orderIndex: 'asc'
+          }
         }
       },
       orderBy: {
@@ -127,7 +132,15 @@ export async function GET() {
       }
     });
     
-    return NextResponse.json(trips);
+    // Arricchisci ogni viaggio con calcoli aggiornati
+    const enrichedTrips = trips.map((trip) => ({
+      ...trip,
+      calculatedDistance: calculateTotalDistance(trip),
+      calculatedDuration: calculateTripDuration(trip),
+      isMultiStage: isMultiStageTripUtil(trip)
+    }));
+    
+    return NextResponse.json(enrichedTrips);
   } catch (error) {
     console.error('Errore durante il recupero dei viaggi:', error);
     return NextResponse.json(
@@ -204,7 +217,38 @@ export async function POST(request: NextRequest) {
 
       
       
-      return NextResponse.json(newTrip, { status: 201 });
+      // Recupera il viaggio completo con stages per la response
+      const completeTrip = await prisma.trip.findUnique({
+        where: { id: newTrip.id },
+        include: {
+          user: {
+            select: {
+              name: true,
+              email: true,
+              image: true
+            }
+          },
+          stages: {
+            orderBy: {
+              orderIndex: 'asc'
+            }
+          }
+        }
+      });
+      
+      if (!completeTrip) {
+        throw new Error('Failed to retrieve created trip');
+      }
+      
+      // Arricchisci il viaggio creato con calcoli
+      const enrichedTrip = {
+        ...completeTrip,
+        calculatedDistance: calculateTotalDistance(completeTrip),
+        calculatedDuration: calculateTripDuration(completeTrip),
+        isMultiStage: isMultiStageTripUtil(completeTrip)
+      };
+      
+      return NextResponse.json(enrichedTrip, { status: 201 });
     } catch (error: unknown) {
       console.error('Errore Prisma:', error);
       

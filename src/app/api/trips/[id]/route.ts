@@ -4,7 +4,7 @@ import { prisma } from '@/lib/prisma'
 import { auth } from '@/auth'
 import { UserRole } from '@/types/profile'
 import { RecommendedSeason } from '@/types/trip'
-import { prepareJsonFieldsUpdate } from '@/lib/trip-utils'
+import { prepareJsonFieldsUpdate, isMultiStageTripUtil, calculateTotalDistance, calculateTripDuration } from '@/lib/trip-utils'
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic'
@@ -89,7 +89,7 @@ export async function GET(
 
     const tripId = params.id
 
-    // Trova il viaggio con informazioni dell'utente
+    // Trova il viaggio con informazioni dell'utente e stages
     const trip = await prisma.trip.findUnique({
       where: { id: tripId },
       include: {
@@ -99,6 +99,11 @@ export async function GET(
             name: true,
             email: true,
             role: true
+          }
+        },
+        stages: {
+          orderBy: {
+            orderIndex: 'asc'
           }
         }
       }
@@ -122,7 +127,16 @@ export async function GET(
       )
     }
 
-    return NextResponse.json(trip)
+    // Arricchisci i dati del viaggio con calcoli aggiornati
+    const enrichedTrip = {
+      ...trip,
+      // Calcoli aggiornati per supportare multi-stage
+      calculatedDistance: calculateTotalDistance(trip),
+      calculatedDuration: calculateTripDuration(trip),
+      isMultiStage: isMultiStageTripUtil(trip)
+    };
+
+    return NextResponse.json(enrichedTrip)
 
   } catch (error) {
     console.error('Errore nel caricamento del viaggio:', error)
@@ -234,6 +248,11 @@ export async function PUT(
             name: true,
             email: true
           }
+        },
+        stages: {
+          orderBy: {
+            orderIndex: 'asc'
+          }
         }
       }
     });
@@ -241,9 +260,17 @@ export async function PUT(
     // TODO: Implementare audit log qui
     // await createTripAuditLog(tripId, session.user.id, originalData, updatedTrip)
 
+    // Arricchisci i dati del viaggio aggiornato con calcoli
+    const enrichedTrip = {
+      ...updatedTrip,
+      calculatedDistance: calculateTotalDistance(updatedTrip),
+      calculatedDuration: calculateTripDuration(updatedTrip),
+      isMultiStage: isMultiStageTripUtil(updatedTrip)
+    };
+
     return NextResponse.json({
       message: 'Viaggio aggiornato con successo',
-      trip: updatedTrip
+      trip: enrichedTrip
     })
 
   } catch (error) {

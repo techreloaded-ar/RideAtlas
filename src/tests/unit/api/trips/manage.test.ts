@@ -19,6 +19,7 @@ jest.mock('@/lib/prisma', () => ({
   },
 }))
 
+const mockPrisma = prisma as jest.Mocked<typeof prisma>
 const mockAuth = auth as jest.MockedFunction<typeof auth>
 
 describe('API /api/trips/[id] - Gestione Singolo Viaggio', () => {
@@ -81,8 +82,9 @@ describe('API /api/trips/[id] - Gestione Singolo Viaggio', () => {
         mockAuth.mockResolvedValue({
           user: mockUser,
           expires: '2024-12-31T23:59:59.999Z',
-        })
-        ;(prisma.trip.findUnique as jest.Mock).mockResolvedValue(mockTrip)
+        });
+
+        mockPrisma.trip.findUnique.mockResolvedValue(mockTrip)
 
         const request = createMockRequest()
         const response = await GET(request, { params: { id: 'trip-123' } })
@@ -104,6 +106,11 @@ describe('API /api/trips/[id] - Gestione Singolo Viaggio', () => {
                 role: true,
               },
             },
+            stages: {
+              orderBy: {
+                orderIndex: 'asc'
+              }
+            }
           },
         })
       })
@@ -248,6 +255,11 @@ describe('API /api/trips/[id] - Gestione Singolo Viaggio', () => {
                 email: true,
               },
             },
+            stages: {
+              orderBy: {
+                orderIndex: 'asc'
+              }
+            }
           },
         })
       })
@@ -281,6 +293,11 @@ describe('API /api/trips/[id] - Gestione Singolo Viaggio', () => {
                 email: true,
               },
             },
+            stages: {
+              orderBy: {
+                orderIndex: 'asc'
+              }
+            }
           },
         })
       })
@@ -327,6 +344,11 @@ describe('API /api/trips/[id] - Gestione Singolo Viaggio', () => {
                 email: true,
               },
             },
+            stages: {
+              orderBy: {
+                orderIndex: 'asc'
+              }
+            }
           },
         })
       })
@@ -521,6 +543,11 @@ describe('API /api/trips/[id] - Gestione Singolo Viaggio', () => {
                 email: true,
               },
             },
+            stages: {
+              orderBy: {
+                orderIndex: 'asc'
+              }
+            }
           },
         })
       })
@@ -560,6 +587,11 @@ describe('API /api/trips/[id] - Gestione Singolo Viaggio', () => {
                   email: true,
                 },
               },
+              stages: {
+                orderBy: {
+                  orderIndex: 'asc'
+               }
+              }
             },
           })
 

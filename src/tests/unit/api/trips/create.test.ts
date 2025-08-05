@@ -14,6 +14,7 @@ jest.mock('@/lib/prisma', () => ({
   prisma: {
     trip: {
       create: jest.fn(),
+      findUnique: jest.fn(),
     },
   },
 }))
@@ -22,12 +23,26 @@ jest.mock('@/lib/user-sync', () => ({
   ensureUserExists: jest.fn(),
 }))
 
+// Mock delle utility functions
+jest.mock('@/lib/trip-utils', () => ({
+  ...jest.requireActual('@/lib/trip-utils'),
+  isMultiStageTripUtil: jest.fn(),
+  calculateTotalDistance: jest.fn(),
+  calculateTripDuration: jest.fn(),
+}))
+
 const mockAuth = auth as jest.MockedFunction<typeof auth>
 const mockEnsureUserExists = ensureUserExists as jest.MockedFunction<typeof ensureUserExists>
 
 describe('POST /api/trips - Creazione Viaggi', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    
+    // Setup default mocks for utility functions
+    const { isMultiStageTripUtil, calculateTotalDistance, calculateTripDuration } = require('@/lib/trip-utils')
+    isMultiStageTripUtil.mockReturnValue(false)
+    calculateTotalDistance.mockReturnValue(0)
+    calculateTripDuration.mockReturnValue({ days: 3, nights: 2 })
   })
 
   const createMockRequest = (body: unknown): NextRequest => {
@@ -74,7 +89,15 @@ describe('POST /api/trips - Creazione Viaggi', () => {
         expires: '2024-12-31T23:59:59.999Z',
       });
       mockEnsureUserExists.mockResolvedValue(mockUser);
-      (prisma.trip.create as jest.Mock).mockResolvedValue(mockCreatedTrip);
+      
+      const mockTripWithStages = {
+        ...mockCreatedTrip,
+        user: mockUser,
+        stages: []
+      };
+      
+      (prisma.trip.create as jest.Mock).mockResolvedValue(mockTripWithStages);
+      (prisma.trip.findUnique as jest.Mock).mockResolvedValue(mockTripWithStages);
 
       const request = createMockRequest(validTripData)
       const response = await POST(request)
@@ -113,11 +136,17 @@ describe('POST /api/trips - Creazione Viaggi', () => {
         expires: '2024-12-31T23:59:59.999Z',
       })
       mockEnsureUserExists.mockResolvedValue(mockUser)
-      ;(prisma.trip.create as jest.Mock).mockResolvedValue({
+      
+      const mockTripWithStages = {
         ...mockCreatedTrip,
         ...minimalData,
         characteristics: [],
-      })
+        user: mockUser,
+        stages: []
+      };
+      
+      (prisma.trip.create as jest.Mock).mockResolvedValue(mockTripWithStages);
+      (prisma.trip.findUnique as jest.Mock).mockResolvedValue(mockTripWithStages);
 
       const request = createMockRequest(minimalData)
       const response = await POST(request)
@@ -144,11 +173,17 @@ describe('POST /api/trips - Creazione Viaggi', () => {
         expires: '2024-12-31T23:59:59.999Z',
       })
       mockEnsureUserExists.mockResolvedValue(mockUser)
-      ;(prisma.trip.create as jest.Mock).mockResolvedValue({
+      
+      const mockTripWithStages = {
         ...mockCreatedTrip,
         title: 'Viaggio in Toscana - Versione 2',
         slug: 'viaggio-in-toscana-versione-2',
-      })
+        user: mockUser,
+        stages: []
+      };
+      
+      (prisma.trip.create as jest.Mock).mockResolvedValue(mockTripWithStages);
+      (prisma.trip.findUnique as jest.Mock).mockResolvedValue(mockTripWithStages);
 
       const request = createMockRequest(tripWithSimilarTitle)
       const response = await POST(request)
@@ -273,7 +308,17 @@ describe('POST /api/trips - Creazione Viaggi', () => {
 
       it('should accept valid recommended seasons', async () => {
       mockEnsureUserExists.mockResolvedValue(mockUser);
-      (prisma.trip.create as jest.Mock).mockResolvedValue(mockCreatedTrip);      const seasons = [
+      
+      const mockTripWithStages = {
+        ...mockCreatedTrip,
+        user: mockUser,
+        stages: []
+      };
+      
+      (prisma.trip.create as jest.Mock).mockResolvedValue(mockTripWithStages);
+      (prisma.trip.findUnique as jest.Mock).mockResolvedValue(mockTripWithStages);
+      
+      const seasons = [
         RecommendedSeason.Primavera,
         RecommendedSeason.Estate,
         RecommendedSeason.Autunno,
@@ -421,11 +466,16 @@ describe('POST /api/trips - Creazione Viaggi', () => {
       ]
 
       for (const { title, expectedSlug } of testCases) {
-        ;(prisma.trip.create as jest.Mock).mockResolvedValue({
+        const mockTripWithStages = {
           ...mockCreatedTrip,
           title,
           slug: expectedSlug,
-        })
+          user: mockUser,
+          stages: []
+        }
+
+        ;(prisma.trip.create as jest.Mock).mockResolvedValue(mockTripWithStages)
+        ;(prisma.trip.findUnique as jest.Mock).mockResolvedValue(mockTripWithStages)
 
         const tripData = { ...validTripData, title }
         const request = createMockRequest(tripData)

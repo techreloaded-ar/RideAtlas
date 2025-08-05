@@ -283,6 +283,7 @@ describe('Trip API con Media Integration', () => {
         media: []
       };
 
+      (prisma.trip.findUnique as jest.Mock).mockResolvedValue(tripWithInsights);
       const request = createMockRequest(requestBody);
       const response = await createTripHandler(request);
       const body = await response.json();
