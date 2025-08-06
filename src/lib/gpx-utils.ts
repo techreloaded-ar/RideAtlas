@@ -83,7 +83,7 @@ function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: numbe
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
   const distance = R * c
   
-  return distance;
+  return distance * 1000; // Restituisce distanza in metri invece che in chilometri
 }
 
 function toRadians(degrees: number): number {

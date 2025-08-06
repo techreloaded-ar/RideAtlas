@@ -8,6 +8,7 @@ export interface UseMediaUploadReturn {
   gpxFileName: string | null;
   isUploading: boolean;
   uploadError: string | null;
+  isUploadingGpx: boolean;
   
   // Handlers
   handleImageUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
@@ -36,6 +37,7 @@ export const useMediaUpload = ({
     currentGpx?.filename || null
   );
   const [isUploading, setIsUploading] = useState(false);
+  const [isUploadingGpx, setIsUploadingGpx] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
 
   const handleImageUpload = useCallback(async (
@@ -111,32 +113,60 @@ export const useMediaUpload = ({
     }
   }, [currentMedia, onMediaUpdate]);
 
-  const handleGpxUpload = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleGpxUpload = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
+    // Validazioni client-side
     if (!file.name.toLowerCase().endsWith('.gpx')) {
-      alert('Seleziona solo file GPX');
+      setUploadError('Seleziona solo file GPX');
       return;
     }
 
-    if (file.size > 5 * 1024 * 1024) { // 5MB
-      alert('Il file deve essere massimo 5MB');
+    if (file.size > 20 * 1024 * 1024) { // 20MB (come nell'endpoint)
+      setUploadError('Il file deve essere massimo 20MB');
       return;
     }
 
-    // Create new GpxFile - placeholder per ora
-    const newGpxFile: GpxFile = {
-      url: URL.createObjectURL(file), // URL temporaneo
-      filename: file.name,
-      waypoints: 0, // Da calcolare dopo il parsing
-      distance: 0,  // Da calcolare dopo il parsing
-      elevationGain: 0, // Da calcolare dopo il parsing
-      isValid: true // Assumiamo sia valido per ora
-    };
-
+    setUploadError(null);
+    setIsUploadingGpx(true);
     setGpxFileName(file.name);
-    onGpxUpdate(newGpxFile);
+
+    try {
+      // Prepara FormData per l'upload
+      const formData = new FormData();
+      formData.append('gpx', file);
+
+      // Chiamata all'endpoint dedicato per GPX
+      const response = await fetch('/api/upload/gpx', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Errore durante l\'upload del GPX');
+      }
+
+      // L'endpoint restituisce direttamente un oggetto GpxFile completo
+      const gpxFile: GpxFile = await response.json();
+
+      // Aggiorna il state con i dati completi
+      onGpxUpdate(gpxFile);
+      setGpxFileName(gpxFile.filename);
+
+      // Clear input per permettere ri-upload dello stesso file
+      event.target.value = '';
+      
+    } catch (error) {
+      console.error('Errore upload GPX:', error);
+      setUploadError(error instanceof Error ? error.message : 'Errore sconosciuto durante l\'upload GPX');
+      // Rimuovi GPX in caso di errore
+      onGpxUpdate(null);
+      setGpxFileName(null);
+    } finally {
+      setIsUploadingGpx(false);
+    }
   }, [onGpxUpdate]);
 
   const removeExistingMedia = useCallback((mediaId: string) => {
@@ -157,6 +187,7 @@ export const useMediaUpload = ({
     gpxFileName,
     isUploading,
     uploadError,
+    isUploadingGpx,
     handleImageUpload,
     handleGpxUpload,
     removeExistingMedia,

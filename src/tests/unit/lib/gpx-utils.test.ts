@@ -568,6 +568,229 @@ describe('GPX Utils', () => {
     })
   })
 
+  describe('Distance Calculation - Unit and Precision Tests', () => {
+    /**
+     * Test specifici per il calcolo della distanza GPX dopo la correzione del bug
+     * dove la distanza veniva restituita in km invece che in metri.
+     * 
+     * Questi test prevengono regressioni e verificano la correttezza del calcolo haversine.
+     */
+
+    it('should calculate distance in meters, not kilometers', () => {
+      // Test con due punti a distanza nota: Roma -> Milano (circa 574 km)
+      const romaToMilanoGpx = `<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="Distance Test">
+  <trk>
+    <name>Roma-Milano</name>
+    <trkseg>
+      <trkpt lat="41.9028" lon="12.4964">
+        <ele>50</ele>
+      </trkpt>
+      <trkpt lat="45.4642" lon="9.1900">
+        <ele>120</ele>
+      </trkpt>
+    </trkseg>
+  </trk>
+</gpx>`
+
+      const result = parseGPXContent(romaToMilanoGpx, 'roma-milano.gpx')
+      
+      // La distanza Roma-Milano è circa 477 km = 477,000 metri (distanza reale calcolata)
+      expect(result.metadata.distance).toBeGreaterThan(470000) // Min 470 km
+      expect(result.metadata.distance).toBeLessThan(485000)    // Max 485 km
+      
+      // Verifica che il valore sia ragionevole (in metri, non km)
+      expect(result.metadata.distance).toBeCloseTo(477000, -3) // ~477,000 ± 1000 metri
+    })
+
+    it('should calculate correct distance for short routes without rounding to zero', () => {
+      // Test con distanza breve (circa 1.5 km) per verificare che non diventi 0
+      const shortDistanceGpx = `<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="Short Distance Test">
+  <trk>
+    <name>Short Route</name>
+    <trkseg>
+      <trkpt lat="43.6142" lon="13.5173">
+        <ele>100</ele>
+      </trkpt>
+      <trkpt lat="43.6242" lon="13.5273">
+        <ele>110</ele>
+      </trkpt>
+    </trkseg>
+  </trk>
+</gpx>`
+
+      const result = parseGPXContent(shortDistanceGpx, 'short-distance.gpx')
+      
+      // Distanza prevista: circa 1.4-1.6 km = 1400-1600 metri
+      expect(result.metadata.distance).toBeGreaterThan(1000)  // Min 1 km
+      expect(result.metadata.distance).toBeLessThan(2000)     // Max 2 km
+      
+      // CRITICO: NON deve essere zero (bug precedente)
+      expect(result.metadata.distance).not.toBe(0)
+      
+      // Quando visualizzato nell'UI (diviso per 1000), deve mostrare ~1.5 km
+      const kmForDisplay = result.metadata.distance / 1000
+      expect(kmForDisplay).toBeGreaterThan(1.0)
+      expect(kmForDisplay).toBeLessThan(2.0)
+    })
+
+    it('should handle very short distances (meters range) correctly', () => {
+      // Test con distanza molto breve (sotto il km)
+      const veryShortGpx = `<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="Very Short Test">
+  <trk>
+    <name>Very Short Route</name>
+    <trkseg>
+      <trkpt lat="43.6142" lon="13.5173">
+        <ele>100</ele>
+      </trkpt>
+      <trkpt lat="43.6145" lon="13.5176">
+        <ele>101</ele>
+      </trkpt>
+    </trkseg>
+  </trk>
+</gpx>`
+
+      const result = parseGPXContent(veryShortGpx, 'very-short.gpx')
+      
+      // Distanza prevista: circa 40 metri (distanza reale calcolata)
+      expect(result.metadata.distance).toBeGreaterThan(30)    // Min 30m
+      expect(result.metadata.distance).toBeLessThan(60)       // Max 60m
+      expect(result.metadata.distance).not.toBe(0)
+      
+      // Quando mostrato nell'UI dovrebbe essere 0.1 km (non 0.0 km) 
+      const kmForDisplay = parseFloat((result.metadata.distance / 1000).toFixed(1))
+      expect(kmForDisplay).toBeGreaterThanOrEqual(0.0) // Anche 0.0 va bene per distanze così brevi
+      // Ma il valore raw non deve essere zero
+      expect(result.metadata.distance).toBeGreaterThan(0)
+    })
+
+    it('should calculate distance consistently for tracks vs routes', () => {
+      // Stesso percorso rappresentato come track e come route
+      const commonPoints = `
+        <trkpt lat="43.6142" lon="13.5173"><ele>100</ele></trkpt>
+        <trkpt lat="43.6152" lon="13.5183"><ele>110</ele></trkpt>
+        <trkpt lat="43.6162" lon="13.5193"><ele>120</ele></trkpt>`
+      
+      const trackGpx = `<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="Track Test">
+  <trk>
+    <name>Test Track</name>
+    <trkseg>${commonPoints}</trkseg>
+  </trk>
+</gpx>`
+
+      const routeGpx = `<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="Route Test">
+  <rte>
+    <name>Test Route</name>
+    <rtept lat="43.6142" lon="13.5173"><ele>100</ele></rtept>
+    <rtept lat="43.6152" lon="13.5183"><ele>110</ele></rtept>
+    <rtept lat="43.6162" lon="13.5193"><ele>120</ele></rtept>
+  </rte>
+</gpx>`
+
+      const trackResult = parseGPXContent(trackGpx, 'track.gpx')
+      const routeResult = parseGPXContent(routeGpx, 'route.gpx')
+      
+      // Le distanze dovrebbero essere identiche
+      expect(trackResult.metadata.distance).toBeCloseTo(routeResult.metadata.distance, 1)
+      
+      // Entrambe dovrebbero essere maggiori di zero e in metri
+      expect(trackResult.metadata.distance).toBeGreaterThan(0)
+      expect(routeResult.metadata.distance).toBeGreaterThan(0)
+    })
+
+    it('should accumulate distance correctly for multi-segment tracks', () => {
+      // Track con più segmenti per verificare accumulo corretto
+      const multiSegmentGpx = `<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="Multi-Segment Test">
+  <trk>
+    <name>Multi-Segment Track</name>
+    <trkseg>
+      <trkpt lat="43.6142" lon="13.5173"><ele>100</ele></trkpt>
+      <trkpt lat="43.6152" lon="13.5183"><ele>110</ele></trkpt>
+    </trkseg>
+    <trkseg>
+      <trkpt lat="43.6162" lon="13.5193"><ele>120</ele></trkpt>
+      <trkpt lat="43.6172" lon="13.5203"><ele>130</ele></trkpt>
+    </trkseg>
+  </trk>
+</gpx>`
+
+      const result = parseGPXContent(multiSegmentGpx, 'multi-segment.gpx')
+      
+      // La distanza totale dovrebbe essere la somma di tutti i segmenti (circa 275m)
+      expect(result.metadata.distance).toBeGreaterThan(250)  // Min 250m
+      expect(result.metadata.distance).toBeLessThan(300)     // Max 300m
+      
+      // Verifica che i punti siano stati processati correttamente
+      // Il parser crea una traccia separata per ogni segmento
+      expect(result.tracks).toHaveLength(2) // 2 segmenti = 2 tracce
+      expect(result.tracks[0].points).toHaveLength(2) // Primo segmento: 2 punti
+      expect(result.tracks[1].points).toHaveLength(2) // Secondo segmento: 2 punti
+    })
+
+    it('should handle precision for very precise coordinates', () => {
+      // Test con coordinate molto precise (6 decimali) come da GPS reali
+      const preciseGpx = `<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="Precision Test">
+  <trk>
+    <name>Precise Coordinates</name>
+    <trkseg>
+      <trkpt lat="43.614200" lon="13.517300">
+        <ele>100</ele>
+      </trkpt>
+      <trkpt lat="43.614250" lon="13.517350">
+        <ele>101</ele>
+      </trkpt>
+    </trkseg>
+  </trk>
+</gpx>`
+
+      const result = parseGPXContent(preciseGpx, 'precise.gpx')
+      
+      // Anche per distanze molto piccole, il risultato non dovrebbe essere 0
+      expect(result.metadata.distance).toBeGreaterThan(0)
+      expect(result.metadata.distance).toBeLessThan(100) // Probabilmente sotto i 100 metri
+      
+      // Il calcolo dovrebbe essere preciso fino al metro
+      expect(typeof result.metadata.distance).toBe('number')
+      expect(Number.isFinite(result.metadata.distance)).toBe(true)
+    })
+
+    it('REGRESSION TEST: prevents distance showing as 0 in UI preview', () => {
+      // Test specifico per prevenire la regressione del bug "distanza 0 nella preview"
+      const bugPreventionGpx = `<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="Bug Prevention Test">
+  <trk>
+    <name>Test Track</name>
+    <trkseg>
+      <trkpt lat="43.6142" lon="13.5173"><ele>100</ele></trkpt>
+      <trkpt lat="43.6242" lon="13.5273"><ele>110</ele></trkpt>
+      <trkpt lat="43.6342" lon="13.5373"><ele>120</ele></trkpt>
+    </trkseg>
+  </trk>
+</gpx>`
+
+      const result = parseGPXContent(bugPreventionGpx, 'bug-prevention.gpx')
+      
+      // Simula quello che fa EditableStageItem.tsx linea 315
+      const distanceInKmForUI = (result.metadata.distance / 1000).toFixed(1)
+      
+      // CRITICO: Non deve essere "0.0" nell'UI
+      expect(distanceInKmForUI).not.toBe('0.0')
+      expect(parseFloat(distanceInKmForUI)).toBeGreaterThan(0)
+      
+      // Deve mostrare un valore ragionevole (qualche km)
+      expect(parseFloat(distanceInKmForUI)).toBeGreaterThan(1)
+      expect(parseFloat(distanceInKmForUI)).toBeLessThan(50) // Massimo ragionevole per il test
+      
+      console.log(`Distance for UI display: ${distanceInKmForUI} km (raw: ${result.metadata.distance}m)`)
+    })
+  })
+
   describe('Edge cases and error handling', () => {
     it('should handle empty GPX content', () => {
       const emptyGpx = `<?xml version="1.0" encoding="UTF-8"?>

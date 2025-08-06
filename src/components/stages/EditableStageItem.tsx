@@ -2,11 +2,22 @@
 
 import { useState } from 'react';
 import { type StageCreationData } from '@/schemas/trip';
-import { GripVertical } from 'lucide-react'; // Import GripVertical for drag handle
+import { GripVertical, MapIcon, ChevronDownIcon, ChevronUpIcon } from 'lucide-react'; // Import GripVertical for drag handle
 import { PhotoIcon, DocumentIcon, XMarkIcon } from '@heroicons/react/24/outline'; // Import icons
 import { useMediaUpload } from '@/hooks/useMediaUpload';
 import { DraggableAttributes, DraggableSyntheticListeners } from '@dnd-kit/core'; // Import Dnd-kit types
 import { Transform } from '@dnd-kit/utilities'; // Import Dnd-kit types
+import dynamic from 'next/dynamic';
+
+// Import dinamico per evitare problemi SSR
+const UnifiedGPXMapViewer = dynamic(() => import('@/components/UnifiedGPXMapViewer'), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-48 bg-gray-100 flex items-center justify-center rounded-lg">
+      <div className="text-gray-500">Caricamento mappa...</div>
+    </div>
+  )
+});
 
 interface EditableStageItemProps {
   stage: StageCreationData;
@@ -36,6 +47,7 @@ export const EditableStageItem = ({
   isDragging,
 }: EditableStageItemProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [showGpxPreview, setShowGpxPreview] = useState(false);
 
   // Initialize media upload hook
   const mediaHook = useMediaUpload({
@@ -285,7 +297,7 @@ export const EditableStageItem = ({
                 {/* Current GPX Display */}
                 {stage.gpxFile && (
                   <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-3">
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center">
                         <DocumentIcon className="w-4 h-4 text-green-600 mr-2" />
                         <span className="text-sm font-medium text-green-800">
@@ -294,6 +306,107 @@ export const EditableStageItem = ({
                       </div>
                       <span className="text-xs text-green-600">File attuale</span>
                     </div>
+                    {/* Metadati GPX */}
+                    {(stage.gpxFile.distance > 0 || stage.gpxFile.waypoints > 0) && (
+                      <div className="grid grid-cols-2 gap-2 text-xs text-green-700">
+                        {stage.gpxFile.distance > 0 && (
+                          <div className="flex items-center">
+                            <span className="font-medium mr-1">Distanza:</span>
+                            <span>{(stage.gpxFile.distance / 1000).toFixed(1)} km</span>
+                          </div>
+                        )}
+                        {stage.gpxFile.waypoints > 0 && (
+                          <div className="flex items-center">
+                            <span className="font-medium mr-1">Waypoints:</span>
+                            <span>{stage.gpxFile.waypoints}</span>
+                          </div>
+                        )}
+                        {stage.gpxFile.elevationGain && stage.gpxFile.elevationGain > 0 && (
+                          <div className="flex items-center">
+                            <span className="font-medium mr-1">Dislivello:</span>
+                            <span>{stage.gpxFile.elevationGain.toFixed(0)} m</span>
+                          </div>
+                        )}
+                        {stage.gpxFile.keyPoints && stage.gpxFile.keyPoints.length > 0 && (
+                          <div className="flex items-center">
+                            <span className="font-medium mr-1">Punti chiave:</span>
+                            <span>{stage.gpxFile.keyPoints.length}</span>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    
+                    {/* GPX Preview Toggle - solo se il GPX è valido */}
+                    {stage.gpxFile && stage.gpxFile.isValid && (
+                      <div className="mt-3">
+                        <button
+                          type="button"
+                          onClick={() => setShowGpxPreview(!showGpxPreview)}
+                          className="flex items-center gap-2 text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors"
+                          disabled={isLoading}
+                        >
+                          <MapIcon className="w-4 h-4" />
+                          <span>
+                            {showGpxPreview ? 'Nascondi anteprima mappa' : 'Mostra anteprima mappa'}
+                          </span>
+                          {showGpxPreview ? (
+                            <ChevronUpIcon className="w-4 h-4" />
+                          ) : (
+                            <ChevronDownIcon className="w-4 h-4" />
+                          )}
+                        </button>
+                      </div>
+                    )}
+
+                    {/* GPX Preview Map */}
+                    {showGpxPreview && (
+                      <div className="mt-3 border border-gray-200 rounded-lg overflow-hidden">
+                        <div className="bg-gray-50 px-3 py-2 border-b border-gray-200">
+                          <div className="flex items-center gap-2">
+                            <MapIcon className="w-4 h-4 text-gray-600" />
+                            <span className="text-sm font-medium text-gray-700">
+                              Anteprima percorso: {stage.gpxFile.filename}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="p-3">
+                          {stage.gpxFile.keyPoints && stage.gpxFile.keyPoints.length > 0 ? (
+                            <UnifiedGPXMapViewer
+                              tracks={[{
+                                name: stage.gpxFile.filename || 'Percorso GPX',
+                                points: stage.gpxFile.keyPoints
+                                  .filter(kp => kp.lat && kp.lng) // Filtra punti validi
+                                  .map(kp => ({
+                                    lat: kp.lat,
+                                    lng: kp.lng,
+                                    elevation: kp.elevation
+                                  }))
+                              }]}
+                              routes={[]}
+                              waypoints={[]}
+                              className="w-full"
+                              height="h-48"
+                              showControls={false}
+                              enableFullscreen={false}
+                              enableDownload={false}
+                              autoFit={true}
+                              showLayerControls={false}
+                              defaultShowTracks={true}
+                              defaultShowRoutes={false}
+                              defaultShowWaypoints={false}
+                            />
+                          ) : (
+                            <div className="w-full h-48 bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center">
+                              <div className="text-center text-gray-500">
+                                <MapIcon className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                                <p className="text-sm">Nessun dato di percorso disponibile per la preview</p>
+                                <p className="text-xs mt-1">Il file GPX potrebbe non contenere punti chiave elaborati</p>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -302,13 +415,23 @@ export const EditableStageItem = ({
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     {stage.gpxFile ? 'Sostituisci File GPX' : 'Carica File GPX'}
                   </label>
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
+                  <div className={`border-2 border-dashed rounded-lg p-4 ${
+                    mediaHook.isUploadingGpx 
+                      ? 'border-blue-300 bg-blue-50' 
+                      : 'border-gray-300 hover:border-gray-400'
+                  } transition-colors`}>
                     <div className="text-center">
-                      <DocumentIcon className="mx-auto h-8 w-8 text-gray-400" />
+                      {mediaHook.isUploadingGpx ? (
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                      ) : (
+                        <DocumentIcon className="mx-auto h-8 w-8 text-gray-400" />
+                      )}
                       <div className="mt-2">
-                        <label htmlFor={`gpx-file-${index}`} className="cursor-pointer">
-                          <span className="text-sm font-medium text-gray-900">
-                            Seleziona file GPX
+                        <label htmlFor={`gpx-file-${index}`} className={mediaHook.isUploadingGpx ? 'cursor-not-allowed' : 'cursor-pointer'}>
+                          <span className={`text-sm font-medium ${
+                            mediaHook.isUploadingGpx ? 'text-gray-400' : 'text-gray-900'
+                          }`}>
+                            {mediaHook.isUploadingGpx ? 'Caricamento GPX in corso...' : 'Seleziona file GPX'}
                           </span>
                           <input
                             id={`gpx-file-${index}`}
@@ -316,10 +439,10 @@ export const EditableStageItem = ({
                             accept=".gpx"
                             onChange={mediaHook.handleGpxUpload}
                             className="sr-only"
-                            disabled={isLoading}
+                            disabled={isLoading || mediaHook.isUploadingGpx}
                           />
                         </label>
-                        <p className="text-xs text-gray-500 mt-1">Solo file .gpx fino a 5MB</p>
+                        <p className="text-xs text-gray-500 mt-1">Solo file .gpx fino a 20MB</p>
                       </div>
                     </div>
                   </div>
