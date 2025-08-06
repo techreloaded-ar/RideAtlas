@@ -164,7 +164,7 @@ export default function TripStagesSection({
     setEditingStageId(null);
   }, []);
 
-  const hasStages = currentStages?.length > 0;
+  
   const hasErrors = fieldErrors?.stages && fieldErrors.stages.length > 0;
 
   return (

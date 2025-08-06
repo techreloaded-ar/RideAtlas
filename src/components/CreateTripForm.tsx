@@ -26,6 +26,7 @@ const CreateTripForm = () => {
       media: [],
       gpxFile: null,
       stages: [{
+        id: `temp-${Date.now()}`, // Assign a temporary ID
         orderIndex: 0,
         title: 'Tappa 1',
         description: '',
@@ -37,7 +38,7 @@ const CreateTripForm = () => {
     mode: 'onChange'
   });
 
-  const { handleSubmit, setError } = form;
+  const { setError } = form;
 
   const onSubmit = async (data: TripWithStagesData) => {
     try {
