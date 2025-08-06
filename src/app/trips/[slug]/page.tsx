@@ -136,13 +136,6 @@ export default async function TripDetailPage({ params }: { params: { slug: strin
           </div>
         )}
         
-        {/* GPX Section */}
-        {gpxFile && gpxFile.isValid && (
-          <div className="p-6 border-b">
-            <h2 className="text-xl font-semibold flex items-center mb-4">
-              <Route className="w-5 h-5 mr-2 text-blue-600" />
-              Traccia GPX
-            </h2>
         {/* Sezione Tappe del Viaggio (per viaggi multi-tappa) */}
         {isMultiStage && tripWithStages.stages.length > 0 && (
           <div className="p-6 border-b">
@@ -187,29 +180,7 @@ export default async function TripDetailPage({ params }: { params: { slug: strin
 
         {/* GPX Section (solo per viaggi single-stage legacy) */}
         {!isMultiStage && gpxFile && gpxFile.isValid && (
-          <div className="p-6 border-b">            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold flex items-center">
-                <Route className="w-5 h-5 mr-2 text-blue-600" />
-                Traccia GPX
-              </h2>
-              {session?.user ? (
-                <GPXDownloadButton 
-                  tripId={trip.id} 
-                  tripTitle={trip.title}
-                />
-              ) : (
-                <div className="flex items-center text-sm text-gray-600 bg-gray-100 rounded-lg px-4 py-2">
-                  <Route className="w-4 h-4 mr-2" />
-                  <span>
-                    <Link href="/auth/signin" className="text-blue-600 hover:text-blue-800 font-medium">
-                      Effettua il login
-                    </Link>
-                    {" "}per scaricare la traccia GPX
-                  </span>
-                </div>
-              )}
-            </div>
-            
+          <div className="p-6 border-b">            
             <AccessGate 
               tripId={trip.id} 
               premiumContentType="la traccia GPX e la mappa dettagliata"

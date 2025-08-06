@@ -47,11 +47,22 @@ export default function TripStagesSection({
   const currentStages = tripId ? stagesHook.stages : stages;
   const isStagesLoading = tripId ? stagesHook.isLoading : isLoading;
 
-  // Handler per aprire editor per nuova tappa
+  // Handler per aggiungere nuova tappa direttamente
   const handleAddStage = useCallback(() => {
-    setEditingStageId(null);
-    setIsStageEditorOpen(true);
-  }, []);
+    const newStage: Stage = {
+      id: `temp-stage-${Date.now()}`, // ID temporaneo per la nuova tappa
+      tripId: tripId || 'temp-trip-id', // Usa tripId o un ID temporaneo
+      orderIndex: stages.length, // Assegna il prossimo indice disponibile
+      title: `Tappa ${stages.length + 1}`,
+      description: '',
+      routeType: '',
+      media: [],
+      gpxFile: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    onStagesChange([...stages, newStage]); // Aggiungi la nuova tappa all'array
+  }, [stages, onStagesChange, tripId]); // Aggiungi tripId alle dipendenze
 
   // Handler per aprire editor per modifica tappa esistente
   const handleEditStage = useCallback((stageId: string) => {
@@ -205,46 +216,17 @@ export default function TripStagesSection({
       )}
 
       {/* Lista tappe o messaggio vuoto */}
-      {hasStages ? (
-        <div className="bg-white border border-gray-200 rounded-lg">
-          <div className="p-6">
-            <StageTimeline
-              stages={currentStages}
-              isEditable={!isStagesLoading && !isDeleting}
-              onReorder={handleReorderStages}
-              onUpdateStage={handleEditStage}
-              onDeleteStage={handleDeleteStage}
-            />
-          </div>
+      <div className="bg-white border border-gray-200 rounded-lg">
+        <div className="p-6">
+          <StageTimeline
+            stages={currentStages}
+            isEditable={!isStagesLoading && !isDeleting}
+            onReorder={handleReorderStages}
+            onUpdateStage={handleEditStage}
+            onDeleteStage={handleDeleteStage}
+          />
         </div>
-      ) : (
-        <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-12 text-center">
-          <div className="space-y-4">
-            <div className="mx-auto h-12 w-12 text-gray-400">
-              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-              </svg>
-            </div>
-            <div>
-              <h3 className="text-lg font-medium text-gray-900">
-                Nessuna tappa aggiunta
-              </h3>
-              <p className="mt-2 text-sm text-gray-600">
-                Inizia aggiungendo la prima tappa del tuo viaggio
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={handleAddStage}
-              disabled={isStagesLoading}
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50"
-            >
-              <PlusIcon className="h-4 w-4 mr-2" />
-              Aggiungi Prima Tappa
-            </button>
-          </div>
-        </div>
-      )}
+      </div>
 
       {/* Loading overlay */}
       {(isStagesLoading || isDeleting) && (

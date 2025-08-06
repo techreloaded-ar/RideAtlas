@@ -59,7 +59,7 @@ const stageCreationSchema = z.object({
   orderIndex: z.number().int().nonnegative(),
   title: z.string().min(1, { message: 'Il titolo della tappa è obbligatorio.' }).max(200),
   description: z.string().optional(),
-  routeType: z.string().max(500).optional(),
+  routeType: z.string().max(100, { message: 'Il tipo di percorso non può superare i 100 caratteri.' }).optional(),
   media: z.array(mediaItemSchema).optional().default([]),
   gpxFile: gpxFileSchema,
   id: z.string().optional(), // Aggiunto per permettere l'ID nelle tappe esistenti

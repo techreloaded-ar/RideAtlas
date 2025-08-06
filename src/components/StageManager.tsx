@@ -20,7 +20,7 @@ export const StageManager = ({ stages, onChange, errors, isLoading }: StageManag
       orderIndex: stages.length,
       title: `Tappa ${stages.length + 1}`,
       description: '',
-      routeType: 'road',
+      routeType: '',
       media: [],
       gpxFile: null,
     }
@@ -74,37 +74,13 @@ export const StageManager = ({ stages, onChange, errors, isLoading }: StageManag
         </div>
       )}
 
-      {stages.length === 0 ? (
-        <div className="text-center py-8 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
-          <div className="text-gray-500">
-            <svg
-              className="mx-auto h-12 w-12 text-gray-400"
-              stroke="currentColor"
-              fill="none"
-              viewBox="0 0 48 48"
-            >
-              <path
-                d="M34 40h10v-4a6 6 0 00-10.712-3.714M34 40H14m20 0v-4a9.971 9.971 0 00-.712-3.714M14 40H4v-4a6 6 0 0110.713-3.714M14 40v-4c0-1.313.253-2.566.713-3.714m0 0A9.971 9.971 0 0124 24c4.004 0 7.625 2.371 9.287 6.286"
-                strokeWidth={2}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-            <h3 className="mt-2 text-sm font-medium text-gray-900">Nessuna tappa</h3>
-            <p className="mt-2 text-sm text-gray-600">
-              Inizia aggiungendo la prima tappa del tuo viaggio
-            </p>
-          </div>
-        </div>
-      ) : (
-        <StageTimeline
-          stages={stages}
-          isEditable={true}
-          onReorder={handleReorder}
-          onUpdateStage={updateStage}
-          onDeleteStage={removeStage}
-        />
-      )}
+      <StageTimeline
+        stages={stages}
+        isEditable={true}
+        onReorder={handleReorder}
+        onUpdateStage={updateStage}
+        onDeleteStage={removeStage}
+      />
     </div>
   )
 }

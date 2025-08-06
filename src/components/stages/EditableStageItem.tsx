@@ -172,19 +172,14 @@ export const EditableStageItem = ({
               <label className="block text-sm font-medium text-gray-700">
                 Tipo di percorso
               </label>
-              <select
-                value={stage.routeType || 'road'}
+              <textarea
+                value={stage.routeType || ''}
                 onChange={(e) => onUpdate({ routeType: e.target.value })}
+                rows={2}
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                placeholder="Es: Percorso misto: 60% strade di montagna, 30% statali..."
                 disabled={isLoading}
-              >
-                <option value="road">Strada</option>
-                <option value="highway">Autostrada</option>
-                <option value="mountain">Montagna</option>
-                <option value="coastal">Costiero</option>
-                <option value="urban">Urbano</option>
-                <option value="mixed">Misto</option>
-              </select>
+              />
             </div>
 
             {/* Media Section */}

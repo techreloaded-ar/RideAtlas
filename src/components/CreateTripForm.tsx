@@ -1,79 +1,92 @@
 // src/components/CreateTripForm.tsx
 "use client";
 
-import { FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
-import { useTripForm } from '@/hooks/useTripForm';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { tripWithStagesSchema, type TripWithStagesData } from '@/schemas/trip';
 import { useToast } from '@/hooks/useToast';
-import TripFormContainer from './TripFormContainer';
+import { TripForm } from './TripForm';
 
 const CreateTripForm = () => {
   const router = useRouter();
-  const { showSuccess } = useToast();
-    const {
-    formData,
-    stages,
-    tagInput,
-    error,
-    fieldErrors,
-    isLoading,
-    handleChange,
-    handleTagInputChange,
-    addTag,
-    removeTag,
-    handleCharacteristicChange,
-    handleSeasonChange,
-    handleStagesChange,
-    submitForm,
-  } = useTripForm({
-    mode: 'create',
-    onSuccess: () => {
-      showSuccess('Viaggio creato con successo!');
-      router.push('/dashboard');
-    }
+  const { showSuccess, showError } = useToast();
+
+  const form = useForm<TripWithStagesData>({
+    resolver: zodResolver(tripWithStagesSchema),
+    defaultValues: {
+      title: '',
+      summary: '',
+      destination: '',
+      theme: '',
+      characteristics: [],
+      recommended_seasons: [],
+      tags: [],
+      insights: '',
+      media: [],
+      gpxFile: null,
+      stages: [{
+        orderIndex: 0,
+        title: 'Tappa 1',
+        description: '',
+        routeType: '',
+        media: [],
+        gpxFile: null
+      }]
+    },
+    mode: 'onChange'
   });
 
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    await submitForm();
+  const { handleSubmit, setError } = form;
+
+  const onSubmit = async (data: TripWithStagesData) => {
+    try {
+      const response = await fetch('/api/trips', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        if (result.details) {
+          // Mappa gli errori di campo di Zod su react-hook-form
+          for (const key in result.details) {
+            if (Object.prototype.hasOwnProperty.call(result.details, key)) {
+              setError(key as keyof TripWithStagesData, {
+                type: 'server',
+                message: result.details[key][0],
+              });
+            }
+          }
+        }
+        showError(result.error || 'Errore durante la creazione del viaggio.');
+        return false;
+      }
+
+      showSuccess('Viaggio creato con successo!');
+      router.push('/dashboard'); // Reindirizza alla dashboard o alla pagina del viaggio creato
+      return true;
+
+    } catch (err) {
+      showError('Si è verificato un errore di rete o il server non è raggiungibile.');
+      console.error('Submit error:', err);
+      return false;
+    }
   };
 
-  // Show error message if there's a general error
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gray-50 py-8">
-        <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-          <div className="bg-red-50 border border-red-200 rounded-md p-4">
-            <div className="flex">
-              <div className="ml-3">
-                <h3 className="text-sm font-medium text-red-800">Errore</h3>
-                <div className="mt-2 text-sm text-red-700">{error}</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
   return (
-    <TripFormContainer
-      initialData={formData}
-      stages={stages}
-      tagInput={tagInput}
-      fieldErrors={fieldErrors}
-      isLoading={isLoading}
-      handleChange={handleChange}
-      handleTagInputChange={handleTagInputChange}
-      addTag={addTag}
-      removeTag={removeTag}
-      handleCharacteristicChange={handleCharacteristicChange}
-      handleSeasonChange={handleSeasonChange}
-      onStagesChange={handleStagesChange}
-      onSubmit={handleSubmit}
+    <TripForm
+      form={form}
+      onSubmit={onSubmit}
+      isLoading={form.formState.isSubmitting}
       mode="create"
-      showMediaUpload={false}
-      showGpxUpload={false}
-      showGpxPreview={false}
+      title="Crea Nuovo Viaggio"
+      submitButtonText="Crea Viaggio"
+      onCancel={() => router.push('/dashboard')}
     />
   );
 };
