@@ -46,6 +46,7 @@ const stageCreationSchema = z.object({
   title: z.string().min(3, { message: 'Il titolo deve contenere almeno 3 caratteri.' }).max(100),
   description: z.string().max(2000, { message: 'La descrizione non può superare i 2000 caratteri.' }).optional(),
   routeType: z.string().max(100, { message: 'Il tipo di percorso non può superare i 100 caratteri.' }).optional(),
+  duration: z.string().max(500, { message: 'La durata stimata non può superare i 500 caratteri.' }).optional(),
   media: z.array(mediaItemSchema).default([]),
   gpxFile: gpxFileSchema,
   orderIndex: z.number().int().nonnegative({ message: 'L\'indice di ordinamento deve essere un numero non negativo.' }).optional()

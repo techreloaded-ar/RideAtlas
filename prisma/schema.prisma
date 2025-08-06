@@ -120,6 +120,7 @@ model Stage {
   title             String
   description       String?    @db.Text
   routeType         String?    // Tipo di percorso (testo libero)
+  duration          String?    // Durata stimata (testo libero)
   media             Json[]     @default([])
   gpxFile           Json?      // Traccia GPX della singola tappa
   createdAt         DateTime   @default(now())

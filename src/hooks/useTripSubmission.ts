@@ -35,6 +35,7 @@ export const useTripSubmission = ({
           title: stage.title,
           description: stage.description || '',
           routeType: stage.routeType || 'road',
+          duration: stage.duration || '',
           media: stage.media || [],
           gpxFile: stage.gpxFile || null,
           orderIndex: stage.orderIndex, // Mantieni l'orderIndex esistente
@@ -154,6 +155,7 @@ export const useTripData = ({ tripId, enabled = true }: UseTripDataOptions) => {
           title: (stage.title as string) || '',
           description: (stage.description as string) || '',
           routeType: (stage.routeType as string) || 'road',
+          duration: (stage.duration as string) || '',
           media: (stage.media as unknown[]) || [],
           gpxFile: stage.gpxFile || null,
         })) || []

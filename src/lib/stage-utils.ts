@@ -45,6 +45,7 @@ const stageCreationSchema = z.object({
   title: z.string().min(3, { message: 'Il titolo deve contenere almeno 3 caratteri.' }).max(100),
   description: z.string().max(2000, { message: 'La descrizione non può superare i 2000 caratteri.' }).optional(),
   routeType: z.string().max(100, { message: 'Il tipo di percorso non può superare i 100 caratteri.' }).optional(),
+  duration: z.string().max(500, { message: 'La durata stimata non può superare i 500 caratteri.' }).optional(),
   media: z.array(mediaItemSchema).default([]),
   gpxFile: gpxFileSchema.nullable().optional(),
 })
@@ -113,6 +114,7 @@ export async function createStage(tripId: string, data: StageCreationData): Prom
       title: validatedData.title,
       description: validatedData.description,
       routeType: validatedData.routeType,
+      duration: validatedData.duration,
       ...jsonFields
     }
   })
@@ -125,6 +127,7 @@ export async function createStage(tripId: string, data: StageCreationData): Prom
     title: stage.title,
     description: stage.description || undefined,
     routeType: stage.routeType || undefined,
+    duration: stage.duration || undefined,
     media: stage.media as unknown as MediaItem[],
     gpxFile: stage.gpxFile as unknown as GpxFile | null,
     createdAt: stage.createdAt,
@@ -169,6 +172,7 @@ export async function updateStage(stageId: string, data: StageUpdateData): Promi
   if (validatedData.title !== undefined) updateData.title = validatedData.title
   if (validatedData.description !== undefined) updateData.description = validatedData.description
   if (validatedData.routeType !== undefined) updateData.routeType = validatedData.routeType
+  if (validatedData.duration !== undefined) updateData.duration = validatedData.duration
   
   // Gestione campi JSON
   const jsonFields = prepareStageJsonFields({
@@ -191,6 +195,7 @@ export async function updateStage(stageId: string, data: StageUpdateData): Promi
     title: updatedStage.title,
     description: updatedStage.description || undefined,
     routeType: updatedStage.routeType || undefined,
+    duration: updatedStage.duration || undefined,
     media: updatedStage.media as unknown as MediaItem[],
     gpxFile: updatedStage.gpxFile as unknown as GpxFile | null,
     createdAt: updatedStage.createdAt,
@@ -264,6 +269,7 @@ export async function getStagesByTripId(tripId: string): Promise<Stage[]> {
     title: stage.title,
     description: stage.description || undefined,
     routeType: stage.routeType || undefined,
+    duration: stage.duration || undefined,
     media: stage.media as unknown as MediaItem[],
     gpxFile: stage.gpxFile as unknown as GpxFile | null,
     createdAt: stage.createdAt,

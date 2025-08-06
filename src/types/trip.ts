@@ -45,6 +45,7 @@ export interface Stage {
   title: string
   description?: string
   routeType?: string
+  duration?: string
   media: MediaItem[]
   gpxFile: GpxFile | null
   createdAt: Date
@@ -119,6 +120,7 @@ interface PrismaStage {
   title: string
   description: string | null
   routeType: string | null
+  duration: string | null
   media: JsonValue[]
   gpxFile: JsonValue | null
   createdAt: Date
@@ -131,6 +133,7 @@ export const transformPrismaStageToStage = (prismaStage: PrismaStage): Stage => 
     ...prismaStage,
     description: prismaStage.description ?? undefined,
     routeType: prismaStage.routeType ?? undefined,
+    duration: prismaStage.duration ?? undefined,
     media: castToMediaItems(prismaStage.media || []),
     gpxFile: castToGpxFile(prismaStage.gpxFile)
   }

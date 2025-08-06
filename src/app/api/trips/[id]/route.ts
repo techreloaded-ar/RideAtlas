@@ -47,6 +47,7 @@ const stageUpdateSchema = z.object({
   title: z.string().min(3, { message: "Il titolo della tappa deve contenere almeno 3 caratteri." }),
   description: z.string().optional(),
   routeType: z.string().optional(),
+  duration: z.string().optional(),
   media: z.array(mediaItemSchema).optional(),
   gpxFile: gpxFileSchema.nullable().optional(),
 });
@@ -262,16 +263,19 @@ export async function PUT(
 
       // 2. Gestione delle tappe (se presenti)
       if (stages) {
+        
         const existingStages = await tx.stage.findMany({
           where: { tripId: tripId },
           select: { id: true, orderIndex: true }
         });
         const existingStageIds = new Set(existingStages.map(s => s.id));
-
-        const stagesToCreate = stages.filter(s => !s.id);
-        const stagesToProcess = stages.filter(s => s.id && existingStageIds.has(s.id)); // These are the stages that exist and are being updated/reordered
-        const stageIdsToDelete = Array.from(existingStageIds).filter(id => !stages.some(s => s.id === id)); // Stages that were in DB but not in incoming data
-
+        
+        const stagesToCreate = stages.filter(s => !s.id || (s.id && s.id.startsWith('temp-')));
+        const stagesToProcess = stages.filter(s => s.id && !s.id.startsWith('temp-') && existingStageIds.has(s.id));
+        const stageIdsToDelete = Array.from(existingStageIds).filter(id => 
+          !stages.some(s => s.id === id && !s.id.startsWith('temp-'))
+        );
+        
         const operations: Promise<unknown>[] = [];
 
         // 1. Get max current orderIndex
@@ -321,6 +325,7 @@ export async function PUT(
                         title: stage.title,
                         description: stage.description,
                         routeType: stage.routeType,
+                        duration: stage.duration,
                         media: stage.media,
                         gpxFile: stage.gpxFile || undefined,
                     }
@@ -334,11 +339,12 @@ export async function PUT(
 
         // 5. Create new stages
         if (stagesToCreate.length > 0) {
+            
             operations.push(tx.stage.createMany({
-                data: stagesToCreate.map(stage => ({
-                    ...stage,
+                data: stagesToCreate.map(({ id, ...stageData }) => ({ // eslint-disable-line @typescript-eslint/no-unused-vars
+                    ...stageData,
                     tripId: tripId,
-                    gpxFile: stage.gpxFile || undefined,
+                    gpxFile: stageData.gpxFile || undefined,
                 }))
             }));
         }

@@ -222,6 +222,24 @@ export default function StageEditor({
                 <p className="mt-1 text-sm text-red-600">{formErrors.routeType.message}</p>
               )}
             </div>
+
+            {/* Duration */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Durata Stimata
+              </label>
+              <textarea
+                {...register('duration', {
+                  maxLength: { value: 500, message: 'Descrizione troppo lunga (max 500 caratteri)' }
+                })}
+                rows={2}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Es: 2-3 ore, Mezza giornata, 4-5 ore con soste..."
+              />
+              {formErrors.duration && (
+                <p className="mt-1 text-sm text-red-600">{formErrors.duration.message}</p>
+              )}
+            </div>
           </div>
         )}
       </div>

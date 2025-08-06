@@ -18,6 +18,9 @@ const stageValidationSchema = z.object({
   routeType: z.string()
     .max(500, 'Tipo percorso non può superare 500 caratteri')
     .optional(),
+  duration: z.string()
+    .max(500, 'Durata stimata non può superare 500 caratteri')
+    .optional(),
   media: z.array(z.object({
     id: z.string(),
     type: z.enum(['image', 'video']),
@@ -120,6 +123,7 @@ export function useStageEditor({
       title: '',
       description: '',
       routeType: '',
+      duration: '',
       media: [],
       gpxFile: null
     }
@@ -152,6 +156,7 @@ export function useStageEditor({
           title: stage.title,
           description: stage.description || '',
           routeType: stage.routeType || '',
+          duration: stage.duration || '',
           media: stage.media,
           gpxFile: stage.gpxFile
         });
@@ -185,6 +190,7 @@ export function useStageEditor({
         title: currentStage.title,
         description: currentStage.description || '',
         routeType: currentStage.routeType || '',
+        duration: currentStage.duration || '',
         media: currentStage.media,
         gpxFile: currentStage.gpxFile
       });
@@ -198,6 +204,7 @@ export function useStageEditor({
         title: '',
         description: '',
         routeType: '',
+        duration: '',
         media: [],
         gpxFile: null
       });
@@ -370,6 +377,7 @@ export function useStageEditor({
           title: formData.title,
           description: formData.description || undefined,
           routeType: formData.routeType || undefined,
+          duration: formData.duration || undefined,
           media: formData.media,
           gpxFile: formData.gpxFile
         };
@@ -386,6 +394,7 @@ export function useStageEditor({
           title: formData.title,
           description: formData.description || undefined,
           routeType: formData.routeType || undefined,
+          duration: formData.duration || undefined,
           media: formData.media,
           gpxFile: formData.gpxFile
         };

@@ -42,6 +42,7 @@ export const stageSchema = z.object({
   title: z.string().min(1, 'Il titolo della tappa è obbligatorio'),
   description: z.string().optional(),
   routeType: z.string().optional(),
+  duration: z.string().optional(),
   media: z.array(mediaItemSchema).default([]),
   gpxFile: gpxFileSchema.nullable().default(null),
   createdAt: z.date().optional(),
@@ -54,6 +55,7 @@ const stageCreationSchema = z.object({
   title: z.string().min(1, 'Il titolo della tappa è obbligatorio'),
   description: z.string().optional(),
   routeType: z.string().optional(),
+  duration: z.string().optional(),
   media: z.array(mediaItemSchema),
   gpxFile: gpxFileSchema.nullable(),
   id: z.string().optional(), // Aggiunto per permettere l'ID nelle tappe esistenti
