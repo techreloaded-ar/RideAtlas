@@ -7,6 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Stage, StageCreationData, StageUpdateData, MediaItem, GpxFile } from '@/types/trip';
 import { useStages } from '@/hooks/useStages';
+import { generateTempIdWithIndex, generateTempMediaId } from '@/lib/temp-id-service';
 
 // Schema di validazione Zod per Stage
 const stageValidationSchema = z.object({
@@ -224,7 +225,7 @@ export function useStageEditor({
       
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
-        const tempId = `temp-${Date.now()}-${i}`;
+        const tempId = generateTempIdWithIndex('media', i);
         
         // Validazione file
         if (!file.type.startsWith('image/')) {
@@ -264,7 +265,7 @@ export function useStageEditor({
         
         // Mock response per ora
         const mockMediaItem: MediaItem = {
-          id: `media-${Date.now()}-${i}`,
+          id: generateTempMediaId(),
           type: 'image',
           url: URL.createObjectURL(file),
           caption: ''

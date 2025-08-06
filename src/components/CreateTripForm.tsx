@@ -7,6 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { tripWithStagesSchema, type TripWithStagesData } from '@/schemas/trip';
 import { useToast } from '@/hooks/useToast';
 import { TripForm } from './TripForm';
+import { generateTempStageId } from '@/lib/temp-id-service';
 
 const CreateTripForm = () => {
   const router = useRouter();
@@ -26,7 +27,7 @@ const CreateTripForm = () => {
       media: [],
       gpxFile: null,
       stages: [{
-        id: `temp-${Date.now()}`, // Assign a temporary ID
+        id: generateTempStageId(), // Assign a temporary ID
         orderIndex: 0,
         title: 'Tappa 1',
         description: '',

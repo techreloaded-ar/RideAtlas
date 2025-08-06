@@ -3,6 +3,7 @@
 
 import { useState, useRef, useCallback } from 'react';
 import { MediaItem } from '@/types/trip';
+import { generateTempMediaId } from '@/lib/temp-id-service';
 
 interface MultimediaUploadProps {
   mediaItems: MediaItem[];
@@ -54,7 +55,7 @@ const MultimediaUpload: React.FC<MultimediaUploadProps> = ({
         continue;
       }
 
-      const tempId = `temp-${Date.now()}-${Math.random()}`;
+      const tempId = generateTempMediaId();
       setUploadProgress(prev => ({ ...prev, [tempId]: 0 }));
 
       try {

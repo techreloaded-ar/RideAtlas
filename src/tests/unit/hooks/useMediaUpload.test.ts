@@ -843,7 +843,7 @@ describe('useMediaUpload Hook', () => {
       expect(mockFetch).toHaveBeenCalledTimes(1);
       expect(mockOnMediaUpdate).toHaveBeenCalledWith([
         expect.objectContaining({
-          id: expect.stringMatching(/^media-1640995200000-/),
+          id: expect.stringMatching(/^temp-media--1640995200000-/),
           type: 'image',
           url: 'https://example.com/unique-image.jpg'
         })

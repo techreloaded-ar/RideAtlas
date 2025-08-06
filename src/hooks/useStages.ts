@@ -3,6 +3,7 @@
 
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { Stage, StageCreationData, StageUpdateData } from '@/types/trip';
+import { generateTempStageId, isTempId } from '@/lib/temp-id-service';
 
 interface UseStagesProps {
   tripId: string;
@@ -107,7 +108,7 @@ export function useStages({ tripId, autoFetch = true }: UseStagesProps): UseStag
       
       // Optimistic update: aggiungi temporaneamente la stage
       const tempStage: Stage = {
-        id: `temp-${Date.now()}`,
+        id: generateTempStageId(),
         tripId,
         ...finalData,
         media: finalData.media || [],
@@ -141,7 +142,7 @@ export function useStages({ tripId, autoFetch = true }: UseStagesProps): UseStag
       return newStage;
     } catch (err) {
       // Rollback optimistic update
-      setStages(prev => prev.filter(stage => !stage.id.startsWith('temp-')));
+      setStages(prev => prev.filter(stage => !isTempId(stage.id)));
       
       const errorMessage = err instanceof Error ? err.message : 'Errore creazione tappa';
       setError(errorMessage);

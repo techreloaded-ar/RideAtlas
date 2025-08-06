@@ -5,6 +5,7 @@ import { auth } from '@/auth'
 import { UserRole } from '@/types/profile'
 import { RecommendedSeason, transformPrismaStages } from '@/types/trip'
 import { prepareJsonFieldsUpdate, isMultiStageTripUtil, calculateTotalDistance, calculateTripDuration } from '@/lib/trip-utils'
+import { isTempId } from '@/lib/temp-id-service'
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic'
@@ -270,10 +271,10 @@ export async function PUT(
         });
         const existingStageIds = new Set(existingStages.map(s => s.id));
         
-        const stagesToCreate = stages.filter(s => !s.id || (s.id && s.id.startsWith('temp-')));
-        const stagesToProcess = stages.filter(s => s.id && !s.id.startsWith('temp-') && existingStageIds.has(s.id));
+        const stagesToCreate = stages.filter(s => !s.id || (s.id && isTempId(s.id)));
+        const stagesToProcess = stages.filter(s => s.id && !isTempId(s.id) && existingStageIds.has(s.id));
         const stageIdsToDelete = Array.from(existingStageIds).filter(id => 
-          !stages.some(s => s.id === id && !s.id.startsWith('temp-'))
+          !stages.some(s => s.id === id && !isTempId(s.id))
         );
         
         const operations: Promise<unknown>[] = [];

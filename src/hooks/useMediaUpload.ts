@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from 'react';
 import { MediaItem, GpxFile } from '@/types/trip';
+import { generateTempMediaId } from '@/lib/temp-id-service';
 
 export interface UseMediaUploadReturn {
   // State
@@ -89,7 +90,7 @@ export const useMediaUpload = ({
 
         // Create new MediaItem with real URL
         const newMediaItem: MediaItem = {
-          id: `media-${Date.now()}-${Math.random().toString(36).substring(2, 10)}`,
+          id: generateTempMediaId(),
           type: 'image',
           url,
           caption: ''

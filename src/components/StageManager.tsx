@@ -4,6 +4,7 @@
 import { FieldError } from 'react-hook-form'
 import { type StageCreationData } from '@/schemas/trip'
 import StageTimeline from './stages/StageTimeline' // Import StageTimeline
+import { generateTempStageId } from '@/lib/temp-id-service';
 
 interface StageManagerProps {
   stages: StageCreationData[]
@@ -16,7 +17,7 @@ export const StageManager = ({ stages, onChange, errors, isLoading }: StageManag
 
   const addStage = () => {
     const newStage: StageCreationData = {
-      id: `temp-${Date.now()}`, // Add a temporary ID for new stages
+      id: generateTempStageId(), // Add a temporary ID for new stages
       orderIndex: stages.length,
       title: `Tappa ${stages.length + 1}`,
       description: '',

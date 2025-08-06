@@ -10,6 +10,7 @@ import StageEditor from '@/components/stages/StageEditor';
 import { PlusIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import { Dialog, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
+import { generateTempStageId } from '@/lib/temp-id-service';
 
 interface FormErrors {
   [key: string]: string[] | undefined;
@@ -50,7 +51,7 @@ export default function TripStagesSection({
   // Handler per aggiungere nuova tappa direttamente
   const handleAddStage = useCallback(() => {
     const newStage: Stage = {
-      id: `temp-stage-${Date.now()}`, // ID temporaneo per la nuova tappa
+      id: generateTempStageId(), // ID temporaneo per la nuova tappa
       tripId: tripId || 'temp-trip-id', // Usa tripId o un ID temporaneo
       orderIndex: stages.length, // Assegna il prossimo indice disponibile
       title: `Tappa ${stages.length + 1}`,
@@ -139,7 +140,7 @@ export default function TripStagesSection({
       } else {
         // Modalità create locale (nuovo trip)
         const newStage: Stage = {
-          id: `temp-stage-${Date.now()}`,
+          id: generateTempStageId(),
           tripId: 'temp-trip-id',
           ...stageCreationData,
           createdAt: new Date(),
