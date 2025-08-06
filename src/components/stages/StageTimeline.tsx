@@ -37,14 +37,12 @@ function SortableStageItem({
   stage,
   index,
   isEditable,
-  isDragging,
   onEdit,
   onDelete
 }: {
   stage: Stage;
   index: number;
   isEditable: boolean;
-  isDragging?: boolean;
   onEdit: () => void;
   onDelete: () => void;
 }) {
@@ -217,6 +215,10 @@ export default function StageTimeline({
               } else {
                 return `Trascinamento della tappa ${activeStage?.title} annullato`;
               }
+            },
+            onDragCancel({ active }) {
+              const stage = orderedStages.find(s => s.id === active.id);
+              return `Trascinamento della tappa ${stage?.title} annullato`;
             },
           },
         }}

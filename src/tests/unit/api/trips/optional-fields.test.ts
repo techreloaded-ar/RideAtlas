@@ -19,6 +19,7 @@ jest.mock('@/lib/prisma', () => ({
       findUnique: jest.fn(),
       update: jest.fn(),
     },
+    $transaction: jest.fn(),
   },
 }));
 
@@ -47,6 +48,11 @@ describe('Trip API - Optional Fields Support', () => {
       expires: '2024-12-31T23:59:59.999Z',
     });
     mockEnsureUserExists.mockResolvedValue(mockUser);
+    
+    // Mock $transaction per eseguire la callback con il mock prisma
+    mockPrisma.$transaction.mockImplementation(async (callback) => {
+      return callback(mockPrisma);
+    });
   });
 
   const createMockRequest = (body: unknown): NextRequest => {
@@ -100,6 +106,9 @@ describe('Trip API - Optional Fields Support', () => {
           insights: '', // Dovrebbe accettare stringa vuota
           slug: 'viaggio-senza-descrizione',
           user_id: 'user-123',
+          // L'API ricalcola duration basandosi su stages (0 stages = 1 day, 0 nights)
+          duration_days: 1,
+          duration_nights: 0,
         },
       });
     });
@@ -187,6 +196,9 @@ describe('Trip API - Optional Fields Support', () => {
           tags: [], // Dovrebbe accettare array vuoto
           slug: 'viaggio-senza-tag',
           user_id: 'user-123',
+          // L'API ricalcola duration basandosi su stages (0 stages = 1 day, 0 nights)
+          duration_days: 1,
+          duration_nights: 0,
         },
       });
     });

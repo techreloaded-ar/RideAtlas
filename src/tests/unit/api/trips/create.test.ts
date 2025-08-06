@@ -15,9 +15,16 @@ jest.mock('@/lib/prisma', () => ({
     trip: {
       create: jest.fn(),
       findUnique: jest.fn(),
+      update: jest.fn(),
     },
+    stage: {
+      createMany: jest.fn(),
+    },
+    $transaction: jest.fn(),
   },
 }))
+
+const mockPrisma = prisma as jest.Mocked<typeof prisma>
 
 jest.mock('@/lib/user-sync', () => ({
   ensureUserExists: jest.fn(),
@@ -35,14 +42,19 @@ const mockAuth = auth as jest.MockedFunction<typeof auth>
 const mockEnsureUserExists = ensureUserExists as jest.MockedFunction<typeof ensureUserExists>
 
 describe('POST /api/trips - Creazione Viaggi', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     jest.clearAllMocks()
     
     // Setup default mocks for utility functions
-    const { isMultiStageTripUtil, calculateTotalDistance, calculateTripDuration } = require('@/lib/trip-utils')
+    const { isMultiStageTripUtil, calculateTotalDistance, calculateTripDuration } = await import('@/lib/trip-utils')
     isMultiStageTripUtil.mockReturnValue(false)
     calculateTotalDistance.mockReturnValue(0)
     calculateTripDuration.mockReturnValue({ days: 3, nights: 2 })
+    
+    // Mock $transaction per eseguire la callback con il mock prisma
+    mockPrisma.$transaction.mockImplementation(async (callback) => {
+      return callback(mockPrisma);
+    });
   })
 
   const createMockRequest = (body: unknown): NextRequest => {
@@ -56,8 +68,9 @@ describe('POST /api/trips - Creazione Viaggi', () => {
     title: 'Viaggio in Toscana',
     summary: 'Un bellissimo viaggio attraverso le colline toscane con panorami mozzafiato',
     destination: 'Toscana, Italia',
-    duration_days: 3,
-    duration_nights: 2,
+    insights: 'Approfondimenti sul viaggio',
+    duration_days: 1,
+    duration_nights: 0,
     tags: ['natura', 'panorami', 'cultura'],
     theme: 'Turismo naturalistico',
     characteristics: ['Strade sterrate', 'Bel paesaggio'],
@@ -124,8 +137,7 @@ describe('POST /api/trips - Creazione Viaggi', () => {
         title: 'Viaggio Minimo',
         summary: 'Descrizione minima del viaggio',
         destination: 'Roma',
-        duration_days: 1,
-        duration_nights: 1,
+        insights: 'Approfondimenti sul viaggio',
         tags: ['roma'],
         theme: 'Città',
         recommended_seasons: [RecommendedSeason.Primavera],
@@ -157,6 +169,8 @@ describe('POST /api/trips - Creazione Viaggi', () => {
           ...minimalData,
           characteristics: [],
           slug: 'viaggio-minimo',
+          duration_days: 1,
+          duration_nights: 0,
           user_id: 'user-123',
         },
       })
@@ -210,7 +224,6 @@ describe('POST /api/trips - Creazione Viaggi', () => {
       const invalidData = {
         title: '',
         destination: '',
-        duration_days: 0,
         tags: [],
         theme: '',
       }
@@ -225,7 +238,6 @@ describe('POST /api/trips - Creazione Viaggi', () => {
       expect(data.details.title).toContain('Il titolo deve contenere almeno 3 caratteri.')
       expect(data.details.summary).toContain('Required')
       expect(data.details.destination).toContain('La destinazione deve contenere almeno 3 caratteri.')
-      expect(data.details.duration_days).toContain('La durata in giorni deve essere un numero positivo.')
       // tags è opzionale con default [], quindi non dovrebbe generare errore
       expect(data.details.tags).toBeUndefined()
       expect(data.details.theme).toContain('Il tema deve contenere almeno 3 caratteri.')
@@ -259,22 +271,6 @@ describe('POST /api/trips - Creazione Viaggi', () => {
       expect(response.status).toBe(400)
       expect(data.error).toBe('Dati non validi.')
       expect(data.details.summary).toBeDefined()
-    })
-
-    it('should reject trip with negative duration', async () => {
-      const invalidData = {        ...validTripData,
-        duration_days: -1,
-        duration_nights: -1,
-      };
-      
-      const request = createMockRequest(invalidData)
-      const response = await POST(request)
-      const data = await response.json();
-      
-      expect(response.status).toBe(400)
-      expect(data.error).toBe('Dati non validi.')
-      expect(data.details.duration_days).toContain('La durata in giorni deve essere un numero positivo.')
-      expect(data.details.duration_nights).toContain('La durata in notti deve essere un numero non negativo.')
     })
 
     it('should reject trip with invalid recommended season', async () => {

@@ -10,14 +10,31 @@ jest.mock('@/auth', () => ({
   auth: jest.fn(),
 }))
 
-jest.mock('@/lib/prisma', () => ({
-  prisma: {
-    trip: {
-      findUnique: jest.fn(),
-      update: jest.fn(),
+jest.mock('@/lib/prisma', () => {
+  const mockTrip = {
+    findUnique: jest.fn(),
+    update: jest.fn(),
+  };
+  const mockStage = {
+    findMany: jest.fn(),
+    createMany: jest.fn(),
+    update: jest.fn(),
+    deleteMany: jest.fn(),
+  };
+
+  return {
+    prisma: {
+      trip: mockTrip,
+      stage: mockStage,
+      $transaction: jest.fn().mockImplementation(async (callback) => {
+        return callback({
+          trip: mockTrip,
+          stage: mockStage,
+        });
+      }),
     },
-  },
-}))
+  };
+});
 
 const mockPrisma = prisma as jest.Mocked<typeof prisma>
 const mockAuth = auth as jest.MockedFunction<typeof auth>
@@ -229,6 +246,10 @@ describe('API /api/trips/[id] - Gestione Singolo Viaggio', () => {
       })
 
       it('should update trip successfully', async () => {
+        ;(prisma.trip.findUnique as jest.Mock)
+          .mockResolvedValueOnce(mockExistingTrip) // For the initial existingTrip fetch
+          .mockResolvedValue(mockUpdatedTrip); // For the fetch inside the transaction
+
         ;(prisma.trip.update as jest.Mock).mockResolvedValue(mockUpdatedTrip)
 
         const request = createMockRequest(validUpdateData)
@@ -247,20 +268,6 @@ describe('API /api/trips/[id] - Gestione Singolo Viaggio', () => {
             slug: 'viaggio-in-toscana-aggiornato',
             updated_at: expect.any(Date),
           },
-          include: {
-            user: {
-              select: {
-                id: true,
-                name: true,
-                email: true,
-              },
-            },
-            stages: {
-              orderBy: {
-                orderIndex: 'asc'
-              }
-            }
-          },
         })
       })
 
@@ -268,7 +275,17 @@ describe('API /api/trips/[id] - Gestione Singolo Viaggio', () => {
         const partialData = {
           title: 'Nuovo Titolo',
           summary: 'Nuova descrizione del viaggio',
-        }        ;(prisma.trip.update as jest.Mock).mockResolvedValue({
+        }
+        // Mock findUnique to return existing trip first, then updated trip
+        ;(prisma.trip.findUnique as jest.Mock)
+          .mockResolvedValueOnce(mockExistingTrip)
+          .mockResolvedValue({
+            ...mockExistingTrip,
+            ...partialData,
+            slug: 'nuovo-titolo',
+          });
+
+        ;(prisma.trip.update as jest.Mock).mockResolvedValue({
           ...mockUpdatedTrip,
           ...partialData,
         });
@@ -284,20 +301,6 @@ describe('API /api/trips/[id] - Gestione Singolo Viaggio', () => {
             slug: 'nuovo-titolo',
             tags: [],
             updated_at: expect.any(Date),
-          },
-          include: {
-            user: {
-              select: {
-                id: true,
-                name: true,
-                email: true,
-              },
-            },
-            stages: {
-              orderBy: {
-                orderIndex: 'asc'
-              }
-            }
           },
         })
       })
@@ -321,6 +324,14 @@ describe('API /api/trips/[id] - Gestione Singolo Viaggio', () => {
           duration_days: 5,
         };
 
+        // Mock findUnique to return existing trip first, then updated trip
+        ;(prisma.trip.findUnique as jest.Mock)
+          .mockResolvedValueOnce(mockExistingTrip)
+          .mockResolvedValue({
+            ...mockExistingTrip,
+            ...updateWithoutTitle,
+          });
+
         (prisma.trip.update as jest.Mock).mockResolvedValue({
           ...mockTrip,
           ...updateWithoutTitle,
@@ -335,20 +346,6 @@ describe('API /api/trips/[id] - Gestione Singolo Viaggio', () => {
             ...updateWithoutTitle,
             tags: [],
             updated_at: expect.any(Date),
-          },
-          include: {
-            user: {
-              select: {
-                id: true,
-                name: true,
-                email: true,
-              },
-            },
-            stages: {
-              orderBy: {
-                orderIndex: 'asc'
-              }
-            }
           },
         })
       })
@@ -517,6 +514,15 @@ describe('API /api/trips/[id] - Gestione Singolo Viaggio', () => {
           title: 'Nuovo Titolo Completamente Diverso',
         }
 
+        // Mock findUnique to return existing trip first, then updated trip
+        ;(prisma.trip.findUnique as jest.Mock)
+          .mockResolvedValueOnce(mockExistingTrip)
+          .mockResolvedValue({
+            ...mockExistingTrip,
+            ...updateData,
+            slug: 'nuovo-titolo-completamente-diverso',
+          });
+
         ;(prisma.trip.update as jest.Mock).mockResolvedValue({
           ...mockTrip,
           ...updateData,
@@ -535,20 +541,6 @@ describe('API /api/trips/[id] - Gestione Singolo Viaggio', () => {
             tags: [],
             updated_at: expect.any(Date),
           },
-          include: {
-            user: {
-              select: {
-                id: true,
-                name: true,
-                email: true,
-              },
-            },
-            stages: {
-              orderBy: {
-                orderIndex: 'asc'
-              }
-            }
-          },
         })
       })
 
@@ -561,6 +553,15 @@ describe('API /api/trips/[id] - Gestione Singolo Viaggio', () => {
         ]
 
         for (const { title, expectedSlug } of testCases) {
+          // Mock findUnique to return existing trip first, then updated trip
+          ;(prisma.trip.findUnique as jest.Mock)
+            .mockResolvedValueOnce(mockExistingTrip)
+            .mockResolvedValue({
+              ...mockExistingTrip,
+              title,
+              slug: expectedSlug,
+            });
+
           (prisma.trip.update as jest.Mock).mockResolvedValue({
             ...mockTrip,
             title,
@@ -578,20 +579,6 @@ describe('API /api/trips/[id] - Gestione Singolo Viaggio', () => {
               slug: expectedSlug,
               tags: [],
               updated_at: expect.any(Date),
-            },
-            include: {
-              user: {
-                select: {
-                  id: true,
-                  name: true,
-                  email: true,
-                },
-              },
-              stages: {
-                orderBy: {
-                  orderIndex: 'asc'
-               }
-              }
             },
           })
 

@@ -60,6 +60,7 @@ interface UploadProgress {
 interface UseStageEditorProps {
   tripId: string;
   stageId?: string; // Se presente, modalità edit
+  existingStages?: Stage[]; // Per calcolare automaticamente orderIndex
   autoFetch?: boolean; // Auto-fetch stage in modalità edit
 }
 
@@ -99,6 +100,7 @@ interface UseStageEditorReturn {
 export function useStageEditor({ 
   tripId, 
   stageId, 
+  existingStages = [],
   autoFetch = true 
 }: UseStageEditorProps): UseStageEditorReturn {
   // Integration con useStages per operazioni CRUD
@@ -157,11 +159,14 @@ export function useStageEditor({
       }
     } else if (!stageId) {
       // Modalità creazione: calcola il prossimo orderIndex
-      const nextOrderIndex = stages.length;
+      const stagesToConsider = existingStages.length > 0 ? existingStages : stages;
+      const nextOrderIndex = stagesToConsider.length > 0 
+        ? Math.max(...stagesToConsider.map(s => s.orderIndex)) + 1 
+        : 0;
       form.setValue('orderIndex', nextOrderIndex);
       setIsInitialized(true);
     }
-  }, [stageId, stages, autoFetch, stagesLoading, getStageById, form]);
+  }, [stageId, stages, existingStages, autoFetch, stagesLoading, getStageById, form]);
   
   // Clear errors function
   const clearErrors = useCallback(() => {
@@ -184,8 +189,12 @@ export function useStageEditor({
         gpxFile: currentStage.gpxFile
       });
     } else {
+      const stagesToConsider = existingStages.length > 0 ? existingStages : stages;
+      const nextOrderIndex = stagesToConsider.length > 0 
+        ? Math.max(...stagesToConsider.map(s => s.orderIndex)) + 1 
+        : 0;
       form.reset({
-        orderIndex: stages.length,
+        orderIndex: nextOrderIndex,
         title: '',
         description: '',
         routeType: '',
@@ -194,7 +203,7 @@ export function useStageEditor({
       });
     }
     clearErrors();
-  }, [currentStage, stages.length, form, clearErrors]);
+  }, [currentStage, stages, existingStages, form, clearErrors]);
 
   // Upload media files
   const uploadMedia = useCallback(async (files: FileList): Promise<MediaItem[]> => {

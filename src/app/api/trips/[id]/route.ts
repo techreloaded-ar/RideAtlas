@@ -3,7 +3,7 @@ import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/auth'
 import { UserRole } from '@/types/profile'
-import { RecommendedSeason } from '@/types/trip'
+import { RecommendedSeason, transformPrismaStages } from '@/types/trip'
 import { prepareJsonFieldsUpdate, isMultiStageTripUtil, calculateTotalDistance, calculateTripDuration } from '@/lib/trip-utils'
 
 // Force dynamic rendering
@@ -41,6 +41,16 @@ const gpxFileSchema = z.object({
   })).optional()
 });
 
+const stageUpdateSchema = z.object({
+  id: z.string().optional(),
+  orderIndex: z.number().int(),
+  title: z.string().min(3, { message: "Il titolo della tappa deve contenere almeno 3 caratteri." }),
+  description: z.string().optional(),
+  routeType: z.string().optional(),
+  media: z.array(mediaItemSchema).optional(),
+  gpxFile: gpxFileSchema.nullable().optional(),
+});
+
 // Schema di validazione per l'aggiornamento del viaggio
 const tripUpdateSchema = z.object({
   title: z.string().min(3, { message: 'Il titolo deve contenere almeno 3 caratteri.' }).max(100).optional(),
@@ -55,6 +65,7 @@ const tripUpdateSchema = z.object({
   insights: z.string().max(10000, { message: 'Il testo esteso non può superare 10000 caratteri.' }).optional(),
   media: z.array(mediaItemSchema).optional(),
   gpxFile: gpxFileSchema.nullable().optional(),
+  stages: z.array(stageUpdateSchema).optional(),
 })
 
 // Funzione di utilità per generare lo slug
@@ -127,13 +138,19 @@ export async function GET(
       )
     }
 
+    // Trasforma le stages di Prisma nel formato corretto per l'interfaccia
+    const transformedTrip = {
+      ...trip,
+      stages: trip.stages ? transformPrismaStages(trip.stages) : undefined
+    };
+    
     // Arricchisci i dati del viaggio con calcoli aggiornati
     const enrichedTrip = {
-      ...trip,
+      ...transformedTrip,
       // Calcoli aggiornati per supportare multi-stage
-      calculatedDistance: calculateTotalDistance(trip),
-      calculatedDuration: calculateTripDuration(trip),
-      isMultiStage: isMultiStageTripUtil(trip)
+      calculatedDistance: calculateTotalDistance(transformedTrip),
+      calculatedDuration: calculateTripDuration(transformedTrip),
+      isMultiStage: isMultiStageTripUtil(transformedTrip)
     };
 
     return NextResponse.json(enrichedTrip)
@@ -164,10 +181,12 @@ export async function PUT(
 
     const tripId = params.id
     const body = await request.json()
+    console.log('Backend - Dati ricevuti:', body);
 
     // Validazione dei dati
     const parsed = tripUpdateSchema.safeParse(body)
     if (!parsed.success) {
+      console.error('Backend - Errore di validazione:', parsed.error.flatten().fieldErrors);
       return NextResponse.json({
         error: 'Dati non validi',
         details: parsed.error.flatten().fieldErrors
@@ -205,7 +224,7 @@ export async function PUT(
       )
     }
 
-    const { gpxFile, media, ...updateData } = parsed.data
+    const { stages, gpxFile, media, ...updateData } = parsed.data
 
     // Se il titolo è cambiato, aggiorna anche lo slug
     let newSlug = existingTrip.slug
@@ -223,49 +242,103 @@ export async function PUT(
           error: 'Un viaggio con questo titolo esiste già. Scegli un titolo diverso.'
         }, { status: 409 })
       }
-    }    // TODO: Salva i dati originali per l'audit log quando implementeremo la tabella trip_changes
-    // const originalData = await prisma.trip.findUnique({
-    //   where: { id: tripId }
-    // })    // Prepara i dati per l'aggiornamento di base
-    const baseUpdateData = {
-      ...updateData,
-      ...(newSlug !== existingTrip.slug && { slug: newSlug }),
-      updated_at: new Date()
     }
 
-    // Aggiungi i campi JSON usando logica condivisa
-    const jsonFieldsUpdate = prepareJsonFieldsUpdate({ media, gpxFile });
-    const updatePayload: Record<string, unknown> = { ...baseUpdateData, ...jsonFieldsUpdate };
+    // Inizia una transazione per garantire l'atomicità
+    const updatedTrip = await prisma.$transaction(async (tx) => {
+      // 1. Aggiorna i dati di base del viaggio
+      const baseUpdateData = {
+        ...updateData,
+        ...(newSlug !== existingTrip.slug && { slug: newSlug }),
+        updated_at: new Date()
+      }
+      const jsonFieldsUpdate = prepareJsonFieldsUpdate({ media, gpxFile });
+      const updatePayload: Record<string, unknown> = { ...baseUpdateData, ...jsonFieldsUpdate };
 
-    // Aggiorna il viaggio con tutti i dati in un'unica chiamata
-    const updatedTrip = await prisma.trip.update({
-      where: { id: tripId },
-      data: updatePayload,
-      include: {
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true
-          }
-        },
-        stages: {
-          orderBy: {
-            orderIndex: 'asc'
-          }
+      await tx.trip.update({
+        where: { id: tripId },
+        data: updatePayload,
+      });
+
+      // 2. Gestione delle tappe (se presenti)
+      if (stages) {
+
+        const existingStages = await tx.stage.findMany({
+          where: { tripId: tripId },
+          select: { id: true, orderIndex: true }
+        });
+        const existingStageIds = new Set(existingStages.map(s => s.id));
+        const incomingStageIds = new Set(stages.map(s => s.id).filter(Boolean));
+
+        // Tappe da creare (senza ID)
+        const stagesToCreate = stages.filter(s => !s.id);
+        if (stagesToCreate.length > 0) {
+          await tx.stage.createMany({
+            data: stagesToCreate.map(stage => ({
+              ...stage,
+              tripId: tripId,
+            }))
+          });
+        }
+
+        // Tappe da aggiornare (con ID esistente)
+        const stagesToUpdate = stages.filter(s => s.id && existingStageIds.has(s.id));
+        for (const stage of stagesToUpdate) {
+          await tx.stage.update({
+            where: { id: stage.id },
+            data: {
+              ...stage,
+              tripId: tripId, // Assicura che la tappa rimanga collegata al viaggio
+            }
+          });
+        }
+
+        // Tappe da eliminare (ID esistenti non presenti nei dati in arrivo)
+        const stageIdsToDelete = Array.from(existingStageIds).filter(id => !incomingStageIds.has(id));
+        if (stageIdsToDelete.length > 0) {
+          await tx.stage.deleteMany({
+            where: {
+              id: { in: stageIdsToDelete },
+              tripId: tripId // Sicurezza extra
+            }
+          });
         }
       }
+
+      // 3. Recupera il viaggio aggiornato con tutte le tappe
+      return tx.trip.findUnique({
+        where: { id: tripId },
+        include: {
+          user: {
+            select: { id: true, name: true, email: true }
+          },
+          stages: {
+            orderBy: { orderIndex: 'asc' }
+          }
+        }
+      });
     });
+
+    if (!updatedTrip) {
+      // Questo non dovrebbe accadere se la transazione ha successo
+      throw new Error("Impossibile recuperare il viaggio dopo l'aggiornamento.");
+    }
 
     // TODO: Implementare audit log qui
     // await createTripAuditLog(tripId, session.user.id, originalData, updatedTrip)
 
+    // Trasforma le stages di Prisma nel formato corretto per l'interfaccia
+    const transformedUpdatedTrip = {
+      ...updatedTrip,
+      stages: updatedTrip.stages ? transformPrismaStages(updatedTrip.stages) : undefined
+    };
+    
     // Arricchisci i dati del viaggio aggiornato con calcoli
     const enrichedTrip = {
-      ...updatedTrip,
-      calculatedDistance: calculateTotalDistance(updatedTrip),
-      calculatedDuration: calculateTripDuration(updatedTrip),
-      isMultiStage: isMultiStageTripUtil(updatedTrip)
+      ...transformedUpdatedTrip,
+      calculatedDistance: calculateTotalDistance(transformedUpdatedTrip),
+      calculatedDuration: calculateTripDuration(transformedUpdatedTrip),
+      isMultiStage: isMultiStageTripUtil(transformedUpdatedTrip)
     };
 
     return NextResponse.json({

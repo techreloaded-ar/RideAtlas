@@ -3,8 +3,9 @@
 
 import React, { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { TripCreationData, MediaItem, GpxFile, RecommendedSeason } from '@/types/trip';
-import TripFormFields from './TripFormFields';
+import { TripCreationData, MediaItem, GpxFile, RecommendedSeason, Stage } from '@/types/trip';
+import TripFormFields from './TripFormFields.old';
+import TripStagesSection from './TripStagesSection';
 
 interface FormErrors {
   [key: string]: string[] | undefined;
@@ -13,11 +14,14 @@ interface FormErrors {
 interface TripFormContainerProps {
   // Dati e stato
   initialData: TripCreationData;
-  mediaItems: MediaItem[];
-  gpxFile: GpxFile | null;
   tagInput: string;
   fieldErrors: FormErrors | null;
   isLoading: boolean;
+  
+  // Stages data
+  stages: Stage[];
+  onStagesChange: (stages: Stage[]) => void;
+  
   // Handlers per i campi form
   handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
   handleTagInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -26,12 +30,16 @@ interface TripFormContainerProps {
   handleCharacteristicChange: (characteristic: string, checked: boolean) => void;
   handleSeasonChange: (season: RecommendedSeason, checked: boolean) => void;
 
-  // Handlers per media e GPX
-  addMedia: (mediaItem: Omit<MediaItem, 'id'>) => void;
-  removeMedia: (mediaId: string) => void;
-  updateMediaCaption: (mediaId: string, caption: string) => void;
-  setGpxFile: (gpxFile: GpxFile) => void;
-  removeGpxFile: () => void;
+  // Handlers opzionali per media e GPX (per backward compatibility)
+  addMedia?: (mediaItem: Omit<MediaItem, 'id'>) => void;
+  removeMedia?: (mediaId: string) => void;
+  updateMediaCaption?: (mediaId: string, caption: string) => void;
+  setGpxFile?: (gpxFile: GpxFile) => void;
+  removeGpxFile?: () => void;
+  
+  // Media data opzionali
+  mediaItems?: MediaItem[];
+  gpxFile?: GpxFile | null;
 
   // Submit e navigation
   onSubmit: (e: React.FormEvent) => Promise<void>;
@@ -44,15 +52,16 @@ interface TripFormContainerProps {
   showMediaUpload?: boolean;
   showGpxUpload?: boolean;
   showGpxPreview?: boolean;
+  showStagesSection?: boolean;
 }
 
 const TripFormContainer: React.FC<TripFormContainerProps> = ({
   initialData,
-  mediaItems,
-  gpxFile,
   tagInput,
   fieldErrors,
   isLoading,
+  stages,
+  onStagesChange,
   handleChange,
   handleTagInputChange,
   addTag,
@@ -67,11 +76,15 @@ const TripFormContainer: React.FC<TripFormContainerProps> = ({
   onSubmit,
   mode,
   tripId,
+  // Optional media data
+  mediaItems = [],
+  gpxFile = null,
   submitButtonText = mode === 'create' ? 'Crea Viaggio' : 'Aggiorna Viaggio',
   title = mode === 'create' ? 'Crea Nuovo Viaggio' : 'Modifica Viaggio',
   showMediaUpload = true,
   showGpxUpload = true,
   showGpxPreview = true,
+  showStagesSection = true,
 }) => {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -120,8 +133,10 @@ const TripFormContainer: React.FC<TripFormContainerProps> = ({
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-8">
+          {/* Sezione dati base viaggio */}
           <div className="bg-white shadow-lg rounded-lg overflow-hidden">
-            <div className="px-6 py-8 space-y-6">              <TripFormFields
+            <div className="px-6 py-8 space-y-6">
+              <TripFormFields
                 formData={initialData}
                 mediaItems={mediaItems}
                 gpxFile={gpxFile}
@@ -134,18 +149,37 @@ const TripFormContainer: React.FC<TripFormContainerProps> = ({
                 removeTag={removeTag}
                 handleCharacteristicChange={handleCharacteristicChange}
                 handleSeasonChange={handleSeasonChange}
-                addMedia={addMedia}
-                removeMedia={removeMedia}
-                updateMediaCaption={updateMediaCaption}
-                setGpxFile={setGpxFile}
-                removeGpxFile={removeGpxFile}
+                addMedia={addMedia || (() => {})}
+                removeMedia={removeMedia || (() => {})}
+                updateMediaCaption={updateMediaCaption || (() => {})}
+                setGpxFile={setGpxFile || (() => {})}
+                removeGpxFile={removeGpxFile || (() => {})}
                 showMediaUpload={showMediaUpload}
                 showGpxUpload={showGpxUpload}
                 showGpxPreview={showGpxPreview}
               />
             </div>
+          </div>
 
-            {/* Footer con bottoni */}
+          {/* Sezione gestione tappe */}
+          {showStagesSection && (
+            <div className="bg-white shadow-lg rounded-lg overflow-hidden">
+              <div className="px-6 py-8">
+                <TripStagesSection
+                  tripId={tripId}
+                  stages={stages}
+                  onStagesChange={onStagesChange}
+                  isLoading={combinedIsLoading}
+                  fieldErrors={fieldErrors}
+                  mode={mode}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Submit section */}
+          <div className="bg-white shadow-lg rounded-lg overflow-hidden">
+
             <div className="bg-gray-50 px-6 py-4">
               <div className="flex items-center justify-end space-x-4">
                 <button

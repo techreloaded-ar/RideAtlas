@@ -37,12 +37,12 @@ describe('useTripForm Hook - Optional Fields', () => {
         result.current.handleChange({
           target: { name: 'destination', value: 'Test Destination' },
         } as any);
-        result.current.handleChange({
-          target: { name: 'duration_days', value: '2' },
-        } as any);
-        result.current.handleChange({
-          target: { name: 'duration_nights', value: '1' },
-        } as any);
+        // result.current.handleChange({
+        //   target: { name: 'duration_days', value: '2' },
+        // } as any);
+        // result.current.handleChange({
+        //   target: { name: 'duration_nights', value: '1' },
+        // } as any);
         result.current.handleChange({
           target: { name: 'theme', value: 'Test Theme' },
         } as any);
@@ -53,6 +53,19 @@ describe('useTripForm Hook - Optional Fields', () => {
 
       act(() => {
         result.current.handleSeasonChange(RecommendedSeason.Estate, true);
+      });
+
+      // Aggiungi una tappa mock per superare la validazione
+      act(() => {
+        result.current.handleStagesChange([{
+          id: 'stage-1',
+          orderIndex: 0,
+          title: 'Tappa Mock',
+          description: 'Tappa di test',
+          media: [],
+          gpxFile: null,
+          routeType: 'strada'
+        }]);
       });
 
       // Verifica che il form accetti la submission con descrizione vuota
@@ -104,6 +117,19 @@ describe('useTripForm Hook - Optional Fields', () => {
 
       act(() => {
         result.current.handleSeasonChange(RecommendedSeason.Primavera, true);
+      });
+
+      // Aggiungi una tappa mock per superare la validazione
+      act(() => {
+        result.current.handleStagesChange([{
+          id: 'stage-1',
+          orderIndex: 0,
+          title: 'Tappa Mock',
+          description: 'Tappa di test',
+          media: [],
+          gpxFile: null,
+          routeType: 'strada'
+        }]);
       });
 
       // Verifica che il form accetti la submission senza tag
@@ -158,6 +184,19 @@ describe('useTripForm Hook - Optional Fields', () => {
 
       act(() => {
         result.current.handleSeasonChange(RecommendedSeason.Estate, true);
+      });
+
+      // Aggiungi una tappa mock per superare la validazione
+      act(() => {
+        result.current.handleStagesChange([{
+          id: 'stage-1',
+          orderIndex: 0,
+          title: 'Tappa Mock',
+          description: 'Tappa di test',
+          media: [],
+          gpxFile: null,
+          routeType: 'strada'
+        }]);
       });
 
       await act(async () => {

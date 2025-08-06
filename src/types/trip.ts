@@ -111,5 +111,35 @@ export const castStagesToJsonValue = (stages: Stage[]): JsonValue[] => {
   return stages as unknown as JsonValue[]
 }
 
+// Tipo per i dati Stage che arrivano da Prisma
+interface PrismaStage {
+  id: string
+  tripId: string
+  orderIndex: number
+  title: string
+  description: string | null
+  routeType: string | null
+  media: JsonValue[]
+  gpxFile: JsonValue | null
+  createdAt: Date
+  updatedAt: Date
+}
+
+// Funzione per trasformare i dati Prisma Stage nell'interfaccia Stage
+export const transformPrismaStageToStage = (prismaStage: PrismaStage): Stage => {
+  return {
+    ...prismaStage,
+    description: prismaStage.description ?? undefined,
+    routeType: prismaStage.routeType ?? undefined,
+    media: castToMediaItems(prismaStage.media || []),
+    gpxFile: castToGpxFile(prismaStage.gpxFile)
+  }
+}
+
+// Funzione per trasformare array di Prisma Stages in array di Stages
+export const transformPrismaStages = (prismaStages: PrismaStage[]): Stage[] => {
+  return prismaStages.map(transformPrismaStageToStage)
+}
+
 // Esporta gli enum per facilità d'uso
 export { TripStatus, RecommendedSeason }

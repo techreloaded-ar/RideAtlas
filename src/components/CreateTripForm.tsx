@@ -12,8 +12,7 @@ const CreateTripForm = () => {
   const { showSuccess } = useToast();
     const {
     formData,
-    mediaItems,
-    gpxFile,
+    stages,
     tagInput,
     error,
     fieldErrors,
@@ -24,11 +23,7 @@ const CreateTripForm = () => {
     removeTag,
     handleCharacteristicChange,
     handleSeasonChange,
-    addMedia,
-    removeMedia,
-    updateMediaCaption,
-    setGpxFile,
-    removeGpxFile,
+    handleStagesChange,
     submitForm,
   } = useTripForm({
     mode: 'create',
@@ -63,23 +58,22 @@ const CreateTripForm = () => {
   return (
     <TripFormContainer
       initialData={formData}
-      mediaItems={mediaItems}
-      gpxFile={gpxFile || null}
+      stages={stages}
       tagInput={tagInput}
       fieldErrors={fieldErrors}
-      isLoading={isLoading}      handleChange={handleChange}
+      isLoading={isLoading}
+      handleChange={handleChange}
       handleTagInputChange={handleTagInputChange}
       addTag={addTag}
       removeTag={removeTag}
       handleCharacteristicChange={handleCharacteristicChange}
       handleSeasonChange={handleSeasonChange}
-      addMedia={addMedia}
-      removeMedia={removeMedia}
-      updateMediaCaption={updateMediaCaption}
-      setGpxFile={setGpxFile}
-      removeGpxFile={removeGpxFile}
+      onStagesChange={handleStagesChange}
       onSubmit={handleSubmit}
       mode="create"
+      showMediaUpload={false}
+      showGpxUpload={false}
+      showGpxPreview={false}
     />
   );
 };

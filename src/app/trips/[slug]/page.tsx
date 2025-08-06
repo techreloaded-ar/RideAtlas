@@ -5,7 +5,7 @@ import { Calendar, MapPin, Tag, User, Clock, Award, Route, TrendingUp } from 'lu
 import { auth } from '@/auth';
 import Link from 'next/link';
 import { UserRole } from '@/types/profile';
-import { MediaItem, GpxFile, isMultiStageTrip } from '@/types/trip';
+import { MediaItem, GpxFile, isMultiStageTrip, transformPrismaStages } from '@/types/trip';
 import MediaGallery from '@/components/MediaGallery';
 import GPXDownloadButton from '@/components/GPXDownloadButton';
 import GPXAutoMapViewer from '@/components/GPXAutoMapViewer';
@@ -54,10 +54,10 @@ export default async function TripDetailPage({ params }: { params: { slug: strin
   // Cast GPX file safely
   const gpxFile = trip.gpxFile as GpxFile | null;
 
-  // Cast stages data and check if multi-stage trip
+  // Trasforma le stages di Prisma nel formato corretto per l'interfaccia
   const tripWithStages = {
     ...trip,
-    stages: trip.stages || []
+    stages: trip.stages ? transformPrismaStages(trip.stages) : []
   };
   const isMultiStage = isMultiStageTrip(tripWithStages);
 

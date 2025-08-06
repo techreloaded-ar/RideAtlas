@@ -58,24 +58,24 @@ export default function StageDisplay({
 
       {/* Metadati strutturati - Design responsive */}
       <div className="space-y-1 mb-6">
-        {stage.distance && (
+        {stage.gpxFile?.distance && (
           <div className="flex flex-col sm:flex-row sm:items-center text-sm">
             <span className="font-medium text-gray-700 sm:w-32 flex-shrink-0">Distanza:</span>
-            <span className="text-gray-900 mt-1 sm:mt-0">{stage.distance}</span>
+            <span className="text-gray-900 mt-1 sm:mt-0">{stage.gpxFile.distance} m</span>
           </div>
         )}
         
-        {stage.duration && (
+        {stage.gpxFile?.duration && (
           <div className="flex flex-col sm:flex-row sm:items-center text-sm">
             <span className="font-medium text-gray-700 sm:w-32 flex-shrink-0">Durata stimata:</span>
-            <span className="text-gray-900 mt-1 sm:mt-0">{stage.duration}</span>
+            <span className="text-gray-900 mt-1 sm:mt-0">{Math.round(stage.gpxFile.duration / 60)} min</span>
           </div>
         )}
         
-        {stage.elevation && (
+        {stage.gpxFile?.elevationGain && (
           <div className="flex flex-col sm:flex-row sm:items-center text-sm">
             <span className="font-medium text-gray-700 sm:w-32 flex-shrink-0">Dislivello:</span>
-            <span className="text-gray-900 mt-1 sm:mt-0">{stage.elevation}</span>
+            <span className="text-gray-900 mt-1 sm:mt-0">{stage.gpxFile.elevationGain} m</span>
           </div>
         )}
         
@@ -97,21 +97,21 @@ export default function StageDisplay({
       )}
 
       {/* Immagine principale - Performance optimized */}
-      {stage.mainImage && (
+      {stage.media && stage.media.length > 0 && (
         <div className="mb-6">
           <div className="relative w-full h-64 rounded-lg overflow-hidden">
             <Image
-              src={stage.mainImage.url}
-              alt={stage.mainImage.caption || `Immagine tappa ${stageNumber}`}
+              src={stage.media[0].url}
+              alt={stage.media[0].caption || `Immagine tappa ${stageNumber}`}
               fill
               className="object-cover"
               loading="lazy"
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             />
           </div>
-          {stage.mainImage.caption && (
+          {stage.media[0].caption && (
             <p className="text-sm text-gray-600 mt-2 text-center italic">
-              {stage.mainImage.caption}
+              {stage.media[0].caption}
             </p>
           )}
         </div>

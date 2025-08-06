@@ -5,7 +5,8 @@ import {
   RecommendedSeason, 
   Trip, 
   MediaItem, 
-  GpxFile
+  GpxFile,
+  Stage
 } from '@/types/trip';
 
 interface UseTripFormProps {
@@ -30,8 +31,8 @@ export const useTripForm = ({
     title: '',
     summary: '',
     destination: '',
-    duration_days: 1,
-    duration_nights: 1,
+    duration_days: 1, // Calcolato automaticamente dalle stages
+    duration_nights: 0, // Calcolato automaticamente dalle stages
     tags: [],
     theme: '',
     characteristics: [],
@@ -44,6 +45,9 @@ export const useTripForm = ({
 
   // Stato separato per i media items come MediaItem[]
   const [mediaItems, setMediaItems] = useState<MediaItem[]>([]);
+  
+  // Stato per le stages del viaggio
+  const [stages, setStages] = useState<Stage[]>([]);
 
   const [tagInput, setTagInput] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -68,8 +72,8 @@ export const useTripForm = ({
   // Only update once when data is first loaded
   useEffect(() => {
     if (initialData && 'id' in initialData && initialData.id && !isInitialized) {
-      // Estrai media e gpx separatamente per gestirli diversamente
-      const { media, gpxFile, price, ...restData } = initialData;
+      // Estrai media, gpx e stages separatamente per gestirli diversamente
+      const { media, gpxFile, price, stages: initialStages, ...restData } = initialData;
       
       // Aggiorna il form con i dati base
       setFormData(prev => ({
@@ -97,6 +101,11 @@ export const useTripForm = ({
             gpxFile: gpxFileData
           }));
         }
+        
+        // Gestisci le stages se presenti
+        if (initialStages && Array.isArray(initialStages)) {
+          setStages(initialStages as Stage[]);
+        }
       
       setIsInitialized(true);
     }
@@ -104,13 +113,14 @@ export const useTripForm = ({
 
   const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
+    // Non permettiamo più la modifica manuale della durata
+    if (name === 'duration_days' || name === 'duration_nights') {
+      return; // Ignora i cambiamenti manuali - la durata è calcolata automaticamente
     
     // Gestione campi numerici speciali
     let processedValue: string | number = value;
     
-    if (name === 'duration_days' || name === 'duration_nights') {
-      processedValue = Math.max(1, parseInt(value, 10) || 1);
-    } else if (name === 'price') {
+    if (name === 'price') {
       // Gestisce il prezzo come numero decimale, minimo 0
       const numericValue = parseFloat(value);
       processedValue = isNaN(numericValue) ? 0 : Math.max(0, numericValue);
@@ -158,7 +168,7 @@ export const useTripForm = ({
       summary: '',
       destination: '',
       duration_days: 1,
-      duration_nights: 1,
+      duration_nights: 0,
       tags: [],
       theme: '',
       characteristics: [],
@@ -169,6 +179,7 @@ export const useTripForm = ({
       // price rimosso - sarà gestito dal database default
     });
     setMediaItems([]);
+    setStages([]);
     setTagInput('');
     setError(null);
     setFieldErrors(null);
@@ -192,20 +203,51 @@ export const useTripForm = ({
       item.id === mediaId ? { ...item, caption } : item
     ));
   }, []);
+  
+  // Funzioni per gestire le stages
+  const handleStagesChange = useCallback((newStages: Stage[]) => {
+    setStages(newStages);
+    
+    // Calcola automaticamente la durata basata sul numero di stages
+    const calculatedDays = Math.max(1, newStages.length); // Almeno 1 giorno
+    const calculatedNights = Math.max(0, newStages.length - 1); // 0 notti se 1 stage
+    
+    setFormData(prev => ({
+      ...prev,
+      duration_days: calculatedDays,
+      duration_nights: calculatedNights
+    }));
+  }, []);
 
   const submitForm = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     setFieldErrors(null);
 
+    // Validazione: almeno una stage richiesta
+    if (stages.length === 0) {
+      setFieldErrors({ stages: ['È richiesta almeno una tappa per completare il viaggio'] });
+      setIsLoading(false);
+      return false;
+    }
+
     try {
       const url = mode === 'create' ? '/api/trips' : `/api/trips/${tripId}`;
       const method = mode === 'create' ? 'POST' : 'PUT';
 
-      // Combina i dati del form con i media items
+      // Combina i dati del form con stages (media e GPX sono nelle stages)
       const submitData = {
         ...formData,
-        media: mediaItems
+        media: [], // Vuoto - i media sono nelle stages
+        gpxFile: null, // Null - i GPX sono nelle stages
+        stages: stages.map(stage => ({
+          orderIndex: stage.orderIndex,
+          title: stage.title,
+          description: stage.description,
+          routeType: stage.routeType,
+          media: stage.media,
+          gpxFile: stage.gpxFile
+        }))
       };
 
       const response = await fetch(url, {
@@ -235,13 +277,14 @@ export const useTripForm = ({
     } finally {
       setIsLoading(false);
     }
-  }, [formData, mediaItems, mode, tripId, onSuccess]);
+  }, [formData, stages, mode, tripId, onSuccess]);
 
   return {
     formData,
     setFormData,
     mediaItems,
     gpxFile: formData.gpxFile,
+    stages,
     tagInput,
     error,
     fieldErrors,
@@ -257,6 +300,7 @@ export const useTripForm = ({
     addMedia,
     removeMedia,
     updateMediaCaption,
+    handleStagesChange,
     resetForm,
     submitForm,
     setError,

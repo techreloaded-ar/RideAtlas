@@ -56,7 +56,7 @@
     "react-map-gl": "^7.1.6",
     "react-markdown": "^10.1.0",
     "stripe": "^18.4.0",
-    "zod": "^3.22.4"
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.1.5",

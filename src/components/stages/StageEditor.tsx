@@ -1,8 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { Stage, MediaItem, GpxFile } from '@/types/trip';
+import { Stage, MediaItem, StageCreationData } from '@/types/trip';
 import { useStageEditor } from '@/hooks/useStageEditor';
 import { PlusIcon, XMarkIcon, PhotoIcon, DocumentIcon, ChevronDownIcon, ChevronUpIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 
@@ -10,29 +9,18 @@ interface StageEditorProps {
   tripId: string;
   stageId?: string;
   initialData?: Stage;
-  onSave: (stageData: StageFormData) => void;
+  existingStages?: Stage[]; // Per calcolare automaticamente orderIndex
+  onSave: (stageData: StageCreationData) => void;
   onCancel: () => void;
   onDelete?: () => void;
 }
 
-interface StageFormData {
-  title: string;
-  description?: string;
-  routeType?: string;
-  orderIndex: number;
-  // File uploads
-  mainImageFile?: File;
-  mediaFiles?: File[];
-  gpxFileUpload?: File;
-  // Existing data (for edit mode)
-  existingMedia?: MediaItem[];
-  existingGpx?: GpxFile | null;
-}
 
 export default function StageEditor({
   tripId,
   stageId,
   initialData,
+  existingStages = [],
   onSave,
   onCancel,
   onDelete
@@ -41,13 +29,19 @@ export default function StageEditor({
   
   // Hook per gestione business logic
   const { 
+    form,
     isLoading, 
-    uploadProgress, 
-    error, 
-    saveStage, 
-    deleteStage, 
-    clearError 
-  } = useStageEditor(tripId, stageId);
+    isSaving,
+    isUploading,
+    saveStage,
+    errors,
+    clearErrors
+  } = useStageEditor({ 
+    tripId, 
+    stageId, 
+    existingStages,
+    autoFetch: !!stageId 
+  });
   
   // Collapsible sections state
   const [expandedSections, setExpandedSections] = useState({
@@ -57,23 +51,14 @@ export default function StageEditor({
     gpx: false
   });
 
-  // Form setup
+  // Destructure form methods from hook
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors: formErrors, isSubmitting },
     setValue,
     watch
-  } = useForm<StageFormData>({
-    defaultValues: {
-      title: initialData?.title || '',
-      description: initialData?.description || '',
-      routeType: initialData?.routeType || '',
-      orderIndex: initialData?.orderIndex || 0,
-      existingMedia: initialData?.media || [],
-      existingGpx: initialData?.gpxFile || null
-    }
-  });
+  } = form;
 
   // File upload states
   const [previewImages, setPreviewImages] = useState<string[]>([]);
@@ -88,12 +73,12 @@ export default function StageEditor({
   };
 
   // Handle file uploads
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>, isMainImage = false) => {
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>, isMainImage?: boolean) => {
     const files = event.target.files;
     if (!files || files.length === 0) return;
 
     const file = files[0];
-    
+
     // Basic validation
     if (!file.type.startsWith('image/')) {
       alert('Seleziona solo file immagine');
@@ -105,19 +90,22 @@ export default function StageEditor({
       return;
     }
 
-    // Set form value
-    if (isMainImage) {
-      setValue('mainImageFile', file);
-    } else {
-      const currentFiles = watch('mediaFiles') || [];
-      setValue('mediaFiles', [...currentFiles, file]);
-    }
+    // Set form value - aggiungi al campo media esistente
+    const currentMedia = watch('media') || [];
+    // Per ora creiamo un placeholder MediaItem - dovremmo fare l'upload del file
+    const newMediaItem: MediaItem = {
+      id: `temp-${Date.now()}`, // ID temporaneo
+      type: file.type.startsWith('image/') ? 'image' : 'video',
+      url: URL.createObjectURL(file), // URL temporaneo per preview
+      caption: isMainImage ? 'Immagine principale' : ''
+    };
+    setValue('media', [...currentMedia, newMediaItem]);
 
     // Create preview
     const reader = new FileReader();
     reader.onload = (e) => {
       if (e.target?.result) {
-        setPreviewImages(prev => [...prev, e.target.result as string]);
+        setPreviewImages(prev => [...prev, e.target!.result as string]);
       }
     };
     reader.readAsDataURL(file);
@@ -137,15 +125,18 @@ export default function StageEditor({
       return;
     }
 
-    setValue('gpxFileUpload', file);
+    // TODO: Implementare upload GPX e creazione oggetto GpxFile
+    // Per ora salviamo solo il nome file
     setGpxFileName(file.name);
   };
 
   // Submit handler
-  const onSubmit = async (data: StageFormData) => {
+  const onSubmit = async (data: Omit<Stage, 'id' | 'tripId' | 'createdAt' | 'updatedAt'>) => {
     try {
-      await saveStage(data);
-      onSave(data); // Callback per parent component
+      const savedStage = await saveStage();
+      if (savedStage) {
+        onSave(data); // Callback per parent component
+      }
     } catch (error) {
       // Error già gestito dal hook
       console.error('Errore salvataggio tappa:', error);
@@ -157,19 +148,17 @@ export default function StageEditor({
     if (!stageId || !onDelete) return;
     
     if (confirm('Sei sicuro di voler eliminare questa tappa? L\'operazione non può essere annullata.')) {
-      try {
-        await deleteStage(stageId);
-        onDelete();
-      } catch (error) {
-        console.error('Errore eliminazione tappa:', error);
-      }
+      onDelete(); // La logica di eliminazione è gestita dal parent
     }
   };
 
-  // Remove existing media
+  // Remove existing media - utilizza la funzione dell'hook
   const removeExistingMedia = (mediaId: string) => {
-    const currentMedia = watch('existingMedia') || [];
-    setValue('existingMedia', currentMedia.filter(m => m.id !== mediaId));
+    // Utilizza il metodo dell'hook useStageEditor
+    // removeMedia(mediaId); // Questo potrebbe non funzionare per media esistenti
+    // Per ora manteniamo la logica esistente
+    const currentMedia = watch('media') || [];
+    setValue('media', currentMedia.filter(m => m.id !== mediaId));
   };
 
   return (
@@ -184,7 +173,7 @@ export default function StageEditor({
             <button
               type="button"
               onClick={handleDelete}
-              disabled={isLoading}
+              disabled={isLoading || isSaving}
               className="px-3 py-1.5 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 rounded border border-red-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Elimina
@@ -199,24 +188,26 @@ export default function StageEditor({
           </button>
           <button
             type="submit"
-            disabled={isSubmitting || isLoading}
+            disabled={isSubmitting || isLoading || isSaving}
             className="px-4 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isSubmitting || isLoading ? 'Salvataggio...' : 'Salva Tappa'}
+            {isSubmitting || isLoading || isSaving ? 'Salvataggio...' : 'Salva Tappa'}
           </button>
         </div>
       </div>
 
       {/* Error message */}
-      {error && (
+      {(errors.form || errors.save || errors.upload) && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
               <ExclamationTriangleIcon className="w-5 h-5 text-red-600 mr-2" />
-              <span className="text-sm text-red-700">{error}</span>
+              <span className="text-sm text-red-700">
+                {errors.form || errors.save || errors.upload}
+              </span>
             </div>
             <button
-              onClick={clearError}
+              onClick={clearErrors}
               className="text-red-600 hover:text-red-700"
             >
               <XMarkIcon className="w-4 h-4" />
@@ -226,17 +217,15 @@ export default function StageEditor({
       )}
 
       {/* Progress bar during upload */}
-      {uploadProgress.overall !== undefined && (
+      {(isUploading || isSaving) && (
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
           <div className="flex items-center justify-between mb-1">
-            <span className="text-sm text-blue-700">Salvataggio in corso...</span>
-            <span className="text-sm text-blue-700">{uploadProgress.overall}%</span>
+            <span className="text-sm text-blue-700">
+              {isSaving ? 'Salvataggio in corso...' : 'Upload in corso...'}
+            </span>
           </div>
           <div className="w-full bg-blue-200 rounded-full h-2">
-            <div 
-              className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-              style={{ width: `${uploadProgress.overall}%` }}
-            />
+            <div className="bg-blue-600 h-2 rounded-full animate-pulse w-full" />
           </div>
         </div>
       )}
@@ -268,30 +257,11 @@ export default function StageEditor({
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="Es: Da Cortina d'Ampezzo al Passo Giau"
               />
-              {errors.title && (
-                <p className="mt-1 text-sm text-red-600">{errors.title.message}</p>
+              {formErrors.title && (
+                <p className="mt-1 text-sm text-red-600">{formErrors.title.message}</p>
               )}
             </div>
 
-            {/* Order Index */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Numero Tappa
-              </label>
-              <input
-                type="number"
-                min="0"
-                {...register('orderIndex', { 
-                  required: 'Numero tappa richiesto',
-                  min: { value: 0, message: 'Il numero deve essere positivo' }
-                })}
-                className="w-32 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="0"
-              />
-              {errors.orderIndex && (
-                <p className="mt-1 text-sm text-red-600">{errors.orderIndex.message}</p>
-              )}
-            </div>
 
             {/* Route Type */}
             <div>
@@ -306,8 +276,8 @@ export default function StageEditor({
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Es: Percorso misto: 60% strade di montagna, 30% statali..."
               />
-              {errors.routeType && (
-                <p className="mt-1 text-sm text-red-600">{errors.routeType.message}</p>
+              {formErrors.routeType && (
+                <p className="mt-1 text-sm text-red-600">{formErrors.routeType.message}</p>
               )}
             </div>
           </div>
@@ -335,8 +305,8 @@ export default function StageEditor({
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Descrivi il percorso, i punti di interesse, consigli utili..."
             />
-            {errors.description && (
-              <p className="mt-1 text-sm text-red-600">{errors.description.message}</p>
+            {formErrors.description && (
+              <p className="mt-1 text-sm text-red-600">{formErrors.description.message}</p>
             )}
           </div>
         )}
@@ -383,13 +353,13 @@ export default function StageEditor({
             </div>
 
             {/* Existing Media (Edit Mode) */}
-            {isEditMode && watch('existingMedia')?.length > 0 && (
+            {isEditMode && watch('media')?.length > 0 && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Immagini Esistenti
                 </label>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  {watch('existingMedia')?.map((media) => (
+                  {watch('media')?.map((media) => (
                     <div key={media.id} className="relative">
                       <img
                         src={media.url}
@@ -473,13 +443,13 @@ export default function StageEditor({
         {expandedSections.gpx && (
           <div className="p-4 border-t border-gray-200 space-y-4">
             {/* Current GPX (Edit Mode) */}
-            {isEditMode && watch('existingGpx') && (
+            {isEditMode && watch('gpxFile') && (
               <div className="bg-green-50 border border-green-200 rounded-lg p-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center">
                     <DocumentIcon className="w-5 h-5 text-green-600 mr-2" />
                     <span className="text-sm font-medium text-green-800">
-                      {watch('existingGpx')?.filename}
+                      {watch('gpxFile')?.filename}
                     </span>
                   </div>
                   <span className="text-sm text-green-600">File attuale</span>

@@ -1,101 +1,107 @@
 // src/components/EditTripForm.tsx
 "use client";
 
-import { useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
-import { TripCreationData, Trip } from '@/types/trip';
-import { useTripForm } from '@/hooks/useTripForm';
-import { useToast } from '@/hooks/useToast';
-import TripFormContainer from './TripFormContainer';
+import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { tripWithStagesSchema, type TripWithStagesData } from '@/schemas/trip'
+import { useTripSubmission, useTripData } from '@/hooks/useTripSubmission'
+import { useToast } from '@/hooks/useToast'
+import { TripForm } from './TripForm'
 
 interface EditTripFormProps {
-  tripId: string;
+  tripId: string
 }
 
 const EditTripForm = ({ tripId }: EditTripFormProps) => {
-  const router = useRouter();
-  const { showSuccess, showError } = useToast();
+  const router = useRouter()
+  const { showSuccess, showError } = useToast()
   
-  const [initialData, setInitialData] = useState<Partial<TripCreationData & Pick<Trip, 'id'>> | null>(null);
-  const [loadingTrip, setLoadingTrip] = useState(true);
-  const [tripError, setTripError] = useState('');
+  // Carica i dati esistenti del trip
+  const { 
+    data: tripData, 
+    isLoading: loadingTrip, 
+    error: tripError,
+    fetchTrip 
+  } = useTripData({ tripId, enabled: true })
 
-  const fetchTrip = useCallback(async () => {
-    try {
-      const response = await fetch(`/api/trips/${tripId}`);
-      
-      if (response.status === 403) {
-        setTripError('Non hai i permessi per modificare questo viaggio');
-        return;
-      }
-      
-      if (response.status === 404) {
-        setTripError('Viaggio non trovato');
-        return;
-      }
-      
-      if (!response.ok) {
-        throw new Error('Errore nel caricamento del viaggio');
-      }
-      
-      const tripData = await response.json();
-      setInitialData(tripData);
-    } catch (err) {
-      setTripError(err instanceof Error ? err.message : 'Errore sconosciuto');
-    } finally {
-      setLoadingTrip(false);
-    }
-  }, [tripId]);
+  // Setup del form con React Hook Form + Zod
+  const form = useForm<TripWithStagesData>({
+    resolver: zodResolver(tripWithStagesSchema),
+    defaultValues: {
+      title: '',
+      summary: '',
+      destination: '',
+      theme: '',
+      duration_days: 1,
+      duration_nights: 0,
+      characteristics: [],
+      recommended_seasons: [],
+      tags: [],
+      insights: '',
+      media: [],
+      gpxFile: null,
+      stages: []
+    },
+    mode: 'onChange' // Per validazione in tempo reale
+  })
 
-  // Fetch trip data on mount
-  useEffect(() => {
-    fetchTrip();
-  }, [fetchTrip]);
+  const { setError, reset } = form
 
-  const {
-    formData,
-    mediaItems,
-    gpxFile,
-    tagInput,
-    error,
-    fieldErrors,
-    isLoading,    handleChange,
-    handleTagInputChange,
-    addTag,
-    removeTag,
-    handleCharacteristicChange,
-    handleSeasonChange,
-    addMedia,
-    removeMedia,
-    updateMediaCaption,
-    setGpxFile,
-    removeGpxFile,
-    submitForm,  } = useTripForm({
+  // Hook per il submission
+  const { submit, isLoading: submitting } = useTripSubmission({
     mode: 'edit',
     tripId,
-    initialData: initialData || undefined,
-    onSuccess: () => {
-      showSuccess('Viaggio aggiornato con successo!');
-      // Reindirizza alla pagina del viaggio usando lo slug dai dati iniziali
-      if (initialData && 'slug' in initialData && initialData.slug) {
-        router.push(`/trips/${initialData.slug}`);
+    onSuccess: (trip: unknown) => {
+      showSuccess('Viaggio aggiornato con successo!')
+      
+      // Redirect alla pagina del trip usando lo slug
+      if (trip && typeof trip === 'object' && 'slug' in trip && trip.slug) {
+        router.push(`/trips/${trip.slug}`)
+      } else if (tripData && 'slug' in tripData && (tripData as Record<string, unknown>).slug) {
+        router.push(`/trips/${(tripData as Record<string, unknown>).slug}`)
       } else {
-        // Fallback alla dashboard se non abbiamo lo slug
-        console.error('Slug non trovato per il reindirizzamento');
-        router.push('/dashboard');
+        console.error('Slug non trovato per il reindirizzamento')
+        router.push('/dashboard')
       }
+    },
+    setError
+  })
+
+  // Carica i dati del trip al mount
+  useEffect(() => {
+    fetchTrip()
+  }, [fetchTrip])
+
+  // Reset del form quando arrivano i dati
+  useEffect(() => {
+    if (tripData) {
+      reset(tripData)
     }
-  });
+  }, [tripData, reset])
 
-  const handleSubmit = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault();
-    await submitForm();
-  }, [submitForm]);
+  // Gestisce errori di caricamento
+  useEffect(() => {
+    if (tripError) {
+      if (tripError.includes('permessi')) {
+        showError(tripError)
+        router.push('/dashboard')
+        return
+      }
+      if (tripError.includes('non trovato')) {
+        showError(tripError)
+        router.push('/dashboard')
+        return
+      }
+      // Altri errori vengono mostrati in UI
+    }
+  }, [tripError, showError, router])
 
-  // Loading state while fetching trip
+  // Loading state
   if (loadingTrip) {
     return (
-      <div className="max-w-2xl mx-auto p-4">
+      <div className="max-w-4xl mx-auto p-4">
         <div className="bg-white shadow-md rounded-lg p-6">
           <div className="flex items-center justify-center py-8">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
@@ -103,76 +109,53 @@ const EditTripForm = ({ tripId }: EditTripFormProps) => {
           </div>
         </div>
       </div>
-    );
+    )
   }
 
-  // Error state
-  if (tripError) {
-    // Show toast for permission/not found errors and redirect
-    if (tripError.includes('permessi')) {
-      showError(tripError);
-      router.push('/dashboard');
-      return null;
-    }
-    if (tripError.includes('non trovato')) {
-      showError(tripError);
-      router.push('/dashboard');
-      return null;
-    }
-    
+  // Error state per errori non-redirect
+  if (tripError && !tripError.includes('permessi') && !tripError.includes('non trovato')) {
     return (
-      <div className="max-w-2xl mx-auto p-4">
+      <div className="max-w-4xl mx-auto p-4">
         <div className="bg-white shadow-md rounded-lg p-6">
           <div className="text-center py-8">
             <div className="text-red-600 mb-2">Errore nel caricamento</div>
             <div className="text-sm text-gray-500 mb-4">{tripError}</div>
             <button
+              onClick={() => fetchTrip()}
+              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 mr-2"
+            >
+              Riprova
+            </button>
+            <button
               onClick={() => router.push('/dashboard')}
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+              className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
             >
               Torna alla Dashboard
             </button>
           </div>
         </div>
       </div>
-    );
+    )
   }
 
-  // Render TripFormContainer for edit mode
+  // Form principale
   return (
-    <>
-      {error && (
-        <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 mb-4">
-          <div className="p-3 bg-red-100 text-red-700 border border-red-400 rounded">
-            {error}
-          </div>
-        </div>
-      )}
-      <TripFormContainer
-        initialData={formData}
-        mediaItems={mediaItems}
-        gpxFile={gpxFile || null}
-        tagInput={tagInput}
-        fieldErrors={fieldErrors}
-        isLoading={isLoading}
-        handleChange={handleChange}        handleTagInputChange={handleTagInputChange}
-        addTag={addTag}
-        removeTag={removeTag}
-        handleCharacteristicChange={handleCharacteristicChange}
-        handleSeasonChange={handleSeasonChange}
-        addMedia={addMedia}
-        removeMedia={removeMedia}
-        updateMediaCaption={updateMediaCaption}
-        setGpxFile={setGpxFile}
-        removeGpxFile={removeGpxFile}
-        onSubmit={handleSubmit}
-        mode="edit"
-        tripId={tripId}
-        title="Modifica Viaggio"
-        submitButtonText="Salva Modifiche"
-      />
-    </>
-  );
-};
+    <TripForm
+      form={form}
+      onSubmit={submit}
+      isLoading={submitting}
+      mode="edit"
+      title="Modifica Viaggio"
+      submitButtonText="Salva Modifiche"
+      onCancel={() => {
+        if (tripData && 'slug' in tripData && (tripData as Record<string, unknown>).slug) {
+          router.push(`/trips/${(tripData as Record<string, unknown>).slug}`)
+        } else {
+          router.push('/dashboard')
+        }
+      }}
+    />
+  )
+}
 
-export default EditTripForm;
+export default EditTripForm

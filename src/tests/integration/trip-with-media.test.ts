@@ -18,16 +18,42 @@ jest.mock('@/lib/user-sync', () => ({
   }))
 }));
 
-jest.mock('@/lib/prisma', () => ({
-  prisma: {
+jest.mock('@/lib/prisma', () => {
+  const originalPrisma = jest.requireActual('@/lib/prisma');
+  const tripCreateMock = jest.fn();
+  const tripUpdateMock = jest.fn();
+  const tripFindUniqueMock = jest.fn();
+  const tripDeleteMock = jest.fn();
+  const stageCreateManyMock = jest.fn();
+
+  const prismaMock = {
+    ...originalPrisma.prisma,
     trip: {
-      create: jest.fn(),
-      update: jest.fn(),
-      findUnique: jest.fn(),
-      delete: jest.fn()
-    }
-  }
-}));
+      create: tripCreateMock,
+      update: tripUpdateMock,
+      findUnique: tripFindUniqueMock,
+      delete: tripDeleteMock,
+    },
+    stage: {
+      createMany: stageCreateManyMock,
+    },
+    $transaction: jest.fn().mockImplementation(async (callback) => {
+      return callback({
+        trip: {
+          create: tripCreateMock,
+          update: tripUpdateMock,
+          findUnique: tripFindUniqueMock,
+          delete: tripDeleteMock,
+        },
+        stage: {
+          createMany: stageCreateManyMock,
+        },
+      });
+    }),
+  };
+
+  return { prisma: prismaMock };
+});
 
 // Utility per creare un mock di NextRequest
 const createMockRequest = (body: any, params = {}) => {
@@ -311,6 +337,7 @@ describe('Trip API con Media Integration', () => {
 
       (prisma.trip.findUnique as jest.Mock).mockResolvedValue({
         ...tripWithInsights,
+        insights: updatedInsights,
         user_id: 'user-123'
       });
 
