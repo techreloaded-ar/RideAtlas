@@ -262,47 +262,89 @@ export async function PUT(
 
       // 2. Gestione delle tappe (se presenti)
       if (stages) {
-
         const existingStages = await tx.stage.findMany({
           where: { tripId: tripId },
           select: { id: true, orderIndex: true }
         });
         const existingStageIds = new Set(existingStages.map(s => s.id));
-        const incomingStageIds = new Set(stages.map(s => s.id).filter(Boolean));
 
-        // Tappe da creare (senza ID)
         const stagesToCreate = stages.filter(s => !s.id);
-        if (stagesToCreate.length > 0) {
-          await tx.stage.createMany({
-            data: stagesToCreate.map(stage => ({
-              ...stage,
-              tripId: tripId,
-            }))
-          });
-        }
+        const stagesToProcess = stages.filter(s => s.id && existingStageIds.has(s.id)); // These are the stages that exist and are being updated/reordered
+        const stageIdsToDelete = Array.from(existingStageIds).filter(id => !stages.some(s => s.id === id)); // Stages that were in DB but not in incoming data
 
-        // Tappe da aggiornare (con ID esistente)
-        const stagesToUpdate = stages.filter(s => s.id && existingStageIds.has(s.id));
-        for (const stage of stagesToUpdate) {
-          await tx.stage.update({
-            where: { id: stage.id },
-            data: {
-              ...stage,
-              tripId: tripId, // Assicura che la tappa rimanga collegata al viaggio
-            }
-          });
-        }
+        const operations: Promise<unknown>[] = [];
 
-        // Tappe da eliminare (ID esistenti non presenti nei dati in arrivo)
-        const stageIdsToDelete = Array.from(existingStageIds).filter(id => !incomingStageIds.has(id));
-        if (stageIdsToDelete.length > 0) {
-          await tx.stage.deleteMany({
+        // 1. Get max current orderIndex
+        const maxExistingOrderIndexResult = await tx.stage.aggregate({
+            _max: {
+                orderIndex: true,
+            },
             where: {
-              id: { in: stageIdsToDelete },
-              tripId: tripId // Sicurezza extra
-            }
-          });
+                tripId: tripId,
+            },
+        });
+        const maxOrderIndex = maxExistingOrderIndexResult._max.orderIndex !== null ? maxExistingOrderIndexResult._max.orderIndex : -1;
+
+        // 2. Assign temporary high orderIndex to stages that are being reordered/updated
+        // This prevents unique constraint violations during the intermediate steps
+        if (stagesToProcess.length > 0) {
+            const tempUpdates = stagesToProcess.map((stage, i) =>
+                tx.stage.update({
+                    where: { id: stage.id },
+                    data: { orderIndex: maxOrderIndex + 1 + i }, // Assign a unique high temporary index
+                })
+            );
+            operations.push(...tempUpdates);
         }
+
+        // Execute temporary updates first to free up orderIndex values
+        await Promise.all(operations);
+        operations.length = 0; // Clear operations array for next batch
+
+        // 3. Delete stages that are no longer present
+        if (stageIdsToDelete.length > 0) {
+            operations.push(tx.stage.deleteMany({
+                where: {
+                    id: { in: stageIdsToDelete },
+                    tripId: tripId
+                }
+            }));
+        }
+
+        // 4. Update existing stages with their final orderIndex and other fields
+        if (stagesToProcess.length > 0) {
+            stagesToProcess.forEach(stage => {
+                operations.push(tx.stage.update({
+                    where: { id: stage.id },
+                    data: {
+                        orderIndex: stage.orderIndex, // Assign final orderIndex
+                        title: stage.title,
+                        description: stage.description,
+                        routeType: stage.routeType,
+                        media: stage.media,
+                        gpxFile: stage.gpxFile || undefined,
+                    }
+                }));
+            });
+        }
+
+        // Execute deletion and update first to avoid conflicts in orderIndex with the new created stages
+        await Promise.all(operations);
+        operations.length = 0; // Clear operations array for next batch
+
+        // 5. Create new stages
+        if (stagesToCreate.length > 0) {
+            operations.push(tx.stage.createMany({
+                data: stagesToCreate.map(stage => ({
+                    ...stage,
+                    tripId: tripId,
+                    gpxFile: stage.gpxFile || undefined,
+                }))
+            }));
+        }
+
+        // Execute all remaining operations
+        await Promise.all(operations);
       }
 
       // 3. Recupera il viaggio aggiornato con tutte le tappe

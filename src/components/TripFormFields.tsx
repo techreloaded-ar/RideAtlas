@@ -21,7 +21,7 @@ export const TripFormFields = ({ form }: TripFormFieldsProps) => {
   const recommendedSeasons = watch('recommended_seasons')
   const tags = watch('tags')
 
-  const handleCharacteristicChange = (characteristic: string, checked: boolean) => {
+  const handleCharacteristicChange = (characteristic: typeof CharacteristicOptions[number], checked: boolean) => {
     const current = characteristics || []
     if (checked) {
       setValue('characteristics', [...current, characteristic])

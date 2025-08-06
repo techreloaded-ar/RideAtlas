@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Stage } from '@/types/trip';
-import StageDisplay from './StageDisplay';
+import { StageCreationData } from '@/schemas/trip'; // Changed to StageCreationData
+import { EditableStageItem } from './EditableStageItem'; // Import EditableStageItem
 import {
   DndContext,
   closestCenter,
@@ -25,11 +25,11 @@ import {
 import { GripVertical } from 'lucide-react';
 
 interface StageTimelineProps {
-  stages: Stage[];
+  stages: StageCreationData[]; // Changed to StageCreationData
   isEditable?: boolean;
-  onReorder?: (newOrder: Stage[]) => void;
-  onEditStage?: (stageId: string) => void;
-  onDeleteStage?: (stageId: string) => void;
+  onReorder?: (newOrder: StageCreationData[]) => void; // Changed to StageCreationData
+  onUpdateStage?: (stageId: string, updatedStage: Partial<StageCreationData>) => void; // New prop for updating stage
+  onDeleteStage?: (stageId: string) => void; // New prop for deleting stage
 }
 
 // Componente wrapper per ogni stage sortable
@@ -37,13 +37,13 @@ function SortableStageItem({
   stage,
   index,
   isEditable,
-  onEdit,
-  onDelete
+  onUpdate, // Changed from onEdit
+  onDelete,
 }: {
-  stage: Stage;
+  stage: StageCreationData; // Changed to StageCreationData
   index: number;
   isEditable: boolean;
-  onEdit: () => void;
+  onUpdate: (updatedStage: Partial<StageCreationData>) => void; // Changed from onEdit
   onDelete: () => void;
 }) {
   const {
@@ -53,11 +53,11 @@ function SortableStageItem({
     transform,
     transition,
     isDragging: sortableIsDragging,
-  } = useSortable({ id: stage.id });
+  } = useSortable({ id: stage.id || `temp-${index}` }); // Use stage.id or temp id
 
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
+  const style: React.CSSProperties = {
+    transform: CSS.Transform.toString(transform || null),
+    transition: transition as string | undefined,
     opacity: sortableIsDragging ? 0.5 : 1,
   };
 
@@ -95,12 +95,19 @@ function SortableStageItem({
       
       {/* Stage content */}
       <div className={isEditable ? 'ml-2' : ''}>
-        <StageDisplay
+        <EditableStageItem // Use EditableStageItem
           stage={stage}
           index={index}
-          isEditable={isEditable}
-          onEdit={onEdit}
-          onDelete={onDelete}
+          onUpdate={onUpdate} // Pass onUpdate
+          onDelete={onDelete} // Pass onDelete
+          isLoading={false} // Assuming isLoading is managed by parent or EditableStageItem itself
+          // Pass dnd-kit props to EditableStageItem
+          attributes={attributes}
+          listeners={listeners}
+          setNodeRef={setNodeRef}
+          transform={transform}
+          transition={transition}
+          isDragging={sortableIsDragging}
         />
       </div>
     </div>
@@ -111,8 +118,8 @@ export default function StageTimeline({
   stages,
   isEditable = false,
   onReorder,
-  onEditStage,
-  onDeleteStage
+  onUpdateStage, // New prop
+  onDeleteStage, // New prop
 }: StageTimelineProps) {
   // Stato locale per gestire l'ordine delle tappe
   const [orderedStages, setOrderedStages] = useState(() => 
@@ -153,20 +160,6 @@ export default function StageTimeline({
       if (onReorder) {
         onReorder(reorderedStages);
       }
-    }
-  };
-
-  // Handler per modifica tappa
-  const handleEditStage = (stageId: string) => {
-    if (onEditStage) {
-      onEditStage(stageId);
-    }
-  };
-
-  // Handler per eliminazione tappa
-  const handleDeleteStage = (stageId: string) => {
-    if (onDeleteStage) {
-      onDeleteStage(stageId);
     }
   };
 
@@ -224,17 +217,17 @@ export default function StageTimeline({
         }}
       >
         <SortableContext 
-          items={orderedStages.map(stage => stage.id)}
+          items={orderedStages.map(stage => stage.id || `temp-${stage.orderIndex}`)} // Use stage.id or temp id
           strategy={verticalListSortingStrategy}
         >
           {orderedStages.map((stage, index) => (
             <SortableStageItem
-              key={stage.id}
+              key={stage.id || `temp-${index}`} // Use stage.id or temp id
               stage={stage}
               index={index}
               isEditable={isEditable}
-              onEdit={() => handleEditStage(stage.id)}
-              onDelete={() => handleDeleteStage(stage.id)}
+              onUpdate={(updatedStage) => onUpdateStage && onUpdateStage(stage.id || `temp-${index}`, updatedStage)} // Pass update handler
+              onDelete={() => onDeleteStage && onDeleteStage(stage.id || `temp-${index}`)} // Pass delete handler
             />
           ))}
         </SortableContext>

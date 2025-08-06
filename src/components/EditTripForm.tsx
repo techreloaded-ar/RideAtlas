@@ -34,8 +34,6 @@ const EditTripForm = ({ tripId }: EditTripFormProps) => {
       summary: '',
       destination: '',
       theme: '',
-      duration_days: 1,
-      duration_nights: 0,
       characteristics: [],
       recommended_seasons: [],
       tags: [],

@@ -3,6 +3,7 @@
 
 import { useState, useCallback } from 'react';
 import { Stage, MediaItem, GpxFile } from '@/types/trip';
+import { StageCreationData } from '@/schemas/trip';
 import { useStages } from '@/hooks/useStages';
 import StageTimeline from '@/components/stages/StageTimeline';
 import StageEditor from '@/components/stages/StageEditor';
@@ -85,17 +86,17 @@ export default function TripStagesSection({
   }, [tripId, stages, stagesHook, onStagesChange, isDeleting]);
 
   // Handler per riordinamento tappe
-  const handleReorderStages = useCallback(async (newOrder: Stage[]) => {
+  const handleReorderStages = useCallback(async (newOrder: Stage[] | StageCreationData[]) => {
     if (tripId) {
       // Modalità edit: usa hook per riordinamento server-side
-      await stagesHook.reorderStages(newOrder);
+      await stagesHook.reorderStages(newOrder as Stage[]);
     } else {
       // Modalità create: riordina solo localmente
-      const reorderedStages = newOrder.map((stage, index) => ({
+      const reorderedStages = (newOrder as StageCreationData[]).map((stage, index) => ({
         ...stage,
         orderIndex: index
       }));
-      onStagesChange(reorderedStages);
+      onStagesChange(reorderedStages as Stage[]);
     }
   }, [tripId, stagesHook, onStagesChange]);
 
@@ -211,7 +212,7 @@ export default function TripStagesSection({
               stages={currentStages}
               isEditable={!isStagesLoading && !isDeleting}
               onReorder={handleReorderStages}
-              onEditStage={handleEditStage}
+              onUpdateStage={handleEditStage}
               onDeleteStage={handleDeleteStage}
             />
           </div>
