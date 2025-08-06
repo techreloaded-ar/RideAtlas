@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { type StageCreationData } from '@/schemas/trip';
 import { GripVertical } from 'lucide-react'; // Import GripVertical for drag handle
+import { PhotoIcon, DocumentIcon, XMarkIcon } from '@heroicons/react/24/outline'; // Import icons
+import { useMediaUpload } from '@/hooks/useMediaUpload';
 import { DraggableAttributes, DraggableSyntheticListeners } from '@dnd-kit/core'; // Import Dnd-kit types
 import { Transform } from '@dnd-kit/utilities'; // Import Dnd-kit types
 
@@ -34,6 +36,14 @@ export const EditableStageItem = ({
   isDragging,
 }: EditableStageItemProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
+
+  // Initialize media upload hook
+  const mediaHook = useMediaUpload({
+    currentMedia: Array.isArray(stage.media) ? stage.media : [],
+    currentGpx: stage.gpxFile || null,
+    onMediaUpdate: (newMedia) => onUpdate({ media: newMedia }),
+    onGpxUpdate: (newGpx) => onUpdate({ gpxFile: newGpx }),
+  });
 
   const toggleExpansion = () => {
     setIsExpanded(!isExpanded);
@@ -165,9 +175,163 @@ export const EditableStageItem = ({
               </select>
             </div>
 
-            {/* Placeholder per media e GPX - da implementare later */}
-            <div className="text-xs text-gray-500 bg-gray-50 p-3 rounded">
-              📸 Media upload e 🗺️ GPX upload saranno disponibili nella prossima versione
+            {/* Media Section */}
+            <div className="space-y-4">
+              <div>
+                <h5 className="text-sm font-medium text-gray-700 mb-3">Immagini e Media</h5>
+                
+                {/* Existing Media Display */}
+                {stage.media && Array.isArray(stage.media) && stage.media.length > 0 && (
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Immagini {stage.media.length > 0 && stage.media[0] && (
+                        <span className="text-xs text-gray-500">(la prima sarà l&apos;immagine principale)</span>
+                      )}
+                    </label>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {stage.media.map((media, mediaIndex) => (
+                        <div key={media.id} className="border border-gray-200 rounded-lg overflow-hidden">
+                          <div className="relative">
+                            <img
+                              src={media.url}
+                              alt={media.caption || 'Immagine tappa'}
+                              className="w-full h-20 object-cover"
+                            />
+                            {mediaIndex === 0 && (
+                              <div className="absolute top-1 left-1 bg-blue-500 text-white text-xs px-1 py-0.5 rounded">
+                                Principale
+                              </div>
+                            )}
+                            <button
+                              type="button"
+                              onClick={() => mediaHook.removeExistingMedia(media.id)}
+                              disabled={isLoading}
+                              className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center hover:bg-red-600 disabled:opacity-50"
+                            >
+                              <XMarkIcon className="w-3 h-3" />
+                            </button>
+                          </div>
+                          <div className="p-2">
+                            <input
+                              type="text"
+                              value={media.caption || ''}
+                              onChange={(e) => mediaHook.updateMediaCaption(media.id, e.target.value)}
+                              placeholder="Aggiungi una didascalia..."
+                              disabled={isLoading}
+                              className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50"
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Upload Error Display */}
+                {mediaHook.uploadError && (
+                  <div className="mb-4 bg-red-50 border border-red-200 rounded-lg p-3">
+                    <div className="flex items-center">
+                      <div className="text-red-600 text-sm">
+                        <strong>Errore upload:</strong> {mediaHook.uploadError}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Unified Image Upload */}
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    {stage.media && stage.media.length > 0 ? 'Aggiungi altre immagini' : 'Carica immagini'}
+                  </label>
+                  <div className={`border-2 border-dashed rounded-lg p-4 ${
+                    mediaHook.isUploading 
+                      ? 'border-blue-300 bg-blue-50' 
+                      : 'border-gray-300 hover:border-gray-400'
+                  } transition-colors`}>
+                    <div className="text-center">
+                      {mediaHook.isUploading ? (
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                      ) : (
+                        <PhotoIcon className="mx-auto h-8 w-8 text-gray-400" />
+                      )}
+                      <div className="mt-2">
+                        <label htmlFor={`images-${index}`} className={mediaHook.isUploading ? 'cursor-not-allowed' : 'cursor-pointer'}>
+                          <span className={`text-sm font-medium ${
+                            mediaHook.isUploading ? 'text-gray-400' : 'text-gray-900'
+                          }`}>
+                            {mediaHook.isUploading ? 'Caricamento in corso...' : 'Seleziona immagini'}
+                          </span>
+                          <input
+                            id={`images-${index}`}
+                            type="file"
+                            multiple
+                            accept="image/*"
+                            onChange={(e) => mediaHook.handleImageUpload(e)}
+                            className="sr-only"
+                            disabled={isLoading || mediaHook.isUploading}
+                          />
+                        </label>
+                        <p className="text-xs text-gray-500 mt-1">PNG, JPG, WebP fino a 10MB ciascuna. La prima immagine sarà quella principale.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* GPX Section */}
+              <div>
+                <h5 className="text-sm font-medium text-gray-700 mb-3">File GPX</h5>
+                
+                {/* Current GPX Display */}
+                {stage.gpxFile && (
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center">
+                        <DocumentIcon className="w-4 h-4 text-green-600 mr-2" />
+                        <span className="text-sm font-medium text-green-800">
+                          {stage.gpxFile.filename}
+                        </span>
+                      </div>
+                      <span className="text-xs text-green-600">File attuale</span>
+                    </div>
+                  </div>
+                )}
+
+                {/* GPX Upload */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    {stage.gpxFile ? 'Sostituisci File GPX' : 'Carica File GPX'}
+                  </label>
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
+                    <div className="text-center">
+                      <DocumentIcon className="mx-auto h-8 w-8 text-gray-400" />
+                      <div className="mt-2">
+                        <label htmlFor={`gpx-file-${index}`} className="cursor-pointer">
+                          <span className="text-sm font-medium text-gray-900">
+                            Seleziona file GPX
+                          </span>
+                          <input
+                            id={`gpx-file-${index}`}
+                            type="file"
+                            accept=".gpx"
+                            onChange={mediaHook.handleGpxUpload}
+                            className="sr-only"
+                            disabled={isLoading}
+                          />
+                        </label>
+                        <p className="text-xs text-gray-500 mt-1">Solo file .gpx fino a 5MB</p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {mediaHook.gpxFileName && (
+                    <div className="mt-2 flex items-center text-sm text-gray-600">
+                      <DocumentIcon className="w-4 h-4 mr-1" />
+                      File selezionato: {mediaHook.gpxFileName}
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
         </div>

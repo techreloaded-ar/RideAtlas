@@ -40,7 +40,14 @@ const EditTripForm = ({ tripId }: EditTripFormProps) => {
       insights: '',
       media: [],
       gpxFile: null,
-      stages: []
+      stages: [{
+        orderIndex: 0,
+        title: 'Tappa 1',
+        description: '',
+        routeType: '',
+        media: [],
+        gpxFile: null
+      }]
     },
     mode: 'onChange' // Per validazione in tempo reale
   })

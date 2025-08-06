@@ -1,9 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { Stage, MediaItem, StageCreationData } from '@/types/trip';
+import { Stage, StageCreationData } from '@/types/trip';
 import { useStageEditor } from '@/hooks/useStageEditor';
-import { PlusIcon, XMarkIcon, PhotoIcon, DocumentIcon, ChevronDownIcon, ChevronUpIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
+import { useMediaUpload } from '@/hooks/useMediaUpload';
+import { XMarkIcon, PhotoIcon, DocumentIcon, ChevronDownIcon, ChevronUpIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 
 interface StageEditorProps {
   tripId: string;
@@ -60,9 +61,13 @@ export default function StageEditor({
     watch
   } = form;
 
-  // File upload states
-  const [previewImages, setPreviewImages] = useState<string[]>([]);
-  const [gpxFileName, setGpxFileName] = useState<string>(initialData?.gpxFile?.filename || '');
+  // Initialize media upload hook
+  const mediaHook = useMediaUpload({
+    currentMedia: Array.isArray(watch('media')) ? watch('media') : [],
+    currentGpx: watch('gpxFile') || null,
+    onMediaUpdate: (newMedia) => setValue('media', newMedia),
+    onGpxUpdate: (newGpx) => setValue('gpxFile', newGpx),
+  });
 
   // Toggle section visibility
   const toggleSection = (section: keyof typeof expandedSections) => {
@@ -72,63 +77,8 @@ export default function StageEditor({
     }));
   };
 
-  // Handle file uploads
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>, isMainImage?: boolean) => {
-    const files = event.target.files;
-    if (!files || files.length === 0) return;
-
-    const file = files[0];
-
-    // Basic validation
-    if (!file.type.startsWith('image/')) {
-      alert('Seleziona solo file immagine');
-      return;
-    }
-
-    if (file.size > 10 * 1024 * 1024) { // 10MB
-      alert('Il file deve essere massimo 10MB');
-      return;
-    }
-
-    // Set form value - aggiungi al campo media esistente
-    const currentMedia = watch('media') || [];
-    // Per ora creiamo un placeholder MediaItem - dovremmo fare l'upload del file
-    const newMediaItem: MediaItem = {
-      id: `temp-${Date.now()}`, // ID temporaneo
-      type: file.type.startsWith('image/') ? 'image' : 'video',
-      url: URL.createObjectURL(file), // URL temporaneo per preview
-      caption: isMainImage ? 'Immagine principale' : ''
-    };
-    setValue('media', [...currentMedia, newMediaItem]);
-
-    // Create preview
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      if (e.target?.result) {
-        setPreviewImages(prev => [...prev, e.target!.result as string]);
-      }
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const handleGpxUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    if (!file.name.toLowerCase().endsWith('.gpx')) {
-      alert('Seleziona solo file GPX');
-      return;
-    }
-
-    if (file.size > 5 * 1024 * 1024) { // 5MB
-      alert('Il file GPX deve essere massimo 5MB');
-      return;
-    }
-
-    // TODO: Implementare upload GPX e creazione oggetto GpxFile
-    // Per ora salviamo solo il nome file
-    setGpxFileName(file.name);
-  };
+  // File upload handlers from hook
+  const { handleImageUpload, handleGpxUpload, removeExistingMedia, updateMediaCaption } = mediaHook;
 
   // Submit handler
   const onSubmit = async (data: Omit<Stage, 'id' | 'tripId' | 'createdAt' | 'updatedAt'>) => {
@@ -152,14 +102,6 @@ export default function StageEditor({
     }
   };
 
-  // Remove existing media - utilizza la funzione dell'hook
-  const removeExistingMedia = (mediaId: string) => {
-    // Utilizza il metodo dell'hook useStageEditor
-    // removeMedia(mediaId); // Questo potrebbe non funzionare per media esistenti
-    // Per ora manteniamo la logica esistente
-    const currentMedia = watch('media') || [];
-    setValue('media', currentMedia.filter(m => m.id !== mediaId));
-  };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -188,7 +130,7 @@ export default function StageEditor({
           </button>
           <button
             type="submit"
-            disabled={isSubmitting || isLoading || isSaving}
+            disabled={isSubmitting || isLoading || isSaving || mediaHook.isUploading}
             className="px-4 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isSubmitting || isLoading || isSaving ? 'Salvataggio...' : 'Salva Tappa'}
@@ -325,106 +267,101 @@ export default function StageEditor({
         
         {expandedSections.media && (
           <div className="p-4 border-t border-gray-200 space-y-4">
-            {/* Main Image Upload */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Immagine Principale
-              </label>
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-6">
-                <div className="text-center">
-                  <PhotoIcon className="mx-auto h-12 w-12 text-gray-400" />
-                  <div className="mt-4">
-                    <label htmlFor="main-image" className="cursor-pointer">
-                      <span className="mt-2 block text-sm font-medium text-gray-900">
-                        Carica immagine principale
-                      </span>
-                      <input
-                        id="main-image"
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) => handleImageUpload(e, true)}
-                        className="sr-only"
-                      />
-                    </label>
-                    <p className="mt-1 text-sm text-gray-500">PNG, JPG, WebP fino a 10MB</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Existing Media (Edit Mode) */}
-            {isEditMode && watch('media')?.length > 0 && (
+            {/* Existing Media Display */}
+            {isEditMode && Array.isArray(watch('media')) && watch('media').length > 0 && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Immagini Esistenti
+                  Immagini {watch('media')?.length > 0 && watch('media')[0] && (
+                    <span className="text-sm text-gray-500">(la prima sarà l&apos;immagine principale)</span>
+                  )}
                 </label>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  {watch('media')?.map((media) => (
-                    <div key={media.id} className="relative">
-                      <img
-                        src={media.url}
-                        alt={media.caption || 'Immagine tappa'}
-                        className="w-full h-24 object-cover rounded border"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => removeExistingMedia(media.id)}
-                        className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600"
-                      >
-                        <XMarkIcon className="w-4 h-4" />
-                      </button>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {watch('media')?.map((media, mediaIndex) => (
+                    <div key={media.id} className="border border-gray-200 rounded-lg overflow-hidden">
+                      <div className="relative">
+                        <img
+                          src={media.url}
+                          alt={media.caption || 'Immagine tappa'}
+                          className="w-full h-24 object-cover"
+                        />
+                        {mediaIndex === 0 && (
+                          <div className="absolute top-1 left-1 bg-blue-500 text-white text-xs px-1 py-0.5 rounded">
+                            Principale
+                          </div>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => removeExistingMedia(media.id)}
+                          className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600"
+                        >
+                          <XMarkIcon className="w-4 h-4" />
+                        </button>
+                      </div>
+                      <div className="p-3">
+                        <input
+                          type="text"
+                          value={media.caption || ''}
+                          onChange={(e) => updateMediaCaption(media.id, e.target.value)}
+                          placeholder="Aggiungi una didascalia..."
+                          className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                        />
+                      </div>
                     </div>
                   ))}
                 </div>
               </div>
             )}
 
-            {/* Additional Images Upload */}
+            {/* Upload Error Display */}
+            {mediaHook.uploadError && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+                <div className="flex items-center">
+                  <div className="text-red-600 text-sm">
+                    <strong>Errore upload:</strong> {mediaHook.uploadError}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Unified Image Upload */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Galleria Immagini Aggiuntive
+                {isEditMode && watch('media')?.length > 0 ? 'Aggiungi altre immagini' : 'Carica immagini'}
               </label>
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-6">
+              <div className={`border-2 border-dashed rounded-lg p-6 ${
+                mediaHook.isUploading 
+                  ? 'border-blue-300 bg-blue-50' 
+                  : 'border-gray-300 hover:border-gray-400'
+              } transition-colors`}>
                 <div className="text-center">
-                  <PlusIcon className="mx-auto h-12 w-12 text-gray-400" />
+                  {mediaHook.isUploading ? (
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+                  ) : (
+                    <PhotoIcon className="mx-auto h-12 w-12 text-gray-400" />
+                  )}
                   <div className="mt-4">
-                    <label htmlFor="gallery-images" className="cursor-pointer">
-                      <span className="mt-2 block text-sm font-medium text-gray-900">
-                        Aggiungi più immagini
+                    <label htmlFor="images" className={mediaHook.isUploading ? 'cursor-not-allowed' : 'cursor-pointer'}>
+                      <span className={`mt-2 block text-sm font-medium ${
+                        mediaHook.isUploading ? 'text-gray-400' : 'text-gray-900'
+                      }`}>
+                        {mediaHook.isUploading ? 'Caricamento in corso...' : 'Seleziona immagini'}
                       </span>
                       <input
-                        id="gallery-images"
+                        id="images"
                         type="file"
                         multiple
                         accept="image/*"
                         onChange={(e) => handleImageUpload(e)}
                         className="sr-only"
+                        disabled={mediaHook.isUploading}
                       />
                     </label>
-                    <p className="mt-1 text-sm text-gray-500">Seleziona più file (max 20 immagini totali)</p>
+                    <p className="mt-1 text-sm text-gray-500">PNG, JPG, WebP fino a 10MB ciascuna. La prima immagine sarà quella principale.</p>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Preview of new images */}
-            {previewImages.length > 0 && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Anteprima Nuove Immagini
-                </label>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  {previewImages.map((preview, index) => (
-                    <img
-                      key={index}
-                      src={preview}
-                      alt={`Anteprima ${index + 1}`}
-                      className="w-full h-24 object-cover rounded border"
-                    />
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
         )}
       </div>
@@ -483,10 +420,10 @@ export default function StageEditor({
                 </div>
               </div>
               
-              {gpxFileName && (
+              {mediaHook.gpxFileName && (
                 <div className="mt-3 flex items-center text-sm text-gray-600">
                   <DocumentIcon className="w-4 h-4 mr-1" />
-                  File selezionato: {gpxFileName}
+                  File selezionato: {mediaHook.gpxFileName}
                 </div>
               )}
             </div>
