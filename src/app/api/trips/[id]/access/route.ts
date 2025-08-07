@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { PurchaseService } from '@/lib/purchaseService';
+import { UserRole } from '@/types/profile';
 
 export const dynamic = 'force-dynamic';
 
@@ -53,8 +54,9 @@ export async function GET(
       );
     }
 
-    const canAccess = tripInfo.isOwner || tripInfo.hasPurchased;
-    console.log(`🔍 [ACCESS API] Controllo accesso - isOwner: ${tripInfo.isOwner}, hasPurchased: ${tripInfo.hasPurchased}, canAccess: ${canAccess}`);
+    const isSentinel = session.user.role === UserRole.Sentinel;
+    const canAccess = tripInfo.isOwner || tripInfo.hasPurchased || isSentinel;
+    console.log(`🔍 [ACCESS API] Controllo accesso - isOwner: ${tripInfo.isOwner}, hasPurchased: ${tripInfo.hasPurchased}, isSentinel: ${isSentinel}, canAccess: ${canAccess}`);
 
     const response = {
       canAccess,
