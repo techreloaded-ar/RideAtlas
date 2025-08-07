@@ -4,7 +4,7 @@
 import { UseFormReturn } from 'react-hook-form'
 import { type TripWithStagesData } from '@/schemas/trip'
 import { TripFormFields } from './TripFormFields'
-import { StageManager } from './StageManager'
+import SafeStageManager from './SafeStageManager'
 
 interface TripFormProps {
   form: UseFormReturn<TripWithStagesData>
@@ -63,7 +63,7 @@ export const TripForm = ({
           {/* Sezione gestione tappe */}
           <div className="bg-white shadow-lg rounded-lg overflow-hidden">
             <div className="px-6 py-8">
-              <StageManager
+              <SafeStageManager
                 stages={stages}
                 onChange={(newStages) => setValue('stages', newStages)}
                 errors={errors.stages}

@@ -8,7 +8,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { tripWithStagesSchema, type TripWithStagesData } from '@/schemas/trip'
 import { useTripSubmission, useTripData } from '@/hooks/useTripSubmission'
 import { useToast } from '@/hooks/useToast'
-import { TripForm } from './TripForm'
+import SafeTripForm from './SafeTripForm'
 
 interface EditTripFormProps {
   tripId: string
@@ -145,7 +145,7 @@ const EditTripForm = ({ tripId }: EditTripFormProps) => {
 
   // Form principale
   return (
-    <TripForm
+    <SafeTripForm
       form={form}
       onSubmit={submit}
       isLoading={submitting}

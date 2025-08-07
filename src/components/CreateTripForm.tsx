@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { tripWithStagesSchema, type TripWithStagesData } from '@/schemas/trip';
 import { useToast } from '@/hooks/useToast';
-import { TripForm } from './TripForm';
+import SafeTripForm from './SafeTripForm';
 import { generateTempStageId } from '@/lib/temp-id-service';
 
 const CreateTripForm = () => {
@@ -81,7 +81,7 @@ const CreateTripForm = () => {
   };
 
   return (
-    <TripForm
+    <SafeTripForm
       form={form}
       onSubmit={onSubmit}
       isLoading={form.formState.isSubmitting}

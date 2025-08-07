@@ -4,8 +4,9 @@
  * Migliora l'organizzazione e facilita l'import
  */
 
-// Componente base principale
+// Componenti base
 export { default as GPXMapViewer } from '../GPXMapViewer'
+export { default as SafeGPXMapViewer } from '../SafeGPXMapViewer'
 
 // Componenti specializzati
 export { default as SimpleMapViewer } from './SimpleMapViewer'

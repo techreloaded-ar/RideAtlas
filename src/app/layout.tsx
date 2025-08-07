@@ -5,6 +5,7 @@ import { SessionProvider } from 'next-auth/react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import CookieBanner from '@/components/CookieBanner';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 const montserrat = Montserrat({ subsets: ['latin'], variable: '--font-montserrat' });
@@ -28,9 +29,11 @@ export default function RootLayout({
           refetchWhenOffline={false}
         >
           <Navbar />
-          <div className="flex-grow">
-            {children}
-          </div>
+          <ErrorBoundary>
+            <div className="flex-grow">
+              {children}
+            </div>
+          </ErrorBoundary>
           <Footer />
           <CookieBanner />
         </SessionProvider>
