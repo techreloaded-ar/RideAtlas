@@ -3,11 +3,36 @@ import { TripStatus } from '@prisma/client';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Calendar, MapPin, Tag, User, Clock, Navigation } from 'lucide-react';
-import { castToGpxFile, castToMediaItems } from '@/types/trip'; // Importa la funzione helper
+import { castToGpxFile, castToMediaItems, MediaItem, GpxFile } from '@/types/trip'; // Importa la funzione helper
+import { Prisma } from '@prisma/client';
 
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic';
+
+// Usa i tipi generati automaticamente da Prisma per le query con include
+type TripWithRelations = Prisma.TripGetPayload<{
+  include: {
+    user: {
+      select: {
+        name: true;
+        email: true;
+        image: true;
+      };
+    };
+    stages: {
+      select: {
+        media: true;
+        orderIndex: true;
+      };
+    };
+  };
+}>;
+
+type TripWithProcessedData = TripWithRelations & {
+  processedGpxFile: GpxFile | null;
+  processedMedia: MediaItem[];
+};
 
 // Funzione per ottenere il colore del tema
 const getThemeColor = (theme: string) => {
@@ -43,19 +68,26 @@ const formatDate = (date: Date) => {
 };
 
 // Funzione per trovare l'immagine di copertina
-const getCoverImage = (trip: any) => {
+const getCoverImage = (trip: TripWithProcessedData): MediaItem | null => {
   // Prima cerca nelle stages (ordinate per orderIndex)
   const stageImage = trip.stages
-    ?.find((stage: any) => stage.media && Array.isArray(stage.media) && stage.media.some((m: any) => m.type === 'image'))
-    ?.media?.find((m: any) => m.type === 'image');
+    ?.find((stage) => {
+      const media = castToMediaItems(stage.media || []);
+      return media.some((m: MediaItem) => m.type === 'image');
+    })
+    ?.media;
   
-  // Poi cerca in trip.media come fallback
-  const tripImage = trip.media && Array.isArray(trip.media) 
-    ? trip.media.find((m: any) => m.type === 'image')
-    : null;
+  if (stageImage) {
+    const mediaItems = castToMediaItems(stageImage);
+    const imageItem = mediaItems.find((m: MediaItem) => m.type === 'image');
+    if (imageItem) return imageItem;
+  }
+  
+  // Poi cerca in trip.media come fallback usando i dati processati
+  const tripImage = trip.processedMedia.find((m: MediaItem) => m.type === 'image');
   
   // Restituisce la prima immagine trovata
-  return stageImage || tripImage;
+  return tripImage || null;
 };
 
 export default async function TripsPage() {
@@ -63,7 +95,7 @@ export default async function TripsPage() {
   // I viaggi in bozza sono visibili solo in Dashboard ("I miei Viaggi") e nel pannello Admin
   const whereClause = { status: TripStatus.Pubblicato };
   // Recupera i viaggi dal database con filtri basati sui ruoli
-  const trips = await prisma.trip.findMany({
+  const trips: TripWithRelations[] = await prisma.trip.findMany({
     where: whereClause,
     include: {
       user: {
@@ -88,16 +120,11 @@ export default async function TripsPage() {
     }
   });
 
-  // Converte i media per ogni viaggio
-  const tripsWithProcessedGpx = trips.map(trip => ({
+  // Converte i GPX per ogni viaggio per uso interno, manteniamo i tipi Prisma
+  const tripsWithProcessedData = trips.map(trip => ({
     ...trip,
-    gpxFile: castToGpxFile(trip.gpxFile || [])
-  }));
-  
-  // Converte i media per ogni viaggio
-  const tripsWithProcessedMedia = tripsWithProcessedGpx.map(trip => ({
-    ...trip,
-    media: castToMediaItems(trip.media || [])
+    processedGpxFile: castToGpxFile(trip.gpxFile),
+    processedMedia: castToMediaItems(trip.media || [])
   }));
 
   return (
@@ -118,7 +145,7 @@ export default async function TripsPage() {
 
       {/* Contenuto principale */}
       <section className="container mx-auto px-4 py-12">
-        {tripsWithProcessedMedia.length === 0 ? (
+        {tripsWithProcessedData.length === 0 ? (
           // Stato vuoto
           <div className="text-center py-20">
             <div className="max-w-md mx-auto">
@@ -143,7 +170,7 @@ export default async function TripsPage() {
         ) : (
           // Griglia dei viaggi
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {tripsWithProcessedMedia.map((trip) => (
+            {tripsWithProcessedData.map((trip) => (
               <div 
                 key={trip.id} 
                 className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden"
