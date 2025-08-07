@@ -407,4 +407,221 @@ export class PurchaseService {
       return [];
     }
   }
+
+  static async refundPurchase(purchaseId: string, adminId: string, reason?: string): Promise<{ success: boolean; error?: string }> {
+    try {
+      const purchase = await prisma.tripPurchase.findUnique({
+        where: { id: purchaseId }
+      });
+
+      if (!purchase) {
+        return { success: false, error: 'Acquisto non trovato' };
+      }
+
+      if (purchase.status !== PurchaseStatus.COMPLETED) {
+        return { success: false, error: 'Solo gli acquisti completati possono essere rimborsati' };
+      }
+
+      await prisma.$transaction([
+        prisma.tripPurchase.update({
+          where: { id: purchaseId },
+          data: {
+            status: PurchaseStatus.REFUNDED
+          }
+        }),
+        prisma.tripPurchaseTransaction.create({
+          data: {
+            purchaseId,
+            amount: purchase.amount,
+            status: PurchaseStatus.REFUNDED,
+            paymentMethod: 'admin_refund',
+            failureReason: reason || 'Rimborso amministrativo',
+            metadata: {
+              adminId,
+              refundedAt: new Date().toISOString(),
+              reason
+            }
+          }
+        })
+      ]);
+
+      return { success: true };
+
+    } catch (error) {
+      console.error('Errore nel rimborso dell\'acquisto:', error);
+      return { success: false, error: 'Errore interno del server' };
+    }
+  }
+
+  static async giftTrip(userId: string, tripId: string, adminId: string, reason?: string): Promise<{ success: boolean; error?: string }> {
+    try {
+      const trip = await prisma.trip.findUnique({
+        where: { id: tripId },
+        select: { 
+          id: true, 
+          price: true, 
+          user_id: true,
+          status: true,
+          title: true
+        }
+      });
+
+      if (!trip) {
+        return { success: false, error: 'Viaggio non trovato' };
+      }
+
+      if (trip.user_id === userId) {
+        return { success: false, error: 'Non puoi regalare un viaggio al suo proprietario' };
+      }
+
+      if (trip.status !== 'Pubblicato') {
+        return { success: false, error: 'Questo viaggio non è disponibile' };
+      }
+
+      const existingPurchase = await prisma.tripPurchase.findUnique({
+        where: {
+          userId_tripId: {
+            userId,
+            tripId
+          }
+        }
+      });
+
+      if (existingPurchase?.status === PurchaseStatus.COMPLETED) {
+        return { success: false, error: 'L\'utente ha già acquistato questo viaggio' };
+      }
+
+      const now = new Date();
+      
+      const purchase = await prisma.tripPurchase.upsert({
+        where: {
+          userId_tripId: {
+            userId,
+            tripId
+          }
+        },
+        create: {
+          userId,
+          tripId,
+          amount: 0,
+          status: PurchaseStatus.COMPLETED,
+          paymentMethod: 'admin_gift',
+          purchasedAt: now
+        },
+        update: {
+          amount: 0,
+          status: PurchaseStatus.COMPLETED,
+          paymentMethod: 'admin_gift',
+          purchasedAt: now
+        }
+      });
+
+      await prisma.tripPurchaseTransaction.create({
+        data: {
+          purchaseId: purchase.id,
+          amount: 0,
+          status: PurchaseStatus.COMPLETED,
+          paymentMethod: 'admin_gift',
+          failureReason: reason || 'Regalo amministrativo',
+          metadata: {
+            adminId,
+            giftedAt: now.toISOString(),
+            reason,
+            originalPrice: Number(trip.price)
+          }
+        }
+      });
+
+      return { success: true };
+
+    } catch (error) {
+      console.error('Errore nel regalo del viaggio:', error);
+      return { success: false, error: 'Errore interno del server' };
+    }
+  }
+
+  static async getAllPurchases(page: number = 1, limit: number = 10, filters?: {
+    userId?: string;
+    tripId?: string;
+    status?: PurchaseStatus;
+    search?: string;
+  }) {
+    try {
+      const offset = (page - 1) * limit;
+      const where: Record<string, unknown> = {};
+
+      if (filters?.userId) {
+        where.userId = filters.userId;
+      }
+      
+      if (filters?.tripId) {
+        where.tripId = filters.tripId;
+      }
+      
+      if (filters?.status) {
+        where.status = filters.status;
+      }
+
+      if (filters?.search) {
+        where.OR = [
+          {
+            user: {
+              OR: [
+                { name: { contains: filters.search, mode: 'insensitive' } },
+                { email: { contains: filters.search, mode: 'insensitive' } }
+              ]
+            }
+          },
+          {
+            trip: {
+              title: { contains: filters.search, mode: 'insensitive' }
+            }
+          }
+        ];
+      }
+
+      const [purchases, total] = await Promise.all([
+        prisma.tripPurchase.findMany({
+          where,
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                email: true
+              }
+            },
+            trip: {
+              select: {
+                id: true,
+                title: true,
+                price: true
+              }
+            }
+          },
+          orderBy: { createdAt: 'desc' },
+          skip: offset,
+          take: limit
+        }),
+        prisma.tripPurchase.count({ where })
+      ]);
+
+      return {
+        purchases,
+        pagination: {
+          page,
+          limit,
+          total,
+          pages: Math.ceil(total / limit)
+        }
+      };
+
+    } catch (error) {
+      console.error('Errore nel recupero degli acquisti:', error);
+      return {
+        purchases: [],
+        pagination: { page: 1, limit, total: 0, pages: 0 }
+      };
+    }
+  }
 }
