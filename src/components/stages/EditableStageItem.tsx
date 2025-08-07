@@ -10,7 +10,7 @@ import { Transform } from '@dnd-kit/utilities'; // Import Dnd-kit types
 import dynamic from 'next/dynamic';
 
 // Import dinamico per evitare problemi SSR
-const UnifiedGPXMapViewer = dynamic(() => import('@/components/UnifiedGPXMapViewer'), {
+const GPXMapViewer = dynamic(() => import('@/components/GPXMapViewer'), {
   ssr: false,
   loading: () => (
     <div className="w-full h-48 bg-gray-100 flex items-center justify-center rounded-lg">
@@ -381,7 +381,7 @@ export const EditableStageItem = ({
                         </div>
                         <div className="p-3">
                           {stage.gpxFile.keyPoints && stage.gpxFile.keyPoints.length > 0 ? (
-                            <UnifiedGPXMapViewer
+                            <GPXMapViewer
                               tracks={[{
                                 name: stage.gpxFile.filename || 'Percorso GPX',
                                 points: stage.gpxFile.keyPoints

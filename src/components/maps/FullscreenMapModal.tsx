@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react'
 import dynamic from 'next/dynamic'
 import { GPXPoint, GPXWaypoint, GPXRoute } from '@/types/gpx'
 
-const UnifiedGPXMapViewer = dynamic(() => import('../UnifiedGPXMapViewer'), {
+const GPXMapViewer = dynamic(() => import('../GPXMapViewer'), {
   ssr: false,
   loading: () => (
     <div className="h-64 w-full bg-gray-100 flex items-center justify-center rounded-lg">
@@ -100,7 +100,7 @@ export default function FullscreenMapModal({
         
         {/* Contenuto mappa fullscreen */}
         <div className="flex-1 bg-white">
-          <UnifiedGPXMapViewer 
+          <GPXMapViewer 
             tracks={tracks}
             routes={routes}
             waypoints={waypoints}

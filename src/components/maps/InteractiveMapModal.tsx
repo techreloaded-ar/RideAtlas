@@ -6,7 +6,7 @@ import { X } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import { GPXPoint, GPXWaypoint, GPXRoute } from '@/types/gpx'
 
-const UnifiedGPXMapViewer = dynamic(() => import('../UnifiedGPXMapViewer'), {
+const GPXMapViewer = dynamic(() => import('../GPXMapViewer'), {
   ssr: false,
   loading: () => (
     <div className="h-64 w-full bg-gray-100 flex items-center justify-center rounded-lg">
@@ -126,7 +126,7 @@ export default function InteractiveMapModal({
               <div className="absolute top-0 left-0 w-20 h-20 bg-gradient-to-br from-blue-500/10 to-transparent rounded-br-2xl"></div>
               <div className="absolute bottom-0 right-0 w-20 h-20 bg-gradient-to-tl from-indigo-500/10 to-transparent rounded-tl-2xl"></div>
               
-              <UnifiedGPXMapViewer 
+              <GPXMapViewer 
                 tracks={tracks}
                 routes={routes}
                 waypoints={waypoints}

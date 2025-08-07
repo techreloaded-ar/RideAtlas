@@ -4,8 +4,8 @@
  * Migliora l'organizzazione e facilita l'import
  */
 
-// Componente base unificato
-export { default as UnifiedGPXMapViewer } from '../UnifiedGPXMapViewer'
+// Componente base principale
+export { default as GPXMapViewer } from '../GPXMapViewer'
 
 // Componenti specializzati
 export { default as SimpleMapViewer } from './SimpleMapViewer'
@@ -27,9 +27,5 @@ export type {
 // Hook migliorato
 export { useGPXMap } from '@/hooks/useGPXMap'
 
-/**
- * Componenti legacy per backward compatibility
- * Deprecati - usare i nuovi componenti sopra
- */
-export { default as GPXMapViewer } from '../GPXMapViewer'
-export { default as GPXAutoMapViewer } from '../GPXAutoMapViewer'
+// Retrocompatibilità temporanea
+export { default as UnifiedGPXMapViewer } from '../GPXMapViewer'

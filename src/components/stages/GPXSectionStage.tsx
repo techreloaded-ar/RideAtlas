@@ -3,7 +3,7 @@
 import { Download, Route, MapPin, Mountain } from 'lucide-react';
 import { useGPXMap } from '@/hooks/useGPXMap';
 import { useEffect, useMemo, useState } from 'react';
-import UnifiedGPXMapViewer from '@/components/UnifiedGPXMapViewer';
+import GPXMapViewer from '@/components/GPXMapViewer';
 
 interface GPXSectionStageProps {
   gpxUrl: string;
@@ -181,7 +181,7 @@ export default function GPXSectionStage({
           {/* Colonna destra: Mappa preview - 1/3 dello spazio */}
           <div className="w-full h-full lg:col-span-1">
             {tracks.length > 0 && (
-              <UnifiedGPXMapViewer
+              <GPXMapViewer
                 tracks={tracks}
                 routes={routes}
                 waypoints={waypoints}
@@ -201,7 +201,7 @@ export default function GPXSectionStage({
       {isFullscreen && (
         <div className="fixed inset-0 z-[9999] bg-black bg-opacity-75 flex items-center justify-center">
           <div className="w-full h-full max-w-full max-h-full p-4">
-            <UnifiedGPXMapViewer
+            <GPXMapViewer
               tracks={tracks}
               routes={routes}
               waypoints={waypoints}

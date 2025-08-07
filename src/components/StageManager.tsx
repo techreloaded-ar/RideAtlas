@@ -51,21 +51,13 @@ export const StageManager = ({ stages, onChange, errors, isLoading }: StageManag
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="mb-6">
         <div>
           <h3 className="text-lg font-medium text-gray-900">Gestione Tappe</h3>
           <p className="mt-1 text-sm text-gray-600">
             Gestisci le tappe del tuo viaggio. La durata è calcolata automaticamente dal numero di tappe.
           </p>
         </div>
-        <button
-          type="button"
-          onClick={addStage}
-          disabled={isLoading}
-          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50"
-        >
-          + Aggiungi Tappa
-        </button>
       </div>
 
       {/* Errore generale sulle stages */}
@@ -82,6 +74,18 @@ export const StageManager = ({ stages, onChange, errors, isLoading }: StageManag
         onUpdateStage={updateStage}
         onDeleteStage={removeStage}
       />
+
+      {/* Pulsante aggiungi tappa spostato in fondo */}
+      <div className="mt-6 flex justify-center">
+        <button
+          type="button"
+          onClick={addStage}
+          disabled={isLoading}
+          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50"
+        >
+          + Aggiungi Tappa
+        </button>
+      </div>
     </div>
   )
 }

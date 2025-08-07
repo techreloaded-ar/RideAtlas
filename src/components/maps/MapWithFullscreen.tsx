@@ -7,7 +7,7 @@ import { GPXPoint, GPXWaypoint, GPXRoute } from '@/types/gpx'
 import FullscreenMapModal from './FullscreenMapModal'
 
 // Import dinamico per evitare problemi SSR
-const UnifiedGPXMapViewer = dynamic(() => import('../UnifiedGPXMapViewer'), {
+const GPXMapViewer = dynamic(() => import('../GPXMapViewer'), {
   ssr: false,
   loading: () => (
     <div className="h-96 w-full bg-gray-100 flex items-center justify-center rounded-lg">
@@ -36,7 +36,7 @@ interface MapWithFullscreenProps {
 }
 
 /**
- * Componente che wrappa UnifiedGPXMapViewer aggiungendo la funzionalità fullscreen
+ * Componente che wrappa GPXMapViewer aggiungendo la funzionalità fullscreen
  * con il nuovo modal in stile Booking.com
  */
 export default function MapWithFullscreen({
@@ -69,7 +69,7 @@ export default function MapWithFullscreen({
   return (
     <>
       {/* Mappa normale */}
-      <UnifiedGPXMapViewer
+      <GPXMapViewer
         tracks={tracks}
         routes={routes}
         waypoints={waypoints}
