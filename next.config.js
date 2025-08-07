@@ -19,6 +19,10 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'googleusercontent.com',
       },
+      {
+        protocol: 'https',
+        hostname: '*.public.blob.vercel-storage.com',
+      },
     ],
   },
   // Server Actions sono disponibili di default in Next.js 14.0.4

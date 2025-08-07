@@ -2,7 +2,7 @@
 
 import { Download, Route, MapPin, Mountain } from 'lucide-react';
 import { useGPXMap } from '@/hooks/useGPXMap';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import UnifiedGPXMapViewer from '@/components/UnifiedGPXMapViewer';
 
 interface GPXSectionStageProps {
@@ -16,6 +16,7 @@ export default function GPXSectionStage({
   filename,
   onDownload
 }: GPXSectionStageProps) {
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const {
     metadata,
     isLoading,
@@ -45,6 +46,31 @@ export default function GPXSectionStage({
       document.body.removeChild(link);
     }
   };
+
+  const handleFullscreenOpen = () => {
+    setIsFullscreen(true);
+  };
+
+  const handleFullscreenClose = () => {
+    setIsFullscreen(false);
+  };
+
+  // Gestione tasto ESC per chiudere fullscreen
+  useEffect(() => {
+    const handleEscapeKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && isFullscreen) {
+        setIsFullscreen(false);
+      }
+    };
+
+    if (isFullscreen) {
+      document.addEventListener('keydown', handleEscapeKey);
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscapeKey);
+    };
+  }, [isFullscreen]);
 
   // Calcola la distanza totale dai metadati - Memoizzato per performance
   const totalDistance = useMemo(() => {
@@ -109,12 +135,13 @@ export default function GPXSectionStage({
         </button>
       </div>
 
-      {/* Container blu con le informazioni - Responsive design */}
-      <div className="bg-blue-50 border border-blue-100 rounded-lg p-6">
-        <div className="flex flex-col lg:flex-row gap-6">
-          {/* Sezione metriche - Stack verticale su mobile, griglia su desktop */}
-          <div className="flex-1">
-            <div className="space-y-4 lg:grid lg:grid-cols-2 lg:gap-8 lg:space-y-0 lg:h-32">
+      {/* Container blu con layout a due colonne */}
+      <div className="bg-blue-50 border border-blue-100 rounded-lg p-4">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 h-48">
+          {/* Colonna sinistra: Metriche + Filename - 2/3 dello spazio */}
+          <div className="flex flex-col justify-between lg:col-span-2">
+            {/* Sezione metriche */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {/* Distanza */}
               <div className="flex items-center gap-3">
                 <div className="bg-blue-100 p-2 rounded-lg">
@@ -141,35 +168,55 @@ export default function GPXSectionStage({
                 </div>
               </div>
             </div>
+
+            {/* Filename separato con border */}
+            <div className="border-t border-gray-200 pt-4 mt-4">
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <Mountain className="w-4 h-4" />
+                <span className="font-mono">{filename}</span>
+              </div>
+            </div>
           </div>
 
-          {/* Mappa preview - Stack sotto su mobile */}
-          <div className="w-full lg:w-48 lg:flex-shrink-0">
+          {/* Colonna destra: Mappa preview - 1/3 dello spazio */}
+          <div className="w-full h-full lg:col-span-1">
             {tracks.length > 0 && (
-              <div className="h-48 lg:h-32">
-                <UnifiedGPXMapViewer
-                  tracks={tracks}
-                  routes={routes}
-                  waypoints={waypoints}
-                  height="h-full"
-                  showControls={false}
-                  enableFullscreen={false}
-                  autoFit={true}
-                  className="rounded-lg overflow-hidden"
-                />
-              </div>
+              <UnifiedGPXMapViewer
+                tracks={tracks}
+                routes={routes}
+                waypoints={waypoints}
+                height="h-full"
+                showControls={false}
+                enableFullscreen={true}
+                onFullscreenClick={handleFullscreenOpen}
+                autoFit={true}
+                className="rounded-lg overflow-hidden"
+              />
             )}
           </div>
         </div>
+      </div>
 
-        {/* Filename separato con border */}
-        <div className="border-t border-gray-200 pt-4 mt-4">
-          <div className="flex items-center gap-2 text-sm text-gray-600">
-            <Mountain className="w-4 h-4" />
-            <span className="font-mono">{filename}</span>
+      {/* Modal Fullscreen */}
+      {isFullscreen && (
+        <div className="fixed inset-0 z-[9999] bg-black bg-opacity-75 flex items-center justify-center">
+          <div className="w-full h-full max-w-full max-h-full p-4">
+            <UnifiedGPXMapViewer
+              tracks={tracks}
+              routes={routes}
+              waypoints={waypoints}
+              height="h-full"
+              showControls={false}
+              enableFullscreen={false}
+              isFullscreenMode={true}
+              onFullscreenClose={handleFullscreenClose}
+              autoFit={true}
+              showLayerControls={true}
+              className="rounded-lg overflow-hidden"
+            />
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

@@ -2,7 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { StageCreationData } from '@/schemas/trip'; // Changed to StageCreationData
+import { Stage } from '@/types/trip';
 import { EditableStageItem } from './EditableStageItem'; // Import EditableStageItem
+import StageDisplay from './StageDisplay';
 import {
   DndContext,
   closestCenter,
@@ -25,11 +27,11 @@ import {
 import { GripVertical } from 'lucide-react';
 
 interface StageTimelineProps {
-  stages: StageCreationData[]; // Changed to StageCreationData
+  stages: (StageCreationData | Stage)[]; // Support both types
   isEditable?: boolean;
-  onReorder?: (newOrder: StageCreationData[]) => void; // Changed to StageCreationData
-  onUpdateStage?: (stageId: string, updatedStage: Partial<StageCreationData>) => void; // New prop for updating stage
-  onDeleteStage?: (stageId: string) => void; // New prop for deleting stage
+  onReorder?: (newOrder: (StageCreationData | Stage)[]) => void; // Support both types
+  onUpdateStage?: (stageId: string, updatedStage: Partial<StageCreationData>) => void; // For editable mode only
+  onDeleteStage?: (stageId: string) => void; // For editable mode only
 }
 
 // Componente wrapper per ogni stage sortable
@@ -37,14 +39,14 @@ function SortableStageItem({
   stage,
   index,
   isEditable,
-  onUpdate, // Changed from onEdit
+  onUpdate,
   onDelete,
 }: {
-  stage: StageCreationData; // Changed to StageCreationData
+  stage: StageCreationData | Stage;
   index: number;
   isEditable: boolean;
-  onUpdate: (updatedStage: Partial<StageCreationData>) => void; // Changed from onEdit
-  onDelete: () => void;
+  onUpdate?: (updatedStage: Partial<StageCreationData>) => void; // For editable mode only
+  onDelete?: () => void; // For editable mode only
 }) {
   const {
     attributes,
@@ -95,20 +97,27 @@ function SortableStageItem({
       
       {/* Stage content */}
       <div className={isEditable ? 'ml-2' : ''}>
-        <EditableStageItem // Use EditableStageItem
-          stage={stage}
-          index={index}
-          onUpdate={onUpdate} // Pass onUpdate
-          onDelete={onDelete} // Pass onDelete
-          isLoading={false} // Assuming isLoading is managed by parent or EditableStageItem itself
-          // Pass dnd-kit props to EditableStageItem
-          attributes={attributes}
-          listeners={listeners}
-          setNodeRef={setNodeRef}
-          transform={transform}
-          transition={transition}
-          isDragging={sortableIsDragging}
-        />
+        {isEditable ? (
+          <EditableStageItem // Use EditableStageItem for editing mode
+            stage={stage as StageCreationData}
+            index={index}
+            onUpdate={onUpdate!} // Pass onUpdate (guaranteed to exist in editable mode)
+            onDelete={onDelete!} // Pass onDelete (guaranteed to exist in editable mode)
+            isLoading={false} // Assuming isLoading is managed by parent or EditableStageItem itself
+            // Pass dnd-kit props to EditableStageItem
+            attributes={attributes}
+            listeners={listeners}
+            setNodeRef={setNodeRef}
+            transform={transform}
+            transition={transition}
+            isDragging={sortableIsDragging}
+          />
+        ) : (
+          <StageDisplay // Use StageDisplay for view mode (read-only)
+            stage={stage as Stage}
+            index={index}
+          />
+        )}
       </div>
     </div>
   );
@@ -118,8 +127,8 @@ export default function StageTimeline({
   stages,
   isEditable = false,
   onReorder,
-  onUpdateStage, // New prop
-  onDeleteStage, // New prop
+  onUpdateStage, // For editable mode only
+  onDeleteStage, // For editable mode only
 }: StageTimelineProps) {
   // Stato locale per gestire l'ordine delle tappe
   const [orderedStages, setOrderedStages] = useState(() => 
@@ -226,8 +235,8 @@ export default function StageTimeline({
               stage={stage}
               index={index}
               isEditable={isEditable}
-              onUpdate={(updatedStage) => onUpdateStage && onUpdateStage(stage.id || `temp-${index}`, updatedStage)} // Pass update handler
-              onDelete={() => onDeleteStage && onDeleteStage(stage.id || `temp-${index}`)} // Pass delete handler
+              onUpdate={isEditable ? (updatedStage) => onUpdateStage && onUpdateStage(stage.id || `temp-${index}`, updatedStage) : undefined} // Pass update handler only in editable mode
+              onDelete={isEditable ? () => onDeleteStage && onDeleteStage(stage.id || `temp-${index}`) : undefined} // Pass delete handler only in editable mode
             />
           ))}
         </SortableContext>

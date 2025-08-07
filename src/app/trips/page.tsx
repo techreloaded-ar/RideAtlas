@@ -42,6 +42,22 @@ const formatDate = (date: Date) => {
   }).format(date);
 };
 
+// Funzione per trovare l'immagine di copertina
+const getCoverImage = (trip: any) => {
+  // Prima cerca nelle stages (ordinate per orderIndex)
+  const stageImage = trip.stages
+    ?.find((stage: any) => stage.media && Array.isArray(stage.media) && stage.media.some((m: any) => m.type === 'image'))
+    ?.media?.find((m: any) => m.type === 'image');
+  
+  // Poi cerca in trip.media come fallback
+  const tripImage = trip.media && Array.isArray(trip.media) 
+    ? trip.media.find((m: any) => m.type === 'image')
+    : null;
+  
+  // Restituisce la prima immagine trovata
+  return stageImage || tripImage;
+};
+
 export default async function TripsPage() {
   // La pagina /trips mostra solo i viaggi pubblicati per tutti gli utenti
   // I viaggi in bozza sono visibili solo in Dashboard ("I miei Viaggi") e nel pannello Admin
@@ -55,6 +71,15 @@ export default async function TripsPage() {
           name: true,
           email: true,
           image: true
+        }
+      },
+      stages: {
+        select: {
+          media: true,
+          orderIndex: true
+        },
+        orderBy: {
+          orderIndex: 'asc'
         }
       }
     },
@@ -124,27 +149,39 @@ export default async function TripsPage() {
                 className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden"
               >                {/* Media preview or placeholder */}
                 <div className="relative h-48 bg-gradient-to-br from-primary-400 to-secondary-500">
-                  {/* Mostra la prima immagine se disponibile, altrimenti un placeholder */}
-                  {trip.media && Array.isArray(trip.media) && trip.media.length > 0 && trip.media[0].type === 'image' ? (
-                    <img 
-                      src={trip.media[0].url} 
-                      alt={trip.media[0].caption || trip.title}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : trip.media && Array.isArray(trip.media) && trip.media.length > 0 && trip.media[0].type === 'video' && trip.media[0].thumbnailUrl ? (
-                    <img 
-                      src={trip.media[0].thumbnailUrl} 
-                      alt={trip.media[0].caption || trip.title}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <>
-                      <div className="absolute inset-0 bg-black/20"></div>
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <Navigation className="w-16 h-16 text-white/70" />
-                      </div>
-                    </>
-                  )}
+                  {(() => {
+                    const coverImage = getCoverImage(trip);
+                    
+                    if (coverImage && coverImage.type === 'image') {
+                      return (
+                        <img 
+                          src={coverImage.url} 
+                          alt={coverImage.caption || trip.title}
+                          className="w-full h-full object-cover"
+                        />
+                      );
+                    }
+                    
+                    if (coverImage && coverImage.type === 'video' && coverImage.thumbnailUrl) {
+                      return (
+                        <img 
+                          src={coverImage.thumbnailUrl} 
+                          alt={coverImage.caption || trip.title}
+                          className="w-full h-full object-cover"
+                        />
+                      );
+                    }
+                    
+                    // Fallback: mostra placeholder
+                    return (
+                      <>
+                        <div className="absolute inset-0 bg-black/20"></div>
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <Navigation className="w-16 h-16 text-white/70" />
+                        </div>
+                      </>
+                    );
+                  })()}
                   
                   {/* Status badge */}
                   <div className="absolute top-4 right-4">

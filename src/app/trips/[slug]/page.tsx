@@ -1,16 +1,15 @@
 // src/app/trips/[slug]/page.tsx
 import { prisma } from '@/lib/prisma';
 import { notFound } from 'next/navigation';
-import { Calendar, MapPin, Tag, User, Clock, Award, Route, TrendingUp } from 'lucide-react';
 import { auth } from '@/auth';
 import Link from 'next/link';
 import { UserRole } from '@/types/profile';
-import { MediaItem, GpxFile, isMultiStageTrip, transformPrismaStages } from '@/types/trip';
-import MediaGallery from '@/components/MediaGallery';
-import GPXDownloadButton from '@/components/GPXDownloadButton';
-import GPXAutoMapViewer from '@/components/GPXAutoMapViewer';
-import AccessGate from '@/components/AccessGate';
+import { isMultiStageTrip, transformPrismaStages, RecommendedSeason } from '@/types/trip';
+import { TripChips } from '@/components/TripChips';
+import { TripMeta } from '@/components/TripMeta';
+import { ImageGallery } from '@/components/ImageGallery';
 import StageTimeline from '@/components/stages/StageTimeline';
+import AccessGate from '@/components/AccessGate';
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic';
@@ -48,11 +47,7 @@ export default async function TripDetailPage({ params }: { params: { slug: strin
     notFound();
   }
 
-  // Convert media to MediaItem[]
-  const tripMedia = (trip.media || []) as unknown as MediaItem[];
 
-  // Cast GPX file safely
-  const gpxFile = trip.gpxFile as GpxFile | null;
 
   // Trasforma le stages di Prisma nel formato corretto per l'interfaccia
   const tripWithStages = {
@@ -66,264 +61,144 @@ export default async function TripDetailPage({ params }: { params: { slug: strin
   const isSentinel = session?.user?.role === UserRole.Sentinel;
   const canEdit = isOwner || isSentinel;
 
+  // Aggrega solo le immagini (non video) delle tappe per il carosello principale
+  const allStageImages = tripWithStages.stages.flatMap(stage => 
+    stage.media
+      .filter(media => media.type === 'image')
+      .map(media => ({
+        src: media.url,
+        alt: media.caption || `Immagine da ${stage.title}`
+      }))
+  );
+
+  // Se non ci sono immagini dalle tappe, usa quelle del trip principale (solo immagini)
+  const tripMedia = (trip.media || []) as unknown as { type: 'image' | 'video'; url: string; caption?: string }[];
+  const galleryImages = allStageImages.length > 0 ? allStageImages : 
+    tripMedia
+      .filter(media => media.type === 'image')
+      .map(media => ({
+        src: media.url,
+        alt: media.caption || trip.title
+      }));
+
+  // Mappa le stagioni per il formato chip
+  const seasonMapping: Record<RecommendedSeason, string> = {
+    Primavera: 'Primavera',
+    Estate: 'Estate', 
+    Autunno: 'Autunno',
+    Inverno: 'Inverno'
+  };
+  const mappedSeasons = trip.recommended_seasons.map(season => seasonMapping[season]);
+
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
-      <div className="bg-white shadow-md rounded-lg overflow-hidden">
-        {/* Header */}
-        <div className="p-6 border-b">
-          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2 sm:mb-0">{trip.title}</h1>
-            {canEdit && (
-              <div className="flex space-x-3">
-                <Link
-                  href={`/edit-trip/${trip.id}`}
-                  className="px-4 py-2 bg-primary-600 text-white text-sm font-medium rounded-md hover:bg-primary-700"
-                >
-                  Modifica
-                </Link>
-              </div>
-            )}
-          </div>
-          
-          <div className="mt-4 flex flex-wrap gap-2">
-            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-              <Clock className="w-3 h-3 mr-1" />
-              {isMultiStage 
-                ? `${tripWithStages.stages.length} giorni / ${Math.max(0, tripWithStages.stages.length - 1)} notti`
-                : `${trip.duration_days} giorni / ${trip.duration_nights} notti`
-              }
-            </span>
-            
-            {isMultiStage && (
-              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                <Route className="w-3 h-3 mr-1" />
-                Multi-tappa ({tripWithStages.stages.length} tappe)
-              </span>
-            )}
-            
-            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-              <MapPin className="w-3 h-3 mr-1" />
-              {trip.destination}
-            </span>
-              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-              <Award className="w-3 h-3 mr-1" />
-              {trip.theme}
-            </span>
-            
-            {/* Multiple seasons support */}
-            {trip.recommended_seasons.map((season, index) => (
-              <span key={index} className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
-                <Calendar className="w-3 h-3 mr-1" />
-                {season}
-              </span>
-            ))}
-          </div>
-          
-          <div className="mt-4 text-sm text-gray-500">
-            <div className="flex items-center">
-              <User className="w-4 h-4 mr-1" />
-              Creato da: {trip.user.name || trip.user.email}
-            </div>
-            <div>Pubblicato il: {formatDate(trip.created_at)}</div>
-          </div>
+    <div className="max-w-4xl mx-auto p-6 bg-white">
+      {/* Header */}
+      <div className="mb-8">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-4">
+          <h1 className="text-4xl font-medium mb-4">{trip.title}</h1>
+          {canEdit && (
+            <Link
+              href={`/edit-trip/${trip.id}`}
+              className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700"
+            >
+              Modifica
+            </Link>
+          )}
         </div>
         
-        {/* Media Gallery */}
-        {tripMedia.length > 0 && (
-          <div className="p-6 border-b">
-            <MediaGallery media={tripMedia} />
-          </div>
-        )}
+        <TripChips 
+          duration={isMultiStage 
+            ? `${tripWithStages.stages.length} giorni / ${Math.max(0, tripWithStages.stages.length - 1)} notti`
+            : `${trip.duration_days} giorni / ${trip.duration_nights} notti`
+          }
+          location={trip.destination}
+          terrain={trip.theme}
+          seasons={mappedSeasons}
+        />
         
-        {/* Sezione Tappe del Viaggio (per viaggi multi-tappa) */}
-        {isMultiStage && tripWithStages.stages.length > 0 && (
-          <div className="p-6 border-b">
-            <h2 className="text-xl font-semibold mb-4 flex items-center">
-              <Route className="w-5 h-5 mr-2 text-blue-600" />
-              Tappe del Viaggio
-            </h2>
-            <div className="bg-blue-50 rounded-lg p-4 mb-6">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                <div className="flex items-center">
-                  <Route className="w-4 h-4 text-blue-600 mr-2" />
-                  <div>
-                    <div className="font-medium text-gray-700">Numero Tappe</div>
-                    <div className="text-lg font-semibold text-blue-800">{tripWithStages.stages.length}</div>
-                  </div>
-                </div>
-                <div className="flex items-center">
-                  <Clock className="w-4 h-4 text-blue-600 mr-2" />
-                  <div>
-                    <div className="font-medium text-gray-700">Durata Totale</div>
-                    <div className="text-lg font-semibold text-blue-800">
-                      {tripWithStages.stages.length} giorni / {Math.max(0, tripWithStages.stages.length - 1)} notti
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-center">
-                  <MapPin className="w-4 h-4 text-blue-600 mr-2" />
-                  <div>
-                    <div className="font-medium text-gray-700">Destinazioni</div>
-                    <div className="text-lg font-semibold text-blue-800">Percorso multiplo</div>
-                  </div>
+        <TripMeta 
+          author={trip.user.name || trip.user.email}
+          publishDate={formatDate(trip.created_at)}
+        />
+      </div>
+
+      {/* Image Gallery */}
+      {galleryImages.length > 0 && (
+        <ImageGallery images={galleryImages} />
+      )}
+
+      {/* Description */}
+      <div className="mb-8">
+        <p className="leading-relaxed mb-4 text-[14px]">
+          {trip.summary}
+        </p>
+      </div>
+
+      {/* Caratteristiche e Tags */}
+      {(trip.characteristics.length > 0 || trip.tags.length > 0) && (
+        <div className="mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {trip.characteristics.length > 0 && (
+              <div>
+                <h4 className="text-sm font-medium text-gray-700 mb-2">Caratteristiche</h4>
+                <div className="flex flex-wrap gap-2">
+                  {trip.characteristics.map((characteristic, index) => (
+                    <span 
+                      key={index} 
+                      className="inline-block bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full"
+                    >
+                      {characteristic}
+                    </span>
+                  ))}
                 </div>
               </div>
-            </div>
+            )}
             
+            {trip.tags.length > 0 && (
+              <div>
+                <h4 className="text-sm font-medium text-gray-700 mb-2">Tags</h4>
+                <div className="flex flex-wrap gap-2">
+                  {trip.tags.map((tag, index) => (
+                    <span 
+                      key={index} 
+                      className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Trip Stages Section - Solo per viaggi multi-tappa */}
+      {isMultiStage && tripWithStages.stages.length > 0 && (
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">Tappe del viaggio</h2>
+
+          <AccessGate 
+            tripId={trip.id} 
+            premiumContentType="le tappe dettagliate del viaggio"
+            showPreview={true}
+          >
             <StageTimeline
               stages={tripWithStages.stages}
               isEditable={false}
             />
-          </div>
-        )}
-
-        {/* GPX Section (solo per viaggi single-stage legacy) */}
-        {!isMultiStage && gpxFile && gpxFile.isValid && (
-          <div className="p-6 border-b">            
-            <AccessGate 
-              tripId={trip.id} 
-              premiumContentType="la traccia GPX e la mappa dettagliata"
-              showPreview={true}
-            >
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex-1" />
-                {session?.user && (
-                  <GPXDownloadButton 
-                    tripId={trip.id} 
-                    tripTitle={trip.title}
-                  />
-                )}
-              </div>
-              
-              <div className="bg-blue-50 rounded-lg p-4">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="flex items-center">
-                    <Route className="w-4 h-4 text-blue-600 mr-2" />
-                    <div>
-                      <div className="text-sm font-medium text-gray-700">Distanza</div>
-                      <div className="text-lg font-semibold text-blue-800">{gpxFile.distance} km</div>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center">
-                    <MapPin className="w-4 h-4 text-blue-600 mr-2" />
-                    <div>
-                      <div className="text-sm font-medium text-gray-700">Waypoints</div>
-                      <div className="text-lg font-semibold text-blue-800">{gpxFile.waypoints}</div>
-                    </div>
-                  </div>
-                  
-                  {gpxFile.elevationGain && (
-                    <div className="flex items-center">
-                      <TrendingUp className="w-4 h-4 text-blue-600 mr-2" />
-                      <div>
-                        <div className="text-sm font-medium text-gray-700">Dislivello positivo</div>
-                        <div className="text-lg font-semibold text-blue-800">+{gpxFile.elevationGain} m</div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-                
-                {(gpxFile.duration || gpxFile.elevationLoss || gpxFile.maxElevation) && (
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 pt-4 border-t border-blue-200">
-                    {gpxFile.duration && (
-                      <div className="flex items-center">
-                        <Clock className="w-4 h-4 text-blue-600 mr-2" />
-                        <div>
-                          <div className="text-sm font-medium text-gray-700">Durata stimata</div>
-                          <div className="text-lg font-semibold text-blue-800">
-                            {Math.floor(gpxFile.duration / 3600)}h {Math.floor((gpxFile.duration % 3600) / 60)}m
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                    
-                    {gpxFile.elevationLoss && (
-                      <div className="flex items-center">
-                        <TrendingUp className="w-4 h-4 text-blue-600 mr-2 transform rotate-180" />
-                        <div>
-                          <div className="text-sm font-medium text-gray-700">Dislivello negativo</div>
-                          <div className="text-lg font-semibold text-blue-800">-{gpxFile.elevationLoss} m</div>
-                        </div>
-                      </div>
-                    )}
-                    
-                    {gpxFile.maxElevation && (
-                      <div className="flex items-center">
-                        <Award className="w-4 h-4 text-blue-600 mr-2" />
-                        <div>
-                          <div className="text-sm font-medium text-gray-700">Altitudine max</div>
-                          <div className="text-lg font-semibold text-blue-800">{gpxFile.maxElevation} m</div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-                
-                <div className="mt-4 pt-4 border-t border-blue-200">
-                  <div className="text-xs text-gray-600">
-                    <span className="font-medium">File:</span> {gpxFile.filename}
-                  </div>
-                  {gpxFile.startTime && gpxFile.endTime && (
-                    <div className="text-xs text-gray-600 mt-1">
-                      <span className="font-medium">Registrato:</span> {new Date(gpxFile.startTime).toLocaleDateString('it-IT')} - {new Date(gpxFile.endTime).toLocaleDateString('it-IT')}
-                    </div>
-                  )}
-                </div>
-              </div>
-              
-              {/* Mappa automatica del percorso */}
-              <div className="mt-6">
-                <GPXAutoMapViewer 
-                  gpxUrl={gpxFile.url}
-                  tripTitle={trip.title}
-                />
-              </div>
-            </AccessGate>
-          </div>
-        )}
-
-        {/* Summary */}
-        <div className="p-6 border-b">
-          <h2 className="text-xl font-semibold mb-3">Sommario</h2>
-          <p className="text-gray-700 whitespace-pre-wrap">{trip.summary}</p>
+          </AccessGate>
         </div>
-        
-        {/* Tags */}
-        <div className="p-6 border-b">
-          <h2 className="text-xl font-semibold mb-3">Tag</h2>
-          <div className="flex flex-wrap gap-2">
-            {trip.tags.map((tag: string) => (
-              <span key={tag} className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                <Tag className="w-3 h-3 mr-1" />
-                {tag}
-              </span>
-            ))}
-          </div>
+      )}
+      
+      {/* Insights - Approfondimenti */}
+      {trip.insights && (
+        <div className="mt-8">
+          <h3 className="text-lg font-semibold mb-3">Approfondimenti</h3>
+          <p className="text-gray-700 leading-relaxed">{trip.insights}</p>
         </div>
-        
-        {/* Characteristics */}
-        {trip.characteristics.length > 0 && (
-          <div className="p-6 border-b">
-            <h2 className="text-xl font-semibold mb-3">Caratteristiche</h2>
-            <div className="flex flex-wrap gap-2">              {trip.characteristics.map((characteristic: string) => (
-                <span key={characteristic} className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                  {characteristic}
-                </span>
-              ))}
-            </div>
-          </div>
-        )}        
-        {/* Insights - Approfondimenti */}
-        {trip.insights && (
-          <div className="p-6 border-b">
-            <h2 className="text-xl font-semibold mb-3">Approfondimenti</h2>
-            <div className="prose prose-slate max-w-none">              <p className="text-gray-700 whitespace-pre-wrap">{trip.insights}</p>
-            </div>
-          </div>
-        )}
-      </div>
+      )}
     </div>
   );
 }
