@@ -1,7 +1,7 @@
 // src/app/create-trip/page.tsx
 "use client";
 
-import CreateTripForm from '@/components/CreateTripForm';
+import CreateTripForm from '@/components/trips/CreateTripForm';
 
 export default function CreateTripPage() {
   return (

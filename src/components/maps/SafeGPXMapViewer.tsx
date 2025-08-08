@@ -2,8 +2,8 @@
 'use client'
 
 import { useState } from 'react'
-import { ErrorBoundary, MapErrorFallback } from './ErrorBoundary'
-import GPXMapViewer from './GPXMapViewer'
+import { ErrorBoundary, MapErrorFallback } from '@/components/ui/ErrorBoundary'
+import GPXMapViewer from '@/components/maps/GPXMapViewer'
 import { MapViewerProps } from '@/types/gpx'
 
 export default function SafeGPXMapViewer(props: MapViewerProps) {

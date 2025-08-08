@@ -3,7 +3,7 @@
 import { Download, Route, MapPin, Mountain } from 'lucide-react';
 import { useGPXMap } from '@/hooks/useGPXMap';
 import { useEffect, useMemo, useState } from 'react';
-import SafeGPXMapViewer from '@/components/SafeGPXMapViewer';
+import SafeGPXMapViewer from '@/components/maps/SafeGPXMapViewer';
 
 interface GPXSectionStageProps {
   gpxUrl: string;

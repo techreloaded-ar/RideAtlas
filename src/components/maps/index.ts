@@ -5,8 +5,8 @@
  */
 
 // Componenti base
-export { default as GPXMapViewer } from '../GPXMapViewer'
-export { default as SafeGPXMapViewer } from '../SafeGPXMapViewer'
+export { default as GPXMapViewer } from '@/components/maps/GPXMapViewer'
+export { default as SafeGPXMapViewer } from '@/components/maps/SafeGPXMapViewer'
 
 // Componenti specializzati
 export { default as SimpleMapViewer } from './SimpleMapViewer'
@@ -29,4 +29,4 @@ export type {
 export { useGPXMap } from '@/hooks/useGPXMap'
 
 // Retrocompatibilità temporanea
-export { default as UnifiedGPXMapViewer } from '../GPXMapViewer'
+export { default as UnifiedGPXMapViewer } from '@/components/maps/GPXMapViewer'

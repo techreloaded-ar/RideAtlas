@@ -2,10 +2,10 @@ import './globals.css';
 import type { Metadata } from 'next';
 import { Inter, Montserrat } from 'next/font/google';
 import { SessionProvider } from 'next-auth/react';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
-import CookieBanner from '@/components/CookieBanner';
-import { ErrorBoundary } from '@/components/ErrorBoundary';
+import Navbar from '@/components/layout/Navbar';
+import Footer from '@/components/layout/Footer';
+import CookieBanner from '@/components/ui/CookieBanner';
+import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 const montserrat = Montserrat({ subsets: ['latin'], variable: '--font-montserrat' });

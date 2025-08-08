@@ -3,8 +3,8 @@
 
 import { UseFormReturn } from 'react-hook-form'
 import { type TripWithStagesData } from '@/schemas/trip'
-import { TripFormFields } from './TripFormFields'
-import SafeStageManager from './SafeStageManager'
+import { TripFormFields } from '@/components/trips/TripFormFields'
+import SafeStageManager from '@/components/stages/SafeStageManager'
 
 interface TripFormProps {
   form: UseFormReturn<TripWithStagesData>

@@ -10,7 +10,7 @@ import { Transform } from '@dnd-kit/utilities'; // Import Dnd-kit types
 import dynamic from 'next/dynamic';
 
 // Import dinamico per evitare problemi SSR
-const GPXMapViewer = dynamic(() => import('@/components/GPXMapViewer'), {
+const GPXMapViewer = dynamic(() => import('@/components/maps/GPXMapViewer'), {
   ssr: false,
   loading: () => (
     <div className="w-full h-48 bg-gray-100 flex items-center justify-center rounded-lg">

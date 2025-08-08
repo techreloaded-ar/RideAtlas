@@ -4,11 +4,11 @@
 import { useEffect, useState, useMemo } from 'react'
 import { Download, Route, MapPin, Maximize2, X } from 'lucide-react'
 import { MapViewerProps, GPXTrack } from '@/types/gpx'
-import LayerControl from './maps/LayerControl'
+import LayerControl from '@/components/maps/LayerControl'
 import dynamic from 'next/dynamic'
 
 // Componente mappa con import dinamico per evitare problemi SSR
-const DynamicMap = dynamic(() => import('./maps/LeafletMapRenderer').then(mod => ({ default: mod.default })), { 
+const DynamicMap = dynamic(() => import('@/components/maps/LeafletMapRenderer').then(mod => ({ default: mod.default })), { 
   ssr: false,
   loading: () => (
     <div className="w-full h-full bg-gray-100 flex items-center justify-center rounded-lg">

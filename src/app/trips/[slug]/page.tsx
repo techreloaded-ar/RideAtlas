@@ -5,11 +5,11 @@ import { auth } from '@/auth';
 import Link from 'next/link';
 import { UserRole } from '@/types/profile';
 import { isMultiStageTrip, transformPrismaStages, RecommendedSeason } from '@/types/trip';
-import { TripChips } from '@/components/TripChips';
-import { TripMeta } from '@/components/TripMeta';
-import { ImageGallery } from '@/components/ImageGallery';
+import { TripChips } from '@/components/trips/TripChips';
+import { TripMeta } from '@/components/trips/TripMeta';
+import { ImageGallery } from '@/components/ui/ImageGallery';
 import StageTimeline from '@/components/stages/StageTimeline';
-import AccessGate from '@/components/AccessGate';
+import AccessGate from '@/components/auth/AccessGate';
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic';

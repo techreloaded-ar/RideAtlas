@@ -2,8 +2,8 @@
 "use client";
 
 import { useState } from 'react'
-import { ErrorBoundary, MediaErrorFallback } from './ErrorBoundary'
-import MultimediaUpload from './MultimediaUpload'
+import { ErrorBoundary, MediaErrorFallback } from '@/components/ui/ErrorBoundary'
+import MultimediaUpload from '@/components/upload/MultimediaUpload'
 import { MediaItem } from '@/types/trip'
 
 interface SafeMultimediaUploadProps {

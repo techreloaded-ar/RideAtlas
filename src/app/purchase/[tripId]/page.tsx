@@ -1,7 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
 import { notFound, redirect } from 'next/navigation';
-import PurchasePageClient from '@/components/PurchasePageClient';
+import PurchasePageClient from '@/components/payment/PurchasePageClient';
 import { PurchaseService } from '@/lib/purchaseService';
 
 export const dynamic = 'force-dynamic';

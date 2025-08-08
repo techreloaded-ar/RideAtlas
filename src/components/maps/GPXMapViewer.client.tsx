@@ -3,7 +3,7 @@
 // DEPRECATO: Usa AutoLoadMapViewer dal nuovo sistema
 // Questo componente è mantenuto per backward compatibility
 
-import { AutoLoadMapViewer } from './maps'
+import { AutoLoadMapViewer } from '@/components/maps'
 
 interface GPXAutoMapViewerProps {
   gpxUrl: string

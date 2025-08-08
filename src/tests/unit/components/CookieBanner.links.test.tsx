@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react'
-import CookieBanner from '@/components/CookieBanner'
+import CookieBanner from '@/components/ui/CookieBanner'
 
 describe('CookieBanner - Privacy Policy Link', () => {
   beforeEach(() => {

@@ -2,8 +2,8 @@
 "use client";
 
 import { useState } from 'react'
-import { ErrorBoundary, FormErrorFallback } from './ErrorBoundary'
-import { TripForm } from './TripForm'
+import { ErrorBoundary, FormErrorFallback } from '@/components/ui/ErrorBoundary'
+import { TripForm } from '@/components/trips/TripForm'
 import { UseFormReturn } from 'react-hook-form'
 import { type TripWithStagesData } from '@/schemas/trip'
 

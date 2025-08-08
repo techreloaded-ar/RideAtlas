@@ -7,7 +7,7 @@ import { GPXPoint, GPXWaypoint, GPXRoute } from '@/types/gpx'
 import FullscreenMapModal from './FullscreenMapModal'
 
 // Import dinamico per evitare problemi SSR
-const GPXMapViewer = dynamic(() => import('../GPXMapViewer'), {
+const GPXMapViewer = dynamic(() => import('@/components/maps/GPXMapViewer'), {
   ssr: false,
   loading: () => (
     <div className="h-96 w-full bg-gray-100 flex items-center justify-center rounded-lg">

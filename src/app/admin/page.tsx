@@ -1,7 +1,7 @@
 import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
 import { UserRole } from '@/types/profile'
-import AdminDashboard from '@/components/AdminDashboard'
+import AdminDashboard from '@/components/admin/AdminDashboard'
 
 export default async function AdminPage() {
   const session = await auth()

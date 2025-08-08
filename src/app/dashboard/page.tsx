@@ -6,9 +6,9 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { UserRole, UserRoleLabels, UserRoleDescriptions, UserPermissions } from '@/types/profile';
 import { useEffect, useState, Suspense } from 'react';
-import UserTrips from '@/components/UserTrips';
-import PurchasedTrips from '@/components/PurchasedTrips';
-import ChangePasswordForm from '@/components/ChangePasswordForm';
+import UserTrips from '@/components/trips/UserTrips';
+import PurchasedTrips from '@/components/trips/PurchasedTrips';
+import ChangePasswordForm from '@/components/profile/ChangePasswordForm';
 
 function DashboardContent() {
   const { data: session, status } = useSession();

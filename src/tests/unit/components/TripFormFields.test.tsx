@@ -1,6 +1,6 @@
 // src/tests/unit/components/TripFormFields.test.tsx
 import { render, screen, fireEvent } from '../../setup/test-utils';
-import { TripFormFields } from '@/components/TripFormFields';
+import { TripFormFields } from '@/components/trips/TripFormFields';
 import { RecommendedSeason } from '@/types/trip';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';

@@ -2,8 +2,8 @@
 "use client";
 
 import { useState } from 'react'
-import { ErrorBoundary, GenericErrorFallback } from './ErrorBoundary'
-import { StageManager } from './StageManager'
+import { ErrorBoundary, GenericErrorFallback } from '@/components/ui/ErrorBoundary'
+import { StageManager } from '@/components/stages/StageManager'
 import { FieldError } from 'react-hook-form'
 import { type StageCreationData } from '@/schemas/trip'
 

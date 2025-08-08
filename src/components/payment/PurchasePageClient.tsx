@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Clock, MapPin, Award, User, CreditCard, CheckCircle, AlertCircle, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
-import StripePaymentForm from '@/components/StripePaymentForm';
+import StripePaymentForm from '@/components/payment/StripePaymentForm';
 
 interface TripData {
   id: string;

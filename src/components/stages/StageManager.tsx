@@ -3,7 +3,7 @@
 
 import { FieldError } from 'react-hook-form'
 import { type StageCreationData } from '@/schemas/trip'
-import StageTimeline from './stages/StageTimeline' // Import StageTimeline
+import StageTimeline from '@/components/stages/StageTimeline' // Import StageTimeline
 import { generateTempStageId } from '@/lib/temp-id-service';
 
 interface StageManagerProps {

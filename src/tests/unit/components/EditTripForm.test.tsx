@@ -1,6 +1,6 @@
 // src/tests/unit/components/EditTripForm.test.tsx
 import { render, screen, fireEvent, waitFor } from '../../setup/test-utils';
-import EditTripForm from '@/components/EditTripForm';
+import EditTripForm from '@/components/trips/EditTripForm';
 import { RecommendedSeason } from '@/types/trip';
 import * as useToastModule from '@/hooks/useToast';
 

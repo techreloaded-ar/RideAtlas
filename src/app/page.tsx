@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import ReadyToStart from '@/components/ReadyToStart';
+import ReadyToStart from '@/components/layout/ReadyToStart';
 
 export default function HomePage() {
   return (

@@ -3,8 +3,8 @@
 import { useState, useEffect } from 'react';
 import { StageCreationData } from '@/schemas/trip'; // Changed to StageCreationData
 import { Stage } from '@/types/trip';
-import { EditableStageItem } from './EditableStageItem'; // Import EditableStageItem
-import StageDisplay from './StageDisplay';
+import { EditableStageItem } from '@/components/stages/EditableStageItem'; // Import EditableStageItem
+import StageDisplay from '@/components/stages/StageDisplay';
 import {
   DndContext,
   closestCenter,

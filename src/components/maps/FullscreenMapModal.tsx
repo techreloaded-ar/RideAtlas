@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react'
 import dynamic from 'next/dynamic'
 import { GPXPoint, GPXWaypoint, GPXRoute } from '@/types/gpx'
 
-const GPXMapViewer = dynamic(() => import('../GPXMapViewer'), {
+const GPXMapViewer = dynamic(() => import('@/components/maps/GPXMapViewer'), {
   ssr: false,
   loading: () => (
     <div className="h-64 w-full bg-gray-100 flex items-center justify-center rounded-lg">

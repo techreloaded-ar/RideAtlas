@@ -1,7 +1,7 @@
 // src/tests/unit/components/MediaGallery.test.tsx
 import { render, screen, fireEvent } from '../../setup/test-utils';
 import { MediaItem } from '@/types/trip';
-import MediaGallery from '@/components/MediaGallery';
+import MediaGallery from '@/components/upload/MediaGallery';
 
 // Mock delle funzionalità dei browser come matchMedia necessarie per alcuni componenti UI
 window.matchMedia = window.matchMedia || function() {

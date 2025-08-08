@@ -8,7 +8,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { tripWithStagesSchema, type TripWithStagesData } from '@/schemas/trip'
 import { useTripSubmission, useTripData } from '@/hooks/useTripSubmission'
 import { useToast } from '@/hooks/useToast'
-import SafeTripForm from './SafeTripForm'
+import SafeTripForm from '@/components/trips/SafeTripForm'
 
 interface EditTripFormProps {
   tripId: string

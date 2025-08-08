@@ -1,7 +1,7 @@
 // src/tests/unit/components/MultimediaUpload.test.tsx
 import { render, screen, fireEvent, waitFor } from '../../setup/test-utils';
 import userEvent from '@testing-library/user-event';
-import MultimediaUpload from '@/components/MultimediaUpload';
+import MultimediaUpload from '@/components/upload/MultimediaUpload';
 import { MediaItem } from '@/types/trip';
 
 // Mock della funzione fetch globale

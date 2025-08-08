@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Stage } from '@/types/trip';
 import { ChevronDown, ChevronRight, MapPin, Clock } from 'lucide-react';
 import Image from 'next/image';
-import GPXSectionStage from './GPXSectionStage';
+import GPXSectionStage from '@/components/stages/GPXSectionStage';
 
 interface StageDisplayProps {
   stage: Stage;

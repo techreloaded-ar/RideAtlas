@@ -1,7 +1,7 @@
 // src/app/edit-trip/[id]/page.tsx
 "use client";
 
-import EditTripForm from '@/components/EditTripForm'
+import EditTripForm from '@/components/trips/EditTripForm'
 
 interface EditTripPageProps {
   params: {

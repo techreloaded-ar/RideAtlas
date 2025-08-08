@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { PurchaseStatus } from '@prisma/client'
 import { useToast } from '@/hooks/useToast'
 import { Search, RefreshCw, Gift, Undo, CreditCard, User, Navigation } from 'lucide-react'
-import SearchableSelect from './SearchableSelect'
+import SearchableSelect from '@/components/ui/SearchableSelect'
 
 // Type for Prisma Decimal values
 type DecimalLike = {

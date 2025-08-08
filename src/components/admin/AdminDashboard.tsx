@@ -2,9 +2,9 @@
 
 import { useState } from 'react'
 import { Users, Navigation, Settings, CreditCard } from 'lucide-react'
-import UserManagement from '@/components/UserManagement'
-import TripManagement from '@/components/TripManagement'
-import PurchaseManagement from '@/components/PurchaseManagement'
+import UserManagement from '@/components/admin/UserManagement'
+import TripManagement from '@/components/trips/TripManagement'
+import PurchaseManagement from '@/components/admin/PurchaseManagement'
 
 type AdminTab = 'users' | 'trips' | 'purchases' | 'settings'
 

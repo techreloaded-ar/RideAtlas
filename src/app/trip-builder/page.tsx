@@ -4,7 +4,7 @@
 
 import { useSession } from 'next-auth/react';
 import { MessageSquare, Route, MapPin, Clock, AlertTriangle } from 'lucide-react';
-import TripBuilderChat from '@/components/TripBuilderChat';
+import TripBuilderChat from '@/components/trip-builder/TripBuilderChat';
 
 export default function TripBuilderPage() {
   const { data: session, status } = useSession();

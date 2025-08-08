@@ -3,11 +3,11 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { Send, Bot, User, Loader2, Route, AlertTriangle } from 'lucide-react';
-import TripRecommendationCard from './TripRecommendationCard';
-import DistanceWarningCard from './DistanceWarningCard';
-import SuggestedPrompts from './SuggestedPrompts';
-import ItineraryDisplay from './ItineraryDisplay';
-import MarkdownRenderer from './MarkdownRenderer';
+import TripRecommendationCard from '@/components/trips/TripRecommendationCard';
+import DistanceWarningCard from '@/components/ui/DistanceWarningCard';
+import SuggestedPrompts from '@/components/trip-builder/SuggestedPrompts';
+import ItineraryDisplay from '@/components/trips/ItineraryDisplay';
+import MarkdownRenderer from '@/components/ui/MarkdownRenderer';
 
 interface Message {
   id: string;
