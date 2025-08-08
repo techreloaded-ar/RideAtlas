@@ -27,7 +27,7 @@ const MediaGallery: React.FC<MediaGalleryProps> = ({ media }) => {
 
   return (
     <div className="space-y-4">
-      <div className="relative aspect-w-16 aspect-h-9 rounded-lg overflow-hidden bg-gray-100">
+      <div className="relative aspect-[3/2] rounded-lg overflow-hidden bg-gray-100">
         {activeItem.type === 'image' ? (
           <img 
             src={activeItem.url}
@@ -83,7 +83,7 @@ const MediaGallery: React.FC<MediaGalleryProps> = ({ media }) => {
             <button
               key={item.id}
               onClick={() => setActiveIndex(index)}
-              className={`flex-shrink-0 w-16 h-16 rounded-md overflow-hidden border-2 ${index === activeIndex ? 'border-blue-500' : 'border-transparent'}`}
+              className={`flex-shrink-0 w-20 h-14 rounded-md overflow-hidden border-2 ${index === activeIndex ? 'border-blue-500' : 'border-transparent'}`}
             >
               {item.type === 'image' ? (
                 <img

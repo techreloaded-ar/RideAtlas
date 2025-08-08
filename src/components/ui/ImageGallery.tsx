@@ -36,7 +36,7 @@ export function ImageGallery({ images }: ImageGalleryProps) {
     <div className="mb-8">
       {/* Main Image Container */}
       <div className="relative group">
-        <div className="relative w-full h-80 rounded overflow-hidden">
+        <div className="relative w-full aspect-[3/2] rounded overflow-hidden">
           <Image
             src={images[currentIndex].src}
             alt={images[currentIndex].alt}
@@ -83,7 +83,7 @@ export function ImageGallery({ images }: ImageGalleryProps) {
             <button
               key={index}
               onClick={() => goToSlide(index)}
-              className={`flex-shrink-0 w-16 h-12 rounded overflow-hidden border-2 transition-all duration-200 relative ${
+              className={`flex-shrink-0 w-20 h-14 rounded overflow-hidden border-2 transition-all duration-200 relative ${
                 index === currentIndex 
                   ? 'border-blue-600 opacity-100' 
                   : 'border-gray-200 opacity-70 hover:opacity-100'
@@ -95,7 +95,7 @@ export function ImageGallery({ images }: ImageGalleryProps) {
                 alt={image.alt}
                 fill
                 className="object-cover"
-                sizes="64px"
+                sizes="80px"
               />
             </button>
           ))}

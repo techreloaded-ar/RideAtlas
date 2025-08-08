@@ -234,15 +234,15 @@ const MultimediaUpload: React.FC<MultimediaUploadProps> = ({
             {mediaItems.map((item) => (
               <div key={item.id} className="border border-gray-200 rounded-lg overflow-hidden">
                 {/* Anteprima Media */}
-                <div className="aspect-w-16 aspect-h-9 bg-gray-100">
+                <div className="aspect-[3/2] bg-gray-100">
                   {item.type === 'image' ? (
                     <img
                       src={item.url}
                       alt={item.caption || 'Immagine'}
-                      className="w-full h-32 object-cover"
+                      className="w-full h-full object-cover"
                     />
                   ) : (
-                    <div className="relative w-full h-32 bg-gray-900 flex items-center justify-center">
+                    <div className="relative w-full h-full bg-gray-900 flex items-center justify-center">
                       {item.thumbnailUrl ? (
                         <img
                           src={item.thumbnailUrl}

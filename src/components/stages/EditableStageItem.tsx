@@ -217,7 +217,7 @@ export const EditableStageItem = ({
                             <img
                               src={media.url}
                               alt={media.caption || 'Immagine tappa'}
-                              className="w-full h-20 object-cover"
+                              className="w-full aspect-[3/2] object-cover"
                             />
                             {mediaIndex === 0 && (
                               <div className="absolute top-1 left-1 bg-blue-500 text-white text-xs px-1 py-0.5 rounded">
