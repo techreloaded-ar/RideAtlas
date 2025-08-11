@@ -6,7 +6,7 @@ import { RecommendedSeason, transformPrismaStages } from '@/types/trip';
 import { auth } from '@/auth';
 import { ensureUserExists } from '@/lib/user-sync';
 import { UserRole } from '@/types/profile';
-import { prepareJsonFieldsUpdate, isMultiStageTripUtil, calculateTotalDistance, calculateTripDuration } from '@/lib/trip-utils';
+import { isMultiStageTripUtil, calculateTotalDistance, calculateTripDuration } from '@/lib/trip-utils';
 
 // Funzione di utilità per generare lo slug
 function slugify(text: string): string {
@@ -228,6 +228,8 @@ export async function POST(request: NextRequest) {
             characteristics: tripData.characteristics,
             recommended_seasons: tripData.recommended_seasons,
             insights: tripData.insights,
+            media: (tripData.media || []) as unknown as object[],
+            gpxFile: (tripData.gpxFile || null) as unknown as object,
             slug,
             user_id: user.id,
           },
@@ -256,21 +258,6 @@ export async function POST(request: NextRequest) {
       });
       const newTrip = result;
 
-      // Aggiorna media e gpxFile usando logica condivisa (solo per compatibilità legacy)
-      if (body.media || body.gpxFile) {
-        const jsonFieldsUpdate = prepareJsonFieldsUpdate({
-          media: body.media,
-          gpxFile: body.gpxFile
-        });
-
-        if (Object.keys(jsonFieldsUpdate).length > 0) {
-          await prisma.trip.update({
-            where: { id: newTrip.id },
-            data: jsonFieldsUpdate
-          });
-          console.log('Viaggio aggiornato con dati JSON legacy:', newTrip.id);
-        }
-      }
 
       
       

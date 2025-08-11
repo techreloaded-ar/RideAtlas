@@ -112,11 +112,14 @@ describe('Trip API con Media Integration', () => {
       user: { id: 'user-123', name: 'Test User', role: 'Ranger' }
     });
     
-    // Mock delle risposte del database
-    (prisma.trip.create as jest.Mock).mockResolvedValue({
-      ...mockTrip,
-      id: 'trip-123',
-      media: []  // Inizialmente senza media
+    // Mock delle risposte del database  
+    (prisma.trip.create as jest.Mock).mockImplementation(({ data }) => {
+      return Promise.resolve({
+        ...mockTrip,
+        id: 'trip-123',
+        ...data,  // Include i media se passati
+        slug: data.title ? data.title.toLowerCase().replace(/\s+/g, '-') : mockTrip.slug
+      });
     });
     
     (prisma.trip.update as jest.Mock).mockResolvedValue(mockTrip);
@@ -133,7 +136,8 @@ describe('Trip API con Media Integration', () => {
         destination: 'Destinazione test',
         duration_days: 5,
         duration_nights: 4,
-        tags: ['test', 'media', 'integrazione'],        theme: 'Avventura',
+        tags: ['test', 'media', 'integrazione'],        
+        theme: 'Avventura',
         characteristics: ['Percorso panoramico', 'Strade di montagna'],
         recommended_seasons: ['Estate'],
         media: mockMediaItems
@@ -146,12 +150,14 @@ describe('Trip API con Media Integration', () => {
       // Verifica che il viaggio sia stato creato con successo
       expect(response.status).toBe(201);
       expect(prisma.trip.create).toHaveBeenCalled();
-      expect(prisma.trip.update).toHaveBeenCalled();
       
-      // Verifica che l'update sia stato chiamato con i media
-      const updateCall = (prisma.trip.update as jest.Mock).mock.calls[0][0];
-      expect(updateCall.data.media).toEqual(mockMediaItems);
-      expect(updateCall.where.id).toBe('trip-123');
+      // Verifica che il create sia stato chiamato con i media direttamente
+      const createCall = (prisma.trip.create as jest.Mock).mock.calls[0][0];
+      expect(createCall.data.media).toEqual(mockMediaItems);
+      expect(createCall.data.title).toBe('Viaggio Test con Media');
+      
+      // Verifica che il risultato contenga i media
+      expect(result.media).toEqual(mockMediaItems);
     });
     
     it('deve creare un viaggio senza media se non specificati', async () => {
@@ -163,17 +169,23 @@ describe('Trip API con Media Integration', () => {
         duration_days: 3,
         duration_nights: 2,
         tags: ['test', 'senza-media'],
-        theme: 'Relax',        characteristics: ['Spiaggia', 'Mare'],
+        theme: 'Relax',        
+        characteristics: ['Spiaggia', 'Mare'],
         recommended_seasons: ['Estate']
       };
       
       const request = createMockRequest(tripData);
       const response = await createTripHandler(request);
+      const result = await response.json();
       
       // Verifica che il viaggio sia stato creato con successo
       expect(response.status).toBe(201);
       expect(prisma.trip.create).toHaveBeenCalled();
-      expect(prisma.trip.update).not.toHaveBeenCalled(); // Non dovrebbe essere chiamato l'update per i media
+      
+      // Verifica che il create sia stato chiamato con media vuoto (default)
+      const createCall = (prisma.trip.create as jest.Mock).mock.calls[0][0];
+      expect(createCall.data.media).toEqual([]); // Dovrebbe avere array vuoto per default
+      expect(createCall.data.title).toBe('Viaggio Test Senza Media');
     });
   });
   
@@ -286,7 +298,14 @@ describe('Trip API con Media Integration', () => {
       updated_at: new Date(),
       user_id: 'user-123'
     };    beforeEach(() => {
-      (prisma.trip.create as jest.Mock).mockResolvedValue(tripWithInsights);
+      (prisma.trip.create as jest.Mock).mockImplementation(({ data }) => {
+        return Promise.resolve({
+          ...tripWithInsights,
+          ...data,
+          id: 'trip-456',
+          slug: data.title ? data.title.toLowerCase().replace(/\s+/g, '-') : tripWithInsights.slug
+        });
+      });
       (prisma.trip.update as jest.Mock).mockImplementation(({ data }) => {
         return Promise.resolve({
           ...tripWithInsights,
@@ -317,7 +336,9 @@ describe('Trip API con Media Integration', () => {
       expect(prisma.trip.create).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
-            insights: tripWithInsights.insights
+            insights: tripWithInsights.insights,
+            media: [],
+            gpxFile: null
           })
         })
       );

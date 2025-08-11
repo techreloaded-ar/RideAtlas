@@ -127,6 +127,8 @@ describe('POST /api/trips - Creazione Viaggi', () => {
       expect(prisma.trip.create).toHaveBeenCalledWith({
         data: {
           ...validTripData,
+          media: [],
+          gpxFile: null,
           slug: 'viaggio-in-toscana',
           user_id: 'user-123',
         },
@@ -168,6 +170,8 @@ describe('POST /api/trips - Creazione Viaggi', () => {
         data: {
           ...minimalData,
           characteristics: [],
+          media: [],
+          gpxFile: null,
           slug: 'viaggio-minimo',
           duration_days: 1,
           duration_nights: 0,
@@ -206,6 +210,8 @@ describe('POST /api/trips - Creazione Viaggi', () => {
       expect(prisma.trip.create).toHaveBeenCalledWith({
         data: {
           ...tripWithSimilarTitle,
+          media: [],
+          gpxFile: null,
           slug: 'viaggio-in-toscana-versione-2',
           user_id: 'user-123',
         },
@@ -481,6 +487,8 @@ describe('POST /api/trips - Creazione Viaggi', () => {
         expect(prisma.trip.create).toHaveBeenCalledWith({
           data: {
             ...tripData,
+            media: [],
+            gpxFile: null,
             slug: expectedSlug,
             user_id: 'user-123',
           },

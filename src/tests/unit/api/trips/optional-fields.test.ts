@@ -104,6 +104,8 @@ describe('Trip API - Optional Fields Support', () => {
         data: {
           ...tripDataWithEmptyDescription,
           insights: '', // Dovrebbe accettare stringa vuota
+          media: [],
+          gpxFile: null,
           slug: 'viaggio-senza-descrizione',
           user_id: 'user-123',
           // L'API ricalcola duration basandosi su stages (0 stages = 1 day, 0 nights)
@@ -194,6 +196,8 @@ describe('Trip API - Optional Fields Support', () => {
         data: {
           ...tripDataWithEmptyTags,
           tags: [], // Dovrebbe accettare array vuoto
+          media: [],
+          gpxFile: null,
           slug: 'viaggio-senza-tag',
           user_id: 'user-123',
           // L'API ricalcola duration basandosi su stages (0 stages = 1 day, 0 nights)

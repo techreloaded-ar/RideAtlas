@@ -2,8 +2,10 @@
 "use client";
 
 import { UseFormReturn } from 'react-hook-form'
-import { type TripWithStagesData, CharacteristicOptions, RecommendedSeasons } from '@/schemas/trip'
+import { type TripWithStagesData, CharacteristicOptions, RecommendedSeasons, MediaItem } from '@/schemas/trip'
 import { formFieldClasses } from '@/constants/tripForm'
+import { generateTempMediaId } from '@/lib/temp-id-service'
+import MultimediaUpload from '@/components/upload/MultimediaUpload'
 
 interface TripFormFieldsProps {
   form: UseFormReturn<TripWithStagesData>
@@ -20,6 +22,7 @@ export const TripFormFields = ({ form }: TripFormFieldsProps) => {
   const characteristics = watch('characteristics')
   const recommendedSeasons = watch('recommended_seasons')
   const tags = watch('tags')
+  const media = watch('media') || []
 
   const handleCharacteristicChange = (characteristic: typeof CharacteristicOptions[number], checked: boolean) => {
     const current = characteristics || []
@@ -68,6 +71,24 @@ export const TripFormFields = ({ form }: TripFormFieldsProps) => {
       addTag(input.value)
       input.value = ''
     }
+  }
+
+  const handleAddMedia = (mediaItem: Omit<MediaItem, 'id'>) => {
+    const newMedia: MediaItem = {
+      ...mediaItem,
+      id: generateTempMediaId()
+    }
+    setValue('media', [...media, newMedia])
+  }
+
+  const handleRemoveMedia = (mediaId: string) => {
+    setValue('media', media.filter((m: MediaItem) => m.id !== mediaId))
+  }
+
+  const handleUpdateCaption = (mediaId: string, caption: string) => {
+    setValue('media', media.map((m: MediaItem) => 
+      m.id === mediaId ? { ...m, caption } : m
+    ))
   }
 
   return (
@@ -220,6 +241,25 @@ export const TripFormFields = ({ form }: TripFormFieldsProps) => {
         </div>
         {errors.recommended_seasons && (
           <p className={formFieldClasses.error}>{errors.recommended_seasons.message}</p>
+        )}
+      </div>
+
+      {/* Multimedia del Viaggio */}
+      <div>
+        <label className={formFieldClasses.label}>
+          Multimedia del Viaggio
+        </label>
+        <div className="text-xs text-gray-500 mb-3">
+          Aggiungi immagini e video rappresentativi dell&apos;intero viaggio. Le immagini delle singole tappe vengono gestite separatamente.
+        </div>
+        <MultimediaUpload
+          mediaItems={media}
+          onAddMedia={handleAddMedia}
+          onRemoveMedia={handleRemoveMedia}
+          onUpdateCaption={handleUpdateCaption}
+        />
+        {errors.media && (
+          <p className={formFieldClasses.error}>{errors.media.message}</p>
         )}
       </div>
 

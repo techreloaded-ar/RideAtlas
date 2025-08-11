@@ -251,6 +251,33 @@ describe('TripFormFields Component - Updated Characteristics', () => {
     });
   });
 
+  describe('Multimedia Section', () => {
+    it('shouldRenderMultimediaSection', () => {
+      render(<TripFormFieldsTestWrapper defaultValues={mockDefaultValues} />);
+
+      // Verifica che la sezione multimedia sia presente
+      const multimediaLabel = screen.getByText('Multimedia del Viaggio');
+      expect(multimediaLabel).toBeInTheDocument();
+
+      // Verifica la descrizione della sezione
+      const description = screen.getByText(/Aggiungi immagini e video rappresentativi/i);
+      expect(description).toBeInTheDocument();
+    });
+
+    it('shouldSupportEmptyMediaArray', () => {
+      const defaultsWithEmptyMedia = {
+        ...mockDefaultValues,
+        media: []
+      };
+
+      render(<TripFormFieldsTestWrapper defaultValues={defaultsWithEmptyMedia} />);
+
+      // Il componente dovrebbe renderizzarsi senza errori anche con media vuoto
+      const multimediaLabel = screen.getByText('Multimedia del Viaggio');
+      expect(multimediaLabel).toBeInTheDocument();
+    });
+  });
+
   describe('Accessibility and UX', () => {
     it('shouldHaveProperLabelsForAllCharacteristics', () => {
       render(<TripFormFieldsTestWrapper defaultValues={mockDefaultValues} />);

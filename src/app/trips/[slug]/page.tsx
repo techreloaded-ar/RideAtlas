@@ -61,7 +61,16 @@ export default async function TripDetailPage({ params }: { params: { slug: strin
   const isSentinel = session?.user?.role === UserRole.Sentinel;
   const canEdit = isOwner || isSentinel;
 
-  // Aggrega solo le immagini (non video) delle tappe per il carosello principale
+  // Cast e filtra le immagini del viaggio principale
+  const tripMedia = (trip.media || []) as unknown as { type: 'image' | 'video'; url: string; caption?: string }[];
+  const tripImages = tripMedia
+    .filter(media => media.type === 'image')
+    .map(media => ({
+      src: media.url,
+      alt: media.caption || trip.title
+    }));
+
+  // Aggrega le immagini (non video) delle tappe 
   const allStageImages = tripWithStages.stages.flatMap(stage => 
     stage.media
       .filter(media => media.type === 'image')
@@ -71,15 +80,8 @@ export default async function TripDetailPage({ params }: { params: { slug: strin
       }))
   );
 
-  // Se non ci sono immagini dalle tappe, usa quelle del trip principale (solo immagini)
-  const tripMedia = (trip.media || []) as unknown as { type: 'image' | 'video'; url: string; caption?: string }[];
-  const galleryImages = allStageImages.length > 0 ? allStageImages : 
-    tripMedia
-      .filter(media => media.type === 'image')
-      .map(media => ({
-        src: media.url,
-        alt: media.caption || trip.title
-      }));
+  // Combina immagini del viaggio + immagini delle tappe (viaggio prima, poi tappe in ordine)
+  const galleryImages = [...tripImages, ...allStageImages];
 
   // Mappa le stagioni per il formato chip
   const seasonMapping: Record<RecommendedSeason, string> = {
