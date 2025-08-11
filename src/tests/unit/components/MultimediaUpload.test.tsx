@@ -219,4 +219,62 @@ describe('MultimediaUpload', () => {
       window.alert = originalAlert;
     }
   });
+
+  it('deve gestire correttamente l\'upload di più immagini simultaneamente', async () => {
+    const { container } = render(
+      <MultimediaUpload
+        mediaItems={[]}
+        onAddMedia={mockOnAddMedia}
+        onRemoveMedia={mockOnRemoveMedia}
+        onUpdateCaption={mockOnUpdateCaption}
+      />
+    );
+    
+    // Crea due file fittizi
+    const file1 = new File(['dummy content 1'], 'test-image-1.jpg', { type: 'image/jpeg' });
+    const file2 = new File(['dummy content 2'], 'test-image-2.jpg', { type: 'image/jpeg' });
+    
+    // Mock delle risposte per l'upload delle due immagini
+    (global.fetch as jest.Mock)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ url: 'https://example.com/uploaded-image-1.jpg' })
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ url: 'https://example.com/uploaded-image-2.jpg' })
+      });
+    
+    // Trova l'input per il file
+    const fileInput = container.querySelector('input[type="file"][accept="image/*"]') as HTMLInputElement;
+    expect(fileInput).not.toBeNull();
+    
+    // Simula l'upload di entrambi i file contemporaneamente
+    Object.defineProperty(fileInput, 'files', {
+      value: [file1, file2],
+      writable: false,
+    });
+    
+    fireEvent.change(fileInput);
+    
+    // Aspetta che entrambi i fetch siano completati
+    await waitFor(() => {
+      expect(global.fetch).toHaveBeenCalledTimes(2);
+    });
+    
+    // Verifica che onAddMedia sia stato chiamato due volte con i dati corretti
+    await waitFor(() => {
+      expect(mockOnAddMedia).toHaveBeenCalledTimes(2);
+      expect(mockOnAddMedia).toHaveBeenNthCalledWith(1, {
+        type: 'image',
+        url: 'https://example.com/uploaded-image-1.jpg',
+        caption: ''
+      });
+      expect(mockOnAddMedia).toHaveBeenNthCalledWith(2, {
+        type: 'image',
+        url: 'https://example.com/uploaded-image-2.jpg',
+        caption: ''
+      });
+    });
+  });
 });

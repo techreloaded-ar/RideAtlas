@@ -16,7 +16,8 @@ export const TripFormFields = ({ form }: TripFormFieldsProps) => {
     register, 
     formState: { errors },
     watch,
-    setValue
+    setValue,
+    getValues
   } = form
 
   const characteristics = watch('characteristics')
@@ -78,15 +79,19 @@ export const TripFormFields = ({ form }: TripFormFieldsProps) => {
       ...mediaItem,
       id: generateTempMediaId()
     }
-    setValue('media', [...media, newMedia])
+    // Uso getValues() per ottenere lo stato più recente invece di watch()
+    const currentMedia = getValues('media') || []
+    setValue('media', [...currentMedia, newMedia])
   }
 
   const handleRemoveMedia = (mediaId: string) => {
-    setValue('media', media.filter((m: MediaItem) => m.id !== mediaId))
+    const currentMedia = getValues('media') || []
+    setValue('media', currentMedia.filter((m: MediaItem) => m.id !== mediaId))
   }
 
   const handleUpdateCaption = (mediaId: string, caption: string) => {
-    setValue('media', media.map((m: MediaItem) => 
+    const currentMedia = getValues('media') || []
+    setValue('media', currentMedia.map((m: MediaItem) => 
       m.id === mediaId ? { ...m, caption } : m
     ))
   }
