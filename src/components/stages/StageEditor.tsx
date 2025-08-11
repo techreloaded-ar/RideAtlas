@@ -341,39 +341,51 @@ export default function StageEditor({
               </div>
             )}
 
-            {/* Unified Image Upload */}
+            {/* Unified Image Upload with Drag & Drop */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 {isEditMode && watch('media')?.length > 0 ? 'Aggiungi altre immagini' : 'Carica immagini'}
               </label>
-              <div className={`border-2 border-dashed rounded-lg p-6 ${
-                mediaHook.isUploading 
-                  ? 'border-blue-300 bg-blue-50' 
-                  : 'border-gray-300 hover:border-gray-400'
-              } transition-colors`}>
+              <div 
+                className={`border-2 border-dashed rounded-lg p-6 transition-colors cursor-pointer ${
+                  mediaHook.isUploading 
+                    ? 'border-blue-300 bg-blue-50' 
+                    : mediaHook.isDragOver
+                    ? 'border-blue-400 bg-blue-50'
+                    : 'border-gray-300 hover:border-gray-400'
+                }`}
+                onDrop={mediaHook.handleDrop}
+                onDragOver={mediaHook.handleDragOver}
+                onDragLeave={mediaHook.handleDragLeave}
+                onClick={() => document.getElementById('images')?.click()}
+              >
                 <div className="text-center">
                   {mediaHook.isUploading ? (
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
                   ) : (
-                    <PhotoIcon className="mx-auto h-12 w-12 text-gray-400" />
+                    <PhotoIcon className={`mx-auto h-12 w-12 ${
+                      mediaHook.isDragOver ? 'text-blue-400' : 'text-gray-400'
+                    }`} />
                   )}
                   <div className="mt-4">
-                    <label htmlFor="images" className={mediaHook.isUploading ? 'cursor-not-allowed' : 'cursor-pointer'}>
-                      <span className={`mt-2 block text-sm font-medium ${
-                        mediaHook.isUploading ? 'text-gray-400' : 'text-gray-900'
-                      }`}>
-                        {mediaHook.isUploading ? 'Caricamento in corso...' : 'Seleziona immagini'}
-                      </span>
-                      <input
-                        id="images"
-                        type="file"
-                        multiple
-                        accept="image/*"
-                        onChange={(e) => handleImageUpload(e)}
-                        className="sr-only"
-                        disabled={mediaHook.isUploading}
-                      />
-                    </label>
+                    <span className={`mt-2 block text-sm font-medium ${
+                      mediaHook.isUploading ? 'text-gray-400' : 
+                      mediaHook.isDragOver ? 'text-blue-600' :
+                      'text-gray-900'
+                    }`}>
+                      {mediaHook.isUploading ? 'Caricamento in corso...' : 
+                       mediaHook.isDragOver ? 'Rilascia le immagini qui' :
+                       'Clicca per selezionare o trascina le immagini qui'}
+                    </span>
+                    <input
+                      id="images"
+                      type="file"
+                      multiple
+                      accept="image/*"
+                      onChange={(e) => handleImageUpload(e)}
+                      className="sr-only"
+                      disabled={mediaHook.isUploading}
+                    />
                     <p className="mt-1 text-sm text-gray-500">PNG, JPG, WebP fino a 10MB ciascuna. La prima immagine sarà quella principale.</p>
                   </div>
                 </div>

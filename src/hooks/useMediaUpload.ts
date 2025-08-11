@@ -10,9 +10,14 @@ export interface UseMediaUploadReturn {
   isUploading: boolean;
   uploadError: string | null;
   isUploadingGpx: boolean;
+  isDragOver: boolean;
   
   // Handlers
   handleImageUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  handleImageDrop: (files: FileList) => void;
+  handleDragOver: (event: React.DragEvent<HTMLDivElement>) => void;
+  handleDragLeave: (event: React.DragEvent<HTMLDivElement>) => void;
+  handleDrop: (event: React.DragEvent<HTMLDivElement>) => void;
   handleGpxUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
   removeExistingMedia: (mediaId: string) => void;
   updateMediaCaption: (mediaId: string, caption: string) => void;
@@ -40,11 +45,10 @@ export const useMediaUpload = ({
   const [isUploading, setIsUploading] = useState(false);
   const [isUploadingGpx, setIsUploadingGpx] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [isDragOver, setIsDragOver] = useState(false);
 
-  const handleImageUpload = useCallback(async (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const files = event.target.files;
+  // Common upload logic for both file input and drag & drop
+  const uploadImageFiles = useCallback(async (files: FileList) => {
     if (!files || files.length === 0) return;
 
     setUploadError(null);
@@ -102,9 +106,6 @@ export const useMediaUpload = ({
       // Update media array once with all new items
       const updatedMedia = [...currentArray, ...newMediaItems];
       onMediaUpdate(updatedMedia);
-
-      // Clear the input to allow re-uploading same files
-      event.target.value = '';
       
     } catch (error) {
       console.error('Errore upload:', error);
@@ -113,6 +114,47 @@ export const useMediaUpload = ({
       setIsUploading(false);
     }
   }, [currentMedia, onMediaUpdate]);
+
+  const handleImageUpload = useCallback(async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
+
+    await uploadImageFiles(files);
+    
+    // Clear the input to allow re-uploading same files
+    event.target.value = '';
+  }, [uploadImageFiles]);
+
+  // Drag & drop handlers
+  const handleImageDrop = useCallback(async (files: FileList) => {
+    await uploadImageFiles(files);
+  }, [uploadImageFiles]);
+
+  const handleDragOver = useCallback((event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    setIsDragOver(true);
+  }, []);
+
+  const handleDragLeave = useCallback((event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    // Only set dragOver to false if we're actually leaving the drop zone
+    // This prevents flicker when dragging over child elements
+    if (!event.currentTarget.contains(event.relatedTarget as Node)) {
+      setIsDragOver(false);
+    }
+  }, []);
+
+  const handleDrop = useCallback((event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    setIsDragOver(false);
+    
+    const files = event.dataTransfer.files;
+    if (files.length > 0) {
+      handleImageDrop(files);
+    }
+  }, [handleImageDrop]);
 
   const handleGpxUpload = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -189,7 +231,12 @@ export const useMediaUpload = ({
     isUploading,
     uploadError,
     isUploadingGpx,
+    isDragOver,
     handleImageUpload,
+    handleImageDrop,
+    handleDragOver,
+    handleDragLeave,
+    handleDrop,
     handleGpxUpload,
     removeExistingMedia,
     updateMediaCaption,

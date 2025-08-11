@@ -260,39 +260,51 @@ export const EditableStageItem = ({
                   </div>
                 )}
 
-                {/* Unified Image Upload */}
+                {/* Unified Image Upload with Drag & Drop */}
                 <div className="mb-4">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     {stage.media && stage.media.length > 0 ? 'Aggiungi altre immagini' : 'Carica immagini'}
                   </label>
-                  <div className={`border-2 border-dashed rounded-lg p-4 ${
-                    mediaHook.isUploading 
-                      ? 'border-blue-300 bg-blue-50' 
-                      : 'border-gray-300 hover:border-gray-400'
-                  } transition-colors`}>
+                  <div 
+                    className={`border-2 border-dashed rounded-lg p-4 transition-colors cursor-pointer ${
+                      mediaHook.isUploading 
+                        ? 'border-blue-300 bg-blue-50' 
+                        : mediaHook.isDragOver
+                        ? 'border-blue-400 bg-blue-50'
+                        : 'border-gray-300 hover:border-gray-400'
+                    }`}
+                    onDrop={mediaHook.handleDrop}
+                    onDragOver={mediaHook.handleDragOver}
+                    onDragLeave={mediaHook.handleDragLeave}
+                    onClick={() => document.getElementById(`images-${index}`)?.click()}
+                  >
                     <div className="text-center">
                       {mediaHook.isUploading ? (
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
                       ) : (
-                        <PhotoIcon className="mx-auto h-8 w-8 text-gray-400" />
+                        <PhotoIcon className={`mx-auto h-8 w-8 ${
+                          mediaHook.isDragOver ? 'text-blue-400' : 'text-gray-400'
+                        }`} />
                       )}
                       <div className="mt-2">
-                        <label htmlFor={`images-${index}`} className={mediaHook.isUploading ? 'cursor-not-allowed' : 'cursor-pointer'}>
-                          <span className={`text-sm font-medium ${
-                            mediaHook.isUploading ? 'text-gray-400' : 'text-gray-900'
-                          }`}>
-                            {mediaHook.isUploading ? 'Caricamento in corso...' : 'Seleziona immagini'}
-                          </span>
-                          <input
-                            id={`images-${index}`}
-                            type="file"
-                            multiple
-                            accept="image/*"
-                            onChange={(e) => mediaHook.handleImageUpload(e)}
-                            className="sr-only"
-                            disabled={isLoading || mediaHook.isUploading}
-                          />
-                        </label>
+                        <span className={`text-sm font-medium ${
+                          mediaHook.isUploading ? 'text-gray-400' : 
+                          mediaHook.isDragOver ? 'text-blue-600' :
+                          'text-gray-900'
+                        }`}>
+                          {mediaHook.isUploading ? 'Caricamento in corso...' : 
+                           mediaHook.isDragOver ? 'Rilascia le immagini qui' :
+                           'Clicca per selezionare o trascina le immagini qui'}
+                        </span>
+                        <input
+                          id={`images-${index}`}
+                          type="file"
+                          multiple
+                          accept="image/*"
+                          onChange={(e) => mediaHook.handleImageUpload(e)}
+                          className="sr-only"
+                          disabled={isLoading || mediaHook.isUploading}
+                        />
                         <p className="text-xs text-gray-500 mt-1">PNG, JPG, WebP fino a 10MB ciascuna. La prima immagine sarà quella principale.</p>
                       </div>
                     </div>
