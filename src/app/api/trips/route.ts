@@ -211,7 +211,6 @@ export async function POST(request: NextRequest) {
 
       // Calcola la durata automaticamente dalle stages
       const calculatedDays = Math.max(1, tripData.stages.length);
-      const calculatedNights = Math.max(0, tripData.stages.length - 1);
       
       // Crea il viaggio con i dati di base in una transazione
       const result = await prisma.$transaction(async (tx) => {
@@ -222,7 +221,7 @@ export async function POST(request: NextRequest) {
             summary: tripData.summary,
             destination: tripData.destination,
             duration_days: calculatedDays, // Calcolato dalle stages
-            duration_nights: calculatedNights, // Calcolato dalle stages
+            duration_nights: 0, // Non più utilizzato nell'interfaccia
             tags: tripData.tags,
             theme: tripData.theme,
             characteristics: tripData.characteristics,

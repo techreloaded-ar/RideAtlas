@@ -22,7 +22,6 @@ interface UserTrip {
   title: string
   destination: string
   duration_days: number
-  duration_nights: number
   theme: string
   status: TripStatus
   created_at: string
@@ -172,7 +171,7 @@ export default function UserTrips() {
                     </div>
                     <div className="flex items-center">
                       <Clock className="w-3 h-3 mr-1" />
-                      {trip.duration_days}g, {trip.duration_nights}n
+                      {trip.duration_days} giorni
                     </div>
                     <div className="flex items-center">
                       <Calendar className="w-3 h-3 mr-1" />

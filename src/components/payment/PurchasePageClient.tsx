@@ -12,7 +12,6 @@ interface TripData {
   summary: string;
   destination: string;
   duration_days: number;
-  duration_nights: number;
   theme: string;
   price: number;
   slug: string;
@@ -215,7 +214,7 @@ export default function PurchasePageClient({ trip }: PurchasePageClientProps) {
                 <div className="flex flex-wrap gap-3">
                   <div className="flex items-center text-sm text-gray-600">
                     <Clock className="w-4 h-4 mr-1" />
-                    {trip.duration_days} giorni / {trip.duration_nights} notti
+                    {trip.duration_days} giorni
                   </div>
                   <div className="flex items-center text-sm text-gray-600">
                     <MapPin className="w-4 h-4 mr-1" />

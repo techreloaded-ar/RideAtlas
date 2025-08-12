@@ -3,7 +3,6 @@ interface Trip {
   title: string;
   destination: string;
   duration_days: number;
-  duration_nights: number;
   theme: string;
   characteristics: string[];
   recommended_seasons: string[];
@@ -52,7 +51,7 @@ Il tuo compito è aiutare gli utenti a pianificare viaggi in moto personalizzati
       let tripInfo = `- ID: ${trip.id}
 - Titolo: ${trip.title}
 - Destinazione: ${trip.destination}
-- Durata: ${trip.duration_days} giorni / ${trip.duration_nights} notti
+- Durata: ${trip.duration_days} giorni
 - Tema: ${trip.theme}
 - Caratteristiche: ${trip.characteristics.join(', ')}
 - Stagioni consigliate: ${trip.recommended_seasons.join(', ')}

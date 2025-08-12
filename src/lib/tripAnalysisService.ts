@@ -7,7 +7,6 @@ interface TripForAI {
   summary: string;
   destination: string;
   duration_days: number;
-  duration_nights: number;
   tags: string[];
   theme: string;
   characteristics: string[];

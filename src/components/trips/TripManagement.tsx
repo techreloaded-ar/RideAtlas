@@ -13,7 +13,6 @@ interface Trip {
   title: string
   destination: string
   duration_days: number
-  duration_nights: number
   theme: string
   status: string
   created_at: Date
@@ -310,7 +309,7 @@ export default function TripManagement() {
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         <div className="flex items-center gap-1">
                           <Clock className="w-4 h-4 text-gray-400" />
-                          {trip.duration_days}g, {trip.duration_nights}n
+                          {trip.duration_days} giorni
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">

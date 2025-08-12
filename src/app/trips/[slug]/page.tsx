@@ -110,8 +110,8 @@ export default async function TripDetailPage({ params }: { params: { slug: strin
         
         <TripChips 
           duration={isMultiStage 
-            ? `${tripWithStages.stages.length} giorni / ${Math.max(0, tripWithStages.stages.length - 1)} notti`
-            : `${trip.duration_days} giorni / ${trip.duration_nights} notti`
+            ? `${tripWithStages.stages.length} giorni`
+            : `${trip.duration_days} giorni`
           }
           location={trip.destination}
           terrain={trip.theme}

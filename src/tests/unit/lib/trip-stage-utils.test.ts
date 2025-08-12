@@ -186,10 +186,9 @@ describe('tripStageUtilities', () => {
 
   describe('calculateTripDuration', () => {
     describe('viaggi multi-tappa', () => {
-      it('dovrebbe calcolare giorni e notti basato sul numero di tappe', () => {
+      it('dovrebbe calcolare giorni basato sul numero di tappe', () => {
         const result = calculateTripDuration(mockMultiStageTrip);
-        expect(result.days).toBe(3); // 3 stages
-        expect(result.nights).toBe(2); // 3 - 1
+        expect(result).toBe(3); // 3 stages
       });
 
       it('dovrebbe gestire viaggi con una sola tappa', () => {
@@ -198,36 +197,31 @@ describe('tripStageUtilities', () => {
           stages: [mockStage1]
         };
         const result = calculateTripDuration(singleStageTrip);
-        expect(result.days).toBe(1);
-        expect(result.nights).toBe(0);
+        expect(result).toBe(1);
       });
 
       it('dovrebbe gestire viaggi con stages vuote', () => {
         const result = calculateTripDuration(mockEmptyStagesTrip);
-        expect(result.days).toBe(3); // fallback a duration_days
-        expect(result.nights).toBe(2);
+        expect(result).toBe(3); // fallback a duration_days
       });
     });
 
     describe('viaggi legacy', () => {
       it('dovrebbe utilizzare duration_days esistente', () => {
         const result = calculateTripDuration(mockLegacyTrip);
-        expect(result.days).toBe(3);
-        expect(result.nights).toBe(2);
+        expect(result).toBe(3);
       });
 
       it('dovrebbe utilizzare 1 giorno di default se duration_days è null', () => {
         const tripWithNullDuration = { ...mockLegacyTrip, duration_days: null as any };
         const result = calculateTripDuration(tripWithNullDuration);
-        expect(result.days).toBe(1);
-        expect(result.nights).toBe(0);
+        expect(result).toBe(1);
       });
 
       it('dovrebbe gestire duration_days a 0', () => {
         const tripWithZeroDuration = { ...mockLegacyTrip, duration_days: 0 };
         const result = calculateTripDuration(tripWithZeroDuration);
-        expect(result.days).toBe(1); // fallback a 1
-        expect(result.nights).toBe(0);
+        expect(result).toBe(1); // fallback a 1
       });
     });
   });

@@ -101,7 +101,6 @@ export class PurchaseService {
             slug: true,
             destination: true,
             duration_days: true,
-            duration_nights: true,
             theme: true,
             created_at: true
           }

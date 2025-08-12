@@ -240,7 +240,7 @@ export default async function TripsPage() {
                   {/* Durata */}
                   <div className="flex items-center gap-2 text-gray-600 mb-4">
                     <Clock className="w-4 h-4" />
-                    <span>{trip.duration_days} giorni, {trip.duration_nights} notti</span>
+                    <span>{trip.duration_days} giorni</span>
                   </div>
 
                   {/* Tema */}

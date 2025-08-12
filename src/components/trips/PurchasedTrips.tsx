@@ -17,7 +17,6 @@ interface PurchasedTrip {
     slug: string;
     destination: string;
     duration_days: number;
-    duration_nights: number;
     theme: string;
     created_at: string;
   };
@@ -149,7 +148,7 @@ export default function PurchasedTrips() {
                     <div className="flex flex-wrap gap-3 text-sm text-gray-600 mb-3">
                       <div className="flex items-center">
                         <Clock className="w-4 h-4 mr-1" />
-                        {purchase.trip.duration_days} giorni / {purchase.trip.duration_nights} notti
+                        {purchase.trip.duration_days} giorni
                       </div>
                       <div className="flex items-center">
                         <MapPin className="w-4 h-4 mr-1" />

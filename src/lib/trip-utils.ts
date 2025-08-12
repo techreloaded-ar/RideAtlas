@@ -59,20 +59,16 @@ export const calculateTotalDistance = (trip: Trip): number => {
 };
 
 /**
- * Calcola la durata di un viaggio in giorni e notti
- * Per viaggi multi-tappa: giorni = numero tappe, notti = tappe - 1
+ * Calcola la durata di un viaggio in giorni
+ * Per viaggi multi-tappa: giorni = numero tappe
  * Per viaggi legacy: usa il campo duration_days esistente
  * @param trip Il viaggio di cui calcolare la durata
- * @returns Oggetto con giorni e notti
+ * @returns Numero di giorni
  */
-export const calculateTripDuration = (trip: Trip): { days: number, nights: number } => {
-
-  const days = isMultiStageTrip(trip) && trip.stages ? 
-                  trip.stages.length : 
-                  trip.duration_days || 1;
-                  
-  const nights = Math.max(0, days - 1);
-  return { days, nights };
+export const calculateTripDuration = (trip: Trip): number => {
+  return isMultiStageTrip(trip) && trip.stages ? 
+    trip.stages.length : 
+    trip.duration_days || 1;
 };
 
 /**

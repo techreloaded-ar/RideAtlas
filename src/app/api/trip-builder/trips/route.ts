@@ -12,7 +12,6 @@ interface TripForAI {
   summary: string;
   destination: string;
   duration_days: number;
-  duration_nights: number;
   tags: string[];
   theme: string;
   characteristics: string[];
@@ -67,7 +66,6 @@ export async function GET() {
         summary: true,
         destination: true,
         duration_days: true,
-        duration_nights: true,
         tags: true,
         theme: true,
         characteristics: true,
@@ -91,7 +89,6 @@ export async function GET() {
         summary: trip.summary,
         destination: trip.destination,
         duration_days: trip.duration_days,
-        duration_nights: trip.duration_nights,
         tags: trip.tags,
         theme: trip.theme,
         characteristics: trip.characteristics,

@@ -31,7 +31,6 @@ export async function GET() {
         title: true,
         destination: true,
         duration_days: true,
-        duration_nights: true,
         theme: true,
         status: true,
         created_at: true,
