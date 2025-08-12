@@ -3,9 +3,6 @@ import { useState, useCallback } from 'react'
 import { parseGPXContent, GPXParseResult } from '@/lib/gpx-utils'
 import { GPXPoint, GPXWaypoint, GPXRoute, GPXData } from '@/types/gpx'
 
-// Backward compatibility types (maintained for existing code)
-type GPXWaypointForMap = GPXWaypoint
-type GPXRouteForMap = GPXRoute
 
 interface UseGPXMapOptions {
   /** Auto-load GPX from URL on hook initialization */
@@ -20,9 +17,9 @@ interface UseGPXMapOptions {
 
 interface UseGPXMapReturn {
   gpxData: GPXPoint[] // Legacy support
-  tracks: GPXRouteForMap[] // Multiple tracks support
-  routes: GPXRouteForMap[]
-  waypoints: GPXWaypointForMap[]
+  tracks: GPXRoute[] // Multiple tracks support
+  routes: GPXRoute[]
+  waypoints: GPXWaypoint[]
   isLoading: boolean
   error: string | null
   metadata: {
@@ -42,9 +39,9 @@ export function useGPXMap(options: UseGPXMapOptions = {}): UseGPXMapReturn {
   const { onDataLoaded, onError } = options
   
   const [gpxData, setGpxData] = useState<GPXPoint[]>([])
-  const [tracks, setTracks] = useState<GPXRouteForMap[]>([]) // Support for multiple tracks
-  const [routes, setRoutes] = useState<GPXRouteForMap[]>([])
-  const [waypoints, setWaypoints] = useState<GPXWaypointForMap[]>([])
+  const [tracks, setTracks] = useState<GPXRoute[]>([]) // Support for multiple tracks
+  const [routes, setRoutes] = useState<GPXRoute[]>([])
+  const [waypoints, setWaypoints] = useState<GPXWaypoint[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [lastUrl, setLastUrl] = useState<string | null>(null)
@@ -65,7 +62,7 @@ export function useGPXMap(options: UseGPXMapOptions = {}): UseGPXMapReturn {
 
     // Estrai tutti i punti da tutti i tracciati
     const allPoints: GPXPoint[] = []
-    const gpxTracks: GPXRouteForMap[] = []
+    const gpxTracks: GPXRoute[] = []
     
     parsedData.tracks.forEach((track, index) => {
       const trackPoints: GPXPoint[] = track.points.map(point => ({
@@ -93,7 +90,7 @@ export function useGPXMap(options: UseGPXMapOptions = {}): UseGPXMapReturn {
     setTracks(gpxTracks) // Multiple tracks support
 
     // Estrai i waypoints
-    const gpxWaypoints: GPXWaypointForMap[] = parsedData.waypoints.map(wp => ({
+    const gpxWaypoints: GPXWaypoint[] = parsedData.waypoints.map(wp => ({
       lat: wp.lat,
       lng: wp.lng,
       name: wp.name,
@@ -103,7 +100,7 @@ export function useGPXMap(options: UseGPXMapOptions = {}): UseGPXMapReturn {
     setWaypoints(gpxWaypoints)
 
     // Estrai le route
-    const gpxRoutes: GPXRouteForMap[] = parsedData.routes.map(route => ({
+    const gpxRoutes: GPXRoute[] = parsedData.routes.map(route => ({
       name: route.name,
       points: route.points.map(point => ({
         lat: point.lat,
