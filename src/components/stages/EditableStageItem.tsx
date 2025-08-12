@@ -2,22 +2,15 @@
 
 import { useState } from 'react';
 import { type StageCreationData } from '@/schemas/trip';
-import { GripVertical, MapIcon, ChevronDownIcon, ChevronUpIcon } from 'lucide-react'; // Import GripVertical for drag handle
-import { PhotoIcon, DocumentIcon, XMarkIcon } from '@heroicons/react/24/outline'; // Import icons
-import { useMediaUpload } from '@/hooks/useMediaUpload';
-import { DraggableAttributes, DraggableSyntheticListeners } from '@dnd-kit/core'; // Import Dnd-kit types
-import { Transform } from '@dnd-kit/utilities'; // Import Dnd-kit types
-import dynamic from 'next/dynamic';
-
-// Import dinamico per evitare problemi SSR
-const GPXMapViewer = dynamic(() => import('@/components/maps/GPXMapViewer'), {
-  ssr: false,
-  loading: () => (
-    <div className="w-full h-48 bg-gray-100 flex items-center justify-center rounded-lg">
-      <div className="text-gray-500">Caricamento mappa...</div>
-    </div>
-  )
-});
+import { GripVertical } from 'lucide-react';
+import MediaUpload from '@/components/upload/MediaUpload';
+import { generateTempMediaId } from '@/lib/temp-id-service';
+import { DraggableAttributes, DraggableSyntheticListeners } from '@dnd-kit/core';
+import { Transform, CSS } from '@dnd-kit/utilities';
+import { useGpxUpload } from '@/hooks/useGpxUpload';
+import { GpxDisplay } from './GpxDisplay';
+import { GpxUpload } from '@/components/upload/GpxUpload';
+import { GpxFile } from '@/schemas/trip';
 
 interface EditableStageItemProps {
   stage: StageCreationData;
@@ -27,12 +20,13 @@ interface EditableStageItemProps {
   isLoading: boolean;
   // Props for dnd-kit
   attributes?: DraggableAttributes;
-  listeners?: DraggableSyntheticListeners; // Changed type for listeners
+  listeners?: DraggableSyntheticListeners;
   setNodeRef?: (node: HTMLElement | null) => void;
   transform?: Transform | null;
   transition?: string;
   isDragging?: boolean;
 }
+
 export const EditableStageItem = ({
   stage,
   index,
@@ -47,14 +41,9 @@ export const EditableStageItem = ({
   isDragging,
 }: EditableStageItemProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
-  const [showGpxPreview, setShowGpxPreview] = useState(false);
-
-  // Initialize media upload hook
-  const mediaHook = useMediaUpload({
-    currentMedia: Array.isArray(stage.media) ? stage.media : [],
-    currentGpx: stage.gpxFile || null,
-    onMediaUpdate: (newMedia) => onUpdate({ media: newMedia }),
-    onGpxUpdate: (newGpx) => onUpdate({ gpxFile: newGpx }),
+  
+  const gpxUpload = useGpxUpload({
+    onGpxUpdate: (gpxFile: GpxFile) => onUpdate({ gpxFile })
   });
 
   const toggleExpansion = () => {
@@ -88,7 +77,7 @@ export const EditableStageItem = ({
 
       {/* Header della stage */}
       <div
-        className="px-4 py-3 cursor-pointer hover:bg-gray-50 pl-12" // Adjusted padding for drag handle
+        className="px-4 py-3 cursor-pointer hover:bg-gray-50 pl-12"
         onClick={toggleExpansion}
       >
         <div className="flex items-center justify-between">
@@ -199,283 +188,57 @@ export const EditableStageItem = ({
 
             {/* Media Section */}
             <div className="space-y-4">
-              <div>
-                <h5 className="text-sm font-medium text-gray-700 mb-3">Immagini e Media</h5>
-                
-                {/* Existing Media Display */}
-                {stage.media && Array.isArray(stage.media) && stage.media.length > 0 && (
-                  <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Immagini {stage.media.length > 0 && stage.media[0] && (
-                        <span className="text-xs text-gray-500">(la prima sarà l&apos;immagine principale)</span>
-                      )}
-                    </label>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {stage.media.map((media, mediaIndex) => (
-                        <div key={media.id} className="border border-gray-200 rounded-lg overflow-hidden">
-                          <div className="relative">
-                            <img
-                              src={media.url}
-                              alt={media.caption || 'Immagine tappa'}
-                              className="w-full aspect-[3/2] object-cover"
-                            />
-                            {mediaIndex === 0 && (
-                              <div className="absolute top-1 left-1 bg-blue-500 text-white text-xs px-1 py-0.5 rounded">
-                                Principale
-                              </div>
-                            )}
-                            <button
-                              type="button"
-                              onClick={() => mediaHook.removeExistingMedia(media.id)}
-                              disabled={isLoading}
-                              className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center hover:bg-red-600 disabled:opacity-50"
-                            >
-                              <XMarkIcon className="w-3 h-3" />
-                            </button>
-                          </div>
-                          <div className="p-2">
-                            <input
-                              type="text"
-                              value={media.caption || ''}
-                              onChange={(e) => mediaHook.updateMediaCaption(media.id, e.target.value)}
-                              placeholder="Aggiungi una didascalia..."
-                              disabled={isLoading}
-                              className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50"
-                            />
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Upload Error Display */}
-                {mediaHook.uploadError && (
-                  <div className="mb-4 bg-red-50 border border-red-200 rounded-lg p-3">
-                    <div className="flex items-center">
-                      <div className="text-red-600 text-sm">
-                        <strong>Errore upload:</strong> {mediaHook.uploadError}
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Unified Image Upload with Drag & Drop */}
-                <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {stage.media && stage.media.length > 0 ? 'Aggiungi altre immagini' : 'Carica immagini'}
-                  </label>
-                  <div 
-                    className={`border-2 border-dashed rounded-lg p-4 transition-colors cursor-pointer ${
-                      mediaHook.isUploading 
-                        ? 'border-blue-300 bg-blue-50' 
-                        : mediaHook.isDragOver
-                        ? 'border-blue-400 bg-blue-50'
-                        : 'border-gray-300 hover:border-gray-400'
-                    }`}
-                    onDrop={mediaHook.handleDrop}
-                    onDragOver={mediaHook.handleDragOver}
-                    onDragLeave={mediaHook.handleDragLeave}
-                    onClick={() => document.getElementById(`images-${index}`)?.click()}
-                  >
-                    <div className="text-center">
-                      {mediaHook.isUploading ? (
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-                      ) : (
-                        <PhotoIcon className={`mx-auto h-8 w-8 ${
-                          mediaHook.isDragOver ? 'text-blue-400' : 'text-gray-400'
-                        }`} />
-                      )}
-                      <div className="mt-2">
-                        <span className={`text-sm font-medium ${
-                          mediaHook.isUploading ? 'text-gray-400' : 
-                          mediaHook.isDragOver ? 'text-blue-600' :
-                          'text-gray-900'
-                        }`}>
-                          {mediaHook.isUploading ? 'Caricamento in corso...' : 
-                           mediaHook.isDragOver ? 'Rilascia le immagini qui' :
-                           'Clicca per selezionare o trascina le immagini qui'}
-                        </span>
-                        <input
-                          id={`images-${index}`}
-                          type="file"
-                          multiple
-                          accept="image/*"
-                          onChange={(e) => mediaHook.handleImageUpload(e)}
-                          className="sr-only"
-                          disabled={isLoading || mediaHook.isUploading}
-                        />
-                        <p className="text-xs text-gray-500 mt-1">PNG, JPG, WebP fino a 10MB ciascuna. La prima immagine sarà quella principale.</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <MediaUpload
+                mediaItems={Array.isArray(stage.media) ? stage.media : []}
+                onAddMedia={(media) => {
+                  const currentMedia = Array.isArray(stage.media) ? stage.media : [];
+                  const newMediaItem = {
+                    ...media,
+                    id: generateTempMediaId()
+                  };
+                  onUpdate({ media: [...currentMedia, newMediaItem] });
+                }}
+                onAddMultipleMedia={(mediaList) => {
+                  const currentMedia = Array.isArray(stage.media) ? stage.media : [];
+                  const newMediaItems = mediaList.map(media => ({
+                    ...media,
+                    id: generateTempMediaId()
+                  }));
+                  onUpdate({ media: [...currentMedia, ...newMediaItems] });
+                }}
+                onRemoveMedia={(mediaId) => {
+                  const currentMedia = Array.isArray(stage.media) ? stage.media : [];
+                  const filteredMedia = currentMedia.filter(m => m.id !== mediaId);
+                  onUpdate({ media: filteredMedia });
+                }}
+                onUpdateCaption={(mediaId, caption) => {
+                  const currentMedia = Array.isArray(stage.media) ? stage.media : [];
+                  const updatedMedia = currentMedia.map(m => 
+                    m.id === mediaId ? { ...m, caption } : m
+                  );
+                  onUpdate({ media: updatedMedia });
+                }}
+                config={{
+                  enableYoutube: true,
+                  maxImageSize: 10,
+                }}
+                className="mb-6"
+              />
 
               {/* GPX Section */}
               <div>
                 <h5 className="text-sm font-medium text-gray-700 mb-3">File GPX</h5>
                 
-                {/* Current GPX Display */}
-                {stage.gpxFile && (
-                  <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-3">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center">
-                        <DocumentIcon className="w-4 h-4 text-green-600 mr-2" />
-                        <span className="text-sm font-medium text-green-800">
-                          {stage.gpxFile.filename}
-                        </span>
-                      </div>
-                      <span className="text-xs text-green-600">File attuale</span>
-                    </div>
-                    {/* Metadati GPX */}
-                    {(stage.gpxFile.distance > 0 || stage.gpxFile.waypoints > 0) && (
-                      <div className="grid grid-cols-2 gap-2 text-xs text-green-700">
-                        {stage.gpxFile.distance > 0 && (
-                          <div className="flex items-center">
-                            <span className="font-medium mr-1">Distanza:</span>
-                            <span>{(stage.gpxFile.distance / 1000).toFixed(1)} km</span>
-                          </div>
-                        )}
-                        {stage.gpxFile.waypoints > 0 && (
-                          <div className="flex items-center">
-                            <span className="font-medium mr-1">Waypoints:</span>
-                            <span>{stage.gpxFile.waypoints}</span>
-                          </div>
-                        )}
-                        {stage.gpxFile.elevationGain && stage.gpxFile.elevationGain > 0 && (
-                          <div className="flex items-center">
-                            <span className="font-medium mr-1">Dislivello:</span>
-                            <span>{stage.gpxFile.elevationGain.toFixed(0)} m</span>
-                          </div>
-                        )}
-                        {stage.gpxFile.keyPoints && stage.gpxFile.keyPoints.length > 0 && (
-                          <div className="flex items-center">
-                            <span className="font-medium mr-1">Punti chiave:</span>
-                            <span>{stage.gpxFile.keyPoints.length}</span>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                    
-                    {/* GPX Preview Toggle - solo se il GPX è valido */}
-                    {stage.gpxFile && stage.gpxFile.isValid && (
-                      <div className="mt-3">
-                        <button
-                          type="button"
-                          onClick={() => setShowGpxPreview(!showGpxPreview)}
-                          className="flex items-center gap-2 text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors"
-                          disabled={isLoading}
-                        >
-                          <MapIcon className="w-4 h-4" />
-                          <span>
-                            {showGpxPreview ? 'Nascondi anteprima mappa' : 'Mostra anteprima mappa'}
-                          </span>
-                          {showGpxPreview ? (
-                            <ChevronUpIcon className="w-4 h-4" />
-                          ) : (
-                            <ChevronDownIcon className="w-4 h-4" />
-                          )}
-                        </button>
-                      </div>
-                    )}
-
-                    {/* GPX Preview Map */}
-                    {showGpxPreview && (
-                      <div className="mt-3 border border-gray-200 rounded-lg overflow-hidden">
-                        <div className="bg-gray-50 px-3 py-2 border-b border-gray-200">
-                          <div className="flex items-center gap-2">
-                            <MapIcon className="w-4 h-4 text-gray-600" />
-                            <span className="text-sm font-medium text-gray-700">
-                              Anteprima percorso: {stage.gpxFile.filename}
-                            </span>
-                          </div>
-                        </div>
-                        <div className="p-3">
-                          {stage.gpxFile.keyPoints && stage.gpxFile.keyPoints.length > 0 ? (
-                            <GPXMapViewer
-                              tracks={[{
-                                name: stage.gpxFile.filename || 'Percorso GPX',
-                                points: stage.gpxFile.keyPoints
-                                  .filter(kp => kp.lat && kp.lng) // Filtra punti validi
-                                  .map(kp => ({
-                                    lat: kp.lat,
-                                    lng: kp.lng,
-                                    elevation: kp.elevation
-                                  }))
-                              }]}
-                              routes={[]}
-                              waypoints={[]}
-                              className="w-full"
-                              height="h-48"
-                              showControls={false}
-                              enableFullscreen={false}
-                              enableDownload={false}
-                              autoFit={true}
-                              showLayerControls={false}
-                              defaultShowTracks={true}
-                              defaultShowRoutes={false}
-                              defaultShowWaypoints={false}
-                            />
-                          ) : (
-                            <div className="w-full h-48 bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center">
-                              <div className="text-center text-gray-500">
-                                <MapIcon className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                                <p className="text-sm">Nessun dato di percorso disponibile per la preview</p>
-                                <p className="text-xs mt-1">Il file GPX potrebbe non contenere punti chiave elaborati</p>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* GPX Upload */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {stage.gpxFile ? 'Sostituisci File GPX' : 'Carica File GPX'}
-                  </label>
-                  <div className={`border-2 border-dashed rounded-lg p-4 ${
-                    mediaHook.isUploadingGpx 
-                      ? 'border-blue-300 bg-blue-50' 
-                      : 'border-gray-300 hover:border-gray-400'
-                  } transition-colors`}>
-                    <div className="text-center">
-                      {mediaHook.isUploadingGpx ? (
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-                      ) : (
-                        <DocumentIcon className="mx-auto h-8 w-8 text-gray-400" />
-                      )}
-                      <div className="mt-2">
-                        <label htmlFor={`gpx-file-${index}`} className={mediaHook.isUploadingGpx ? 'cursor-not-allowed' : 'cursor-pointer'}>
-                          <span className={`text-sm font-medium ${
-                            mediaHook.isUploadingGpx ? 'text-gray-400' : 'text-gray-900'
-                          }`}>
-                            {mediaHook.isUploadingGpx ? 'Caricamento GPX in corso...' : 'Seleziona file GPX'}
-                          </span>
-                          <input
-                            id={`gpx-file-${index}`}
-                            type="file"
-                            accept=".gpx"
-                            onChange={mediaHook.handleGpxUpload}
-                            className="sr-only"
-                            disabled={isLoading || mediaHook.isUploadingGpx}
-                          />
-                        </label>
-                        <p className="text-xs text-gray-500 mt-1">Solo file .gpx fino a 20MB</p>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  {mediaHook.gpxFileName && (
-                    <div className="mt-2 flex items-center text-sm text-gray-600">
-                      <DocumentIcon className="w-4 h-4 mr-1" />
-                      File selezionato: {mediaHook.gpxFileName}
-                    </div>
-                  )}
-                </div>
+                <GpxDisplay gpxFile={stage.gpxFile} isLoading={isLoading} />
+                
+                <GpxUpload
+                  onUpload={gpxUpload.handleGpxUpload}
+                  isUploading={gpxUpload.isUploading}
+                  uploadError={gpxUpload.uploadError}
+                  isLoading={isLoading}
+                  index={index}
+                  hasExistingFile={!!stage.gpxFile}
+                />
               </div>
             </div>
           </div>
@@ -484,6 +247,3 @@ export const EditableStageItem = ({
     </div>
   );
 };
-
-// Re-export CSS from dnd-kit/utilities for use in SortableStageItem
-import { CSS } from '@dnd-kit/utilities';

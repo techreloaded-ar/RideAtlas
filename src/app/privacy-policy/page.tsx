@@ -143,13 +143,83 @@ export default function PrivacyPolicyPage() {
           <h2 className="text-2xl font-semibold mb-4">8. Cookie</h2>
           <p className="mb-4">
             Il nostro sito utilizza cookie per garantire il corretto funzionamento e migliorare l'esperienza utente.
-            Per informazioni dettagliate sui cookie utilizzati, consulta la nostra{' '}
-            <a href="/cookie-policy" className="text-blue-600 hover:underline">Cookie Policy</a>.
+          </p>
+          
+          <h3 className="text-xl font-medium mb-3">8.1 Tipologie di Cookie</h3>
+          <ul className="list-disc pl-6 mb-4">
+            <li><strong>Cookie Essenziali:</strong> Necessari per il funzionamento del sito (autenticazione, sessione). Sempre attivi.</li>
+            <li><strong>Cookie Funzionali:</strong> Migliorano l'esperienza utente (preferenze, impostazioni). Richiedono consenso.</li>
+            <li><strong>Cookie per Video Esterni:</strong> Necessari per visualizzare video YouTube embedded. Richiedono consenso specifico.</li>
+            <li><strong>Cookie Analytics:</strong> Per analizzare l'utilizzo del sito (futuro). Richiedono consenso.</li>
+          </ul>
+          
+          <h3 className="text-xl font-medium mb-3">8.2 Gestione delle Preferenze</h3>
+          <p className="mb-4">
+            Puoi gestire le tue preferenze sui cookie attraverso il banner che appare alla prima visita o 
+            accedendo alle <strong>impostazioni cookie</strong> del sito.
           </p>
         </section>
 
         <section className="mb-8">
-          <h2 className="text-2xl font-semibold mb-4">9. Minori</h2>
+          <h2 className="text-2xl font-semibold mb-4">9. Video YouTube Embedded</h2>
+          <p className="mb-4">
+            RideAtlas può incorporare video da YouTube per arricchire i contenuti dei viaggi condivisi dagli utenti.
+          </p>
+          
+          <h3 className="text-xl font-medium mb-3">9.1 Consenso Richiesto</h3>
+          <p className="mb-4">
+            I video YouTube embedded richiedono il tuo consenso esplicito prima di essere caricati. Quando tenti di 
+            riprodurre un video, apparirà un banner informativo che ti permetterà di:
+          </p>
+          <ul className="list-disc pl-6 mb-4">
+            <li>Dare consenso solo per quel video specifico</li>
+            <li>Dare consenso per tutti i video YouTube del sito</li>
+            <li>Rifiutare e non visualizzare il video</li>
+          </ul>
+          
+          <h3 className="text-xl font-medium mb-3">9.2 Dati Condivisi con YouTube</h3>
+          <p className="mb-4">
+            Quando accetti di visualizzare video YouTube, i seguenti dati possono essere condivisi con Google/YouTube:
+          </p>
+          <ul className="list-disc pl-6 mb-4">
+            <li><strong>Indirizzo IP:</strong> per geolocalizzazione e statistiche</li>
+            <li><strong>Cookie e identificatori:</strong> per preferenze video e raccomandazioni</li>
+            <li><strong>Statistiche di visualizzazione:</strong> durata, interazioni, dispositivo utilizzato</li>
+            <li><strong>Informazioni browser:</strong> tipo, versione, risoluzione schermo</li>
+          </ul>
+          
+          <h3 className="text-xl font-medium mb-3">9.3 Privacy Policy di YouTube</h3>
+          <p className="mb-4">
+            Per informazioni complete sul trattamento dei dati da parte di YouTube/Google, consulta:
+          </p>
+          <ul className="list-disc pl-6 mb-4">
+            <li>
+              <a href="https://policies.google.com/privacy" 
+                 className="text-blue-600 hover:underline" 
+                 target="_blank" 
+                 rel="noopener noreferrer">
+                Privacy Policy di Google
+              </a>
+            </li>
+            <li>
+              <a href="https://www.youtube.com/howyoutubeworks/our-commitments/protecting-user-data/" 
+                 className="text-blue-600 hover:underline" 
+                 target="_blank" 
+                 rel="noopener noreferrer">
+                Come YouTube protegge i dati degli utenti
+              </a>
+            </li>
+          </ul>
+          
+          <h3 className="text-xl font-medium mb-3">9.4 Revoca del Consenso</h3>
+          <p className="mb-4">
+            Puoi revocare il consenso per i video YouTube in qualsiasi momento tramite le impostazioni cookie del sito. 
+            Dopo la revoca, i video non verranno più caricati automaticamente e ti verrà richiesto nuovamente il consenso.
+          </p>
+        </section>
+
+        <section className="mb-8">
+          <h2 className="text-2xl font-semibold mb-4">10. Minori</h2>
           <p>
             I nostri servizi non sono destinati a minori di 16 anni. Non raccogliamo consapevolmente dati personali di minori. 
             Se vieni a conoscenza che un minore ha fornito dati personali, ti preghiamo di contattarci immediatamente.
@@ -157,7 +227,7 @@ export default function PrivacyPolicyPage() {
         </section>
 
         <section className="mb-8">
-          <h2 className="text-2xl font-semibold mb-4">10. Modifiche alla Privacy Policy</h2>
+          <h2 className="text-2xl font-semibold mb-4">11. Modifiche alla Privacy Policy</h2>
           <p>
             Questa Privacy Policy può essere aggiornata periodicamente. Ti informeremo di eventuali modifiche sostanziali 
             tramite avviso sul sito o email. Ti invitiamo a consultare regolarmente questa pagina.
@@ -165,7 +235,7 @@ export default function PrivacyPolicyPage() {
         </section>
 
         <section className="mb-8">
-          <h2 className="text-2xl font-semibold mb-4">11. Contatti</h2>
+          <h2 className="text-2xl font-semibold mb-4">12. Contatti</h2>
           <p>
             Per qualsiasi domanda relativa a questa Privacy Policy o al trattamento dei tuoi dati personali:
           </p>

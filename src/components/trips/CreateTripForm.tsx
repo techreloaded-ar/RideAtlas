@@ -23,7 +23,6 @@ const CreateTripForm = () => {
       characteristics: [],
       recommended_seasons: [],
       tags: [],
-      insights: '',
       media: [],
       gpxFile: null,
       stages: [{

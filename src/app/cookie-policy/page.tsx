@@ -43,7 +43,8 @@ export default function CookiePolicyPage() {
           
           <h3 className="text-xl font-medium mb-3 text-green-700">3.1 Cookie Essenziali (Sempre Attivi)</h3>
           <p className="mb-4">
-            Questi cookie sono necessari per il funzionamento del sito e non possono essere disabilitati.
+            Questi cookie sono necessari per il funzionamento del sito e non possono essere disabilitati. 
+            Sono considerati "strettamente necessari" secondo l'Art. 6.1.f del GDPR e non richiedono consenso.
           </p>
           
           <div className="bg-gray-50 p-4 rounded-lg mb-6">
@@ -64,8 +65,8 @@ export default function CookiePolicyPage() {
                   <td className="py-2">Proprietario</td>
                 </tr>
                 <tr className="border-b">
-                  <td className="py-2 font-mono">rideatlas-cookie-consent</td>
-                  <td className="py-2">Memorizza le preferenze sui cookie</td>
+                  <td className="py-2 font-mono">rideatlas-consents</td>
+                  <td className="py-2">Memorizza le preferenze granulari sui cookie (formato JSON)</td>
                   <td className="py-2">365 giorni</td>
                   <td className="py-2">Proprietario</td>
                 </tr>
@@ -73,13 +74,30 @@ export default function CookiePolicyPage() {
             </table>
           </div>
 
+          <div className="bg-blue-50 border-l-4 border-blue-400 p-4 mb-6">
+            <h4 className="font-medium text-blue-900 mb-2">Dettagli Tecnici - Cookie rideatlas-consents</h4>
+            <p className="text-sm text-blue-800 mb-2">
+              <strong>Formato:</strong> JSON contenente le preferenze per ogni categoria di cookie
+            </p>
+            <p className="text-sm text-blue-800 mb-2">
+              <strong>Esempio:</strong> <code className="bg-blue-100 px-1 rounded">{`{"essential":true,"functional":false,"external-videos":true,"analytics":false}`}</code>
+            </p>
+            <p className="text-sm text-blue-800">
+              <strong>Gestione:</strong> Puoi visualizzare e cancellare questo cookie dalle impostazioni del tuo browser
+            </p>
+          </div>
+
           <h3 className="text-xl font-medium mb-3 text-blue-700">3.2 Cookie di Preferenze (Opzionali)</h3>
           <p className="mb-4">
-            Questi cookie permettono al sito di ricordare le scelte che fai per offrirti funzionalità personalizzate.
+            Le preferenze sui cookie sono gestite tramite il cookie <code>rideatlas-consents</code> che memorizza 
+            le tue scelte per ogni categoria. Questo cookie è essenziale per ricordare le tue preferenze e non richiede consenso aggiuntivo.
           </p>
           
           <div className="bg-blue-50 p-4 rounded-lg mb-6">
-            <p className="text-sm italic">Al momento non utilizziamo cookie di questa categoria.</p>
+            <p className="text-sm italic">
+              Le categorie gestite sono: Cookie Funzionali, Video Esterni (YouTube), Analytics. 
+              I cookie essenziali sono sempre attivi per garantire il funzionamento del sito.
+            </p>
           </div>
 
           <h3 className="text-xl font-medium mb-3 text-orange-700">3.3 Cookie Statistici/Analytics (Opzionali)</h3>
@@ -157,8 +175,9 @@ export default function CookiePolicyPage() {
             Puoi modificare le tue preferenze sui cookie in qualsiasi momento:
           </p>
           <ul className="list-disc pl-6 mb-4">
-            <li>Cancellando i cookie dal tuo browser (ricomparirà il banner)</li>
-            <li>Utilizzando le impostazioni del tuo browser per bloccare i cookie</li>
+            <li><strong>Dal nostro sito:</strong> accedi alle <a href="/cookie-settings" className="text-blue-600 hover:underline">impostazioni cookie</a></li>
+            <li><strong>Tramite browser:</strong> cancella il cookie <code>rideatlas-consents</code> per far ricomparire il banner</li>
+            <li><strong>Blocco totale:</strong> utilizza le impostazioni del browser per bloccare tutti i cookie</li>
           </ul>
 
           <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">

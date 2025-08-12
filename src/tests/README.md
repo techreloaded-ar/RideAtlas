@@ -12,7 +12,7 @@ src/tests/
 ├── unit/                           # Test unitari
 │   ├── components/                 # Test componenti React
 │   │   ├── MediaGallery.test.tsx   # Test visualizzazione media
-│   │   └── MultimediaUpload.test.tsx # Test upload media
+│   │   └── MediaUpload.test.tsx # Test upload media unificato
 │   ├── pages/                      # Test pagine Next.js
 │   │   ├── HomePage.test.tsx       # Test homepage
 │   │   ├── RegisterPage.test.tsx   # Test registrazione
@@ -39,7 +39,7 @@ src/tests/
 
 ### Test Media (`unit/components/` e `integration/`)
 - **MediaGallery**: Test visualizzazione galleria immagini e video
-- **MultimediaUpload**: Test upload immagini e aggiunta video YouTube
+- **MediaUpload**: Test upload unificato (immagini + YouTube + GPX)
 - **API Upload**: Test delle API di upload media su Vercel Blob
 - **Gestione Trip con Media**: Test integrazione dei media nei viaggi
 

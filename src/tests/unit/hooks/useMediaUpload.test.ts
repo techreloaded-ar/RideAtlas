@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import { renderHook, act } from '@testing-library/react';
 import { useMediaUpload } from '@/hooks/useMediaUpload';
-import { MediaItem, GpxFile } from '@/types/trip';
+import { MediaItem } from '@/types/trip';
 
 // Mock fetch with proper typing
 const mockFetch = jest.fn() as jest.MockedFunction<typeof fetch>;
@@ -65,7 +65,6 @@ const createMockInputEvent = (files: File[]): React.ChangeEvent<HTMLInputElement
 
 describe('useMediaUpload Hook', () => {
   const mockOnMediaUpdate = jest.fn();
-  const mockOnGpxUpdate = jest.fn();
   
   beforeEach(() => {
     jest.clearAllMocks();
@@ -81,50 +80,27 @@ describe('useMediaUpload Hook', () => {
 
   const defaultProps = {
     currentMedia: [],
-    currentGpx: null,
     onMediaUpdate: mockOnMediaUpdate,
-    onGpxUpdate: mockOnGpxUpdate,
   };
 
   describe('Inizializzazione', () => {
     it('should initialize with correct default state', () => {
       const { result } = renderHook(() => useMediaUpload(defaultProps));
 
-      expect(result.current.gpxFileName).toBeNull();
       expect(result.current.isUploading).toBe(false);
-      expect(result.current.isUploadingGpx).toBe(false);
       expect(result.current.uploadError).toBeNull();
       expect(typeof result.current.handleImageUpload).toBe('function');
-      expect(typeof result.current.handleGpxUpload).toBe('function');
       expect(typeof result.current.removeExistingMedia).toBe('function');
       expect(typeof result.current.updateMediaCaption).toBe('function');
-      expect(typeof result.current.setGpxFileName).toBe('function');
     });
 
-    it('should initialize with existing GPX filename', () => {
-      const existingGpx: GpxFile = {
-        url: 'test-url',
-        filename: 'existing.gpx',
-        waypoints: 10,
-        distance: 100,
-        isValid: true
-      };
-
-      const { result } = renderHook(() => 
-        useMediaUpload({ ...defaultProps, currentGpx: existingGpx })
-      );
-
-      expect(result.current.gpxFileName).toBe('existing.gpx');
-    });
 
     it('should handle undefined currentMedia gracefully', () => {
       const { result } = renderHook(() => 
         useMediaUpload({ ...defaultProps, currentMedia: undefined })
       );
 
-      expect(result.current.gpxFileName).toBeNull();
       expect(result.current.isUploading).toBe(false);
-      expect(result.current.isUploadingGpx).toBe(false);
       expect(result.current.uploadError).toBeNull();
     });
   });
@@ -370,182 +346,6 @@ describe('useMediaUpload Hook', () => {
     });
   });
 
-  describe('Upload GPX', () => {
-    it('should handle successful GPX upload', async () => {
-      // Mock successful API response
-      const mockGpxFile = {
-        url: 'https://example.com/route.gpx',
-        filename: 'route.gpx',
-        waypoints: 150,
-        distance: 75000,
-        elevationGain: 1200,
-        isValid: true,
-        keyPoints: [
-          { lat: 45.0, lng: 7.0, type: 'start', description: 'Start point', distanceFromStart: 0 },
-          { lat: 45.1, lng: 7.1, type: 'end', description: 'End point', distanceFromStart: 75000 }
-        ]
-      };
-
-      mockFetch.mockResolvedValueOnce(
-        createMockResponse({
-          ok: true,
-          json: async () => mockGpxFile,
-        })
-      );
-
-      const { result } = renderHook(() => useMediaUpload(defaultProps));
-      const mockFile = createMockFile('route.gpx', 'application/gpx+xml');
-      const mockEvent = createMockInputEvent([mockFile]);
-
-      await act(async () => {
-        await result.current.handleGpxUpload(mockEvent);
-      });
-
-      expect(mockFetch).toHaveBeenCalledWith('/api/upload/gpx', {
-        method: 'POST',
-        body: expect.any(FormData)
-      });
-      expect(mockOnGpxUpdate).toHaveBeenCalledWith(mockGpxFile);
-      expect(result.current.gpxFileName).toBe('route.gpx');
-      expect(result.current.isUploadingGpx).toBe(false);
-      expect(result.current.uploadError).toBeNull();
-    });
-
-    it('should reject non-GPX files', async () => {
-      const { result } = renderHook(() => useMediaUpload(defaultProps));
-      const mockFile = createMockFile('document.txt', 'text/plain');
-      const mockEvent = createMockInputEvent([mockFile]);
-
-      await act(async () => {
-        await result.current.handleGpxUpload(mockEvent);
-      });
-
-      expect(mockFetch).not.toHaveBeenCalled();
-      expect(result.current.uploadError).toBe('Seleziona solo file GPX');
-      expect(mockOnGpxUpdate).not.toHaveBeenCalled();
-      expect(result.current.gpxFileName).toBeNull();
-    });
-
-    it('should reject GPX files larger than 20MB', async () => {
-      const { result } = renderHook(() => useMediaUpload(defaultProps));
-      const largeFile = createMockFile('large.gpx', 'application/gpx+xml', 21 * 1024 * 1024); // 21MB
-      const mockEvent = createMockInputEvent([largeFile]);
-
-      await act(async () => {
-        await result.current.handleGpxUpload(mockEvent);
-      });
-
-      expect(mockFetch).not.toHaveBeenCalled();
-      expect(result.current.uploadError).toBe('Il file deve essere massimo 20MB');
-      expect(mockOnGpxUpdate).not.toHaveBeenCalled();
-      expect(result.current.gpxFileName).toBeNull();
-    });
-
-    it('should handle GPX upload API errors', async () => {
-      mockFetch.mockResolvedValueOnce(
-        createMockResponse({
-          ok: false,
-          status: 400,
-          json: async () => ({ error: 'File GPX non valido' }),
-        })
-      );
-
-      const { result } = renderHook(() => useMediaUpload(defaultProps));
-      const mockFile = createMockFile('invalid.gpx', 'application/gpx+xml');
-      const mockEvent = createMockInputEvent([mockFile]);
-
-      await act(async () => {
-        await result.current.handleGpxUpload(mockEvent);
-      });
-
-      expect(result.current.uploadError).toBe('File GPX non valido');
-      expect(result.current.isUploadingGpx).toBe(false);
-      expect(mockOnGpxUpdate).toHaveBeenCalledWith(null); // GPX rimosso in caso di errore
-      expect(result.current.gpxFileName).toBeNull();
-    });
-
-    it('should handle network errors during GPX upload', async () => {
-      mockFetch.mockRejectedValueOnce(new Error('Network error'));
-
-      const { result } = renderHook(() => useMediaUpload(defaultProps));
-      const mockFile = createMockFile('route.gpx', 'application/gpx+xml');
-      const mockEvent = createMockInputEvent([mockFile]);
-
-      await act(async () => {
-        await result.current.handleGpxUpload(mockEvent);
-      });
-
-      expect(result.current.uploadError).toBe('Network error');
-      expect(result.current.isUploadingGpx).toBe(false);
-      expect(mockOnGpxUpdate).toHaveBeenCalledWith(null);
-      expect(result.current.gpxFileName).toBeNull();
-    });
-
-    it('should set loading state during GPX upload', async () => {
-      let resolvePromise: (value: Response) => void;
-      const uploadPromise = new Promise<Response>((resolve) => {
-        resolvePromise = resolve;
-      });
-      mockFetch.mockReturnValueOnce(uploadPromise);
-
-      const { result } = renderHook(() => useMediaUpload(defaultProps));
-      const mockFile = createMockFile('route.gpx', 'application/gpx+xml');
-      const mockEvent = createMockInputEvent([mockFile]);
-
-      // Start upload
-      act(() => {
-        result.current.handleGpxUpload(mockEvent);
-      });
-
-      // Should be loading
-      expect(result.current.isUploadingGpx).toBe(true);
-      expect(result.current.uploadError).toBeNull();
-      expect(result.current.gpxFileName).toBe('route.gpx'); // Set immediately
-
-      // Complete upload
-      await act(async () => {
-        resolvePromise!(createMockResponse({
-          ok: true,
-          json: async () => ({ url: 'test.gpx', filename: 'route.gpx' }),
-        }));
-        await uploadPromise;
-      });
-
-      // Should no longer be loading
-      expect(result.current.isUploadingGpx).toBe(false);
-    });
-
-    it('should handle empty file list', async () => {
-      const { result } = renderHook(() => useMediaUpload(defaultProps));
-      const mockEvent = createMockInputEvent([]);
-
-      await act(async () => {
-        await result.current.handleGpxUpload(mockEvent);
-      });
-
-      expect(mockFetch).not.toHaveBeenCalled();
-      expect(mockOnGpxUpdate).not.toHaveBeenCalled();
-      expect(result.current.gpxFileName).toBeNull();
-    });
-
-    it('should handle file input without files', async () => {
-      const { result } = renderHook(() => useMediaUpload(defaultProps));
-      const input = document.createElement('input');
-      input.type = 'file';
-      
-      // Mock files as null
-      Object.defineProperty(input, 'files', { value: null });
-      const mockEvent = { target: input } as React.ChangeEvent<HTMLInputElement>;
-
-      await act(async () => {
-        await result.current.handleGpxUpload(mockEvent);
-      });
-
-      expect(mockFetch).not.toHaveBeenCalled();
-      expect(mockOnGpxUpdate).not.toHaveBeenCalled();
-      expect(result.current.gpxFileName).toBeNull();
-    });
-  });
 
   describe('Gestione Media', () => {
     describe('removeExistingMedia', () => {
@@ -683,15 +483,6 @@ describe('useMediaUpload Hook', () => {
   });
 
   describe('Edge Cases e Gestione Errori', () => {
-    it('should handle setGpxFileName external control', async () => {
-      const { result } = renderHook(() => useMediaUpload(defaultProps));
-
-      await act(async () => {
-        result.current.setGpxFileName('external-file.gpx');
-      });
-
-      expect(result.current.gpxFileName).toBe('external-file.gpx');
-    });
 
     it('should handle mixed valid and invalid files in image upload', async () => {
       const { result } = renderHook(() => useMediaUpload(defaultProps));
@@ -771,17 +562,13 @@ describe('useMediaUpload Hook', () => {
     it('should handle callback props being undefined', async () => {
       const propsWithUndefinedCallbacks = {
         currentMedia: [],
-        currentGpx: null,
         onMediaUpdate: undefined as any,
-        onGpxUpdate: undefined as any,
       };
 
       // This should not crash
       const { result } = renderHook(() => useMediaUpload(propsWithUndefinedCallbacks));
 
-      expect(result.current.gpxFileName).toBeNull();
       expect(result.current.isUploading).toBe(false);
-      expect(result.current.isUploadingGpx).toBe(false);
       expect(result.current.uploadError).toBeNull();
     });
 
@@ -853,5 +640,101 @@ describe('useMediaUpload Hook', () => {
       Date.now = originalDateNow;
       Math.random = originalMathRandom;
     });
+  });
+
+  describe('Configuration Options', () => {
+    it('should respect enableYoutube: false configuration', () => {
+      const { result } = renderHook(() => useMediaUpload({
+        ...defaultProps,
+        config: { enableYoutube: false }
+      }));
+
+      // Set a YouTube URL
+      act(() => {
+        result.current.setYoutubeUrl('https://www.youtube.com/watch?v=dQw4w9WgXcQ');
+      });
+
+      // Try to add YouTube video
+      act(() => {
+        result.current.handleYouTubeAdd();
+      });
+
+      expect(result.current.uploadError).toBe('Aggiunta video YouTube non abilitata per questo contesto');
+      expect(mockOnMediaUpdate).not.toHaveBeenCalled();
+    });
+
+
+    it('should respect custom maxImageSize configuration', async () => {
+      const { result } = renderHook(() => useMediaUpload({
+        ...defaultProps,
+        config: { maxImageSize: 2 } // 2MB limit
+      }));
+
+      // Create a file larger than 2MB
+      const largeFile = createMockFile('large.jpg', 'image/jpeg', 3 * 1024 * 1024);
+      const event = createMockInputEvent([largeFile]);
+
+      await act(async () => {
+        await result.current.handleImageUpload(event);
+      });
+
+      expect(result.current.uploadError).toBe('large.jpg è troppo grande (max 2MB)');
+      expect(mockOnMediaUpdate).not.toHaveBeenCalled();
+    });
+
+    it('should respect maxImageCount configuration', async () => {
+      const existingMedia = [
+        { id: '1', type: 'image' as const, url: 'test1.jpg', caption: '' },
+        { id: '2', type: 'image' as const, url: 'test2.jpg', caption: '' }
+      ];
+
+      const { result } = renderHook(() => useMediaUpload({
+        ...defaultProps,
+        currentMedia: existingMedia,
+        config: { maxImageCount: 2 }
+      }));
+
+      mockFetch.mockResolvedValueOnce(
+        createMockResponse({
+          ok: true,
+          json: async () => ({ url: 'https://example.com/new-image.jpg' }),
+        })
+      );
+
+      const file = createMockFile('new.jpg', 'image/jpeg');
+      const event = createMockInputEvent([file]);
+
+      await act(async () => {
+        await result.current.handleImageUpload(event);
+      });
+
+      expect(result.current.uploadError).toBe('Puoi caricare massimo 2 immagini');
+      expect(mockFetch).not.toHaveBeenCalled();
+    });
+
+    it('should use default configuration when config is empty', () => {
+      const { result } = renderHook(() => useMediaUpload({
+        ...defaultProps,
+        config: {}
+      }));
+
+      // Test that YouTube is enabled by default
+      act(() => {
+        result.current.setYoutubeUrl('https://www.youtube.com/watch?v=dQw4w9WgXcQ');
+      });
+
+      act(() => {
+        result.current.handleYouTubeAdd();
+      });
+
+      expect(result.current.uploadError).toBeNull();
+      expect(mockOnMediaUpdate).toHaveBeenCalledWith([
+        expect.objectContaining({
+          type: 'video',
+          url: 'https://www.youtube.com/embed/dQw4w9WgXcQ'
+        })
+      ]);
+    });
+
   });
 });

@@ -88,8 +88,8 @@ export const tripFormSchema = z.object({
     .min(3, 'Il titolo deve essere almeno 3 caratteri')
     .max(100, 'Il titolo non può superare 100 caratteri'),
   summary: z.string()
-    .min(10, 'Il sommario deve essere almeno 10 caratteri')
-    .max(500, 'Il sommario non può superare 500 caratteri'),
+    .min(10, 'La descrizione deve essere almeno 10 caratteri')
+    .max(6000, 'La descrizione non può superare 6000 caratteri'),
   destination: z.string()
     .min(1, 'La destinazione è obbligatoria')
     .max(100, 'La destinazione non può superare 100 caratteri'),
@@ -99,7 +99,6 @@ export const tripFormSchema = z.object({
   characteristics: z.array(z.enum(characteristicOptions)),
   recommended_seasons: z.array(z.enum(recommendedSeasons)),
   tags: z.array(z.string()),
-  insights: z.string().optional(),
   media: z.array(mediaItemSchema),
   gpxFile: gpxFileSchema.nullable(),
 })

@@ -67,7 +67,7 @@ const stageCreationSchema = z.object({
 
 const tripCreationSchema = z.object({
   title: z.string().min(3, { message: 'Il titolo deve contenere almeno 3 caratteri.' }).max(100),
-  summary: z.string().min(10, { message: 'Il sommario deve contenere almeno 10 caratteri.' }).max(500),
+  summary: z.string().min(10, { message: 'La descrizione deve contenere almeno 10 caratteri.' }).max(6000),
   destination: z.string().min(3, { message: 'La destinazione deve contenere almeno 3 caratteri.' }).max(100),  
   duration_days: z.number().int().positive().optional(), // Calcolato automaticamente dalle stages
   duration_nights: z.number().int().nonnegative().optional(), // Calcolato automaticamente dalle stages

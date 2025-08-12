@@ -26,7 +26,7 @@ const TripFormFieldsTestWrapper = ({
       characteristics: [],
       recommended_seasons: [],
       tags: [],
-      insights: '',
+
       media: [],
       gpxFile: null,
       stages: [],
@@ -154,30 +154,6 @@ describe('TripFormFields Component - Updated Characteristics', () => {
   });
 
   describe('Optional Fields Handling', () => {
-    it('shouldAllowEmptyInsightsField', () => {
-      const formDataWithEmptyInsights = {
-        ...mockDefaultValues,
-        insights: '',
-      };
-
-      render(<TripFormFieldsTestWrapper defaultValues={formDataWithEmptyInsights} />);
-
-      const insightsTextarea = screen.getByLabelText('Approfondimenti');
-      expect(insightsTextarea).toHaveValue('');
-    });
-
-    it('shouldHandleInsightsInput', () => {
-      render(<TripFormFieldsTestWrapper defaultValues={mockDefaultValues} />);
-
-      const insightsTextarea = screen.getByLabelText('Approfondimenti');
-      
-      fireEvent.change(insightsTextarea, {
-        target: { value: 'Test insights content' }
-      });
-
-      // Con React Hook Form, il cambio è gestito automaticamente
-      expect(insightsTextarea).toHaveValue('Test insights content');
-    });
 
     it('shouldAllowEmptyTagsList', () => {
       const formDataWithEmptyTags = {
@@ -202,14 +178,12 @@ describe('TripFormFields Component - Updated Characteristics', () => {
     it('shouldNotShowErrorsForEmptyOptionalFields', () => {
       const formDataWithEmptyOptionals = {
         ...mockDefaultValues,
-        insights: '',
         tags: [],
       };
 
       render(<TripFormFieldsTestWrapper defaultValues={formDataWithEmptyOptionals} />);
 
       // Non dovrebbero esserci messaggi di errore per campi opzionali vuoti
-      expect(screen.queryByText(/Il testo esteso è obbligatorio/i)).not.toBeInTheDocument();
       expect(screen.queryByText(/Devi aggiungere almeno un tag/i)).not.toBeInTheDocument();
     });
 
@@ -219,7 +193,7 @@ describe('TripFormFields Component - Updated Characteristics', () => {
       render(<TripFormFieldsTestWrapper defaultValues={mockDefaultValues} />);
 
       const titleInput = screen.getByLabelText('Titolo');
-      const summaryInput = screen.getByLabelText('Sommario');
+      const summaryInput = screen.getByLabelText('Descrizione');
       
       expect(titleInput).toBeInTheDocument();
       expect(summaryInput).toBeInTheDocument();

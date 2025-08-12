@@ -5,7 +5,7 @@ import { UseFormReturn } from 'react-hook-form'
 import { type TripWithStagesData, CharacteristicOptions, RecommendedSeasons, MediaItem } from '@/schemas/trip'
 import { formFieldClasses } from '@/constants/tripForm'
 import { generateTempMediaId } from '@/lib/temp-id-service'
-import MultimediaUpload from '@/components/upload/MultimediaUpload'
+import SafeMediaUpload from '@/components/upload/MediaUpload'
 
 interface TripFormFieldsProps {
   form: UseFormReturn<TripWithStagesData>
@@ -117,7 +117,7 @@ export const TripFormFields = ({ form }: TripFormFieldsProps) => {
       {/* Summary */}
       <div>
         <label htmlFor="summary" className={formFieldClasses.label}>
-          Sommario
+          Descrizione
         </label>
         <textarea
           {...register('summary')}
@@ -257,36 +257,22 @@ export const TripFormFields = ({ form }: TripFormFieldsProps) => {
         <div className="text-xs text-gray-500 mb-3">
           Aggiungi immagini e video rappresentativi dell&apos;intero viaggio. Le immagini delle singole tappe vengono gestite separatamente.
         </div>
-        <MultimediaUpload
+        <SafeMediaUpload
           mediaItems={media}
           onAddMedia={handleAddMedia}
           onRemoveMedia={handleRemoveMedia}
           onUpdateCaption={handleUpdateCaption}
+          config={{
+            enableYoutube: true,
+            maxImageSize: 10,
+          }}
         />
         {errors.media && (
           <p className={formFieldClasses.error}>{errors.media.message}</p>
         )}
       </div>
 
-      {/* Insights */}
-      <div>
-        <label htmlFor="insights" className={formFieldClasses.label}>
-          Approfondimenti
-        </label>
-        <div className="text-xs text-gray-500 mb-1">
-          Aggiungi fatti interessanti, luoghi da visitare e altre informazioni utili
-        </div>
-        <textarea
-          {...register('insights')}
-          id="insights"
-          rows={6}
-          className={formFieldClasses.textarea}
-          placeholder="Racconta curiosità, fatti storici, luoghi d'interesse e altre informazioni utili per i motociclisti..."
-        />
-        {errors.insights && (
-          <p className={formFieldClasses.error}>{errors.insights.message}</p>
-        )}
-      </div>
+
     </>
   )
 }

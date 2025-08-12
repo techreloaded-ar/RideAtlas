@@ -12,9 +12,9 @@ describe('Legal Pages - Critical Functionality', () => {
       expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(/privacy policy/i)
       expect(screen.getByText(/ultimo aggiornamento/i)).toBeInTheDocument()
       
-      // Check critical internal links
-      const cookieLink = screen.getByRole('link', { name: /cookie policy/i })
-      expect(cookieLink).toHaveAttribute('href', '/cookie-policy')
+      // Check critical external links (Privacy Policy doesn't have internal cookie policy link)
+      const garanteLink = screen.getByRole('link', { name: /garanteprivacy/i })
+      expect(garanteLink).toHaveAttribute('href', 'https://www.garanteprivacy.it')
     })
 
     it('cookie policy renders and has working internal links', () => {
@@ -24,7 +24,7 @@ describe('Legal Pages - Critical Functionality', () => {
       expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(/cookie policy/i)
       expect(screen.getByText(/ultimo aggiornamento/i)).toBeInTheDocument()
       
-      // Check critical internal links
+      // Check critical internal links (be specific to avoid "Privacy Policy Google")
       const privacyLink = screen.getByRole('link', { name: '/privacy-policy' })
       expect(privacyLink).toHaveAttribute('href', '/privacy-policy')
     })

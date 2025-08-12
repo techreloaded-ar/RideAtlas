@@ -279,7 +279,7 @@ export default function PurchasePageClient({ trip }: PurchasePageClientProps) {
                       <li>• Download del file GPX del percorso</li>
                       <li>• Accesso completo a mappe e dettagli</li>
                       <li>• Contenuti multimediali in alta qualità</li>
-                      <li>• Approfondimenti e suggerimenti dell&apos;autore</li>
+                      <li>• Suggerimenti e informazioni dell&apos;autore</li>
                     </ul>
                   </div>
 

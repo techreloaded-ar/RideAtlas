@@ -21,8 +21,8 @@ describe('CookieBanner - Privacy Policy Link', () => {
     render(<CookieBanner />)
     
     // Check essential cookie banner elements - usa getByText invece di getByRole per i bottoni
-    expect(screen.getByText('Accetta tutti i cookie')).toBeInTheDocument()
-    expect(screen.getByText('Rifiuta cookie non essenziali')).toBeInTheDocument()
+    expect(screen.getByText('Accetta tutti')).toBeInTheDocument()
+    expect(screen.getByText('Rifiuta opzionali')).toBeInTheDocument()
     expect(screen.getByText(/questo sito utilizza cookie/i)).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /informativa privacy/i })).toBeInTheDocument()
   })

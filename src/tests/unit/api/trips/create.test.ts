@@ -267,7 +267,7 @@ describe('POST /api/trips - Creazione Viaggi', () => {
     it('should reject trip with summary too long', async () => {
       const invalidData = {
         ...validTripData,
-        summary: 'A'.repeat(501), // > 500 characters
+        summary: 'A'.repeat(6001), // > 6000 characters
       }
 
       const request = createMockRequest(invalidData)

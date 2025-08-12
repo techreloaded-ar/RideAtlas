@@ -363,7 +363,7 @@ describe('Validation Schemas', () => {  describe('registerSchema (from /api/auth
     // Simplified version of the trip creation schema for testing
     const tripCreationSchema = z.object({
       title: z.string().min(3, 'Il titolo deve contenere almeno 3 caratteri.').max(100),
-      summary: z.string().min(10, 'Il sommario deve contenere almeno 10 caratteri.').max(500),
+      summary: z.string().min(10, 'La descrizione deve contenere almeno 10 caratteri.').max(6000),
       destination: z.string().min(3, 'La destinazione deve contenere almeno 3 caratteri.').max(100),
       recommendedSeason: z.nativeEnum(RecommendedSeason).optional(),
       tags: z.array(z.string()).optional(),

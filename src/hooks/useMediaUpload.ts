@@ -1,16 +1,15 @@
 "use client";
 
 import { useState, useCallback } from 'react';
-import { MediaItem, GpxFile } from '@/types/trip';
+import { MediaItem } from '@/types/trip';
 import { generateTempMediaId } from '@/lib/temp-id-service';
 
 export interface UseMediaUploadReturn {
   // State
-  gpxFileName: string | null;
   isUploading: boolean;
   uploadError: string | null;
-  isUploadingGpx: boolean;
   isDragOver: boolean;
+  youtubeUrl: string;
   
   // Handlers
   handleImageUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
@@ -18,34 +17,39 @@ export interface UseMediaUploadReturn {
   handleDragOver: (event: React.DragEvent<HTMLDivElement>) => void;
   handleDragLeave: (event: React.DragEvent<HTMLDivElement>) => void;
   handleDrop: (event: React.DragEvent<HTMLDivElement>) => void;
-  handleGpxUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  handleYouTubeAdd: () => void;
+  setYoutubeUrl: React.Dispatch<React.SetStateAction<string>>;
   removeExistingMedia: (mediaId: string) => void;
   updateMediaCaption: (mediaId: string, caption: string) => void;
-  
-  // Setters for external control
-  setGpxFileName: React.Dispatch<React.SetStateAction<string | null>>;
+}
+
+export interface UseMediaUploadConfig {
+  enableYoutube?: boolean;
+  maxImageSize?: number; // in MB, default 10
+  maxImageCount?: number; // default unlimited
 }
 
 export interface UseMediaUploadProps {
   currentMedia?: MediaItem[];
-  currentGpx?: GpxFile | null;
   onMediaUpdate: (newMedia: MediaItem[]) => void;
-  onGpxUpdate: (newGpx: GpxFile | null) => void;
+  config?: UseMediaUploadConfig;
 }
 
 export const useMediaUpload = ({
   currentMedia = [],
-  currentGpx = null,
   onMediaUpdate,
-  onGpxUpdate,
+  config = {},
 }: UseMediaUploadProps): UseMediaUploadReturn => {
-  const [gpxFileName, setGpxFileName] = useState<string | null>(
-    currentGpx?.filename || null
-  );
+  // Configuration with defaults
+  const {
+    enableYoutube = true,
+    maxImageSize = 10,
+    maxImageCount = undefined,
+  } = config;
   const [isUploading, setIsUploading] = useState(false);
-  const [isUploadingGpx, setIsUploadingGpx] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
+  const [youtubeUrl, setYoutubeUrl] = useState('');
 
   // Common upload logic for both file input and drag & drop
   const uploadImageFiles = useCallback(async (files: FileList) => {
@@ -65,8 +69,13 @@ export const useMediaUpload = ({
           throw new Error(`${file.name} non è un'immagine valida`);
         }
 
-        if (file.size > 10 * 1024 * 1024) { // 10MB
-          throw new Error(`${file.name} è troppo grande (max 10MB)`);
+        if (file.size > maxImageSize * 1024 * 1024) {
+          throw new Error(`${file.name} è troppo grande (max ${maxImageSize}MB)`);
+        }
+
+        // Check max image count if specified
+        if (maxImageCount && currentArray.length >= maxImageCount) {
+          throw new Error(`Puoi caricare massimo ${maxImageCount} immagini`);
         }
 
         // Create unique filename to avoid conflicts
@@ -113,7 +122,7 @@ export const useMediaUpload = ({
     } finally {
       setIsUploading(false);
     }
-  }, [currentMedia, onMediaUpdate]);
+  }, [currentMedia, onMediaUpdate, maxImageSize, maxImageCount]);
 
   const handleImageUpload = useCallback(async (
     event: React.ChangeEvent<HTMLInputElement>
@@ -156,61 +165,6 @@ export const useMediaUpload = ({
     }
   }, [handleImageDrop]);
 
-  const handleGpxUpload = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    // Validazioni client-side
-    if (!file.name.toLowerCase().endsWith('.gpx')) {
-      setUploadError('Seleziona solo file GPX');
-      return;
-    }
-
-    if (file.size > 20 * 1024 * 1024) { // 20MB (come nell'endpoint)
-      setUploadError('Il file deve essere massimo 20MB');
-      return;
-    }
-
-    setUploadError(null);
-    setIsUploadingGpx(true);
-    setGpxFileName(file.name);
-
-    try {
-      // Prepara FormData per l'upload
-      const formData = new FormData();
-      formData.append('gpx', file);
-
-      // Chiamata all'endpoint dedicato per GPX
-      const response = await fetch('/api/upload/gpx', {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Errore durante l\'upload del GPX');
-      }
-
-      // L'endpoint restituisce direttamente un oggetto GpxFile completo
-      const gpxFile: GpxFile = await response.json();
-
-      // Aggiorna il state con i dati completi
-      onGpxUpdate(gpxFile);
-      setGpxFileName(gpxFile.filename);
-
-      // Clear input per permettere ri-upload dello stesso file
-      event.target.value = '';
-      
-    } catch (error) {
-      console.error('Errore upload GPX:', error);
-      setUploadError(error instanceof Error ? error.message : 'Errore sconosciuto durante l\'upload GPX');
-      // Rimuovi GPX in caso di errore
-      onGpxUpdate(null);
-      setGpxFileName(null);
-    } finally {
-      setIsUploadingGpx(false);
-    }
-  }, [onGpxUpdate]);
 
   const removeExistingMedia = useCallback((mediaId: string) => {
     const mediaArray = Array.isArray(currentMedia) ? currentMedia : [];
@@ -226,20 +180,79 @@ export const useMediaUpload = ({
     onMediaUpdate(updatedMedia);
   }, [currentMedia, onMediaUpdate]);
 
+  // YouTube URL validation
+  const isValidYouTubeUrl = useCallback((url: string): boolean => {
+    const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com\/(watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+    return youtubeRegex.test(url);
+  }, []);
+
+  // Extract YouTube video ID from URL
+  const extractYouTubeId = useCallback((url: string): string | null => {
+    const match = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
+    return match ? match[1] : null;
+  }, []);
+
+  // Generate YouTube thumbnail URL
+  const getYouTubeThumbnail = useCallback((videoId: string): string => {
+    return `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+  }, []);
+
+  // Handle YouTube video addition
+  const handleYouTubeAdd = useCallback(() => {
+    // Check if YouTube is enabled
+    if (!enableYoutube) {
+      setUploadError('Aggiunta video YouTube non abilitata per questo contesto');
+      return;
+    }
+
+    if (!youtubeUrl.trim()) {
+      setUploadError('Inserisci un URL YouTube valido.');
+      return;
+    }
+
+    if (!isValidYouTubeUrl(youtubeUrl)) {
+      setUploadError('URL YouTube non valido. Assicurati di inserire un link YouTube corretto.');
+      return;
+    }
+
+    const videoId = extractYouTubeId(youtubeUrl);
+    if (!videoId) {
+      setUploadError('Non riesco a estrarre l\'ID del video YouTube.');
+      return;
+    }
+
+    setUploadError(null);
+    const embedUrl = `https://www.youtube.com/embed/${videoId}`;
+    const thumbnailUrl = getYouTubeThumbnail(videoId);
+
+    const newVideoItem: MediaItem = {
+      id: generateTempMediaId(),
+      type: 'video',
+      url: embedUrl,
+      thumbnailUrl,
+      caption: ''
+    };
+
+    const currentArray = Array.isArray(currentMedia) ? currentMedia : [];
+    const updatedMedia = [...currentArray, newVideoItem];
+    onMediaUpdate(updatedMedia);
+
+    setYoutubeUrl('');
+  }, [youtubeUrl, enableYoutube, isValidYouTubeUrl, extractYouTubeId, getYouTubeThumbnail, currentMedia, onMediaUpdate]);
+
   return {
-    gpxFileName,
     isUploading,
     uploadError,
-    isUploadingGpx,
     isDragOver,
+    youtubeUrl,
     handleImageUpload,
     handleImageDrop,
     handleDragOver,
     handleDragLeave,
     handleDrop,
-    handleGpxUpload,
+    handleYouTubeAdd,
+    setYoutubeUrl,
     removeExistingMedia,
     updateMediaCaption,
-    setGpxFileName,
   };
 };

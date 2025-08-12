@@ -7,7 +7,7 @@ import { UserRole } from '@/types/profile';
 import { isMultiStageTrip, transformPrismaStages, RecommendedSeason } from '@/types/trip';
 import { TripChips } from '@/components/trips/TripChips';
 import { TripMeta } from '@/components/trips/TripMeta';
-import { ImageGallery } from '@/components/ui/ImageGallery';
+import { UnifiedMediaGallery } from '@/components/ui/UnifiedMediaGallery';
 import StageTimeline from '@/components/stages/StageTimeline';
 import AccessGate from '@/components/auth/AccessGate';
 
@@ -61,27 +61,26 @@ export default async function TripDetailPage({ params }: { params: { slug: strin
   const isSentinel = session?.user?.role === UserRole.Sentinel;
   const canEdit = isOwner || isSentinel;
 
-  // Cast e filtra le immagini del viaggio principale
-  const tripMedia = (trip.media || []) as unknown as { type: 'image' | 'video'; url: string; caption?: string }[];
-  const tripImages = tripMedia
-    .filter(media => media.type === 'image')
-    .map(media => ({
-      src: media.url,
-      alt: media.caption || trip.title
-    }));
+  // Cast dei media del viaggio principale (include immagini e video)
+  const tripMedia = (trip.media || []) as unknown as { type: 'image' | 'video'; url: string; caption?: string; thumbnailUrl?: string; id?: string }[];
+  const tripMediaItems = tripMedia.map((media, index) => ({
+    id: media.id || `trip-media-${index}`,
+    type: media.type,
+    url: media.url,
+    caption: media.caption,
+    thumbnailUrl: media.thumbnailUrl
+  }));
 
-  // Aggrega le immagini (non video) delle tappe 
-  const allStageImages = tripWithStages.stages.flatMap(stage => 
-    stage.media
-      .filter(media => media.type === 'image')
-      .map(media => ({
-        src: media.url,
-        alt: media.caption || `Immagine da ${stage.title}`
-      }))
+  // Aggrega tutti i media delle tappe (immagini e video)
+  const allStageMediaItems = tripWithStages.stages.flatMap(stage => 
+    stage.media.map(media => ({
+      ...media,
+      caption: media.caption || `Media da ${stage.title}`
+    }))
   );
 
-  // Combina immagini del viaggio + immagini delle tappe (viaggio prima, poi tappe in ordine)
-  const galleryImages = [...tripImages, ...allStageImages];
+  // Combina media del viaggio + media delle tappe (viaggio prima, poi tappe in ordine)
+  const galleryMediaItems = [...tripMediaItems, ...allStageMediaItems];
 
   // Mappa le stagioni per il formato chip
   const seasonMapping: Record<RecommendedSeason, string> = {
@@ -125,9 +124,9 @@ export default async function TripDetailPage({ params }: { params: { slug: strin
         />
       </div>
 
-      {/* Image Gallery */}
-      {galleryImages.length > 0 && (
-        <ImageGallery images={galleryImages} />
+      {/* Media Gallery */}
+      {galleryMediaItems.length > 0 && (
+        <UnifiedMediaGallery media={galleryMediaItems} />
       )}
 
       {/* Description */}
@@ -193,14 +192,7 @@ export default async function TripDetailPage({ params }: { params: { slug: strin
           </AccessGate>
         </div>
       )}
-      
-      {/* Insights - Approfondimenti */}
-      {trip.insights && (
-        <div className="mt-8">
-          <h3 className="text-lg font-semibold mb-3">Approfondimenti</h3>
-          <p className="text-gray-700 leading-relaxed">{trip.insights}</p>
-        </div>
-      )}
+
     </div>
   );
 }

@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { Stage } from '@/types/trip';
-import { ChevronDown, ChevronRight, ChevronLeft, MapPin, Clock } from 'lucide-react';
-import Image from 'next/image';
+import { ChevronDown, ChevronRight, MapPin, Clock } from 'lucide-react';
+import { UnifiedMediaGallery } from '@/components/ui/UnifiedMediaGallery';
 import GPXSectionStage from '@/components/stages/GPXSectionStage';
 
 interface StageDisplayProps {
@@ -17,25 +17,9 @@ export default function StageDisplay({
 }: StageDisplayProps) {
   const stageNumber = index + 1;
   const [isExpanded, setIsExpanded] = useState(false);
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   const toggleExpanded = () => {
     setIsExpanded(!isExpanded);
-  };
-
-  // Filtra solo le immagini (escludendo i video)
-  const images = stage.media?.filter(media => media.type === 'image') || [];
-  
-  const goToPrevious = () => {
-    setCurrentImageIndex((prevIndex) => 
-      prevIndex === 0 ? images.length - 1 : prevIndex - 1
-    );
-  };
-
-  const goToNext = () => {
-    setCurrentImageIndex((prevIndex) => 
-      prevIndex === images.length - 1 ? 0 : prevIndex + 1
-    );
   };
 
   return (
@@ -124,77 +108,8 @@ export default function StageDisplay({
 
           {/* Stage Media */}
           {stage.media && stage.media.length > 0 && (
-            <div className="space-y-4">
-              {/* Video section (se presente) */}
-              {stage.media.some(media => media.type === 'video') && (
-                <div>
-                  {stage.media
-                    .filter(media => media.type === 'video')
-                    .slice(0, 1) // Mostriamo solo il primo video
-                    .map((video, idx) => (
-                      <div key={idx} className="relative w-full aspect-[3/2] rounded overflow-hidden">
-                        <iframe
-                          src={video.url}
-                          title={video.caption || stage.title}
-                          className="w-full h-full border-0"
-                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                          allowFullScreen
-                        />
-                      </div>
-                    ))}
-                </div>
-              )}
-              
-              {/* Images Gallery */}
-              {images.length > 0 && (
-                <div className="relative group">
-                  <div className="relative w-full aspect-[3/2] rounded overflow-hidden">
-                    <Image
-                      src={images[currentImageIndex].url}
-                      alt={images[currentImageIndex].caption || stage.title}
-                      fill
-                      className="object-cover transition-opacity duration-300"
-                      loading="lazy"
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                    />
-                  </div>
-                  
-                  {/* Navigation Arrows */}
-                  {images.length > 1 && (
-                    <>
-                      <button
-                        onClick={goToPrevious}
-                        className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white opacity-0 group-hover:opacity-100 transition-opacity duration-200 rounded-md p-2 border border-gray-200 shadow-sm"
-                        aria-label="Immagine precedente"
-                      >
-                        <ChevronLeft className="w-4 h-4" />
-                      </button>
-                      
-                      <button
-                        onClick={goToNext}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white opacity-0 group-hover:opacity-100 transition-opacity duration-200 rounded-md p-2 border border-gray-200 shadow-sm"
-                        aria-label="Immagine successiva"
-                      >
-                        <ChevronRight className="w-4 h-4" />
-                      </button>
-                    </>
-                  )}
-
-                  {/* Image Counter */}
-                  {images.length > 1 && (
-                    <div className="absolute bottom-4 right-4 bg-black/60 text-white px-3 py-1 rounded-full text-sm">
-                      {currentImageIndex + 1} / {images.length}
-                    </div>
-                  )}
-                  
-                  {/* Image Caption */}
-                  {images[currentImageIndex].caption && (
-                    <div className="absolute bottom-4 left-4 bg-black/60 text-white px-3 py-1 rounded-md text-sm max-w-xs">
-                      {images[currentImageIndex].caption}
-                    </div>
-                  )}
-                </div>
-              )}
+            <div>
+              <UnifiedMediaGallery media={stage.media} />
             </div>
           )}
 

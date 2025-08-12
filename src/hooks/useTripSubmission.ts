@@ -146,7 +146,6 @@ export const useTripData = ({ tripId, enabled = true }: UseTripDataOptions) => {
         characteristics: tripData.characteristics || [],
         recommended_seasons: tripData.recommended_seasons || [],
         tags: tripData.tags || [],
-        insights: tripData.insights || '',
         media: tripData.media || [],
         gpxFile: tripData.gpxFile || null,
         stages: tripData.stages?.map((stage: Record<string, unknown>) => ({

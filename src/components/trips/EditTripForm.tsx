@@ -37,7 +37,6 @@ const EditTripForm = ({ tripId }: EditTripFormProps) => {
       characteristics: [],
       recommended_seasons: [],
       tags: [],
-      insights: '',
       media: [],
       gpxFile: null,
       stages: [{

@@ -71,11 +71,11 @@ describe('Trip API - Optional Fields Support', () => {
     });
   };
 
-  describe('Description Field (insights)', () => {
-    it('shouldAcceptEmptyDescriptionOnCreate', async () => {
-      const tripDataWithEmptyDescription = {
-        title: 'Viaggio Senza Descrizione',
-        summary: 'Un viaggio minimale senza descrizione dettagliata',
+  describe('Optional Fields Handling', () => {
+    it('shouldAcceptEmptyOptionalFieldsOnCreate', async () => {
+      const tripDataWithEmptyOptionals = {
+        title: 'Viaggio Minimale',
+        summary: 'Un viaggio minimale con campi opzionali vuoti',
         destination: 'Toscana, Italia',
         duration_days: 2,
         duration_nights: 1,
@@ -83,30 +83,28 @@ describe('Trip API - Optional Fields Support', () => {
         theme: 'Viaggio breve',
         characteristics: ['Bel paesaggio'],
         recommended_seasons: [RecommendedSeason.Estate],
-        insights: '', // Campo descrizione vuoto
       };
 
       const fullTripInfo = {
         id: 'trip-123',
-        ...tripDataWithEmptyDescription,
-        slug: 'viaggio-senza-descrizione',
+        ...tripDataWithEmptyOptionals,
+        slug: 'viaggio-minimale',
         user_id: 'user-123',
       };
 
       mockPrisma.trip.findUnique.mockResolvedValue(fullTripInfo)
       mockPrisma.trip.create.mockResolvedValue(fullTripInfo);
 
-      const request = createMockRequest(tripDataWithEmptyDescription);
+      const request = createMockRequest(tripDataWithEmptyOptionals);
       const response = await POST(request);
 
       expect(response.status).toBe(201);
       expect(prisma.trip.create).toHaveBeenCalledWith({
         data: {
-          ...tripDataWithEmptyDescription,
-          insights: '', // Dovrebbe accettare stringa vuota
+          ...tripDataWithEmptyOptionals,
           media: [],
           gpxFile: null,
-          slug: 'viaggio-senza-descrizione',
+          slug: 'viaggio-minimale',
           user_id: 'user-123',
           // L'API ricalcola duration basandosi su stages (0 stages = 1 day, 0 nights)
           duration_days: 1,
@@ -115,10 +113,10 @@ describe('Trip API - Optional Fields Support', () => {
       });
     });
 
-    it('shouldAcceptNullDescriptionOnCreate', async () => {
-      const tripDataWithNullDescription = {
-        title: 'Viaggio Con Null Description',
-        summary: 'Un viaggio con description null',
+    it('shouldAcceptMinimalRequiredFields', async () => {
+      const tripDataMinimal = {
+        title: 'Viaggio Minimale',
+        summary: 'Un viaggio con solo i campi richiesti',
         destination: 'Umbria, Italia',
         duration_days: 1,
         duration_nights: 1,
@@ -126,23 +124,22 @@ describe('Trip API - Optional Fields Support', () => {
         theme: 'Day trip',
         characteristics: ['Strade sterrate'],
         recommended_seasons: [RecommendedSeason.Primavera],
-        insights: null, // Campo descrizione null
       };
 
       mockPrisma.trip.create.mockResolvedValue({
         id: 'trip-124',
-        ...tripDataWithNullDescription,
-        slug: 'viaggio-con-null-description',
+        ...tripDataMinimal,
+        slug: 'viaggio-minimale',
         user_id: 'user-123',
       });
 
-      const request = createMockRequest(tripDataWithNullDescription);
+      const request = createMockRequest(tripDataMinimal);
       const response = await POST(request);
 
       expect(response.status).toBe(201);
     });
 
-    it('shouldAcceptEmptyDescriptionOnUpdate', async () => {
+    it('shouldAcceptPartialUpdateData', async () => {
       const existingTrip = {
         id: 'trip-123',
         title: 'Viaggio Esistente',
@@ -150,7 +147,7 @@ describe('Trip API - Optional Fields Support', () => {
       };
 
       const updateData = {
-        insights: '', // Aggiornamento con descrizione vuota
+        title: 'Titolo Aggiornato',
       };
 
       (prisma.trip.findUnique as jest.Mock).mockResolvedValue(existingTrip);
@@ -178,7 +175,6 @@ describe('Trip API - Optional Fields Support', () => {
         theme: 'Senza categorizzazione',
         characteristics: ['Curve strette'],
         recommended_seasons: [RecommendedSeason.Autunno],
-        insights: 'Dettagli del viaggio qui',
       };
 
       mockPrisma.trip.create.mockResolvedValue({
@@ -270,7 +266,6 @@ describe('Trip API - Optional Fields Support', () => {
         theme: 'Minimalista',
         characteristics: [],
         recommended_seasons: [RecommendedSeason.Primavera],
-        insights: '',
       };
 
       const fullTripInfo = {

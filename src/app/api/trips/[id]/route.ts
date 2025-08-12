@@ -56,7 +56,7 @@ const stageUpdateSchema = z.object({
 // Schema di validazione per l'aggiornamento del viaggio
 const tripUpdateSchema = z.object({
   title: z.string().min(3, { message: 'Il titolo deve contenere almeno 3 caratteri.' }).max(100).optional(),
-  summary: z.string().min(10, { message: 'Il sommario deve contenere almeno 10 caratteri.' }).max(500).optional(),
+  summary: z.string().min(10, { message: 'Il sommario deve contenere almeno 10 caratteri.' }).max(6000).optional(),
   destination: z.string().min(3, { message: 'La destinazione deve contenere almeno 3 caratteri.' }).max(100).optional(),  
   duration_days: z.number().int().positive({ message: 'La durata in giorni deve essere un numero positivo.' }).optional(),
   duration_nights: z.number().int().nonnegative({ message: 'La durata in notti deve essere un numero non negativo.' }).optional(),

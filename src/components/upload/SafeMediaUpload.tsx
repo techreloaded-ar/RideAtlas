@@ -3,17 +3,20 @@
 
 import { useState } from 'react'
 import { ErrorBoundary, MediaErrorFallback } from '@/components/ui/ErrorBoundary'
-import MultimediaUpload from '@/components/upload/MultimediaUpload'
+import MediaUpload from '@/components/upload/MediaUpload'
 import { MediaItem } from '@/types/trip'
+import { UseMediaUploadConfig } from '@/hooks/useMediaUpload'
 
 interface SafeMultimediaUploadProps {
   mediaItems: MediaItem[];
   onAddMedia: (media: Omit<MediaItem, 'id'>) => void;
   onRemoveMedia: (mediaId: string) => void;
   onUpdateCaption: (mediaId: string, caption: string) => void;
+  config?: UseMediaUploadConfig;
+  className?: string;
 }
 
-export default function SafeMultimediaUpload(props: SafeMultimediaUploadProps) {
+export default function SafeMediaUpload(props: SafeMultimediaUploadProps) {
   const [retryKey, setRetryKey] = useState(0)
 
   const handleRetry = () => {
@@ -25,7 +28,7 @@ export default function SafeMultimediaUpload(props: SafeMultimediaUploadProps) {
       key={retryKey}
       fallback={<MediaErrorFallback onRetry={handleRetry} />}
     >
-      <MultimediaUpload {...props} />
+      <MediaUpload {...props} />
     </ErrorBoundary>
   )
 }

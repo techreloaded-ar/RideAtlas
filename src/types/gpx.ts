@@ -51,6 +51,15 @@ export interface MapConfig {
   isFullscreenMode?: boolean
 }
 
+export interface GpxFile {
+  filename: string
+  distance: number
+  waypoints: number
+  elevationGain?: number
+  keyPoints?: GPXPoint[]
+  isValid: boolean
+}
+
 export interface MapViewerProps extends MapConfig {
   tracks?: GPXTrack[]
   routes?: GPXRoute[]

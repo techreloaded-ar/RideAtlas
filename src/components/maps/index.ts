@@ -8,12 +8,7 @@
 export { default as GPXMapViewer } from '@/components/maps/GPXMapViewer'
 export { default as SafeGPXMapViewer } from '@/components/maps/SafeGPXMapViewer'
 
-// Componenti specializzati
-export { default as SimpleMapViewer } from './SimpleMapViewer'
-export { default as InteractiveMapModal } from './InteractiveMapModal'
-export { default as AutoLoadMapViewer } from './AutoLoadMapViewer'
-export { default as FullscreenMapModal } from './FullscreenMapModal'
-export { default as MapWithFullscreen } from './MapWithFullscreen'
+// Componenti specializzati rimossi - utilizzavano sistema deprecato
 
 // Tipi condivisi
 export type {
@@ -30,3 +25,8 @@ export { useGPXMap } from '@/hooks/useGPXMap'
 
 // Retrocompatibilità temporanea
 export { default as UnifiedGPXMapViewer } from '@/components/maps/GPXMapViewer'
+
+// NOTA: Componenti rimossi (non utilizzati):
+// - SimpleMapViewer, InteractiveMapModal, AutoLoadMapViewer
+// - FullscreenMapModal, MapWithFullscreen, GPXMapViewer.client
+// Utilizzare GPXMapViewer e SafeGPXMapViewer per tutte le esigenze di visualizzazione mappe
