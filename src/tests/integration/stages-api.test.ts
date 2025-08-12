@@ -4,8 +4,8 @@ import { GET as StagesListGET, POST as StagesListPOST } from '@/app/api/trips/[i
 import { GET as SingleStageGET, PUT as SingleStagePUT, DELETE as SingleStageDELETE } from '@/app/api/trips/[id]/stages/[stageId]/route'
 import { NextRequest } from 'next/server'
 import { auth } from '@/auth'
-import { prisma } from '@/lib/prisma'
-import { createStage, updateStage, deleteStage, getStagesByTripId, getNextOrderIndex } from '@/lib/stage-utils'
+import { prisma } from '@/lib/core/prisma'
+import { createStage, updateStage, deleteStage, getStagesByTripId, getNextOrderIndex } from '@/lib//stages/stage-utils'
 import { UserRole } from '@/types/profile'
 
 // Mock delle dipendenze
@@ -13,7 +13,7 @@ jest.mock('@/auth', () => ({
   auth: jest.fn(),
 }))
 
-jest.mock('@/lib/prisma', () => ({
+jest.mock('@/lib/core/prisma', () => ({
   prisma: {
     trip: {
       findUnique: jest.fn(),
@@ -21,7 +21,7 @@ jest.mock('@/lib/prisma', () => ({
   },
 }))
 
-jest.mock('@/lib/stage-utils', () => ({
+jest.mock('@/lib/stages/stage-utils', () => ({
   createStage: jest.fn(),
   updateStage: jest.fn(),
   deleteStage: jest.fn(),

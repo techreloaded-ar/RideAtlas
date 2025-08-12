@@ -2,9 +2,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
-import { TripAnalysisService } from '@/lib/tripAnalysisService';
-import { ValidationService } from '@/lib/validationService';
-import { PromptService } from '@/lib/promptService';
+import { TripAnalysisService } from '@/lib/trips/tripAnalysisService';
+import { ValidationService } from '@/lib/validation/validationService';
+import { PromptService } from '@/lib/trip-builder/promptService';
 
 export const dynamic = 'force-dynamic';
 

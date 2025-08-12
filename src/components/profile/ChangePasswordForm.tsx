@@ -2,8 +2,8 @@
 
 import React, { useState } from 'react';
 import { Eye, EyeOff, Lock, CheckCircle, XCircle, Loader2 } from 'lucide-react';
-import { useChangePassword } from '@/hooks/useChangePassword';
-import { getPasswordRequirements } from '@/lib/password-validation';
+import { useChangePassword } from '@/hooks/auth/useChangePassword';
+import { getPasswordRequirements } from '@/lib/auth/password-validation';
 
 // Props interface for better type safety
 interface ChangePasswordFormProps {

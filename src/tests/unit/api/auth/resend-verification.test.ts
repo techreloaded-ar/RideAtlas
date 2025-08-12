@@ -1,10 +1,10 @@
 import { POST } from '@/app/api/auth/resend-verification/route'
 import { NextRequest } from 'next/server'
-import { prisma } from '@/lib/prisma'
-import { sendVerificationEmail } from '@/lib/email'
+import { prisma } from '@/lib/core/prisma'
+import { sendVerificationEmail } from '@/lib/core/email'
 
 // Mock delle dipendenze
-jest.mock('@/lib/prisma', () => ({
+jest.mock('@/lib/core/prisma', () => ({
   prisma: {
     user: {
       findUnique: jest.fn(),
@@ -16,7 +16,7 @@ jest.mock('@/lib/prisma', () => ({
   },
 }))
 
-jest.mock('@/lib/email', () => ({
+jest.mock('@/lib/core/email', () => ({
   sendVerificationEmail: jest.fn(),
 }))
 

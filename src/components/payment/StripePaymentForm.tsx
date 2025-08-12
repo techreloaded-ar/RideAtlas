@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
-import { getStripe } from '@/lib/stripe-client';
+import { getStripe } from '@/lib/payment/stripe-client';
 import { CreditCard, Lock, AlertCircle, CheckCircle, ChevronDown, ChevronUp, Copy } from 'lucide-react';
 
 interface StripePaymentFormProps {

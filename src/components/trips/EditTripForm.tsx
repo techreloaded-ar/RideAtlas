@@ -6,8 +6,8 @@ import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { tripWithStagesSchema, type TripWithStagesData } from '@/schemas/trip'
-import { useTripSubmission, useTripData } from '@/hooks/useTripSubmission'
-import { useToast } from '@/hooks/useToast'
+import { useTripSubmission, useTripData } from '@/hooks/trips/useTripSubmission'
+import { useToast } from '@/hooks/ui/useToast'
 import SafeTripForm from '@/components/trips/SafeTripForm'
 
 interface EditTripFormProps {

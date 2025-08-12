@@ -2,11 +2,11 @@ import NextAuth from "next-auth"
 import Google from "next-auth/providers/google"
 import Credentials from "next-auth/providers/credentials"
 import { PrismaAdapter } from "@auth/prisma-adapter"
-import { prisma } from "@/lib/prisma"
+import { prisma } from "@/lib/core/prisma"
 import bcrypt from "bcryptjs"
 import { z } from "zod"
 import { UserRole } from "@/types/profile"
-import { passwordSchema } from "@/lib/password-validation"
+import { passwordSchema } from "@/lib/auth/password-validation"
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: PrismaAdapter(prisma),

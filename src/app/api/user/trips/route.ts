@@ -1,6 +1,6 @@
 // src/app/api/user/trips/route.ts
 import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { prisma } from '@/lib/core/prisma'
 import { auth } from '@/auth'
 
 // Force dynamic rendering

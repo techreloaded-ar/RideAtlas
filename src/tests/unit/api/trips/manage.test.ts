@@ -1,7 +1,7 @@
 import { GET, PUT } from '@/app/api/trips/[id]/route'
 import { NextRequest } from 'next/server'
 import { auth } from '@/auth'
-import { prisma } from '@/lib/prisma'
+import { prisma } from '@/lib/core/prisma'
 import { UserRole } from '@/types/profile'
 import { RecommendedSeason } from '@/types/trip'
 
@@ -10,7 +10,7 @@ jest.mock('@/auth', () => ({
   auth: jest.fn(),
 }))
 
-jest.mock('@/lib/prisma', () => {
+jest.mock('@/lib/core/prisma', () => {
   const mockTrip = {
     findUnique: jest.fn(),
     update: jest.fn(),

@@ -1,12 +1,12 @@
 // src/app/api/trips/route.ts
 import { NextResponse, NextRequest } from 'next/server';
 import { z } from 'zod';
-import { prisma } from '@/lib/prisma';
+import { prisma } from '@/lib/core/prisma';
 import { RecommendedSeason, transformPrismaStages } from '@/types/trip';
 import { auth } from '@/auth';
-import { ensureUserExists } from '@/lib/user-sync';
+import { ensureUserExists } from '@/lib/auth/user-sync';
 import { UserRole } from '@/types/profile';
-import { isMultiStageTripUtil, calculateTotalDistance, calculateTripDuration } from '@/lib/trip-utils';
+import { isMultiStageTripUtil, calculateTotalDistance, calculateTripDuration } from '@/lib/trips/trip-utils';
 
 // Funzione di utilità per generare lo slug
 function slugify(text: string): string {

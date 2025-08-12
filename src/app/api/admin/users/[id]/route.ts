@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { prisma } from '@/lib/core/prisma'
 import { auth } from '@/auth'
 import { UserRole } from '@/types/profile'
 import { z } from 'zod'
-import { sendRoleChangeNotificationEmail } from '@/lib/email'
+import { sendRoleChangeNotificationEmail } from '@/lib/core/email'
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic'

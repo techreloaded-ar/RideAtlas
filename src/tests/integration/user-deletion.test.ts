@@ -10,7 +10,7 @@ jest.mock('@/auth', () => ({
 }))
 
 // Mock di Prisma
-jest.mock('@/lib/prisma', () => ({
+jest.mock('@/lib/core/prisma', () => ({
   prisma: {
     user: {
       findUnique: jest.fn(),
@@ -44,7 +44,7 @@ const createMockRequest = (url: string, method: string = 'DELETE'): NextRequest 
 }
 
 import { auth } from '@/auth'
-import { prisma } from '@/lib/prisma'
+import { prisma } from '@/lib/core/prisma'
 import { Session } from 'next-auth'
 
 // Access the mocked auth function with proper typing

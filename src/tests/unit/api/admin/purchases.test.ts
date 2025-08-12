@@ -2,10 +2,10 @@ import { NextRequest } from 'next/server';
 import { GET, POST } from '@/app/api/admin/purchases/route';
 import { auth } from '@/auth';
 import { UserRole } from '@/types/profile';
-import { PurchaseService } from '@/lib/purchaseService';
+import { PurchaseService } from '@/lib/payment/purchaseService';
 
 jest.mock('@/auth');
-jest.mock('@/lib/purchaseService');
+jest.mock('@/lib/payment/purchaseService');
 
 const mockAuth = auth as jest.MockedFunction<typeof auth>;
 const mockPurchaseService = PurchaseService as jest.Mocked<typeof PurchaseService>;

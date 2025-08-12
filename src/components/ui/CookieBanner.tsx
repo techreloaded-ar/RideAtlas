@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { X, Settings, Cookie } from 'lucide-react';
-import { cookieConsentService, CookieCategory } from '@/lib/cookie-consent';
+import { cookieConsentService, CookieCategory } from '@/lib/ui/cookie-consent';
 
 export default function CookieBanner() {
   const [showBanner, setShowBanner] = useState(false);

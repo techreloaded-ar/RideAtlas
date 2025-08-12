@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
-import { prisma } from '@/lib/prisma';
+import { prisma } from '@/lib/core/prisma';
 import bcrypt from 'bcryptjs';
 import { z } from 'zod';
-import { passwordSchema } from '@/lib/password-validation';
+import { passwordSchema } from '@/lib/auth/password-validation';
 import { 
   UserPasswordData, 
   ValidationResult, 

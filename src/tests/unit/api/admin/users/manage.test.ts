@@ -1,7 +1,7 @@
 import { GET, PATCH, DELETE } from '@/app/api/admin/users/[id]/route'
 import { NextRequest } from 'next/server'
 import { auth } from '@/auth'
-import { prisma } from '@/lib/prisma'
+import { prisma } from '@/lib/core/prisma'
 import { UserRole } from '@/types/profile'
 
 // Mock delle dipendenze
@@ -9,7 +9,7 @@ jest.mock('@/auth', () => ({
   auth: jest.fn(),
 }))
 
-jest.mock('@/lib/prisma', () => ({
+jest.mock('@/lib/core/prisma', () => ({
   prisma: {
     user: {
       findUnique: jest.fn(),

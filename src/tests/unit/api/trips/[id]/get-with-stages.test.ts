@@ -1,7 +1,7 @@
 import { GET } from '@/app/api/trips/[id]/route'
 import { NextRequest } from 'next/server'
 import { auth } from '@/auth'
-import { prisma } from '@/lib/prisma'
+import { prisma } from '@/lib/core/prisma'
 import { UserRole } from '@/types/profile'
 
 // Mock delle dipendenze
@@ -9,7 +9,7 @@ jest.mock('@/auth', () => ({
   auth: jest.fn(),
 }))
 
-jest.mock('@/lib/prisma', () => ({
+jest.mock('@/lib/core/prisma', () => ({
   prisma: {
     trip: {
       findUnique: jest.fn(),
@@ -18,8 +18,8 @@ jest.mock('@/lib/prisma', () => ({
 }))
 
 // Mock delle utility functions
-jest.mock('@/lib/trip-utils', () => ({
-  ...jest.requireActual('@/lib/trip-utils'),
+jest.mock('@/lib/trips/trip-utils', () => ({
+  ...jest.requireActual('@/lib/trips/trip-utils'),
   isMultiStageTripUtil: jest.fn(),
   calculateTotalDistance: jest.fn(),
   calculateTripDuration: jest.fn(),
@@ -118,7 +118,7 @@ describe('/api/trips/[id] GET - Singolo viaggio con stages', () => {
       mockFindUnique.mockResolvedValue(mockTripWithStages)
 
       // Mock delle utility functions
-      const { isMultiStageTripUtil, calculateTotalDistance, calculateTripDuration } = await import('@/lib/trip-utils')
+      const { isMultiStageTripUtil, calculateTotalDistance, calculateTripDuration } = await import('@/lib/trips/trip-utils')
       isMultiStageTripUtil.mockReturnValue(true)
       calculateTotalDistance.mockReturnValue(125000)
       calculateTripDuration.mockReturnValue({ days: 2, nights: 1 })
@@ -152,7 +152,7 @@ describe('/api/trips/[id] GET - Singolo viaggio con stages', () => {
       mockFindUnique.mockResolvedValue(mockTripLegacy)
 
       // Mock delle utility functions per viaggio legacy
-      const { isMultiStageTripUtil, calculateTotalDistance, calculateTripDuration } = await import('@/lib/trip-utils')
+      const { isMultiStageTripUtil, calculateTotalDistance, calculateTripDuration } = await import('@/lib/trips/trip-utils')
       isMultiStageTripUtil.mockReturnValue(false)
       calculateTotalDistance.mockReturnValue(0)
       calculateTripDuration.mockReturnValue({ days: 2, nights: 1 })

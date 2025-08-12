@@ -2,7 +2,7 @@
 import { render, screen, fireEvent, waitFor } from '../../setup/test-utils';
 import EditTripForm from '@/components/trips/EditTripForm';
 import { RecommendedSeason } from '@/types/trip';
-import * as useToastModule from '@/hooks/useToast';
+import * as useToastModule from '@/hooks/ui/useToast';
 
 // Mock dei moduli
 const mockPush = jest.fn();
@@ -12,16 +12,16 @@ jest.mock('next/navigation', () => ({
   }),
 }));
 
-jest.mock('@/hooks/useToast');
+jest.mock('@/hooks/ui/useToast');
 
 // Mock dell'hook useTripSubmission
-jest.mock('@/hooks/useTripSubmission', () => ({
+jest.mock('@/hooks/trips/useTripSubmission', () => ({
   useTripData: jest.fn(),
   useTripSubmission: jest.fn(),
 }));
 
 // Importa i mock dopo la definizione del mock
-import { useTripData, useTripSubmission } from '@/hooks/useTripSubmission';
+import { useTripData, useTripSubmission } from '@/hooks/trips/useTripSubmission';
 
 const mockFetchTrip = jest.fn();
 const mockUseTripData = useTripData as jest.MockedFunction<typeof useTripData>;

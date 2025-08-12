@@ -4,7 +4,7 @@
 import { UseFormReturn } from 'react-hook-form'
 import { type TripWithStagesData, CharacteristicOptions, RecommendedSeasons, MediaItem } from '@/schemas/trip'
 import { formFieldClasses } from '@/constants/tripForm'
-import { generateTempMediaId } from '@/lib/temp-id-service'
+import { generateTempMediaId } from '@/lib/ui/temp-id-service';
 import SafeMediaUpload from '@/components/upload/MediaUpload'
 
 interface TripFormFieldsProps {

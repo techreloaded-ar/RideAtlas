@@ -1,6 +1,6 @@
 import { GET } from '@/app/api/trips/route'
 import { auth } from '@/auth'
-import { prisma } from '@/lib/prisma'
+import { prisma } from '@/lib/core/prisma'
 import { UserRole } from '@/types/profile'
 
 // Mock delle dipendenze
@@ -8,7 +8,7 @@ jest.mock('@/auth', () => ({
   auth: jest.fn(),
 }))
 
-jest.mock('@/lib/prisma', () => ({
+jest.mock('@/lib/core/prisma', () => ({
   prisma: {
     trip: {
       findMany: jest.fn(),
@@ -17,8 +17,8 @@ jest.mock('@/lib/prisma', () => ({
 }))
 
 // Mock delle utility functions
-jest.mock('@/lib/trip-utils', () => ({
-  ...jest.requireActual('@/lib/trip-utils'),
+jest.mock('@/lib/trips/trip-utils', () => ({
+  ...jest.requireActual('@/lib/trips/trip-utils'),
   isMultiStageTripUtil: jest.fn(),
   calculateTotalDistance: jest.fn(),
   calculateTripDuration: jest.fn(),
@@ -91,7 +91,7 @@ describe('/api/trips GET - Lista viaggi con stages', () => {
       mockFindMany.mockResolvedValue([mockTripWithStages])
 
       // Mock delle utility functions
-      const { isMultiStageTripUtil, calculateTotalDistance, calculateTripDuration } = await import('@/lib/trip-utils')
+      const { isMultiStageTripUtil, calculateTotalDistance, calculateTripDuration } = await import('@/lib/trips/trip-utils')
       isMultiStageTripUtil.mockReturnValue(true)
       calculateTotalDistance.mockReturnValue(125000)
       calculateTripDuration.mockReturnValue({ days: 2, nights: 1 })
@@ -123,7 +123,7 @@ describe('/api/trips GET - Lista viaggi con stages', () => {
       mockFindMany.mockResolvedValue([mockTripLegacy])
 
       // Mock delle utility functions per viaggio legacy
-      const { isMultiStageTripUtil, calculateTotalDistance, calculateTripDuration } = await import('@/lib/trip-utils')
+      const { isMultiStageTripUtil, calculateTotalDistance, calculateTripDuration } = await import('@/lib/trips/trip-utils')
       isMultiStageTripUtil.mockReturnValue(false)
       calculateTotalDistance.mockReturnValue(0)
       calculateTripDuration.mockReturnValue({ days: 2, nights: 1 })
@@ -152,7 +152,7 @@ describe('/api/trips GET - Lista viaggi con stages', () => {
       mockAuth.mockResolvedValue(mockSession)
       mockFindMany.mockResolvedValue([mockTripWithStages, mockTripLegacy])
 
-      const { isMultiStageTripUtil, calculateTotalDistance, calculateTripDuration } = await import('@/lib/trip-utils')
+      const { isMultiStageTripUtil, calculateTotalDistance, calculateTripDuration } = await import('@/lib/trips/trip-utils')
       
       // Mock per primo viaggio (multi-stage)
       isMultiStageTripUtil.mockReturnValueOnce(true)

@@ -1,10 +1,10 @@
 import { GET, POST } from '@/app/api/auth/setup-password/route'
 import { NextRequest } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { prisma } from '@/lib/core/prisma'
 import bcrypt from 'bcryptjs'
 
 // Mock delle dipendenze
-jest.mock('@/lib/prisma', () => ({
+jest.mock('@/lib/core/prisma', () => ({
   prisma: {
     emailVerificationToken: {
       findUnique: jest.fn(),

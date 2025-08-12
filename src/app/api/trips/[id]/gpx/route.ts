@@ -1,10 +1,10 @@
 // src/app/api/trips/[id]/gpx/route.ts
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { prisma } from '@/lib/core/prisma'
 import { auth } from '@/auth'
 import { UserRole } from '@/types/profile'
 import { castToGpxFile } from '@/types/trip'
-import { PurchaseService } from '@/lib/purchaseService'
+import { PurchaseService } from '@/lib/payment/purchaseService'
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic'

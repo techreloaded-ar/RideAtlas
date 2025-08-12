@@ -1,14 +1,14 @@
 import { GET } from '@/app/api/user/trips/route'
 import { NextRequest } from 'next/server'
 import { auth } from '@/auth'
-import { prisma } from '@/lib/prisma'
+import { prisma } from '@/lib/core/prisma'
 
 // Mock delle dipendenze
 jest.mock('@/auth', () => ({
   auth: jest.fn(),
 }))
 
-jest.mock('@/lib/prisma', () => ({
+jest.mock('@/lib/core/prisma', () => ({
   prisma: {
     trip: {
       findMany: jest.fn(),

@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { UserRole, UserRoleLabels, UserRoleDescriptions } from '@/types/profile'
 import { useSession } from 'next-auth/react'
-import { useToast } from '@/hooks/useToast'
+import { useToast } from '@/hooks/ui/useToast'
 import UserAvatar from '@/components/ui/UserAvatar'
 
 interface User {

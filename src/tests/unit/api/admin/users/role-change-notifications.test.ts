@@ -1,8 +1,8 @@
 import { PATCH } from '@/app/api/admin/users/[id]/route'
 import { NextRequest } from 'next/server'
 import { auth } from '@/auth'
-import { prisma } from '@/lib/prisma'
-import { sendRoleChangeNotificationEmail } from '@/lib/email'
+import { prisma } from '@/lib/core/prisma'
+import { sendRoleChangeNotificationEmail } from '@/lib/core/email'
 import { UserRole } from '@/types/profile'
 
 // Mock delle dipendenze
@@ -10,7 +10,7 @@ jest.mock('@/auth', () => ({
   auth: jest.fn(),
 }))
 
-jest.mock('@/lib/prisma', () => ({
+jest.mock('@/lib/core/prisma', () => ({
   prisma: {
     user: {
       findUnique: jest.fn(),
@@ -19,7 +19,7 @@ jest.mock('@/lib/prisma', () => ({
   },
 }))
 
-jest.mock('@/lib/email', () => ({
+jest.mock('@/lib/core/email', () => ({
   sendRoleChangeNotificationEmail: jest.fn(),
 }))
 

@@ -1,8 +1,8 @@
 import { POST } from '@/app/api/trips/route'
 import { NextRequest } from 'next/server'
 import { auth } from '@/auth'
-import { prisma } from '@/lib/prisma'
-import { ensureUserExists } from '@/lib/user-sync'
+import { prisma } from '@/lib/core/prisma'
+import { ensureUserExists } from '@/lib/auth/user-sync'
 import { RecommendedSeason } from '@/types/trip'
 
 // Mock delle dipendenze
@@ -10,7 +10,7 @@ jest.mock('@/auth', () => ({
   auth: jest.fn(),
 }))
 
-jest.mock('@/lib/prisma', () => ({
+jest.mock('@/lib/core/prisma', () => ({
   prisma: {
     trip: {
       create: jest.fn(),
@@ -26,13 +26,13 @@ jest.mock('@/lib/prisma', () => ({
 
 const mockPrisma = prisma as jest.Mocked<typeof prisma>
 
-jest.mock('@/lib/user-sync', () => ({
+jest.mock('@/lib/auth/user-sync', () => ({
   ensureUserExists: jest.fn(),
 }))
 
 // Mock delle utility functions
-jest.mock('@/lib/trip-utils', () => ({
-  ...jest.requireActual('@/lib/trip-utils'),
+jest.mock('@/lib/trips/trip-utils', () => ({
+  ...jest.requireActual('@/lib/trips/trip-utils'),
   isMultiStageTripUtil: jest.fn(),
   calculateTotalDistance: jest.fn(),
   calculateTripDuration: jest.fn(),
@@ -46,7 +46,7 @@ describe('POST /api/trips - Creazione Viaggi', () => {
     jest.clearAllMocks()
     
     // Setup default mocks for utility functions
-    const { isMultiStageTripUtil, calculateTotalDistance, calculateTripDuration } = await import('@/lib/trip-utils')
+    const { isMultiStageTripUtil, calculateTotalDistance, calculateTripDuration } = await import('@/lib/trips/trip-utils')
     isMultiStageTripUtil.mockReturnValue(false)
     calculateTotalDistance.mockReturnValue(0)
     calculateTripDuration.mockReturnValue({ days: 3, nights: 2 })

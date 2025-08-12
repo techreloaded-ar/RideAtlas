@@ -2,7 +2,7 @@
 
 import { memo } from 'react';
 import { MediaItem } from '@/types/trip';
-import { useMediaUpload, UseMediaUploadConfig } from '@/hooks/useMediaUpload';
+import { useMediaUpload, UseMediaUploadConfig } from '@/hooks/upload/useMediaUpload';
 import { MediaItemComponent } from './MediaItem';
 import { ImageUploadZone } from './ImageUploadZone';
 import { YouTubeUpload } from './YouTubeUpload';

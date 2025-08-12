@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { StripeService } from '@/lib/stripeService';
-import { PurchaseService } from '@/lib/purchaseService';
-import { STRIPE_WEBHOOK_EVENTS } from '@/lib/stripe-server';
+import { StripeService } from '@/lib/payment/stripeService';
+import { PurchaseService } from '@/lib/payment/purchaseService';
+import { STRIPE_WEBHOOK_EVENTS } from '@/lib/payment/stripe-server';
 import Stripe from 'stripe';
 
 export const dynamic = 'force-dynamic';

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { signIn } from 'next-auth/react';
 import Link from 'next/link';
-import { validatePasswordComplexity, getPasswordRequirements } from '@/lib/password-validation';
+import { validatePasswordComplexity, getPasswordRequirements } from '@/lib/auth/password-validation';
 import { CheckCircle, XCircle } from 'lucide-react';
 
 export default function Register() {

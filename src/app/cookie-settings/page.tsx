@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Cookie, Check, X, Shield, Video, BarChart3 } from 'lucide-react';
-import { cookieConsentService, CookieCategory, type CookieConsentState } from '@/lib/cookie-consent';
+import { cookieConsentService, CookieCategory, type CookieConsentState } from '@/lib/ui/cookie-consent';
 
 export default function CookieSettingsPage() {
   const [consents, setConsents] = useState<CookieConsentState>(cookieConsentService.getAllConsents());

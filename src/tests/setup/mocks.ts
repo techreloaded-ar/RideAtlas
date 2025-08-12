@@ -83,12 +83,12 @@ export const setupMocks = () => {
   jest.mock('next/image', () => mockNextImage);
   
   // Mock PurchaseService
-  jest.mock('@/lib/purchaseService', () => ({
+  jest.mock('@/lib/payment/purchaseService', () => ({
     PurchaseService: mockPurchaseService
   }));
   
   // Mock Prisma
-  jest.mock('@/lib/prisma', () => ({
+  jest.mock('@/lib/core/prisma', () => ({
     prisma: mockPrisma
   }));
   

@@ -2,11 +2,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { UserRole } from '@/types/profile';
 import { auth } from '@/tests/unit/mocks/auth';
-import { prisma } from '@/lib/prisma';
-import { sendVerificationEmail } from '@/lib/email';
+import { prisma } from '@/lib/core/prisma';
+import { sendVerificationEmail } from '@/lib/core/email';
 import { z } from 'zod';
 import { Prisma } from '@prisma/client';
-import { passwordSchema } from '@/lib/password-validation';
+import { passwordSchema } from '@/lib/auth/password-validation';
 
 // Schema di validazione per la creazione di un nuovo utente da parte del Sentinel
 const createUserSchema = z.object({

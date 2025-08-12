@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { tripWithStagesSchema, type TripWithStagesData } from '@/schemas/trip';
-import { useToast } from '@/hooks/useToast';
+import { useToast } from '@/hooks/ui/useToast';
 import SafeTripForm from '@/components/trips/SafeTripForm';
 import { generateTempStageId } from '@/lib/temp-id-service';
 

@@ -1,7 +1,7 @@
 
 import { Session } from 'next-auth'
 import Image from 'next/image'
-import { getUserInitials, getUserAvatarBgColor } from '@/lib/avatar-utils'
+import { getUserInitials, getUserAvatarBgColor } from '@/lib/ui/avatar-utils'
 
 interface UserAvatarProps {
   user?: Session['user']

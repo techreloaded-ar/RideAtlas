@@ -216,7 +216,7 @@ if (typeof global !== 'undefined') {
   (global as any).mockPrisma = mockPrisma;
 }
 
-jest.mock('@/lib/prisma', () => ({
+jest.mock('@/lib/core/prisma', () => ({
   prisma: mockPrisma
 }));
 

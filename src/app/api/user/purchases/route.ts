@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
-import { PurchaseService } from '@/lib/purchaseService';
+import { PurchaseService } from '@/lib/payment/purchaseService';
 
 export const dynamic = 'force-dynamic';
 

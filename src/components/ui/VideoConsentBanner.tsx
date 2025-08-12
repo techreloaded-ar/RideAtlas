@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Shield, Settings, ExternalLink } from 'lucide-react';
-import { cookieConsentService, CookieCategory } from '@/lib/cookie-consent';
+import { cookieConsentService, CookieCategory } from '@/lib/ui/cookie-consent';
 
 interface VideoConsentBannerProps {
   thumbnailUrl: string;

@@ -1,11 +1,11 @@
 import { POST } from '@/app/api/auth/register/route'
 import { NextRequest } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { prisma } from '@/lib/core/prisma'
 import bcrypt from 'bcryptjs'
-import { sendVerificationEmail } from '@/lib/email'
+import { sendVerificationEmail } from '@/lib/core/email'
 
 // Mock delle dipendenze
-jest.mock('@/lib/prisma', () => ({
+jest.mock('@/lib/core/prisma', () => ({
   prisma: {
     user: {
       findUnique: jest.fn(),
@@ -23,7 +23,7 @@ jest.mock('bcryptjs', () => ({
   hash: jest.fn(),
 }))
 
-jest.mock('@/lib/email', () => ({
+jest.mock('@/lib/core/email', () => ({
   sendVerificationEmail: jest.fn(),
 }))
 

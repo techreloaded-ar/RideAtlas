@@ -3,8 +3,8 @@ import { POST } from '@/app/api/trips/route';
 import { PUT } from '@/app/api/trips/[id]/route';
 import { NextRequest } from 'next/server';
 import { auth } from '@/auth';
-import { prisma } from '@/lib/prisma';
-import { ensureUserExists } from '@/lib/user-sync';
+import { prisma } from '@/lib/core/prisma';
+import { ensureUserExists } from '@/lib/auth/user-sync';
 import { RecommendedSeason } from '@/types/trip';
 
 // Mock delle dipendenze
@@ -12,7 +12,7 @@ jest.mock('@/auth', () => ({
   auth: jest.fn(),
 }));
 
-jest.mock('@/lib/prisma', () => ({
+jest.mock('@/lib/core/prisma', () => ({
   prisma: {
     trip: {
       create: jest.fn(),
@@ -26,7 +26,7 @@ jest.mock('@/lib/prisma', () => ({
 const mockPrisma = prisma as jest.Mocked<typeof prisma>
 
 
-jest.mock('@/lib/user-sync', () => ({
+jest.mock('@/lib/auth/user-sync', () => ({
   ensureUserExists: jest.fn(),
 }));
 

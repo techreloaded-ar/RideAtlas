@@ -1,7 +1,7 @@
 // src/app/api/trip-builder/trips/route.ts
 import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
-import { prisma } from '@/lib/prisma';
+import { prisma } from '@/lib/core/prisma';
 import { castToGpxFile } from '@/types/trip';
 
 export const dynamic = 'force-dynamic';

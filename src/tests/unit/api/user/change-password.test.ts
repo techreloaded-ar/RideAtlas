@@ -14,7 +14,7 @@ jest.mock('@/auth', () => ({
   auth: mockAuth,
 }));
 
-jest.mock('@/lib/prisma', () => ({
+jest.mock('@/lib/core/prisma', () => ({
   prisma: {
     user: mockPrismaUser,
   },

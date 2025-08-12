@@ -1,11 +1,11 @@
 // src/app/api/auth/register/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
-import { prisma } from '@/lib/prisma';
+import { prisma } from '@/lib/core/prisma';
 import { z } from 'zod';
-import { sendVerificationEmail } from '@/lib/email';
+import { sendVerificationEmail } from '@/lib/core/email';
 import { randomBytes } from 'crypto';
-import { passwordSchema } from '@/lib/password-validation';
+import { passwordSchema } from '@/lib/auth/password-validation';
 
 // Schema di validazione per la registrazione
 const registerSchema = z.object({

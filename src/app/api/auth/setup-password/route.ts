@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { prisma } from '@/lib/core/prisma';
 import bcrypt from 'bcryptjs';
 import { z } from 'zod';
-import { passwordSchema } from '@/lib/password-validation';
+import { passwordSchema } from '@/lib/auth/password-validation';
 
 // Schema di validazione per la richiesta
 const setupPasswordSchema = z.object({

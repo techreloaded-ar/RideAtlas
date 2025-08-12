@@ -5,7 +5,7 @@ import { ChevronLeft, ChevronRight, Play } from 'lucide-react';
 import Image from 'next/image';
 import { MediaItem } from '@/types/trip';
 import { VideoConsentBanner } from './VideoConsentBanner';
-import { cookieConsentService, CookieCategory } from '@/lib/cookie-consent';
+import { cookieConsentService, CookieCategory } from '@/lib/ui/cookie-consent';
 
 interface ImageData {
   src: string;

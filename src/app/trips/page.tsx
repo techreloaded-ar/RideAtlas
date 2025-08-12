@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/prisma';
+import { prisma } from '@/lib/core/prisma';
 import { TripStatus } from '@prisma/client';
 import Image from 'next/image';
 import Link from 'next/link';

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { PurchaseStatus } from '@prisma/client'
-import { useToast } from '@/hooks/useToast'
+import { useToast } from '@/hooks/ui/useToast'
 import { Search, RefreshCw, Gift, Undo, CreditCard, User, Navigation } from 'lucide-react'
 import SearchableSelect from '@/components/ui/SearchableSelect'
 

@@ -1,9 +1,9 @@
 import { render, screen, fireEvent, waitFor } from '../../setup/test-utils';
 import CookieBanner from '@/components/ui/CookieBanner';
-import { cookieConsentService, CookieCategory } from '@/lib/cookie-consent';
+import { cookieConsentService, CookieCategory } from '@/lib/ui/cookie-consent';
 
 // Mock cookie consent service
-jest.mock('@/lib/cookie-consent', () => ({
+jest.mock('@/lib/ui/cookie-consent', () => ({
   cookieConsentService: {
     hasConsentBannerBeenShown: jest.fn(),
     onConsentChange: jest.fn().mockReturnValue(() => {}),

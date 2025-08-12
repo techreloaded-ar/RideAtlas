@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
-import { PurchaseService } from '@/lib/purchaseService';
-import { StripeService } from '@/lib/stripeService';
+import { PurchaseService } from '@/lib/payment/purchaseService';
+import { StripeService } from '@/lib/payment/stripeService';
 import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';

@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-import { prisma } from '@/lib/prisma'
+import { prisma } from '@/lib/core/prisma'
 import { auth } from '@/auth'
 import { UserRole } from '@/types/profile'
 import { RecommendedSeason, transformPrismaStages } from '@/types/trip'
-import { prepareJsonFieldsUpdate, isMultiStageTripUtil, calculateTotalDistance, calculateTripDuration } from '@/lib/trip-utils'
-import { isTempId } from '@/lib/temp-id-service'
+import { isMultiStageTripUtil, calculateTotalDistance, calculateTripDuration, prepareJsonFieldsUpdate } from '@/lib/trips/trip-utils';
+import { isTempId } from '@/lib/ui/temp-id-service'
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic'

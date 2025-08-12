@@ -1,5 +1,5 @@
 // src/app/trips/[slug]/page.tsx
-import { prisma } from '@/lib/prisma';
+import { prisma } from '@/lib/core/prisma';
 import { notFound } from 'next/navigation';
 import { auth } from '@/auth';
 import Link from 'next/link';

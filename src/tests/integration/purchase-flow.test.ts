@@ -1,12 +1,12 @@
-import { PurchaseService } from '@/lib/purchaseService';
+import { PurchaseService } from '@/lib/payment/purchaseService';
 import { PurchaseStatus } from '@prisma/client';
 
 // Mock Prisma for integration tests
-jest.mock('@/lib/prisma', () => ({
+jest.mock('@/lib/core/prisma', () => ({
   prisma: (global as any).mockPrisma
 }));
 
-import { prisma } from '@/lib/prisma';
+import { prisma } from '@/lib/core/prisma';
 const mockPrisma = prisma as jest.Mocked<typeof prisma>;
 
 describe('Purchase Flow Integration', () => {

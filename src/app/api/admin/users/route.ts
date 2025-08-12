@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { prisma } from '@/lib/core/prisma'
 import { auth } from '@/auth'
 import { UserRole } from '@/types/profile'
 import { z } from 'zod'
-import { sendVerificationEmail } from '@/lib/email'
+import { sendVerificationEmail } from '@/lib/core/email'
 import { randomBytes } from 'crypto'
 
 // Force dynamic rendering

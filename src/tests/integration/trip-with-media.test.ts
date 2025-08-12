@@ -2,7 +2,7 @@
 import { POST as createTripHandler } from '@/app/api/trips/route';
 import { GET as getTripHandler, PUT as updateTripHandler } from '@/app/api/trips/[id]/route';
 import { auth } from '@/auth';
-import { prisma } from '@/lib/prisma';
+import { prisma } from '@/lib/core/prisma';
 import { MediaItem } from '@/types/trip';
 import { NextRequest } from 'next/server';
 
@@ -11,15 +11,15 @@ jest.mock('@/auth', () => ({
   auth: jest.fn()
 }));
 
-jest.mock('@/lib/user-sync', () => ({
+jest.mock('@/lib/auth/user-sync', () => ({
   ensureUserExists: jest.fn().mockImplementation(async (session) => ({
     id: session?.user?.id || 'mock-user-id',
     name: session?.user?.name || 'Mock User'
   }))
 }));
 
-jest.mock('@/lib/prisma', () => {
-  const originalPrisma = jest.requireActual('@/lib/prisma');
+jest.mock('@/lib/core/prisma', () => {
+  const originalPrisma = jest.requireActual('@/lib/core/prisma');
   const tripCreateMock = jest.fn();
   const tripUpdateMock = jest.fn();
   const tripFindUniqueMock = jest.fn();

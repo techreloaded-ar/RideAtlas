@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useSession } from 'next-auth/react'
-import { useToast } from '@/hooks/useToast'
+import { useToast } from '@/hooks/ui/useToast'
 import Image from 'next/image'
 import { UserRole } from '@/types/profile'
 import { Calendar, MapPin, User, Clock, Navigation, Check, Eye, Edit } from 'lucide-react'

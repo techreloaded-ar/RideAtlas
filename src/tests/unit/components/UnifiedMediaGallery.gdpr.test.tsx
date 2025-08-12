@@ -1,10 +1,10 @@
 import { render, screen, fireEvent, waitFor } from '../../setup/test-utils';
 import { MediaItem } from '@/types/trip';
 import { UnifiedMediaGallery } from '@/components/ui/UnifiedMediaGallery';
-import { cookieConsentService, CookieCategory } from '@/lib/cookie-consent';
+import { cookieConsentService, CookieCategory } from '@/lib/ui/cookie-consent';
 
 // Mock cookie consent service
-jest.mock('@/lib/cookie-consent', () => ({
+jest.mock('@/lib/ui/cookie-consent', () => ({
   cookieConsentService: {
     hasConsent: jest.fn(),
     setConsent: jest.fn(),

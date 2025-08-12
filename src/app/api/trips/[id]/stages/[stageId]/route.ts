@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-import { prisma } from '@/lib/prisma'
+import { prisma } from '@/lib/core/prisma'
 import { auth } from '@/auth'
 import { UserRole } from '@/types/profile'
-import { updateStage, deleteStage } from '@/lib/stage-utils'
+import { updateStage, deleteStage } from '@/lib/stages/stage-utils'
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic'
