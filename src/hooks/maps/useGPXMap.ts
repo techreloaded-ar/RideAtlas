@@ -2,6 +2,7 @@
 import { useState, useCallback } from 'react'
 import { parseGPXContent } from '@/lib/gpx/gpx-utils'
 import { GPXPoint, GPXWaypoint, GPXRoute, GPXData } from '@/types/gpx'
+import { GPXParseResult } from '@/lib/gpx/gpx-utils';
 import { 
   processGPXData, 
   createGPXMetadata, 

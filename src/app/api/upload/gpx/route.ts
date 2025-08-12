@@ -1,7 +1,7 @@
 // src/app/api/upload/gpx/route.ts
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/auth'
-import { parseGpxMetadata, createGpxFileFromMetadata, isValidGpxFile, isValidGpxFileSize, parseGPXContent, extractKeyPoints } from '@/lib/gpx-utils'
+import { parseGpxMetadata, createGpxFileFromMetadata, isValidGpxFile, isValidGpxFileSize, parseGPXContent, extractKeyPoints } from '@/lib/gpx/gpx-utils'
 import { getStorageProvider } from '@/lib/storage'
 
 // Funzione per l'upload tramite storage provider configurato

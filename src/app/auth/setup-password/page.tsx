@@ -4,7 +4,7 @@ import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { CheckCircle, XCircle, Loader2, Eye, EyeOff } from 'lucide-react';
-import { validatePasswordComplexity } from '@/lib/password-validation';
+import { validatePasswordComplexity } from '@/lib/auth/password-validation';
 
 function SetupPasswordContent() {
   const [status, setStatus] = useState<'loading' | 'form' | 'success' | 'error'>('loading');

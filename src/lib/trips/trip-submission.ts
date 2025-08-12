@@ -1,7 +1,7 @@
 // src/lib/trip-submission.ts
 // Pure functions for trip submission logic - easily testable!
 
-import { FieldPath } from 'react-hook-form';
+import { UseFormSetError } from 'react-hook-form';
 import type { TripWithStagesData } from '@/schemas/trip';
 import { serverErrorSchema } from '@/schemas/trip';
 
@@ -146,11 +146,11 @@ export function transformApiDataToFormData(tripData: Record<string, unknown>): T
     summary: (tripData.summary as string) || '',
     destination: (tripData.destination as string) || '',
     theme: (tripData.theme as string) || '',
-    characteristics: (tripData.characteristics as string[]) || [],
-    recommended_seasons: (tripData.recommended_seasons as string[]) || [],
+    characteristics: (tripData.characteristics as TripWithStagesData['characteristics']) || [],
+    recommended_seasons: (tripData.recommended_seasons as TripWithStagesData['recommended_seasons']) || [],
     tags: (tripData.tags as string[]) || [],
-    media: (tripData.media as unknown[]) || [],
-    gpxFile: tripData.gpxFile || null,
+    media: (tripData.media as TripWithStagesData['media']) || [],
+    gpxFile: (tripData.gpxFile as TripWithStagesData['gpxFile']) || null,
     stages: ((tripData.stages as Record<string, unknown>[]) || []).map((stage) => ({
       id: (stage.id as string) || undefined,
       orderIndex: (stage.orderIndex as number) || 0,
@@ -158,24 +158,25 @@ export function transformApiDataToFormData(tripData: Record<string, unknown>): T
       description: (stage.description as string) || '',
       routeType: (stage.routeType as string) || 'road',
       duration: (stage.duration as string) || '',
-      media: (stage.media as unknown[]) || [],
-      gpxFile: stage.gpxFile || null,
+      media: (stage.media as TripWithStagesData['media']) || [],
+      gpxFile: (stage.gpxFile as TripWithStagesData['gpxFile']) || null,
     }))
   };
 }
 
 /**
  * Pure function to create form field error setter compatible with React Hook Form
- * @param fieldErrors - Parsed field errors
+ * @param setError - The setError function from React Hook Form
  * @returns Function that can be used to set errors on form fields
  */
-export function createFieldErrorSetter<T>(
-  setError: (fieldPath: FieldPath<T>, error: { type: string; message: string }) => void
+export function createFieldErrorSetter(
+  setError: UseFormSetError<TripWithStagesData>
 ) {
   return (fieldErrors: Record<string, string>) => {
     Object.entries(fieldErrors).forEach(([fieldName, message]) => {
-      const fieldPath = fieldName as FieldPath<T>;
-      setError(fieldPath, {
+      // Use type assertion to work with React Hook Form's complex path types
+      // This is safe because we're setting errors from server validation
+      (setError as (name: string, error: { type: string; message: string }) => void)(fieldName, {
         type: 'server',
         message
       });

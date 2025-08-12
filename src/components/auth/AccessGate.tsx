@@ -1,7 +1,7 @@
 'use client';
 
 import { ReactNode } from 'react';
-import { useTripAccess } from '@/hooks/useTripAccess';
+import { useTripAccess } from '@/hooks/trips/useTripAccess';
 import { Lock, ShoppingCart, User } from 'lucide-react';
 import Link from 'next/link';
 

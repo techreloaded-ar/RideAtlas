@@ -1,7 +1,7 @@
 // src/lib/gpx-processing.ts
 // Pure functions for GPX data processing - easily testable!
 
-import { GPXParseResult } from '@/lib/gpx-utils';
+import { GPXParseResult } from '@/lib/gpx/gpx-utils';
 import { GPXPoint, GPXWaypoint, GPXRoute } from '@/types/gpx';
 
 export interface ProcessedGPXData {

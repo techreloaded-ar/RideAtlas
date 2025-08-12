@@ -5,7 +5,7 @@ import { useState } from 'react'
 import { ErrorBoundary, MediaErrorFallback } from '@/components/ui/ErrorBoundary'
 import MediaUpload from '@/components/upload/MediaUpload'
 import { MediaItem } from '@/types/trip'
-import { UseMediaUploadConfig } from '@/hooks/useMediaUpload'
+import { UseMediaUploadConfig } from '@/hooks/upload/useMediaUpload'
 
 interface SafeMultimediaUploadProps {
   mediaItems: MediaItem[];

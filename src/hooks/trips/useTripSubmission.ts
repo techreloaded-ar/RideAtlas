@@ -61,7 +61,8 @@ export const useTripSubmission = ({
       }
 
       // Success - call callback
-      onSuccess?.(apiResult.result.trip || apiResult.result)
+      const resultData = apiResult.result as Record<string, unknown>;
+      onSuccess?.(resultData.trip || resultData)
       return true
 
     } catch (err) {

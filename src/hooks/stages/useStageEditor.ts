@@ -7,7 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Stage, StageCreationData, StageUpdateData, MediaItem, GpxFile } from '@/types/trip';
 import { useStages } from '@/hooks/stages/useStages';
-import { generateTempIdWithIndex, generateTempMediaId } from '@/lib/temp-id-service';
+import { generateTempIdWithIndex, generateTempMediaId } from '@/lib/ui/temp-id-service';
 
 // Schema di validazione Zod per Stage
 const stageValidationSchema = z.object({

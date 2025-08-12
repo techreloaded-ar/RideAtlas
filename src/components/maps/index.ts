@@ -21,7 +21,7 @@ export type {
 } from '@/types/gpx'
 
 // Hook migliorato
-export { useGPXMap } from '@/hooks/useGPXMap'
+export { useGPXMap } from '@/hooks/maps/useGPXMap'
 
 // Retrocompatibilità temporanea
 export { default as UnifiedGPXMapViewer } from '@/components/maps/GPXMapViewer'
