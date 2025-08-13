@@ -70,6 +70,7 @@ function SignInContent() {
     CredentialsSignin: 'Accesso fallito. Controlla che i dettagli che hai fornito siano corretti.',
     SessionRequired: 'Effettua l\'accesso per accedere a questa pagina.',
     'email-verified': 'Email verificata con successo! Ora puoi accedere.',
+    'password-reset-success': 'Password reimpostata con successo! Ora puoi accedere con la nuova password.',
     default: 'Si è verificato un errore durante l\'accesso.',
   };
 
@@ -92,27 +93,27 @@ function SignInContent() {
 
         {(error || credentialsError) && (
           <div className={`border rounded-md p-4 ${
-            searchParams.get('message') === 'email-verified' 
+            ['email-verified', 'password-reset-success'].includes(searchParams.get('message') || '')
               ? 'bg-green-50 border-green-200' 
               : 'bg-red-50 border-red-200'
           }`}>
             <div className={`text-sm ${
-              searchParams.get('message') === 'email-verified' 
+              ['email-verified', 'password-reset-success'].includes(searchParams.get('message') || '')
                 ? 'text-green-800' 
                 : 'text-red-800'
             }`}>
-              {searchParams.get('message') === 'email-verified' 
-                ? 'Email verificata con successo! Ora puoi accedere.'
+              {searchParams.get('message') && errorMessages[searchParams.get('message')!]
+                ? errorMessages[searchParams.get('message')!]
                 : (credentialsError || errorMessages[error!] || errorMessages.default)
               }
             </div>
           </div>
         )}
 
-        {searchParams.get('message') === 'email-verified' && !error && !credentialsError && (
+        {['email-verified', 'password-reset-success'].includes(searchParams.get('message') || '') && !error && !credentialsError && (
           <div className="bg-green-50 border border-green-200 rounded-md p-4">
             <div className="text-green-800 text-sm">
-              Email verificata con successo! Ora puoi accedere.
+              {errorMessages[searchParams.get('message')!]}
             </div>
           </div>
         )}
@@ -209,6 +210,12 @@ function SignInContent() {
         </div>
 
         <div className="text-center space-y-2">
+          <Link 
+            href="/auth/forgot-password"
+            className="text-primary-600 hover:text-primary-500 text-sm font-medium block"
+          >
+            Password dimenticata?
+          </Link>
           <p className="text-sm text-gray-600">
             Non hai ancora un account?{' '}
             <Link 
