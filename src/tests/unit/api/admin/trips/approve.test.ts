@@ -3,6 +3,7 @@ import { NextRequest } from 'next/server'
 import { auth } from '@/auth'
 import { prisma } from '@/lib/core/prisma'
 import { UserRole } from '@/types/profile'
+import { TripValidationService } from '@/lib/trips/tripValidationService'
 
 // Mock delle dipendenze
 jest.mock('@/auth', () => ({
@@ -18,7 +19,14 @@ jest.mock('@/lib/core/prisma', () => ({
   },
 }))
 
+jest.mock('@/lib/trips/tripValidationService', () => ({
+  TripValidationService: {
+    validateForPublication: jest.fn(),
+  },
+}))
+
 const mockAuth = auth as jest.Mock
+const mockValidationService = TripValidationService as jest.Mocked<typeof TripValidationService>
 
 describe('PATCH /api/admin/trips/[id]/approve - Approvazione Viaggi', () => {
   beforeEach(() => {
@@ -120,6 +128,10 @@ describe('PATCH /api/admin/trips/[id]/approve - Approvazione Viaggi', () => {
     it('should approve a draft trip successfully', async () => {
       ;(prisma.trip.findUnique as jest.Mock).mockResolvedValue(mockDraftTrip)
       ;(prisma.trip.update as jest.Mock).mockResolvedValue(mockUpdatedTrip)
+      mockValidationService.validateForPublication.mockResolvedValue({
+        isValid: true,
+        errors: []
+      })
 
       const request = createMockRequest('trip-123')
       const response = await PATCH(request, { params: { id: 'trip-123' } })
@@ -128,6 +140,9 @@ describe('PATCH /api/admin/trips/[id]/approve - Approvazione Viaggi', () => {
       expect(response.status).toBe(200)
       expect(data.message).toBe('Viaggio approvato con successo')
       expect(data.trip).toEqual(mockUpdatedTrip)
+
+      // Verifica che venga chiamata la validazione
+      expect(mockValidationService.validateForPublication).toHaveBeenCalledWith('trip-123')
 
       // Verifica che venga cercato il viaggio esistente
       expect(prisma.trip.findUnique).toHaveBeenCalledWith({
@@ -176,6 +191,10 @@ describe('PATCH /api/admin/trips/[id]/approve - Approvazione Viaggi', () => {
       ;(prisma.trip.update as jest.Mock).mockResolvedValue({
         ...tripWithDifferentUser,
         status: 'Pubblicato',
+      })
+      mockValidationService.validateForPublication.mockResolvedValue({
+        isValid: true,
+        errors: []
       })
 
       const request = createMockRequest('trip-123')
@@ -339,6 +358,117 @@ describe('PATCH /api/admin/trips/[id]/approve - Approvazione Viaggi', () => {
 
       expect(response.status).toBe(200)
       expect(data.trip.id).toBe(uuidTripId)
+    })
+  })
+
+  describe('Validazione con TripValidationService', () => {
+    beforeEach(() => {
+      mockAuth.mockResolvedValue(mockSentinelSession as any)
+    })
+
+    it('should return 400 with validation errors when trip validation fails', async () => {
+      const validationErrors = [
+        {
+          field: 'title',
+          message: 'Il titolo è obbligatorio',
+          code: 'TITLE_REQUIRED'
+        },
+        {
+          field: 'stages.gpx',
+          message: '2 tappa/e mancano del file GPX',
+          code: 'STAGES_GPX_REQUIRED'
+        }
+      ]
+
+      ;(prisma.trip.findUnique as jest.Mock).mockResolvedValue(mockDraftTrip)
+      mockValidationService.validateForPublication.mockResolvedValue({
+        isValid: false,
+        errors: validationErrors
+      })
+
+      const request = createMockRequest('trip-123')
+      const response = await PATCH(request, { params: { id: 'trip-123' } })
+      const data = await response.json()
+
+      expect(response.status).toBe(400)
+      expect(data.error).toBe('Il viaggio non può essere pubblicato')
+      expect(data.validationErrors).toEqual(validationErrors)
+      
+      // Verifica che la validazione sia stata chiamata
+      expect(mockValidationService.validateForPublication).toHaveBeenCalledWith('trip-123')
+      
+      // Verifica che NON venga fatto l'update se la validazione fallisce
+      expect(prisma.trip.update).not.toHaveBeenCalled()
+    })
+
+    it('should return 400 with single validation error', async () => {
+      const singleError = [{
+        field: 'summary',
+        message: 'La descrizione è obbligatoria',
+        code: 'SUMMARY_REQUIRED'
+      }]
+
+      ;(prisma.trip.findUnique as jest.Mock).mockResolvedValue(mockDraftTrip)
+      mockValidationService.validateForPublication.mockResolvedValue({
+        isValid: false,
+        errors: singleError
+      })
+
+      const request = createMockRequest('trip-123')
+      const response = await PATCH(request, { params: { id: 'trip-123' } })
+      const data = await response.json()
+
+      expect(response.status).toBe(400)
+      expect(data.validationErrors).toEqual(singleError)
+      expect(data.validationErrors).toHaveLength(1)
+    })
+
+    it('should handle validation service errors gracefully', async () => {
+      ;(prisma.trip.findUnique as jest.Mock).mockResolvedValue(mockDraftTrip)
+      mockValidationService.validateForPublication.mockResolvedValue({
+        isValid: false,
+        errors: [{
+          field: 'system',
+          message: 'Errore interno durante la validazione',
+          code: 'VALIDATION_ERROR'
+        }]
+      })
+
+      const request = createMockRequest('trip-123')
+      const response = await PATCH(request, { params: { id: 'trip-123' } })
+      const data = await response.json()
+
+      expect(response.status).toBe(400)
+      expect(data.error).toBe('Il viaggio non può essere pubblicato')
+      expect(data.validationErrors[0].code).toBe('VALIDATION_ERROR')
+    })
+
+    it('should proceed with approval when validation passes', async () => {
+      ;(prisma.trip.findUnique as jest.Mock).mockResolvedValue(mockDraftTrip)
+      ;(prisma.trip.update as jest.Mock).mockResolvedValue(mockUpdatedTrip)
+      mockValidationService.validateForPublication.mockResolvedValue({
+        isValid: true,
+        errors: []
+      })
+
+      const request = createMockRequest('trip-123')
+      const response = await PATCH(request, { params: { id: 'trip-123' } })
+
+      expect(response.status).toBe(200)
+      expect(mockValidationService.validateForPublication).toHaveBeenCalledWith('trip-123')
+      expect(prisma.trip.update).toHaveBeenCalled()
+    })
+
+    it('should call validation service even for trips that would otherwise fail', async () => {
+      // Trip che non esiste, ma dovrebbe chiamare prima la validazione
+      ;(prisma.trip.findUnique as jest.Mock).mockResolvedValue(null)
+      
+      const request = createMockRequest('nonexistent-trip')
+      const response = await PATCH(request, { params: { id: 'nonexistent-trip' } })
+      
+      expect(response.status).toBe(404)
+      // La validazione non dovrebbe essere chiamata se il trip non esiste
+      expect(mockValidationService.validateForPublication).not.toHaveBeenCalled()
     })
   })
 })

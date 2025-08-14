@@ -145,5 +145,17 @@ export const transformPrismaStages = (prismaStages: PrismaStage[]): Stage[] => {
   return prismaStages.map(transformPrismaStageToStage)
 }
 
+// Tipi per errori di validazione
+export interface TripValidationError {
+  field: string
+  message: string
+  code: string
+}
+
+export interface TripValidationResult {
+  isValid: boolean
+  errors: TripValidationError[]
+}
+
 // Esporta gli enum per facilità d'uso
 export { TripStatus, RecommendedSeason }

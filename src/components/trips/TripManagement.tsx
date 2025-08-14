@@ -1,11 +1,12 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, Fragment } from 'react'
 import { useSession } from 'next-auth/react'
 import { useToast } from '@/hooks/ui/useToast'
 import Image from 'next/image'
 import { UserRole } from '@/types/profile'
-import { Calendar, MapPin, User, Clock, Navigation, Check, Eye, Edit } from 'lucide-react'
+import { TripValidationError } from '@/types/trip'
+import { Calendar, MapPin, User, Clock, Navigation, Check, Eye, Edit, AlertTriangle } from 'lucide-react'
 
 interface Trip {
   id: string
@@ -44,6 +45,7 @@ export default function TripManagement() {
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
   const [approvingTrip, setApprovingTrip] = useState<string | null>(null)
+  const [validationErrors, setValidationErrors] = useState<Record<string, TripValidationError[]>>({})
 
   const fetchTrips = useCallback(async () => {
     try {
@@ -72,13 +74,30 @@ export default function TripManagement() {
   const handleApproveTrip = async (tripId: string) => {
     try {
       setApprovingTrip(tripId)
+      // Clear any previous validation errors for this trip
+      setValidationErrors(prev => {
+        const newErrors = { ...prev }
+        delete newErrors[tripId]
+        return newErrors
+      })
+
       const response = await fetch(`/api/admin/trips/${tripId}/approve`, {
         method: 'PATCH',
       })
 
       if (!response.ok) {
         const errorData = await response.json()
-        throw new Error(errorData.error || 'Errore nell\'approvazione')
+        
+        if (errorData.validationErrors && errorData.validationErrors.length > 0) {
+          // Store validation errors for this specific trip
+          setValidationErrors(prev => ({
+            ...prev,
+            [tripId]: errorData.validationErrors
+          }))
+        } else {
+          setError(errorData.error || 'Errore nell\'approvazione')
+        }
+        return
       }
 
       showSuccess('Viaggio approvato con successo')
@@ -256,7 +275,8 @@ export default function TripManagement() {
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {tripsData.trips.map((trip) => (
-                    <tr key={trip.id} className="hover:bg-gray-50">
+                    <Fragment key={trip.id}>
+                      <tr className="hover:bg-gray-50">
                       <td className="px-6 py-4">
                         <div className="flex items-start">
                           <div className="flex-shrink-0 h-12 w-12 bg-gradient-to-br from-primary-400 to-secondary-500 rounded-lg flex items-center justify-center">
@@ -360,6 +380,33 @@ export default function TripManagement() {
                         </div>
                       </td>
                     </tr>
+                    {/* Validation errors row */}
+                    {validationErrors[trip.id] && validationErrors[trip.id].length > 0 && (
+                      <tr className="bg-amber-50">
+                        <td colSpan={6} className="px-6 py-4">
+                          <div className="flex items-start gap-3">
+                            <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                            <div className="flex-1">
+                              <h4 className="text-amber-800 font-medium text-sm mb-2">
+                                Requisiti mancanti per la pubblicazione
+                              </h4>
+                              <ul className="space-y-1">
+                                {validationErrors[trip.id].map((error, index) => (
+                                  <li key={index} className="flex items-start gap-2 text-amber-700 text-sm">
+                                    <span className="text-amber-500 font-bold leading-none">•</span>
+                                    <span>{error.message}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                              <p className="text-amber-600 text-xs mt-2 opacity-80">
+                                Risolvi tutti i problemi sopra elencati per poter pubblicare il viaggio.
+                              </p>
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                    </Fragment>
                   ))}
                 </tbody>
               </table>

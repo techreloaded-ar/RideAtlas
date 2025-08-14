@@ -12,9 +12,10 @@ import {
   Edit, 
   Plus,
   Loader2,
-  Check
+  Check,
+  AlertTriangle
 } from 'lucide-react'
-import { TripStatus } from '@/types/trip'
+import { TripStatus, TripValidationError } from '@/types/trip'
 
 interface UserTrip {
   id: string
@@ -38,6 +39,7 @@ export default function UserTrips() {
   const [trips, setTrips] = useState<UserTrip[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [validationErrors, setValidationErrors] = useState<Record<string, TripValidationError[]>>({})
 
   const fetchUserTrips = useCallback(async () => {
     if (!session?.user?.id) return
@@ -208,11 +210,34 @@ export default function UserTrips() {
                     <button
                       onClick={async () => {
                         try {
+                          // Clear previous validation errors for this trip
+                          setValidationErrors(prev => {
+                            const newErrors = { ...prev }
+                            delete newErrors[trip.id]
+                            return newErrors
+                          })
+
                           const res = await fetch(`/api/trips/${trip.id}/publish`, { method: 'PATCH' })
-                          if (!res.ok) throw new Error('Pubblicazione fallita')
+                          
+                          if (!res.ok) {
+                            const errorData = await res.json()
+                            
+                            if (errorData.validationErrors && errorData.validationErrors.length > 0) {
+                              // Store validation errors for this specific trip
+                              setValidationErrors(prev => ({
+                                ...prev,
+                                [trip.id]: errorData.validationErrors
+                              }))
+                            } else {
+                              setError(errorData.error || 'Pubblicazione fallita')
+                            }
+                            return
+                          }
+                          
                           fetchUserTrips()
                         } catch (e) {
                           console.error(e)
+                          setError('Errore durante la pubblicazione')
                         }
                       }}
                       className="p-2 text-green-600 hover:text-green-900 transition-colors"
@@ -223,6 +248,31 @@ export default function UserTrips() {
                   )}
                 </div>
               </div>
+              
+              {/* Validation errors */}
+              {validationErrors[trip.id] && validationErrors[trip.id].length > 0 && (
+                <div className="mt-4 bg-amber-50 border border-amber-200 rounded-lg p-4">
+                  <div className="flex items-start gap-3">
+                    <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                    <div className="flex-1">
+                      <h4 className="text-amber-800 font-medium text-sm mb-2">
+                        Requisiti mancanti per la pubblicazione
+                      </h4>
+                      <ul className="space-y-1">
+                        {validationErrors[trip.id].map((error, index) => (
+                          <li key={index} className="flex items-start gap-2 text-amber-700 text-sm">
+                            <span className="text-amber-500 font-bold leading-none">•</span>
+                            <span>{error.message}</span>
+                          </li>
+                        ))}
+                      </ul>
+                      <p className="text-amber-600 text-xs mt-2 opacity-80">
+                        Completa tutti i requisiti sopra elencati per poter pubblicare il viaggio.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           ))}
         </div>

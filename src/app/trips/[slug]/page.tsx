@@ -2,14 +2,9 @@
 import { prisma } from '@/lib/core/prisma';
 import { notFound } from 'next/navigation';
 import { auth } from '@/auth';
-import Link from 'next/link';
 import { UserRole } from '@/types/profile';
-import { isMultiStageTrip, transformPrismaStages, RecommendedSeason } from '@/types/trip';
-import { TripChips } from '@/components/trips/TripChips';
-import { TripMeta } from '@/components/trips/TripMeta';
-import { UnifiedMediaGallery } from '@/components/ui/UnifiedMediaGallery';
-import StageTimeline from '@/components/stages/StageTimeline';
-import AccessGate from '@/components/auth/AccessGate';
+import { transformPrismaStages, RecommendedSeason } from '@/types/trip';
+import { TripDetailClient } from '@/components/trips/TripDetailClient';
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic';
@@ -45,7 +40,6 @@ export default async function TripDetailPage({ params }: { params: { slug: strin
     ...trip,
     stages: trip.stages ? transformPrismaStages(trip.stages) : []
   };
-  const isMultiStage = isMultiStageTrip(tripWithStages);
 
   // Controlla se l'utente è il creatore o un Sentinel
   const isOwner = session?.user?.id === trip.user_id;
@@ -71,7 +65,7 @@ export default async function TripDetailPage({ params }: { params: { slug: strin
   );
 
   // Combina media del viaggio + media delle tappe (viaggio prima, poi tappe in ordine)
-  const galleryMediaItems = [...tripMediaItems, ...allStageMediaItems];
+  // const galleryMediaItems = [...tripMediaItems, ...allStageMediaItems];
 
   // Mappa le stagioni per il formato chip
   const seasonMapping: Record<RecommendedSeason, string> = {
@@ -84,106 +78,15 @@ export default async function TripDetailPage({ params }: { params: { slug: strin
 
 
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-white">
-      {/* Header */}
-      <div className="mb-8">
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-4">
-          <h1 className="text-4xl font-medium mb-4">{trip.title}</h1>
-          {canEdit && (
-            <Link
-              href={`/edit-trip/${trip.id}`}
-              className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700"
-            >
-              Modifica
-            </Link>
-          )}
-        </div>
-        
-        <TripChips 
-          duration={isMultiStage 
-            ? `${tripWithStages.stages.length} giorni`
-            : `${trip.duration_days} giorni`
-          }
-          location={trip.destination}
-          terrain={trip.theme}
-          seasons={mappedSeasons}
-        />
-        
-        <TripMeta 
-          author={trip.user.name || trip.user.email}
-          travelDate={trip.travelDate}
-        />
-      </div>
-
-      {/* Media Gallery */}
-      {galleryMediaItems.length > 0 && (
-        <UnifiedMediaGallery media={galleryMediaItems} />
-      )}
-
-      {/* Description */}
-      <div className="mb-8">
-        <p className="leading-relaxed mb-4 text-[14px]">
-          {trip.summary}
-        </p>
-      </div>
-
-      {/* Caratteristiche e Tags */}
-      {(trip.characteristics.length > 0 || trip.tags.length > 0) && (
-        <div className="mb-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {trip.characteristics.length > 0 && (
-              <div>
-                <h4 className="text-sm font-medium text-gray-700 mb-2">Caratteristiche</h4>
-                <div className="flex flex-wrap gap-2">
-                  {trip.characteristics.map((characteristic, index) => (
-                    <span 
-                      key={index} 
-                      className="inline-block bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full"
-                    >
-                      {characteristic}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-            
-            {trip.tags.length > 0 && (
-              <div>
-                <h4 className="text-sm font-medium text-gray-700 mb-2">Tags</h4>
-                <div className="flex flex-wrap gap-2">
-                  {trip.tags.map((tag, index) => (
-                    <span 
-                      key={index} 
-                      className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Trip Stages Section - Solo per viaggi multi-tappa */}
-      {isMultiStage && tripWithStages.stages.length > 0 && (
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Tappe del viaggio</h2>
-
-          <AccessGate 
-            tripId={trip.id} 
-            premiumContentType="le tappe dettagliate del viaggio"
-            showPreview={true}
-          >
-            <StageTimeline
-              stages={tripWithStages.stages}
-              isEditable={false}
-            />
-          </AccessGate>
-        </div>
-      )}
-
-    </div>
+    <TripDetailClient
+      trip={trip}
+      tripWithStages={tripWithStages}
+      isOwner={isOwner}
+      isSentinel={isSentinel}
+      canEdit={canEdit}
+      tripMediaItems={tripMediaItems}
+      allStageMediaItems={allStageMediaItems}
+      mappedSeasons={mappedSeasons}
+    />
   );
 }
