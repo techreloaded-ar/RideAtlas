@@ -6,7 +6,7 @@ import { useToast } from '@/hooks/ui/useToast'
 import Image from 'next/image'
 import { UserRole } from '@/types/profile'
 import { TripValidationError } from '@/types/trip'
-import { Calendar, MapPin, User, Clock, Navigation, Check, Eye, Edit, AlertTriangle } from 'lucide-react'
+import { Calendar, MapPin, User, Clock, Navigation, Eye, Edit, AlertTriangle, Send } from 'lucide-react'
 
 interface Trip {
   id: string
@@ -368,7 +368,7 @@ export default function TripManagement() {
                               className="text-green-600 hover:text-green-900 p-1 rounded disabled:opacity-50"
                               title="Approva viaggio"
                             >
-                              <Check className="w-4 h-4" />
+                              <Send className="w-4 h-4" />
                             </button>
                           )}
                           

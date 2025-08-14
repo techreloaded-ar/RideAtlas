@@ -4,15 +4,15 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useSession } from 'next-auth/react'
 import Link from 'next/link'
-import { 
-  MapPin, 
-  Calendar, 
-  Clock, 
-  Eye, 
-  Edit, 
+import {
+  MapPin,
+  Calendar,
+  Clock,
+  Eye,
+  Edit,
   Plus,
   Loader2,
-  Check,
+  Send,
   AlertTriangle
 } from 'lucide-react'
 import { TripStatus, TripValidationError } from '@/types/trip'
@@ -243,7 +243,7 @@ export default function UserTrips() {
                       className="p-2 text-green-600 hover:text-green-900 transition-colors"
                       title="Pubblica viaggio"
                     >
-                      <Check className="w-4 h-4" />
+                      <Send className="w-4 h-4" />
                     </button>
                   )}
                 </div>
