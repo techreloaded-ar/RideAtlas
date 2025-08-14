@@ -14,15 +14,6 @@ import AccessGate from '@/components/auth/AccessGate';
 // Force dynamic rendering
 export const dynamic = 'force-dynamic';
 
-// Funzione per formattare la data
-const formatDate = (date: Date) => {
-  return new Intl.DateTimeFormat('it-IT', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  }).format(date);
-};
-
 export default async function TripDetailPage({ params }: { params: { slug: string } }) {
   const session = await auth();
   const trip = await prisma.trip.findUnique({
@@ -120,7 +111,7 @@ export default async function TripDetailPage({ params }: { params: { slug: strin
         
         <TripMeta 
           author={trip.user.name || trip.user.email}
-          publishDate={formatDate(trip.created_at)}
+          travelDate={trip.travelDate}
         />
       </div>
 

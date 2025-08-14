@@ -79,6 +79,7 @@ const tripCreationSchema = z.object({
   media: z.array(mediaItemSchema).optional().default([]),
   gpxFile: gpxFileSchema.optional(),
   stages: z.array(stageCreationSchema).optional().default([]),
+  travelDate: z.string().datetime().optional().nullable().or(z.date().optional().nullable()), // Data in cui il ranger ha fatto il viaggio
 });
 
 // Implementazione GET per ottenere tutti i viaggi con filtri appropriati per i ruoli
@@ -229,6 +230,7 @@ export async function POST(request: NextRequest) {
             insights: tripData.insights,
             media: (tripData.media || []) as unknown as object[],
             gpxFile: (tripData.gpxFile || null) as unknown as object,
+            travelDate: tripData.travelDate ? new Date(tripData.travelDate) : null,
             slug,
             user_id: user.id,
           },

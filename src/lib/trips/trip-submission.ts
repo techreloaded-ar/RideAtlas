@@ -15,6 +15,7 @@ export interface TransformedTripData {
   tags: string[];
   media: unknown[];
   gpxFile: unknown;
+  travelDate: Date | null;
   stages: TransformedStage[];
 }
 
@@ -47,6 +48,7 @@ export interface ApiSubmissionOptions {
 export function transformTripDataForSubmission(data: TripWithStagesData): TransformedTripData {
   return {
     ...data,
+    travelDate: data.travelDate || null,
     // Transform stages to API format
     stages: data.stages.map((stage) => ({
       id: (stage.id as string) || undefined,
@@ -141,6 +143,16 @@ export function handleHttpErrorStatus(status: number): string {
  * @returns Form data ready for React Hook Form
  */
 export function transformApiDataToFormData(tripData: Record<string, unknown>): TripWithStagesData {
+  // Gestione della data del viaggio - converte da stringa ISO a Date object
+  let travelDate: Date | null = null;
+  if (tripData.travelDate) {
+    if (typeof tripData.travelDate === 'string') {
+      travelDate = new Date(tripData.travelDate);
+    } else if (tripData.travelDate instanceof Date) {
+      travelDate = tripData.travelDate;
+    }
+  }
+
   return {
     title: (tripData.title as string) || '',
     summary: (tripData.summary as string) || '',
@@ -151,6 +163,7 @@ export function transformApiDataToFormData(tripData: Record<string, unknown>): T
     tags: (tripData.tags as string[]) || [],
     media: (tripData.media as TripWithStagesData['media']) || [],
     gpxFile: (tripData.gpxFile as TripWithStagesData['gpxFile']) || null,
+    travelDate: travelDate,
     stages: ((tripData.stages as Record<string, unknown>[]) || []).map((stage) => ({
       id: (stage.id as string) || undefined,
       orderIndex: (stage.orderIndex as number) || 0,

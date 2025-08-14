@@ -68,6 +68,7 @@ const tripUpdateSchema = z.object({
   media: z.array(mediaItemSchema).optional(),
   gpxFile: gpxFileSchema.nullable().optional(),
   stages: z.array(stageUpdateSchema).optional(),
+  travelDate: z.string().datetime().optional().nullable().or(z.date().optional().nullable()), // Data in cui il ranger ha fatto il viaggio
 })
 
 // Funzione di utilità per generare lo slug
@@ -226,7 +227,7 @@ export async function PUT(
       )
     }
 
-    const { stages, gpxFile, media, ...updateData } = parsed.data
+    const { stages, gpxFile, media, travelDate, ...updateData } = parsed.data
 
     // Se il titolo è cambiato, aggiorna anche lo slug
     let newSlug = existingTrip.slug
@@ -252,6 +253,7 @@ export async function PUT(
       const baseUpdateData = {
         ...updateData,
         ...(newSlug !== existingTrip.slug && { slug: newSlug }),
+        ...(travelDate !== undefined && { travelDate: travelDate ? new Date(travelDate) : null }),
         updated_at: new Date()
       }
       const jsonFieldsUpdate = prepareJsonFieldsUpdate({ media, gpxFile });

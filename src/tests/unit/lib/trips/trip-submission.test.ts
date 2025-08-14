@@ -196,6 +196,7 @@ describe('Trip Submission Pure Functions', () => {
       tags: ['camping'],
       media: ['photo1.jpg'],
       gpxFile: { url: 'test.gpx' },
+      travelDate: '2024-03-15T00:00:00.000Z',
       stages: [
         {
           id: 'api-stage-1',
@@ -256,6 +257,44 @@ describe('Trip Submission Pure Functions', () => {
       expect(result.stages[0].description).toBe('');
       expect(result.stages[0].routeType).toBe('road');
       expect(result.stages[0].orderIndex).toBe(0);
+    });
+
+    it('should handle travelDate field correctly', () => {
+      // Test with ISO string date
+      const dataWithStringDate = {
+        ...mockApiData,
+        travelDate: '2024-03-15T00:00:00.000Z'
+      };
+
+      const result1 = transformApiDataToFormData(dataWithStringDate);
+      expect(result1.travelDate).toBeInstanceOf(Date);
+      expect(result1.travelDate?.toISOString().split('T')[0]).toBe('2024-03-15');
+
+      // Test with Date object
+      const testDate = new Date('2024-03-15');
+      const dataWithDateObject = {
+        ...mockApiData,
+        travelDate: testDate
+      };
+
+      const result2 = transformApiDataToFormData(dataWithDateObject);
+      expect(result2.travelDate).toBe(testDate);
+
+      // Test with null/undefined
+      const dataWithNullDate = {
+        ...mockApiData,
+        travelDate: null
+      };
+
+      const result3 = transformApiDataToFormData(dataWithNullDate);
+      expect(result3.travelDate).toBeNull();
+
+      // Test without travelDate field
+      const dataWithoutDate = { ...mockApiData };
+      delete dataWithoutDate.travelDate;
+
+      const result4 = transformApiDataToFormData(dataWithoutDate);
+      expect(result4.travelDate).toBeNull();
     });
   });
 

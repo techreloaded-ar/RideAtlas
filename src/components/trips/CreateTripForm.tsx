@@ -25,6 +25,7 @@ const CreateTripForm = () => {
       tags: [],
       media: [],
       gpxFile: null,
+      travelDate: null,
       stages: [{
         id: generateTempStageId(), // Assign a temporary ID
         orderIndex: 0,

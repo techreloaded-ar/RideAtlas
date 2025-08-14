@@ -326,11 +326,13 @@ export default async function TripsPage() {
                       </div>
                     </div>
                     
-                    {/* Data di creazione */}
-                    <div className="flex items-center gap-2 text-xs text-gray-500">
-                      <Calendar className="w-3 h-3" />
-                      <span>Creato il {formatDate(trip.created_at)}</span>
-                    </div>
+                    {/* Data del viaggio - solo se disponibile */}
+                    {trip.travelDate && (
+                      <div className="flex items-center gap-2 text-xs text-gray-500">
+                        <Calendar className="w-3 h-3" />
+                        <span>Viaggio del {formatDate(trip.travelDate)}</span>
+                      </div>
+                    )}
                   </div>
 
                   {/* Azioni */}

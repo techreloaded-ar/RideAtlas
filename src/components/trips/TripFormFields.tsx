@@ -1,112 +1,153 @@
 // src/components/TripFormFields.tsx
-"use client";
+'use client';
 
-import { UseFormReturn } from 'react-hook-form'
-import { type TripWithStagesData, CharacteristicOptions, RecommendedSeasons, MediaItem } from '@/schemas/trip'
-import { formFieldClasses } from '@/constants/tripForm'
+import { UseFormReturn } from 'react-hook-form';
+import {
+  type TripWithStagesData,
+  CharacteristicOptions,
+  RecommendedSeasons,
+  MediaItem,
+} from '@/schemas/trip';
+import { formFieldClasses } from '@/constants/tripForm';
 import { generateTempMediaId } from '@/lib/ui/temp-id-service';
-import SafeMediaUpload from '@/components/upload/MediaUpload'
+import SafeMediaUpload from '@/components/upload/MediaUpload';
 
 interface TripFormFieldsProps {
-  form: UseFormReturn<TripWithStagesData>
+  form: UseFormReturn<TripWithStagesData>;
 }
 
 export const TripFormFields = ({ form }: TripFormFieldsProps) => {
-  const { 
-    register, 
+  const {
+    register,
     formState: { errors },
     watch,
     setValue,
-    getValues
-  } = form
+    getValues,
+  } = form;
 
-  const characteristics = watch('characteristics')
-  const recommendedSeasons = watch('recommended_seasons')
-  const tags = watch('tags')
-  const media = watch('media') || []
+  const characteristics = watch('characteristics');
+  const recommendedSeasons = watch('recommended_seasons');
+  const tags = watch('tags');
+  const media = watch('media') || [];
+  const travelDate = watch('travelDate');
 
-  const handleCharacteristicChange = (characteristic: typeof CharacteristicOptions[number], checked: boolean) => {
-    const current = characteristics || []
+  const handleCharacteristicChange = (
+    characteristic: (typeof CharacteristicOptions)[number],
+    checked: boolean
+  ) => {
+    const current = characteristics || [];
     if (checked) {
-      setValue('characteristics', [...current, characteristic])
+      setValue('characteristics', [...current, characteristic]);
     } else {
-      setValue('characteristics', current.filter(c => c !== characteristic))
+      setValue(
+        'characteristics',
+        current.filter((c) => c !== characteristic)
+      );
     }
-  }
+  };
 
   const handleSeasonChange = (season: string, checked: boolean) => {
-    const current = recommendedSeasons || []
+    const current = recommendedSeasons || [];
     if (checked) {
-      setValue('recommended_seasons', [...current, season as (typeof RecommendedSeasons)[number]])
+      setValue('recommended_seasons', [
+        ...current,
+        season as (typeof RecommendedSeasons)[number],
+      ]);
     } else {
-      setValue('recommended_seasons', current.filter(s => s !== season))
+      setValue(
+        'recommended_seasons',
+        current.filter((s) => s !== season)
+      );
     }
-  }
+  };
 
   const addTag = (tag: string) => {
-    const current = tags || []
-    const trimmedTag = tag.trim()
+    const current = tags || [];
+    const trimmedTag = tag.trim();
     if (trimmedTag && !current.includes(trimmedTag)) {
-      setValue('tags', [...current, trimmedTag])
+      setValue('tags', [...current, trimmedTag]);
     }
-  }
+  };
 
   const removeTag = (tagToRemove: string) => {
-    const current = tags || []
-    setValue('tags', current.filter(tag => tag !== tagToRemove))
-  }
+    const current = tags || [];
+    setValue(
+      'tags',
+      current.filter((tag) => tag !== tagToRemove)
+    );
+  };
 
   const handleTagKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
-      e.preventDefault()
-      const target = e.currentTarget
-      addTag(target.value)
-      target.value = ''
+      e.preventDefault();
+      const target = e.currentTarget;
+      addTag(target.value);
+      target.value = '';
     }
-  }
+  };
 
   const handleAddTagClick = (e: React.MouseEvent) => {
-    e.preventDefault()
-    const input = document.getElementById('tag-input') as HTMLInputElement
+    e.preventDefault();
+    const input = document.getElementById('tag-input') as HTMLInputElement;
     if (input) {
-      addTag(input.value)
-      input.value = ''
+      addTag(input.value);
+      input.value = '';
     }
-  }
+  };
 
   const handleAddMedia = (mediaItem: Omit<MediaItem, 'id'>) => {
     const newMedia: MediaItem = {
       ...mediaItem,
-      id: generateTempMediaId()
-    }
+      id: generateTempMediaId(),
+    };
     // Uso getValues() per ottenere lo stato più recente invece di watch()
-    const currentMedia = getValues('media') || []
-    setValue('media', [...currentMedia, newMedia])
-  }
+    const currentMedia = getValues('media') || [];
+    setValue('media', [...currentMedia, newMedia]);
+  };
 
   const handleRemoveMedia = (mediaId: string) => {
-    const currentMedia = getValues('media') || []
-    setValue('media', currentMedia.filter((m: MediaItem) => m.id !== mediaId))
-  }
+    const currentMedia = getValues('media') || [];
+    setValue(
+      'media',
+      currentMedia.filter((m: MediaItem) => m.id !== mediaId)
+    );
+  };
 
   const handleUpdateCaption = (mediaId: string, caption: string) => {
-    const currentMedia = getValues('media') || []
-    setValue('media', currentMedia.map((m: MediaItem) => 
-      m.id === mediaId ? { ...m, caption } : m
-    ))
-  }
+    const currentMedia = getValues('media') || [];
+    setValue(
+      'media',
+      currentMedia.map((m: MediaItem) =>
+        m.id === mediaId ? { ...m, caption } : m
+      )
+    );
+  };
+
+  const handleTravelDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setValue('travelDate', value ? new Date(value) : null);
+  };
+
+  // Funzione per convertire la data in formato stringa per l'input
+  const formatDateForInput = (date: Date | null | undefined): string => {
+    if (!date) return '';
+    if (date instanceof Date) {
+      return date.toISOString().split('T')[0];
+    }
+    return '';
+  };
 
   return (
     <>
       {/* Title */}
       <div>
-        <label htmlFor="title" className={formFieldClasses.label}>
+        <label htmlFor='title' className={formFieldClasses.label}>
           Titolo
         </label>
         <input
           {...register('title')}
-          type="text"
-          id="title"
+          type='text'
+          id='title'
           className={formFieldClasses.input}
         />
         {errors.title && (
@@ -116,12 +157,12 @@ export const TripFormFields = ({ form }: TripFormFieldsProps) => {
 
       {/* Summary */}
       <div>
-        <label htmlFor="summary" className={formFieldClasses.label}>
+        <label htmlFor='summary' className={formFieldClasses.label}>
           Descrizione
         </label>
         <textarea
           {...register('summary')}
-          id="summary"
+          id='summary'
           rows={3}
           className={formFieldClasses.textarea}
         />
@@ -132,13 +173,13 @@ export const TripFormFields = ({ form }: TripFormFieldsProps) => {
 
       {/* Destination */}
       <div>
-        <label htmlFor="destination" className={formFieldClasses.label}>
+        <label htmlFor='destination' className={formFieldClasses.label}>
           Destinazione/Area Geografica
         </label>
         <input
           {...register('destination')}
-          type="text"
-          id="destination"
+          type='text'
+          id='destination'
           className={formFieldClasses.input}
         />
         {errors.destination && (
@@ -148,17 +189,34 @@ export const TripFormFields = ({ form }: TripFormFieldsProps) => {
 
       {/* Theme */}
       <div>
-        <label htmlFor="theme" className={formFieldClasses.label}>
+        <label htmlFor='theme' className={formFieldClasses.label}>
           Tema
         </label>
         <input
           {...register('theme')}
-          type="text"
-          id="theme"
+          type='text'
+          id='theme'
           className={formFieldClasses.input}
         />
         {errors.theme && (
           <p className={formFieldClasses.error}>{errors.theme.message}</p>
+        )}
+      </div>
+
+      {/* Travel Date */}
+      <div>
+        <label htmlFor='travelDate' className={formFieldClasses.label}>
+          Data del Viaggio
+        </label>
+        <input
+          type='date'
+          id='travelDate'
+          value={formatDateForInput(travelDate)}
+          onChange={handleTravelDateChange}
+          className={formFieldClasses.input}
+        />
+        {errors.travelDate && (
+          <p className={formFieldClasses.error}>{errors.travelDate.message}</p>
         )}
       </div>
 
@@ -167,39 +225,45 @@ export const TripFormFields = ({ form }: TripFormFieldsProps) => {
         <label className={`${formFieldClasses.label} mb-3`}>
           Caratteristiche del viaggio
         </label>
-        <div className="space-y-2">
+        <div className='space-y-2'>
           {CharacteristicOptions.map((characteristic) => (
-            <label key={characteristic} className="flex items-center">
+            <label key={characteristic} className='flex items-center'>
               <input
-                type="checkbox"
+                type='checkbox'
                 checked={characteristics?.includes(characteristic) || false}
-                onChange={(e) => handleCharacteristicChange(characteristic, e.target.checked)}
+                onChange={(e) =>
+                  handleCharacteristicChange(characteristic, e.target.checked)
+                }
                 className={formFieldClasses.checkbox}
               />
-              <span className="ml-2 text-sm text-gray-700">{characteristic}</span>
+              <span className='ml-2 text-sm text-gray-700'>
+                {characteristic}
+              </span>
             </label>
           ))}
         </div>
         {errors.characteristics && (
-          <p className={formFieldClasses.error}>{errors.characteristics.message}</p>
+          <p className={formFieldClasses.error}>
+            {errors.characteristics.message}
+          </p>
         )}
       </div>
 
       {/* Tags */}
       <div>
-        <label htmlFor="tag-input" className={formFieldClasses.label}>
+        <label htmlFor='tag-input' className={formFieldClasses.label}>
           Tag (separati da virgola o premi Invio)
         </label>
-        <div className="flex items-center mt-1">
+        <div className='flex items-center mt-1'>
           <input
-            type="text"
-            id="tag-input"
+            type='text'
+            id='tag-input'
             onKeyDown={handleTagKeyDown}
             className={formFieldClasses.tagInput}
-            placeholder="Aggiungi un tag..."
+            placeholder='Aggiungi un tag...'
           />
           <button
-            type="button"
+            type='button'
             onClick={handleAddTagClick}
             className={formFieldClasses.tagButton}
           >
@@ -209,16 +273,16 @@ export const TripFormFields = ({ form }: TripFormFieldsProps) => {
         {errors.tags && (
           <p className={formFieldClasses.error}>{errors.tags.message}</p>
         )}
-        <div className="mt-2 flex flex-wrap gap-2">
+        <div className='mt-2 flex flex-wrap gap-2'>
           {(tags || []).map((tag: string) => (
             <span key={tag} className={formFieldClasses.tagSpan}>
               {tag}
               <button
-                type="button"
+                type='button'
                 onClick={() => removeTag(tag)}
                 className={formFieldClasses.tagRemoveButton}
               >
-                <span className="sr-only">Rimuovi tag</span>
+                <span className='sr-only'>Rimuovi tag</span>
                 &times;
               </button>
             </span>
@@ -231,31 +295,32 @@ export const TripFormFields = ({ form }: TripFormFieldsProps) => {
         <label className={`${formFieldClasses.label} mb-3`}>
           Stagioni Consigliate
         </label>
-        <div className="space-y-2">
+        <div className='space-y-2'>
           {RecommendedSeasons.map((season) => (
-            <label key={season} className="flex items-center">
+            <label key={season} className='flex items-center'>
               <input
-                type="checkbox"
+                type='checkbox'
                 checked={recommendedSeasons?.includes(season) || false}
                 onChange={(e) => handleSeasonChange(season, e.target.checked)}
                 className={formFieldClasses.checkbox}
               />
-              <span className="ml-2 text-sm text-gray-700">{season}</span>
+              <span className='ml-2 text-sm text-gray-700'>{season}</span>
             </label>
           ))}
         </div>
         {errors.recommended_seasons && (
-          <p className={formFieldClasses.error}>{errors.recommended_seasons.message}</p>
+          <p className={formFieldClasses.error}>
+            {errors.recommended_seasons.message}
+          </p>
         )}
       </div>
 
       {/* Multimedia del Viaggio */}
       <div>
-        <label className={formFieldClasses.label}>
-          Multimedia del Viaggio
-        </label>
-        <div className="text-xs text-gray-500 mb-3">
-          Aggiungi immagini e video rappresentativi dell&apos;intero viaggio. Le immagini delle singole tappe vengono gestite separatamente.
+        <label className={formFieldClasses.label}>Multimedia del Viaggio</label>
+        <div className='text-xs text-gray-500 mb-3'>
+          Aggiungi immagini e video rappresentativi dell&apos;intero viaggio. Le
+          immagini delle singole tappe vengono gestite separatamente.
         </div>
         <SafeMediaUpload
           mediaItems={media}
@@ -271,8 +336,6 @@ export const TripFormFields = ({ form }: TripFormFieldsProps) => {
           <p className={formFieldClasses.error}>{errors.media.message}</p>
         )}
       </div>
-
-
     </>
-  )
-}
+  );
+};

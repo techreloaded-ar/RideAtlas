@@ -71,6 +71,7 @@ export type TripCreationData = Omit<Trip, 'id' | 'slug' | 'status' | 'created_at
   gpxFile?: GpxFile | null
   stages?: StageCreationData[]
   price?: number // Reso opzionale per permettere al DB di gestire il default
+  travelDate?: Date | null // Data in cui il ranger ha fatto il viaggio
 }
 
 // Tipo per l'aggiornamento di un viaggio

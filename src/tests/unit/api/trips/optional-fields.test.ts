@@ -104,6 +104,7 @@ describe('Trip API - Optional Fields Support', () => {
           ...tripDataWithEmptyOptionals,
           media: [],
           gpxFile: null,
+          travelDate: null,
           slug: 'viaggio-minimale',
           user_id: 'user-123',
           // L'API ricalcola duration basandosi su stages (0 stages = 1 day, 0 nights)
@@ -194,6 +195,7 @@ describe('Trip API - Optional Fields Support', () => {
           tags: [], // Dovrebbe accettare array vuoto
           media: [],
           gpxFile: null,
+          travelDate: null,
           slug: 'viaggio-senza-tag',
           user_id: 'user-123',
           // L'API ricalcola duration basandosi su stages (0 stages = 1 day, 0 nights)
@@ -284,6 +286,85 @@ describe('Trip API - Optional Fields Support', () => {
       expect(response.status).toBe(201);
       const responseData = await response.json();
       expect(responseData.id).toBe('trip-127');
+    });
+  });
+
+  describe('Travel Date Field', () => {
+    it('shouldAcceptTravelDateOnCreate', async () => {
+      const tripDataWithTravelDate = {
+        title: 'Viaggio con Data',
+        summary: 'Un viaggio con data specificata',
+        destination: 'Sicilia, Italia',
+        theme: 'Viaggio storico',
+        characteristics: ['Interesse storico-culturale'],
+        recommended_seasons: ['Primavera'],
+        tags: ['sicilia', 'storia'],
+        travelDate: '2023-05-15T00:00:00.000Z'
+      };
+
+      mockPrisma.trip.create.mockResolvedValue({
+        id: 'trip-126',
+        ...tripDataWithTravelDate,
+        travelDate: new Date('2023-05-15T00:00:00.000Z'),
+        slug: 'viaggio-con-data',
+        user_id: 'user-123',
+      });
+
+      const request = createMockRequest(tripDataWithTravelDate);
+      const response = await POST(request);
+
+      expect(response.status).toBe(201);
+      expect(prisma.trip.create).toHaveBeenCalledWith({
+        data: {
+          ...tripDataWithTravelDate,
+          media: [],
+          gpxFile: null,
+          travelDate: new Date('2023-05-15T00:00:00.000Z'),
+          slug: 'viaggio-con-data',
+          user_id: 'user-123',
+          // L'API ricalcola duration basandosi su stages (0 stages = 1 day, 0 nights)
+          duration_days: 1,
+          duration_nights: 0,
+        },
+      });
+    });
+
+    it('shouldAcceptNullTravelDateOnCreate', async () => {
+      const tripDataWithNullTravelDate = {
+        title: 'Viaggio senza Data',
+        summary: 'Un viaggio senza data specificata',
+        destination: 'Calabria, Italia',
+        theme: 'Viaggio naturalistico',
+        characteristics: ['Bel paesaggio'],
+        recommended_seasons: ['Estate'],
+        tags: ['calabria', 'natura'],
+        travelDate: null
+      };
+
+      mockPrisma.trip.create.mockResolvedValue({
+        id: 'trip-127',
+        ...tripDataWithNullTravelDate,
+        slug: 'viaggio-senza-data',
+        user_id: 'user-123',
+      });
+
+      const request = createMockRequest(tripDataWithNullTravelDate);
+      const response = await POST(request);
+
+      expect(response.status).toBe(201);
+      expect(prisma.trip.create).toHaveBeenCalledWith({
+        data: {
+          ...tripDataWithNullTravelDate,
+          media: [],
+          gpxFile: null,
+          travelDate: null,
+          slug: 'viaggio-senza-data',
+          user_id: 'user-123',
+          // L'API ricalcola duration basandosi su stages (0 stages = 1 day, 0 nights)
+          duration_days: 1,
+          duration_nights: 0,
+        },
+      });
     });
   });
 });

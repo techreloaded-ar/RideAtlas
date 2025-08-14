@@ -39,6 +39,7 @@ const EditTripForm = ({ tripId }: EditTripFormProps) => {
       tags: [],
       media: [],
       gpxFile: null,
+      travelDate: null,
       stages: [{
         orderIndex: 0,
         title: 'Tappa 1',

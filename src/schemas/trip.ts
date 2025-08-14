@@ -101,6 +101,7 @@ export const tripFormSchema = z.object({
   tags: z.array(z.string()),
   media: z.array(mediaItemSchema),
   gpxFile: gpxFileSchema.nullable(),
+  travelDate: z.date().nullable().optional(), // Data in cui il ranger ha fatto il viaggio
 })
 
 // Schema per trip con stages (quello che useremo principalmente)
