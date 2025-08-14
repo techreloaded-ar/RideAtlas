@@ -117,7 +117,7 @@ async function checkStagePermissions(
 // GET - Ottieni dettaglio di una singola tappa
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string; stageId: string } }
+  { params }: { params: Promise<{ id: string; stageId: string }> }
 ) {
   try {
     const session = await auth()
@@ -129,7 +129,7 @@ export async function GET(
       )
     }
 
-    const { id: tripId, stageId } = params
+    const { id: tripId, stageId } = await params
 
     // Verifica permessi e esistenza
     const permissionCheck = await checkStagePermissions(
@@ -174,7 +174,7 @@ export async function GET(
 // PUT - Aggiorna una tappa esistente
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string; stageId: string } }
+  { params }: { params: Promise<{ id: string; stageId: string }> }
 ) {
   try {
     const session = await auth()
@@ -186,7 +186,7 @@ export async function PUT(
       )
     }
 
-    const { id: tripId, stageId } = params
+    const { id: tripId, stageId } = await params
     const body = await request.json()
 
     // Validazione dei dati
@@ -269,7 +269,7 @@ export async function PUT(
 // DELETE - Elimina una tappa
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string; stageId: string } }
+  { params }: { params: Promise<{ id: string; stageId: string }> }
 ) {
   try {
     const session = await auth()
@@ -281,7 +281,7 @@ export async function DELETE(
       )
     }
 
-    const { id: tripId, stageId } = params
+    const { id: tripId, stageId } = await params
 
     // Verifica permessi e esistenza
     const permissionCheck = await checkStagePermissions(

@@ -7,13 +7,14 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  console.log(`🔍 [ACCESS API] Richiesta accesso per trip: ${params.id}`);
+  const { id } = await params;
+  console.log(`🔍 [ACCESS API] Richiesta accesso per trip: ${id}`);
   
   // Validazione parametri di base
-  if (!params?.id || typeof params.id !== 'string') {
-    console.log(`❌ [ACCESS API] Parametro ID non valido: ${params?.id}`);
+  if (!id || typeof id !== 'string') {
+    console.log(`❌ [ACCESS API] Parametro ID non valido: ${id}`);
     return NextResponse.json(
       { error: 'ID viaggio non valido' },
       { status: 400 }
@@ -40,14 +41,14 @@ export async function GET(
     console.log(`🔍 [ACCESS API] Recupero informazioni viaggio tramite PurchaseService...`);
 
     const tripInfo = await PurchaseService.getTripWithPurchaseInfo(
-      params.id, 
+      id, 
       session.user.id
     );
 
     console.log(`🔍 [ACCESS API] TripInfo ricevuto:`, tripInfo);
 
     if (!tripInfo) {
-      console.log(`❌ [ACCESS API] Viaggio non trovato: ${params.id}`);
+      console.log(`❌ [ACCESS API] Viaggio non trovato: ${id}`);
       return NextResponse.json(
         { error: 'Viaggio non trovato' },
         { status: 404 }

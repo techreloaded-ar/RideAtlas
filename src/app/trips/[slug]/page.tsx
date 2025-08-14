@@ -9,10 +9,11 @@ import { TripDetailClient } from '@/components/trips/TripDetailClient';
 // Force dynamic rendering
 export const dynamic = 'force-dynamic';
 
-export default async function TripDetailPage({ params }: { params: { slug: string } }) {
+export default async function TripDetailPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
   const session = await auth();
   const trip = await prisma.trip.findUnique({
-    where: { slug: params.slug },
+    where: { slug },
     include: {
       user: {
         select: {

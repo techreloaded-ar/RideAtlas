@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/core/prisma'
 import { auth } from '@/auth'
 import { UserRole } from '@/types/profile'
+import { TripValidationService } from '@/lib/trips/tripValidationService'
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic'
@@ -9,7 +10,7 @@ export const dynamic = 'force-dynamic'
 // PATCH - Approve a trip (only for Sentinel users)
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth()
@@ -28,7 +29,7 @@ export async function PATCH(
       )
     }
 
-    const tripId = params.id
+    const { id: tripId } = await params
 
     // Verify trip exists
     const existingTrip = await prisma.trip.findUnique({
@@ -60,6 +61,15 @@ export async function PATCH(
         { error: 'Solo i viaggi in bozza possono essere approvati' },
         { status: 400 }
       )
+    }
+
+    // Validazione business logic
+    const validationResult = await TripValidationService.validateForPublication(tripId)
+    if (!validationResult.isValid) {
+      return NextResponse.json({ 
+        error: 'Il viaggio non può essere pubblicato',
+        validationErrors: validationResult.errors
+      }, { status: 400 })
     }
 
     // Update trip status to published

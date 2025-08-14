@@ -15,7 +15,7 @@ const updateUserSchema = z.object({
 // PATCH - Aggiorna il ruolo di un utente (solo per Sentinel)
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth()
@@ -45,7 +45,7 @@ export async function PATCH(
     }
 
     const { role } = result.data
-    const userId = params.id
+    const { id: userId } = await params
 
     // Non permettere di modificare il proprio ruolo
     if (session.user.id === userId) {
@@ -122,7 +122,7 @@ export async function PATCH(
 // GET - Ottieni dettagli di un singolo utente
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth()
@@ -141,7 +141,7 @@ export async function GET(
       )
     }
 
-    const userId = params.id
+    const { id: userId } = await params
 
     const user = await prisma.user.findUnique({
       where: { id: userId },
@@ -194,7 +194,7 @@ export async function GET(
 // DELETE - Elimina un utente (solo per Sentinel)
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth()
@@ -213,7 +213,7 @@ export async function DELETE(
       )
     }
 
-    const userId = params.id
+    const { id: userId } = await params
 
     // Non permettere di eliminare il proprio account
     if (session.user.id === userId) {

@@ -89,7 +89,7 @@ function slugify(text: string): string {
 // GET - Ottieni un singolo viaggio per modifica
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth()
@@ -101,7 +101,7 @@ export async function GET(
       )
     }
 
-    const tripId = params.id
+    const tripId = (await params).id
 
     // Trova il viaggio con informazioni dell'utente e stages
     const trip = await prisma.trip.findUnique({
@@ -170,7 +170,7 @@ export async function GET(
 // PUT - Aggiorna un viaggio
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth()
@@ -182,7 +182,7 @@ export async function PUT(
       )
     }
 
-    const tripId = params.id
+    const tripId = (await params).id
     const body = await request.json()
     console.log('Backend - Dati ricevuti:', body);
 

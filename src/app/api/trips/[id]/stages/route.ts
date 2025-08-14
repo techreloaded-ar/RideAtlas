@@ -55,7 +55,7 @@ const stageCreationSchema = z.object({
 // GET - Ottieni tutte le tappe di un viaggio
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth()
@@ -67,7 +67,7 @@ export async function GET(
       )
     }
 
-    const tripId = params.id
+    const tripId = (await params).id
 
     // Verifica che il viaggio esista e controlla i permessi
     const trip = await prisma.trip.findUnique({
@@ -120,7 +120,7 @@ export async function GET(
 // POST - Crea una nuova tappa per il viaggio
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth()
@@ -132,7 +132,7 @@ export async function POST(
       )
     }
 
-    const tripId = params.id
+    const tripId = (await params).id
     const body = await request.json()
 
     // Validazione dei dati

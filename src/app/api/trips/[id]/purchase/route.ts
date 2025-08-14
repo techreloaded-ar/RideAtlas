@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic';
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth();
@@ -20,7 +20,7 @@ export async function POST(
 
     const result = await PurchaseService.createPurchase(
       session.user.id,
-      params.id
+      (await params).id
     );
 
     if (!result.success) {
@@ -47,7 +47,7 @@ export async function POST(
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth();
@@ -60,7 +60,7 @@ export async function GET(
     }
 
     const tripInfo = await PurchaseService.getTripWithPurchaseInfo(
-      params.id,
+      (await params).id,
       session.user.id
     );
 

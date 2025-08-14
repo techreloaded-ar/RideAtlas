@@ -9,7 +9,7 @@ import StageTimeline from '@/components/stages/StageTimeline'
 import AccessGate from '@/components/auth/AccessGate'
 import { PublishTripButton } from '@/components/trips/PublishTripButton'
 import { TripValidationWarning } from '@/components/trips/TripValidationWarning'
-import { isMultiStageTrip } from '@/types/trip'
+import { GpxFile } from '@/types/trip'
 
 interface MediaItem {
   id: string
@@ -34,7 +34,7 @@ interface TripStage {
   routeType?: string
   duration?: string
   media: MediaItem[]
-  gpxFile: unknown
+  gpxFile: GpxFile | null
   createdAt: Date
   updatedAt: Date
 }
@@ -49,7 +49,7 @@ interface TripData {
   status: string
   characteristics: string[]
   tags: string[]
-  travelDate?: Date
+  travelDate?: Date | null
   user: TripUser
 }
 
@@ -84,7 +84,7 @@ export function TripDetailClient({
     setHasValidationErrors(hasErrors)
   }, [])
   
-  const isMultiStage = isMultiStageTrip(tripWithStages)
+  const isMultiStage = tripWithStages.stages?.length > 0
   const galleryMediaItems = [...tripMediaItems, ...allStageMediaItems]
 
   return (

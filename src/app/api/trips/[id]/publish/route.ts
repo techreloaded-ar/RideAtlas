@@ -10,7 +10,7 @@ export const dynamic = 'force-dynamic'
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth()
@@ -18,7 +18,7 @@ export async function PATCH(
       return NextResponse.json({ error: 'Non autorizzato' }, { status: 401 })
     }
 
-    const tripId = params.id
+    const { id: tripId } = await params
     
     // Fetch existing trip
     const existingTrip = await prisma.trip.findUnique({

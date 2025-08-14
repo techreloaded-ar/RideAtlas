@@ -10,7 +10,7 @@ const refundSchema = z.object({
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth();
@@ -26,8 +26,9 @@ export async function PATCH(
     const body = await request.json();
     const { reason } = refundSchema.parse(body);
 
+    const { id } = await params;
     const result = await PurchaseService.refundPurchase(
-      params.id,
+      id,
       session.user.id,
       reason
     );

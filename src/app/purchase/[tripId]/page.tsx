@@ -7,18 +7,19 @@ import { PurchaseService } from '@/lib/payment/purchaseService';
 export const dynamic = 'force-dynamic';
 
 interface PurchasePageProps {
-  params: { tripId: string };
+  params: Promise<{ tripId: string }>;
 }
 
 export default async function PurchasePage({ params }: PurchasePageProps) {
+  const { tripId } = await params;
   const session = await auth();
   
   if (!session?.user?.id) {
-    redirect('/auth/signin?callbackUrl=' + encodeURIComponent(`/purchase/${params.tripId}`));
+    redirect('/auth/signin?callbackUrl=' + encodeURIComponent(`/purchase/${tripId}`));
   }
 
   const trip = await prisma.trip.findUnique({
-    where: { id: params.tripId },
+    where: { id: tripId },
     select: {
       id: true,
       title: true,

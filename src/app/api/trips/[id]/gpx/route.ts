@@ -11,13 +11,13 @@ export const dynamic = 'force-dynamic'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    console.log(`Richiesta download GPX per viaggio: ${params.id}`)
+    console.log(`Richiesta download GPX per viaggio: ${(await params).id}`)
     
     // Verifica che l'ID sia valido
-    if (!params.id || typeof params.id !== 'string') {
+    if (!(await params).id || typeof (await params).id !== 'string') {
       return NextResponse.json(
         { error: 'ID viaggio non valido' },
         { status: 400 }
@@ -26,7 +26,7 @@ export async function GET(
 
     // Recupera il viaggio dal database
     const trip = await prisma.trip.findUnique({
-      where: { id: params.id },
+      where: { id: (await params).id },
       select: {
         id: true,
         title: true,

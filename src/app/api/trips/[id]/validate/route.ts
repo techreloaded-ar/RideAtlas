@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth()
@@ -16,7 +16,7 @@ export async function GET(
       return NextResponse.json({ error: 'Non autorizzato' }, { status: 401 })
     }
 
-    const tripId = params.id
+    const tripId = (await params).id
     
     // Controllo permessi base (deve essere proprietario o Sentinel per vedere le validazioni)
     const isOwnerOrSentinel = session.user.role === UserRole.Sentinel || 
