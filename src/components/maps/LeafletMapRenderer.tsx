@@ -258,17 +258,18 @@ export default function LeafletMapRenderer({
       if (mapRef.current) {
         try {
           mapRef.current.remove()
-        } catch (error) {
+        } catch {
           // Map already removed
         }
         mapRef.current = null
       }
-      if (containerRef.current) {
-        const leafletContainer = containerRef.current.querySelector('.leaflet-container')
+      const currentContainer = containerRef.current
+      if (currentContainer) {
+        const leafletContainer = currentContainer.querySelector('.leaflet-container') as Element & { _leaflet_id?: number }
         if (leafletContainer && leafletContainer._leaflet_id) {
           delete leafletContainer._leaflet_id
         }
-        containerRef.current.innerHTML = ''
+        currentContainer.innerHTML = ''
       }
     }
   }, [])
