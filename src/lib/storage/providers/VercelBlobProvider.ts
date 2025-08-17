@@ -37,6 +37,7 @@ export class VercelBlobProvider implements IFileStorageProvider {
       const blob = await put(pathname, file, {
         access: 'public', // Vercel Blob supporta solo accesso pubblico
         addRandomSuffix: options.addRandomSuffix || false,
+        allowOverwrite: true, // Consente di sovrascrivere file esistenti
       });
       
       console.log(`File caricato su Vercel Blob: ${blob.url}`);

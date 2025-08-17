@@ -88,10 +88,8 @@ export default function GPXMapViewer({
   // SSR protection - non renderizzare lato server
   const [isClient, setIsClient] = useState(false)
 
-  // Generate unique key to prevent Leaflet container reuse issues
-  const mapKey = useMemo(() => {
-    return `map-${allTracks.length}-${routes.length}-${waypoints.length}-${Date.now()}`
-  }, [allTracks.length, routes.length, waypoints.length])
+  // Generate stable key based on content hash to prevent unnecessary re-renders
+  const [mapKey] = useState(() => `map-${Date.now()}-${Math.random()}`)
 
   useEffect(() => {
     setIsClient(true)

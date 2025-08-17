@@ -91,7 +91,7 @@ describe('API Media Upload', () => {
     const response = await uploadHandler(request);
     const body = await response.json();
     
-    expect(put).toHaveBeenCalledWith('valid.jpg', validFile, { access: 'public', addRandomSuffix: false });
+    expect(put).toHaveBeenCalledWith('valid.jpg', validFile, { access: 'public', addRandomSuffix: false, allowOverwrite: true });
     expect(response.status).toBe(200);
     expect(body).toHaveProperty('url', 'https://example.com/uploaded-image.jpg');
   });

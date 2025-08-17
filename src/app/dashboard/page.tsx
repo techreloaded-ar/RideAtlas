@@ -146,12 +146,18 @@ function DashboardContent() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
                     </svg>
                   </div>
-                  <div className="mt-4">
+                  <div className="mt-4 space-y-2">
                     <Link
                       href="/create-trip"
-                      className="inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-500"
+                      className="block text-sm font-medium text-blue-600 hover:text-blue-500"
                     >
-                      Inizia a creare →
+                      Crea singolo viaggio →
+                    </Link>
+                    <Link
+                      href="/dashboard/trips/batch"
+                      className="block text-sm font-medium text-blue-600 hover:text-blue-500"
+                    >
+                      Caricamento batch →
                     </Link>
                   </div>
                 </div>

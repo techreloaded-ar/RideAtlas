@@ -244,6 +244,7 @@ export default function LeafletMapRenderer({
   autoFit
 }: LeafletMapRendererProps) {
   const mapRef = useRef<L.Map | null>(null)
+  const containerRef = useRef<HTMLDivElement | null>(null)
   const waypointIcon = useWaypointIcon()
   
   // Inizializza Leaflet solo lato client
@@ -251,14 +252,39 @@ export default function LeafletMapRenderer({
     initializeLeafletIcons()
   }, [])
 
+  // Cleanup function per evitare problemi di reinizializzazione
+  useEffect(() => {
+    return () => {
+      if (mapRef.current) {
+        try {
+          mapRef.current.remove()
+        } catch (error) {
+          // Map already removed
+        }
+        mapRef.current = null
+      }
+      if (containerRef.current) {
+        const leafletContainer = containerRef.current.querySelector('.leaflet-container')
+        if (leafletContainer && leafletContainer._leaflet_id) {
+          delete leafletContainer._leaflet_id
+        }
+        containerRef.current.innerHTML = ''
+      }
+    }
+  }, [])
+
   return (
-    <MapContainer
-      center={center}
-      zoom={defaultZoom}
-      className="w-full h-full"
-      ref={mapRef}
-      attributionControl={false}
-    >
+    <div ref={containerRef} className="w-full h-full">
+      <MapContainer
+        center={center}
+        zoom={defaultZoom}
+        className="w-full h-full"
+        ref={mapRef}
+        attributionControl={false}
+        whenReady={() => {
+          // Map is ready - ensure proper initialization
+        }}
+      >
       <BaseLayers />
       
       {/* Tracce multiple */}
@@ -325,5 +351,6 @@ export default function LeafletMapRenderer({
       
       <MapAutoFit bounds={bounds} autoFit={autoFit} />
     </MapContainer>
+    </div>
   )
 }
