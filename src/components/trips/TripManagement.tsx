@@ -6,7 +6,7 @@ import { useToast } from '@/hooks/ui/useToast'
 import Image from 'next/image'
 import { UserRole } from '@/types/profile'
 import { TripValidationError } from '@/types/trip'
-import { Calendar, MapPin, User, Clock, Navigation, Eye, Edit, AlertTriangle, Send } from 'lucide-react'
+import { Calendar, MapPin, User, Clock, Navigation, Eye, Edit, AlertTriangle, Send, Trash2 } from 'lucide-react'
 
 interface Trip {
   id: string
@@ -45,6 +45,9 @@ export default function TripManagement() {
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
   const [approvingTrip, setApprovingTrip] = useState<string | null>(null)
+  const [deletingTrip, setDeletingTrip] = useState<string | null>(null)
+  const [tripToDelete, setTripToDelete] = useState<Trip | null>(null)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [validationErrors, setValidationErrors] = useState<Record<string, TripValidationError[]>>({})
 
   const fetchTrips = useCallback(async () => {
@@ -108,6 +111,43 @@ export default function TripManagement() {
     } finally {
       setApprovingTrip(null)
     }
+  }
+
+  const handleDeleteTrip = async (trip: Trip) => {
+    setTripToDelete(trip)
+    setShowDeleteConfirm(true)
+  }
+
+  const confirmDeleteTrip = async () => {
+    if (!tripToDelete) return
+
+    try {
+      setDeletingTrip(tripToDelete.id)
+      setShowDeleteConfirm(false)
+
+      const response = await fetch(`/api/admin/trips/${tripToDelete.id}`, {
+        method: 'DELETE',
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Errore nell\'eliminazione del viaggio')
+      }
+
+      showSuccess(`Viaggio "${tripToDelete.title}" eliminato con successo`)
+      // Reload trips list
+      await fetchTrips()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Errore sconosciuto')
+    } finally {
+      setDeletingTrip(null)
+      setTripToDelete(null)
+    }
+  }
+
+  const cancelDeleteTrip = () => {
+    setShowDeleteConfirm(false)
+    setTripToDelete(null)
   }
 
   useEffect(() => {
@@ -372,9 +412,25 @@ export default function TripManagement() {
                             </button>
                           )}
                           
+                          {/* Delete button - for all trips */}
+                          <button
+                            onClick={() => handleDeleteTrip(trip)}
+                            disabled={deletingTrip === trip.id}
+                            className="text-red-600 hover:text-red-900 p-1 rounded disabled:opacity-50"
+                            title="Elimina viaggio"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                          
                           {approvingTrip === trip.id && (
                             <div className="inline-block">
                               <div className="w-4 h-4 border-2 border-green-600 border-t-transparent rounded-full animate-spin"></div>
+                            </div>
+                          )}
+                          
+                          {deletingTrip === trip.id && (
+                            <div className="inline-block">
+                              <div className="w-4 h-4 border-2 border-red-600 border-t-transparent rounded-full animate-spin"></div>
                             </div>
                           )}
                         </div>
@@ -497,6 +553,74 @@ export default function TripManagement() {
                 : 'Non ci sono ancora viaggi nel sistema.'
               }
             </p>
+          </div>
+        )}
+
+        {/* Delete Confirmation Modal */}
+        {showDeleteConfirm && tripToDelete && (
+          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50" onClick={cancelDeleteTrip}>
+            <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white" onClick={(e) => e.stopPropagation()}>
+              <div className="mt-3">
+                <div className="flex items-center justify-center w-12 h-12 mx-auto bg-red-100 rounded-full">
+                  <Trash2 className="w-6 h-6 text-red-600" />
+                </div>
+                <div className="mt-5 text-center">
+                  <h3 className="text-lg leading-6 font-medium text-gray-900">
+                    Elimina viaggio
+                  </h3>
+                  <div className="mt-2 px-7 py-3">
+                    <p className="text-sm text-gray-500 mb-4">
+                      Sei sicuro di voler eliminare definitivamente il viaggio <strong>&ldquo;{tripToDelete.title}&rdquo;</strong>?
+                    </p>
+                    <div className="bg-amber-50 border border-amber-200 rounded-md p-3 mb-4">
+                      <div className="flex">
+                        <AlertTriangle className="h-5 w-5 text-amber-400" />
+                        <div className="ml-3">
+                          <h4 className="text-sm font-medium text-amber-800">
+                            Attenzione: Questa azione è irreversibile!
+                          </h4>
+                          <div className="mt-2 text-sm text-amber-700">
+                            <ul className="list-disc list-inside space-y-1">
+                              <li>Il viaggio verrà eliminato dal database</li>
+                              <li>Tutte le tappe associate verranno eliminate</li>
+                              <li>Tutte le immagini, video e file GPX verranno eliminati dallo storage</li>
+                              <li>Non sarà possibile recuperare questi dati</li>
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-400">
+                      Destinazione: {tripToDelete.destination} • Creato da: {tripToDelete.user.name || tripToDelete.user.email}
+                    </p>
+                  </div>
+                  <div className="items-center px-4 py-3">
+                    <div className="flex space-x-3">
+                      <button
+                        onClick={cancelDeleteTrip}
+                        className="w-full px-4 py-2 bg-gray-500 text-white text-base font-medium rounded-md shadow-sm hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-300"
+                      >
+                        Annulla
+                      </button>
+                      <button
+                        onClick={confirmDeleteTrip}
+                        disabled={deletingTrip === tripToDelete.id}
+                        className="w-full px-4 py-2 bg-red-600 text-white text-base font-medium rounded-md shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {deletingTrip === tripToDelete.id ? (
+                          <div className="flex items-center justify-center">
+                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                            Eliminando...
+                          </div>
+                        ) : (
+                          'Elimina definitivamente'
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         )}
       </div>

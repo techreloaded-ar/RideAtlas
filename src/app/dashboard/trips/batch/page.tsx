@@ -2,7 +2,7 @@
 "use client"
 
 import { useState } from 'react'
-import { ArrowLeftIcon, InformationCircleIcon } from '@heroicons/react/24/outline'
+import { ArrowLeftIcon } from '@heroicons/react/24/outline'
 import Link from 'next/link'
 import { BatchUploadForm } from '@/components/trips/BatchUploadForm'
 import { BatchProgressMonitor } from '@/components/trips/BatchProgressMonitor'
@@ -69,35 +69,6 @@ export default function BatchUploadPage() {
           <p className="mt-2 text-gray-600">
             Carica più viaggi contemporaneamente utilizzando un file ZIP strutturato
           </p>
-        </div>
-
-        {/* Info Alert */}
-        <div className="mb-8 bg-blue-50 border border-blue-200 rounded-md p-4">
-          <div className="flex">
-            <InformationCircleIcon className="h-5 w-5 text-blue-400" />
-            <div className="ml-3">
-              <h3 className="text-sm font-medium text-blue-800">
-                Come funziona il caricamento batch
-              </h3>
-              <div className="mt-2 text-sm text-blue-700">
-                <ol className="list-decimal list-inside space-y-1">
-                  <li>Organizza i tuoi viaggi in un file ZIP con la struttura richiesta</li>
-                  <li>Compila il file viaggi.json con i metadati di ogni viaggio</li>
-                  <li>Carica il ZIP e monitora il progresso in tempo reale</li>
-                  <li>I viaggi verranno creati automaticamente nel tuo account</li>
-                </ol>
-                
-                {process.env.NODE_ENV === 'development' && (
-                  <div className="mt-3 p-2 bg-yellow-50 border border-yellow-200 rounded">
-                    <p className="text-xs text-yellow-800">
-                      <strong>Nota sviluppo:</strong> I job vengono mantenuti in memoria e vengono persi quando il server viene riavviato. 
-                      In produzione i job saranno persistenti.
-                    </p>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
         </div>
 
         {/* Main Content */}

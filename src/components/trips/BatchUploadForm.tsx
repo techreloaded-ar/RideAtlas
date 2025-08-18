@@ -247,24 +247,6 @@ export const BatchUploadForm = ({ onUploadStart, onError, disabled = false }: Ba
           </div>
         </div>
       )}
-
-      {/* Help Text */}
-      <div className="mt-6 text-sm text-gray-600">
-        <h4 className="font-medium mb-2">Struttura ZIP richiesta:</h4>
-        <div className="bg-gray-50 rounded-md p-3 font-mono text-xs">
-          <div>viaggio.zip</div>
-          <div>├── viaggi.json</div>
-          <div>├── main.gpx (opzionale)</div>
-          <div>├── media/</div>
-          <div>│   ├── hero.jpg</div>
-          <div>│   └── ...</div>
-          <div>└── tappe/</div>
-          <div>&nbsp;&nbsp;&nbsp;&nbsp;├── 01-nome-tappa/</div>
-          <div>&nbsp;&nbsp;&nbsp;&nbsp;│   ├── tappa.gpx</div>
-          <div>&nbsp;&nbsp;&nbsp;&nbsp;│   └── media/</div>
-          <div>&nbsp;&nbsp;&nbsp;&nbsp;└── 02-nome-tappa/</div>
-        </div>
-      </div>
     </div>
   )
 }
