@@ -13,7 +13,8 @@ import {
   Plus,
   Loader2,
   Send,
-  AlertTriangle
+  AlertTriangle,
+  RotateCcw
 } from 'lucide-react'
 import { TripStatus, TripValidationError } from '@/types/trip'
 
@@ -40,6 +41,7 @@ export default function UserTrips() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [validationErrors, setValidationErrors] = useState<Record<string, TripValidationError[]>>({})
+  const [revertingTrip, setRevertingTrip] = useState<string | null>(null)
 
   const fetchUserTrips = useCallback(async () => {
     if (!session?.user?.id) return
@@ -60,6 +62,30 @@ export default function UserTrips() {
       setLoading(false)
     }
   }, [session?.user?.id])
+
+  const handleRevertToDraft = async (tripId: string) => {
+    try {
+      setRevertingTrip(tripId)
+      setError('')
+
+      const response = await fetch(`/api/trips/${tripId}/revert-to-draft`, {
+        method: 'PATCH',
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        setError(errorData.error || 'Errore nel riportare il viaggio in bozza')
+        return
+      }
+
+      // Reload trips list
+      await fetchUserTrips()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Errore sconosciuto')
+    } finally {
+      setRevertingTrip(null)
+    }
+  }
 
   useEffect(() => {
     if (session?.user?.id) {
@@ -244,6 +270,22 @@ export default function UserTrips() {
                       title="Pubblica viaggio"
                     >
                       <Send className="w-4 h-4" />
+                    </button>
+                  )}
+
+                  {/* Riporta in bozza per viaggi non in Bozza */}
+                  {trip.status !== 'Bozza' && (
+                    <button
+                      onClick={() => handleRevertToDraft(trip.id)}
+                      disabled={revertingTrip === trip.id}
+                      className="p-2 text-orange-600 hover:text-orange-900 transition-colors disabled:opacity-50"
+                      title="Riporta in bozza"
+                    >
+                      {revertingTrip === trip.id ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <RotateCcw className="w-4 h-4" />
+                      )}
                     </button>
                   )}
                 </div>

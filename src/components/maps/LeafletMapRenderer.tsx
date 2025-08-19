@@ -254,6 +254,7 @@ export default function LeafletMapRenderer({
 
   // Cleanup function per evitare problemi di reinizializzazione
   useEffect(() => {
+    const currentContainer = containerRef.current
     return () => {
       if (mapRef.current) {
         try {
@@ -263,7 +264,6 @@ export default function LeafletMapRenderer({
         }
         mapRef.current = null
       }
-      const currentContainer = containerRef.current
       if (currentContainer) {
         const leafletContainer = currentContainer.querySelector('.leaflet-container') as Element & { _leaflet_id?: number }
         if (leafletContainer && leafletContainer._leaflet_id) {

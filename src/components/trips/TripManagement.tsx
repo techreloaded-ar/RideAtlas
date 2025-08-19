@@ -6,7 +6,7 @@ import { useToast } from '@/hooks/ui/useToast'
 import Image from 'next/image'
 import { UserRole } from '@/types/profile'
 import { TripValidationError } from '@/types/trip'
-import { Calendar, MapPin, User, Clock, Navigation, Eye, Edit, AlertTriangle, Send, Trash2 } from 'lucide-react'
+import { Calendar, MapPin, User, Clock, Navigation, Eye, Edit, AlertTriangle, Send, Trash2, RotateCcw } from 'lucide-react'
 
 interface Trip {
   id: string
@@ -45,6 +45,7 @@ export default function TripManagement() {
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
   const [approvingTrip, setApprovingTrip] = useState<string | null>(null)
+  const [revertingTrip, setRevertingTrip] = useState<string | null>(null)
   const [deletingTrip, setDeletingTrip] = useState<string | null>(null)
   const [tripToDelete, setTripToDelete] = useState<Trip | null>(null)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
@@ -110,6 +111,30 @@ export default function TripManagement() {
       setError(err instanceof Error ? err.message : 'Errore sconosciuto')
     } finally {
       setApprovingTrip(null)
+    }
+  }
+
+  const handleRevertToDraft = async (tripId: string) => {
+    try {
+      setRevertingTrip(tripId)
+
+      const response = await fetch(`/api/trips/${tripId}/revert-to-draft`, {
+        method: 'PATCH',
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        setError(errorData.error || 'Errore nel riportare il viaggio in bozza')
+        return
+      }
+
+      showSuccess('Viaggio riportato in bozza con successo')
+      // Reload trips list
+      await fetchTrips()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Errore sconosciuto')
+    } finally {
+      setRevertingTrip(null)
     }
   }
 
@@ -411,6 +436,18 @@ export default function TripManagement() {
                               <Send className="w-4 h-4" />
                             </button>
                           )}
+
+                          {/* Revert to draft button - for non-draft trips */}
+                          {trip.status !== 'Bozza' && (
+                            <button
+                              onClick={() => handleRevertToDraft(trip.id)}
+                              disabled={revertingTrip === trip.id}
+                              className="text-orange-600 hover:text-orange-900 p-1 rounded disabled:opacity-50"
+                              title="Riporta in bozza"
+                            >
+                              <RotateCcw className="w-4 h-4" />
+                            </button>
+                          )}
                           
                           {/* Delete button - for all trips */}
                           <button
@@ -425,6 +462,12 @@ export default function TripManagement() {
                           {approvingTrip === trip.id && (
                             <div className="inline-block">
                               <div className="w-4 h-4 border-2 border-green-600 border-t-transparent rounded-full animate-spin"></div>
+                            </div>
+                          )}
+
+                          {revertingTrip === trip.id && (
+                            <div className="inline-block">
+                              <div className="w-4 h-4 border-2 border-orange-600 border-t-transparent rounded-full animate-spin"></div>
                             </div>
                           )}
                           
