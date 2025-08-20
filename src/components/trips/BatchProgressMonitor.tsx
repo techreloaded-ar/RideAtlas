@@ -2,8 +2,9 @@
 "use client"
 
 import { useState, useEffect, useCallback } from 'react'
-import { CheckCircleIcon, XCircleIcon, ClockIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline'
+import { CheckCircleIcon, XCircleIcon, ClockIcon } from '@heroicons/react/24/outline'
 import { BatchProcessingResult } from '@/schemas/batch-trip'
+import { BatchErrorDisplay } from './BatchErrorDisplay'
 
 interface BatchProgressMonitorProps {
   jobId: string
@@ -22,6 +23,7 @@ interface EnhancedBatchResult extends BatchProcessingResult {
   isComplete: boolean
   duration: number
 }
+
 
 export const BatchProgressMonitor = ({ jobId, onComplete, onError }: BatchProgressMonitorProps) => {
   const [result, setResult] = useState<EnhancedBatchResult | null>(null)
@@ -109,6 +111,7 @@ export const BatchProgressMonitor = ({ jobId, onComplete, onError }: BatchProgre
     }
     return `${remainingSeconds}s`
   }
+  
 
   const getStatusIcon = () => {
     if (!result) return <ClockIcon className="h-5 w-5 text-gray-400 animate-spin" />
@@ -246,28 +249,11 @@ export const BatchProgressMonitor = ({ jobId, onComplete, onError }: BatchProgre
       )}
 
       {/* Errors */}
-      {result.errors.length > 0 && (
-        <div className="space-y-2">
-          <h4 className="text-sm font-medium text-red-900 flex items-center space-x-2">
-            <ExclamationTriangleIcon className="h-4 w-4" />
-            <span>Errori ({result.errors.length})</span>
-          </h4>
-          <div className="bg-red-50 border border-red-200 rounded-md p-3 max-h-40 overflow-y-auto">
-            <div className="text-sm text-red-800 space-y-2">
-              {result.errors.map((error, index) => (
-                <div key={index} className="border-b border-red-200 last:border-b-0 pb-2 last:pb-0">
-                  <div className="font-medium">
-                    {error.tripIndex !== undefined && `Viaggio ${error.tripIndex + 1}`}
-                    {error.stageIndex !== undefined && ` - Tappa ${error.stageIndex + 1}`}
-                    {error.field && ` (${error.field})`}
-                  </div>
-                  <div>{error.message}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
+      <BatchErrorDisplay 
+        errors={result.errors}
+        title="Errori da Risolvere"
+        showHelpLinks={true}
+      />
 
       {/* Action buttons */}
       {result.isComplete && (

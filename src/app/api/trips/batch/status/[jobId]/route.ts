@@ -19,7 +19,7 @@ export async function GET(
     }
 
     // 2. Validate jobId format
-    if (!params.jobId || !params.jobId.startsWith('batch_')) {
+    if (!params.jobId) {
       return NextResponse.json({ 
         error: "ID job non valido." 
       }, { status: 400 })
@@ -85,7 +85,7 @@ export async function DELETE(
     }
 
     // 2. Validate jobId format
-    if (!params.jobId || !params.jobId.startsWith('batch_')) {
+    if (!params.jobId) {
       return NextResponse.json({ 
         error: "ID job non valido." 
       }, { status: 400 })

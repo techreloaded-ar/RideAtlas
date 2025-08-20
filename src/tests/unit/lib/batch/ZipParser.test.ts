@@ -63,7 +63,7 @@ describe('ZipParser', () => {
       await parser.loadZip(emptyBuffer)
       
       const errors = parser.validateZipStructure()
-      expect(errors).toContain('File viaggi.json mancante')
+      expect(errors).toContain('File viaggi.json mancante. Aggiungi il file nella root dello ZIP.')
     })
 
     it('should validate ZIP size', async () => {

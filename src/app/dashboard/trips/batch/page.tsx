@@ -2,10 +2,11 @@
 "use client"
 
 import { useState } from 'react'
-import { ArrowLeftIcon } from '@heroicons/react/24/outline'
+import { ArrowLeftIcon, ChevronDownIcon, ChevronUpIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline'
 import Link from 'next/link'
 import { BatchUploadForm } from '@/components/trips/BatchUploadForm'
 import { BatchProgressMonitor } from '@/components/trips/BatchProgressMonitor'
+import { BatchErrorDisplay } from '@/components/trips/BatchErrorDisplay'
 import { BatchProcessingResult } from '@/schemas/batch-trip'
 
 type PageState = 'upload' | 'monitoring' | 'completed'
@@ -15,6 +16,7 @@ export default function BatchUploadPage() {
   const [currentJobId, setCurrentJobId] = useState<string | null>(null)
   const [uploadError, setUploadError] = useState<string | null>(null)
   const [completedResult, setCompletedResult] = useState<BatchProcessingResult | null>(null)
+  const [isDocumentationExpanded, setIsDocumentationExpanded] = useState<boolean>(false)
 
   const handleUploadStart = (jobId: string) => {
     setCurrentJobId(jobId)
@@ -49,6 +51,7 @@ export default function BatchUploadPage() {
     setUploadError(null)
     setCompletedResult(null)
   }
+
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -159,6 +162,13 @@ export default function BatchUploadPage() {
                   </div>
                 </div>
 
+                {/* Detailed Errors */}
+                <BatchErrorDisplay 
+                  errors={completedResult.errors}
+                  title="Errori da Risolvere"
+                  showHelpLinks={true}
+                />
+
                 {/* Actions */}
                 <div className="flex flex-col sm:flex-row gap-3 justify-center">
                   <Link
@@ -180,12 +190,36 @@ export default function BatchUploadPage() {
         </div>
 
         {/* Documentation */}
-        <div className="mt-8 bg-white border border-gray-200 rounded-lg p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">
-            Documentazione struttura ZIP
-          </h3>
+        <div className="mt-8 bg-white border border-gray-200 rounded-lg overflow-hidden">
+          <div className="px-6 py-4 flex items-center justify-between border-b border-gray-200">
+            <button
+              onClick={() => setIsDocumentationExpanded(!isDocumentationExpanded)}
+              className="flex items-center justify-between text-left hover:text-gray-600 transition-colors flex-1"
+            >
+              <h3 className="text-lg font-medium text-gray-900">
+                Documentazione struttura ZIP
+              </h3>
+              {isDocumentationExpanded ? (
+                <ChevronUpIcon className="h-5 w-5 text-gray-500" />
+              ) : (
+                <ChevronDownIcon className="h-5 w-5 text-gray-500" />
+              )}
+            </button>
+            
+            <a
+              href="/api/trips/batch/template"
+              download="rideatlas-batch-template.zip"
+              className="ml-4 inline-flex items-center px-3 py-2 border border-primary-300 text-sm font-medium rounded-md text-primary-700 bg-primary-50 hover:bg-primary-100 hover:border-primary-400 transition-colors"
+            >
+              <ArrowDownTrayIcon className="h-4 w-4 mr-2" />
+              Scarica Template
+            </a>
+          </div>
           
-          <div className="space-y-6">
+          <div className={`transition-all duration-300 ease-in-out ${
+            isDocumentationExpanded ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0'
+          } overflow-hidden`}>
+            <div className="px-6 pb-6 space-y-6">
             <div>
               <h4 className="text-sm font-medium text-gray-900 mb-2">1. File viaggi.json</h4>
               <p className="text-sm text-gray-600 mb-2">
@@ -243,6 +277,7 @@ export default function BatchUploadPage() {
               </ul>
             </div>
           </div>
+        </div>
         </div>
       </div>
     </div>

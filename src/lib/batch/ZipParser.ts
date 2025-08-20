@@ -1,6 +1,13 @@
 // src/lib/batch/ZipParser.ts
 import JSZip from 'jszip'
 import { BatchUpload, isSingleTripBatch, isMultipleTripsBatch, BatchTrip } from '@/schemas/batch-trip'
+import { 
+  VALID_CHARACTERISTICS, 
+  VALID_SEASONS, 
+  SUPPORTED_IMAGE_TYPES, 
+  SUPPORTED_VIDEO_TYPES, 
+  SYSTEM_FILES_TO_IGNORE 
+} from './BatchConstants'
 
 export interface ParsedTripData {
   metadata: BatchUpload
@@ -49,16 +56,80 @@ export interface ParsedGpxFile {
 
 export class ZipParser {
   private zip: JSZip
-  private supportedImageTypes = ['.jpg', '.jpeg', '.png', '.webp']
-  private supportedVideoTypes = ['.mp4', '.mov', '.avi']
   private basePath: string = '' // Will be set if files are in a subfolder
 
   constructor() {
     this.zip = new JSZip()
   }
 
+  /**
+   * Check if a file should be ignored (system files, temp files, etc.)
+   */
+  private shouldIgnoreFile(filePath: string): boolean {
+    const fileName = this.getFilename(filePath).toLowerCase()
+    const pathSegments = filePath.toLowerCase().split('/')
+    
+    // Check if any path segment or filename matches system files to ignore
+    for (const segment of pathSegments) {
+      if (SYSTEM_FILES_TO_IGNORE.includes(segment)) {
+        return true
+      }
+    }
+    
+    // Check if filename matches system files to ignore
+    if (SYSTEM_FILES_TO_IGNORE.includes(fileName)) {
+      return true
+    }
+    
+    // Check for common patterns
+    if (fileName.startsWith('.')) {
+      return true // Hidden files
+    }
+    
+    if (fileName.endsWith('.tmp') || fileName.endsWith('.temp')) {
+      return true // Temporary files
+    }
+    
+    return false
+  }
+
   async loadZip(zipBuffer: Buffer): Promise<void> {
-    this.zip = await JSZip.loadAsync(zipBuffer)
+    try {
+      console.log(`Loading ZIP buffer of size ${zipBuffer.length} bytes`)
+      
+      if (zipBuffer.length === 0) {
+        throw new Error('ZIP buffer è vuoto')
+      }
+      
+      if (zipBuffer.length > 100 * 1024 * 1024) { // 100MB
+        throw new Error('ZIP buffer troppo grande')
+      }
+      
+      this.zip = await JSZip.loadAsync(zipBuffer, {
+        checkCRC32: true,
+        createFolders: false
+      })
+      
+      console.log(`ZIP loaded successfully, contains ${Object.keys(this.zip.files).length} files`)
+      
+      // Log system files that will be ignored
+      const ignoredFiles: string[] = []
+      this.zip.forEach((relativePath) => {
+        if (this.shouldIgnoreFile(relativePath)) {
+          ignoredFiles.push(relativePath)
+        }
+      })
+      
+      if (ignoredFiles.length > 0) {
+        console.log(`Ignoring ${ignoredFiles.length} system files:`, ignoredFiles)
+      }
+    } catch (error) {
+      console.error('Error loading ZIP file:', error)
+      if (error instanceof Error) {
+        throw new Error(`Errore caricamento ZIP: ${error.message}`)
+      }
+      throw new Error('Errore sconosciuto durante il caricamento del ZIP')
+    }
   }
 
   async parse(): Promise<ParsedTripData> {
@@ -84,28 +155,50 @@ export class ZipParser {
   }
 
   private async parseViaggiJson(): Promise<BatchUpload> {
+    console.log('Parsing viaggi.json from ZIP')
+    
     // First try at root level
     let viaggiFile = this.zip.file('viaggi.json')
     
     // If not found, look for it in any subfolder
     if (!viaggiFile) {
+      console.log('viaggi.json not found at root, searching in subfolders')
       const viaggiPath = this.findViaggiJsonPath()
       if (viaggiPath) {
+        console.log(`Found viaggi.json at path: ${viaggiPath}`)
         viaggiFile = this.zip.file(viaggiPath)
         // Set the base path for other files
         this.basePath = viaggiPath.replace('viaggi.json', '')
+        console.log(`Set base path to: ${this.basePath}`)
       }
     }
     
     if (!viaggiFile) {
-      throw new Error('File viaggi.json non trovato nel ZIP')
+      console.error('viaggi.json file not found in ZIP')
+      throw new Error('File viaggi.json non trovato nel ZIP. Assicurati che sia presente nella cartella principale o in una sottocartella.')
     }
 
-    const content = await viaggiFile.async('text')
     try {
-      return JSON.parse(content)
-    } catch {
-      throw new Error('File viaggi.json non è un JSON valido')
+      const content = await viaggiFile.async('text')
+      console.log(`viaggi.json content length: ${content.length}`)
+      
+      if (!content || content.trim().length === 0) {
+        throw new Error('File viaggi.json è vuoto. Aggiungi i metadati del viaggio nel formato JSON richiesto.')
+      }
+      
+      const parsed = JSON.parse(content)
+      console.log('viaggi.json parsed successfully')
+      
+      // Validate content after parsing
+      this.validateViaggiJsonContent(parsed)
+      
+      return parsed
+    } catch (error) {
+      console.error('Error parsing viaggi.json:', error)
+      if (error instanceof SyntaxError) {
+        throw new Error(`File viaggi.json non è un JSON valido. Errore: ${error.message}. Controlla la sintassi JSON.`)
+      }
+      throw error
     }
   }
 
@@ -217,11 +310,12 @@ export class ZipParser {
     const media: ParsedMediaFile[] = []
     const files = this.getFilesInPath(basePath)
     
-    // Sort files to make first one the hero image
-    files.sort()
+    // Filter out system files and sort remaining files to make first one the hero image
+    const validFiles = files.filter(filePath => !this.shouldIgnoreFile(filePath))
+    validFiles.sort()
     
-    for (let i = 0; i < files.length; i++) {
-      const filePath = files[i]
+    for (let i = 0; i < validFiles.length; i++) {
+      const filePath = validFiles[i]
       const file = this.zip.file(filePath)
       
       if (!file) continue
@@ -231,14 +325,26 @@ export class ZipParser {
       
       if (!this.isMediaFile(extension)) continue
       
-      const buffer = await file.async('nodebuffer')
+      let buffer: Buffer
+      try {
+        buffer = await file.async('nodebuffer')
+      } catch (error) {
+        console.warn(`Failed to extract buffer for media file ${filename}:`, error)
+        continue
+      }
+      
+      if (!buffer || buffer.length === 0) {
+        console.warn(`Empty buffer for media file ${filename}, skipping`)
+        continue
+      }
+      
       const mimeType = this.getMimeType(extension)
       
       media.push({
         filename,
         buffer,
         mimeType,
-        isHero: i === 0 && this.supportedImageTypes.includes(extension), // First image is hero
+        isHero: i === 0 && SUPPORTED_IMAGE_TYPES.includes(extension), // First image is hero
       })
     }
     
@@ -249,7 +355,19 @@ export class ZipParser {
     const file = this.zip.file(gpxPath)
     if (!file) return null
     
-    const buffer = await file.async('nodebuffer')
+    let buffer: Buffer
+    try {
+      buffer = await file.async('nodebuffer')
+    } catch (error) {
+      console.error(`Failed to extract buffer for GPX file ${gpxPath}:`, error)
+      throw new Error(`Errore estrazione file GPX: ${gpxPath}`)
+    }
+    
+    if (!buffer || buffer.length === 0) {
+      console.warn(`Empty buffer for GPX file ${gpxPath}`)
+      return null
+    }
+    
     const filename = this.getFilename(gpxPath)
     
     return {
@@ -263,6 +381,11 @@ export class ZipParser {
     const pattern = new RegExp(`^${basePath}(\\d+)-([^/]+)/?$`)
     
     this.zip.forEach((relativePath) => {
+      // Skip system files
+      if (this.shouldIgnoreFile(relativePath)) {
+        return
+      }
+      
       const match = relativePath.match(pattern)
       if (match) {
         const [, number, name] = match
@@ -310,7 +433,7 @@ export class ZipParser {
   }
 
   private isMediaFile(extension: string): boolean {
-    return [...this.supportedImageTypes, ...this.supportedVideoTypes].includes(extension)
+    return [...SUPPORTED_IMAGE_TYPES, ...SUPPORTED_VIDEO_TYPES].includes(extension)
   }
 
   private getMimeType(extension: string): string {
@@ -327,6 +450,86 @@ export class ZipParser {
     return mimeTypes[extension] || 'application/octet-stream'
   }
 
+  // Enhanced content validation for viaggi.json
+  private validateViaggiJsonContent(data: unknown): void {
+    // First check if data is an object
+    if (!data || typeof data !== 'object') {
+      throw new Error('Il file viaggi.json deve contenere un oggetto JSON valido.')
+    }
+    
+    const dataObj = data as Record<string, unknown>
+    
+    // Check if it's single trip or multiple trips format
+    if ('viaggi' in dataObj) {
+      // Multiple trips format
+      if (!Array.isArray(dataObj.viaggi)) {
+        throw new Error('Il campo "viaggi" deve essere un array nel formato batch multipli.')
+      }
+      
+      dataObj.viaggi.forEach((trip: Record<string, unknown>, index: number) => {
+        this.validateSingleTripData(trip, `Viaggio ${index + 1}`)
+      })
+    } else {
+      // Single trip format
+      this.validateSingleTripData(dataObj, 'Viaggio')
+    }
+  }
+  
+  private validateSingleTripData(trip: Record<string, unknown>, context: string): void {
+    // Validate required fields
+    const requiredFields = ['title', 'summary', 'destination', 'theme']
+    for (const field of requiredFields) {
+      if (!trip[field] || typeof trip[field] !== 'string' || trip[field].trim() === '') {
+        throw new Error(`${context}: Campo "${field}" mancante o vuoto. È obbligatorio.`)
+      }
+    }
+    
+    // Validate characteristics
+    if (trip.characteristics) {
+      if (!Array.isArray(trip.characteristics)) {
+        throw new Error(`${context}: Il campo "characteristics" deve essere un array.`)
+      }
+      
+      const invalidCharacteristics = trip.characteristics.filter(
+        (char: string) => !(VALID_CHARACTERISTICS as readonly string[]).includes(char)
+      )
+      
+      if (invalidCharacteristics.length > 0) {
+        throw new Error(
+          `${context}: Caratteristiche non valide: [${invalidCharacteristics.join(', ')}]. ` +
+          `Valori consentiti: [${VALID_CHARACTERISTICS.join(', ')}]`
+        )
+      }
+    }
+    
+    // Validate recommended_seasons
+    if (trip.recommended_seasons) {
+      if (!Array.isArray(trip.recommended_seasons)) {
+        throw new Error(`${context}: Il campo "recommended_seasons" deve essere un array.`)
+      }
+      
+      if (trip.recommended_seasons.length === 0) {
+        throw new Error(`${context}: Il campo "recommended_seasons" deve contenere almeno una stagione.`)
+      }
+      
+      const invalidSeasons = trip.recommended_seasons.filter(
+        (season: string) => !(VALID_SEASONS as readonly string[]).includes(season)
+      )
+      
+      if (invalidSeasons.length > 0) {
+        throw new Error(
+          `${context}: Stagioni non valide: [${invalidSeasons.join(', ')}]. ` +
+          `Valori consentiti: [${VALID_SEASONS.join(', ')}]`
+        )
+      }
+    } else {
+      throw new Error(`${context}: Campo "recommended_seasons" mancante. Devi specificare almeno una stagione.`)
+    }
+    
+    // Note: Stages validation is done during parsing, not during JSON validation
+    // This allows for titles to be extracted from folder names when not provided
+  }
+  
   // Validation methods
   validateZipStructure(): string[] {
     const errors: string[] = []
@@ -341,12 +544,78 @@ export class ZipParser {
     }
     
     if (!viaggiFile) {
-      errors.push('File viaggi.json mancante')
+      errors.push('File viaggi.json mancante. Aggiungi il file nella root dello ZIP.')
     }
     
-    // Additional structure validations can be added here
+    // Validate folder structure for stages
+    this.validateStagesFolderStructure(errors)
+    
+    // Validate media file formats
+    this.validateMediaFileFormats(errors)
     
     return errors
+  }
+  
+  private validateStagesFolderStructure(errors: string[]): void {
+    const stageFolders: string[] = []
+    const stagesPath = `${this.basePath}tappe/`
+    
+    this.zip.forEach((relativePath) => {
+      if (relativePath.startsWith(stagesPath) && relativePath.includes('/') && relativePath !== stagesPath) {
+        // Skip system files when looking for stage folders
+        if (this.shouldIgnoreFile(relativePath)) {
+          return
+        }
+        
+        const folderName = relativePath.substring(stagesPath.length).split('/')[0]
+        if (!stageFolders.includes(folderName)) {
+          stageFolders.push(folderName)
+        }
+      }
+    })
+    
+    // Check if stage folders follow numbering convention
+    const invalidFolders = stageFolders.filter(folder => {
+      return !folder.match(/^\d{2}-.+/)
+    })
+    
+    if (invalidFolders.length > 0) {
+      errors.push(
+        `Cartelle tappe non numerate correttamente: [${invalidFolders.join(', ')}]. ` +
+        `Usa il formato: 01-nome, 02-nome, etc.`
+      )
+    }
+  }
+  
+  private validateMediaFileFormats(errors: string[]): void {
+    const invalidFiles: string[] = []
+    
+    this.zip.forEach((relativePath) => {
+      if (relativePath.includes('/media/') && !relativePath.endsWith('/')) {
+        // Skip system files
+        if (this.shouldIgnoreFile(relativePath)) {
+          return
+        }
+        
+        const filename = this.getFilename(relativePath)
+        const extension = this.getFileExtension(filename).toLowerCase()
+        
+        if (extension && !this.isMediaFile(extension)) {
+          // Check if it's a supported format according to documentation
+          const supportedFormats = ['.jpg', '.jpeg', '.png', '.mp4', '.mov']
+          if (!supportedFormats.includes(extension)) {
+            invalidFiles.push(`${filename} (${extension})`)
+          }
+        }
+      }
+    })
+    
+    if (invalidFiles.length > 0) {
+      errors.push(
+        `File media in formato non supportato: [${invalidFiles.join(', ')}]. ` +
+        `Formati supportati: JPG, PNG, MP4, MOV`
+      )
+    }
   }
 
   validateZipSize(): boolean {

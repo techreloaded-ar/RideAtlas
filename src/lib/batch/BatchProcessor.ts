@@ -4,172 +4,397 @@ import { BatchProcessingResult } from '@/schemas/batch-trip'
 import { prisma } from '@/lib/core/prisma'
 import { getStorageProvider } from '@/lib/storage'
 import { MediaItem, GpxFile } from '@/types/trip'
-import { RecommendedSeason } from '@prisma/client'
+import { RecommendedSeason, BatchJobStatus, Prisma } from '@prisma/client'
+import { put } from '@vercel/blob'
+import { ErrorUtils } from './ErrorUtils'
 
-interface BatchJob {
-  id: string
-  userId: string
-  status: 'pending' | 'processing' | 'completed' | 'failed'
-  totalTrips: number
-  processedTrips: number
-  createdTripIds: string[]
-  errors: Array<{
-    tripIndex?: number
-    stageIndex?: number
-    field?: string
-    message: string
-  }>
-  startedAt: Date
-  completedAt?: Date
-  zipData: Buffer
+interface BatchError {
+  message: string;
+  tripIndex?: number;
+  stageIndex?: number;
+  field?: string;
 }
 
 export class BatchProcessor {
-  private static jobs = new Map<string, BatchJob>()
   private storageProvider = getStorageProvider()
 
   async startBatchJob(userId: string, zipBuffer: Buffer): Promise<string> {
-    const jobId = this.generateJobId()
+    console.log(`Starting batch job for user ${userId}, buffer size: ${zipBuffer.length}`)
+    console.log(`Environment: ${process.env.NODE_ENV}, Runtime: ${process.env.VERCEL ? 'Vercel' : 'Local'}`)
     
-    // Parse ZIP to get basic info
-    const parser = new ZipParser()
-    await parser.loadZip(zipBuffer)
-    
-    const errors = parser.validateZipStructure()
-    if (errors.length > 0) {
-      throw new Error(`Struttura ZIP non valida: ${errors.join(', ')}`)
-    }
-    
-    if (!parser.validateZipSize()) {
-      throw new Error('File ZIP troppo grande (max 100MB)')
-    }
-    
-    const parsedData = await parser.parse()
-    
-    // Create job
-    const job: BatchJob = {
-      id: jobId,
-      userId,
-      status: 'pending',
-      totalTrips: parsedData.trips.length,
-      processedTrips: 0,
-      createdTripIds: [],
-      errors: [],
-      startedAt: new Date(),
-      zipData: zipBuffer,
-    }
-    
-    BatchProcessor.jobs.set(jobId, job)
-    
-    // Start processing asynchronously
-    this.processJobAsync(jobId).catch((error) => {
-      console.error(`Job ${jobId} failed:`, error)
-      const failedJob = BatchProcessor.jobs.get(jobId)
-      if (failedJob) {
-        failedJob.status = 'failed'
-        failedJob.errors.push({
-          message: error.message || 'Errore sconosciuto durante il processamento'
+    try {
+      // 1. Upload ZIP to blob storage first
+      const zipFileName = `batch-uploads/batch_${Date.now()}_${userId.slice(-6)}.zip`
+      console.log(`Uploading ZIP to blob storage: ${zipFileName}`)
+      
+      const { url: zipFileUrl } = await put(zipFileName, zipBuffer, {
+        access: 'public',
+        contentType: 'application/zip',
+      });
+      console.log(`ZIP uploaded successfully to: ${zipFileUrl}`)
+
+      // 2. Create job record in database
+      const job = await prisma.batchJob.create({
+        data: {
+          userId,
+          zipFileUrl,
+          status: BatchJobStatus.PENDING,
+          totalTrips: 0, // Will be updated after parsing
+          createdTripIds: [],
+        },
+      });
+      console.log(`Batch job created: ${job.id}`)
+
+      // 3. Start processing asynchronously (fire and forget)
+      // Use setTimeout to ensure the response is sent before processing starts
+      setTimeout(() => {
+        this.processJobAsync(job.id).catch((error) => {
+          console.error(`Fatal error in processJobAsync for job ${job.id}:`, error)
+          console.error(`Error stack:`, error instanceof Error ? error.stack : 'No stack')
+          
+          // Log critical failure to the job itself
+          prisma.batchJob.update({
+            where: { id: job.id },
+            data: {
+              status: BatchJobStatus.FAILED,
+              errors: {
+                push: {
+                  message: `Processamento fallito in modo critico: ${error instanceof Error ? error.message : 'Errore sconosciuto'}` 
+                }
+              },
+              completedAt: new Date(),
+            },
+          }).catch(e => console.error(`Failed to update job status on critical failure for job ${job.id}:`, e));
         })
-        failedJob.completedAt = new Date()
-      }
-    })
-    
-    return jobId
+      }, 100) // Small delay to ensure response is sent
+
+      return job.id
+    } catch (error) {
+      console.error('Error in startBatchJob:', error)
+      throw error
+    }
   }
 
   async getJobStatus(jobId: string): Promise<BatchProcessingResult | null> {
-    const job = BatchProcessor.jobs.get(jobId)
+    const job = await prisma.batchJob.findUnique({
+      where: { id: jobId },
+    })
+
     if (!job) return null
+
+    // Debug logging for errors field
+    console.log(`Job ${jobId} raw errors from DB:`, job.errors)
+    console.log(`Job ${jobId} errors type:`, typeof job.errors)
     
+    const parsedErrors = this.parseJobErrors(job.errors)
+    console.log(`Job ${jobId} parsed errors:`, parsedErrors)
+
+    // Adapt the Prisma model to the BatchProcessingResult schema
     return {
       jobId: job.id,
-      status: job.status,
+      status: job.status.toLowerCase() as 'pending' | 'processing' | 'completed' | 'failed',
       totalTrips: job.totalTrips,
       processedTrips: job.processedTrips,
       createdTripIds: job.createdTripIds,
-      errors: job.errors,
+      errors: parsedErrors,
       startedAt: job.startedAt,
-      completedAt: job.completedAt,
+      completedAt: job.completedAt ?? undefined,
+    }
+  }
+
+  /**
+   * Parse job errors from Prisma JSON field to BatchError array
+   */
+  private parseJobErrors(prismaErrors: unknown): BatchError[] {
+    if (!prismaErrors) return []
+    
+    try {
+      // Handle Prisma Json type
+      if (Array.isArray(prismaErrors)) {
+        return prismaErrors.map(error => {
+          // More robust error message extraction
+          let message = 'Errore durante il processamento'
+          
+          if (error && typeof error === 'object') {
+            if (typeof error.message === 'string' && error.message.trim()) {
+              message = error.message
+            }
+          } else if (typeof error === 'string' && error.trim()) {
+            message = error
+          }
+          
+          return {
+            message,
+            tripIndex: error?.tripIndex,
+            stageIndex: error?.stageIndex,
+            field: error?.field
+          }
+        })
+      }
+      
+      // Single error object or Prisma push structure
+      if (typeof prismaErrors === 'object' && prismaErrors !== null) {
+        const error = prismaErrors as Record<string, unknown>
+        
+        // Handle Prisma push structure: { push: { message: "..." } }
+        if (error.push && typeof error.push === 'object') {
+          const pushError = error.push as Record<string, unknown>
+          let message = 'Errore durante il processamento'
+          
+          if (typeof pushError.message === 'string' && pushError.message.trim()) {
+            message = pushError.message
+          }
+          
+          return [{
+            message,
+            tripIndex: (typeof pushError.tripIndex === 'number' ? pushError.tripIndex : undefined),
+            stageIndex: (typeof pushError.stageIndex === 'number' ? pushError.stageIndex : undefined),
+            field: (typeof pushError.field === 'string' ? pushError.field : undefined)
+          }]
+        }
+        
+        // Handle direct error structure
+        let message = 'Errore durante il processamento'
+        
+        if (typeof error.message === 'string' && error.message.trim()) {
+          message = error.message
+        }
+        
+        return [{
+          message,
+          tripIndex: (typeof error.tripIndex === 'number' ? error.tripIndex : undefined),
+          stageIndex: (typeof error.stageIndex === 'number' ? error.stageIndex : undefined),
+          field: (typeof error.field === 'string' ? error.field : undefined)
+        }]
+      }
+      
+      // Handle case where prismaErrors is a string
+      if (typeof prismaErrors === 'string' && prismaErrors.trim()) {
+        return [{ message: prismaErrors }]
+      }
+      
+      return []
+    } catch (error) {
+      console.error('Error parsing job errors:', error)
+      return [{ message: 'Errore durante la lettura degli errori dal database' }]
     }
   }
 
   private async processJobAsync(jobId: string): Promise<void> {
-    const job = BatchProcessor.jobs.get(jobId)
-    if (!job) throw new Error('Job non trovato')
-    
-    console.log(`🚀 Starting processing for job ${jobId}`)
-    job.status = 'processing'
+    console.log(`Starting processJobAsync for job ${jobId}`)
     
     try {
-      // Re-parse ZIP data
-      console.log(`📦 Re-parsing ZIP data for job ${jobId}`)
+      // 1. Set job to PROCESSING
+      await prisma.batchJob.update({
+        where: { id: jobId },
+        data: { status: BatchJobStatus.PROCESSING },
+      })
+      console.log(`Job ${jobId} status updated to PROCESSING`)
+
+      const job = await prisma.batchJob.findUnique({ where: { id: jobId } })
+      if (!job) {
+        console.error(`Job ${jobId} not found after setting to processing`)
+        throw new Error('Job non trovato dopo averlo impostato come in elaborazione')
+      }
+
+      // 2. Download ZIP from storage with timeout and better error handling
+      console.log(`Downloading ZIP file from: ${job.zipFileUrl}`)
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 60000) // 60 second timeout
+      
+      try {
+        const response = await fetch(job.zipFileUrl, { 
+          signal: controller.signal,
+          headers: {
+            'User-Agent': 'RideAtlas-BatchProcessor/1.0'
+          }
+        })
+        clearTimeout(timeoutId)
+        
+        if (!response.ok) {
+          console.error(`Failed to download ZIP file: ${response.status} ${response.statusText}`)
+          throw new Error(`Impossibile scaricare il file ZIP: ${response.status} ${response.statusText}`)
+        }
+        
+        console.log(`ZIP file downloaded successfully, content-length: ${response.headers.get('content-length')}`)
+        const zipBuffer = Buffer.from(await response.arrayBuffer())
+        console.log(`ZIP buffer created, size: ${zipBuffer.length} bytes`)
+        
+        await this.processZipContent(jobId, zipBuffer)
+        
+      } catch (fetchError) {
+        clearTimeout(timeoutId)
+        if (fetchError instanceof Error && fetchError.name === 'AbortError') {
+          throw new Error('Timeout durante il download del file ZIP')
+        }
+        throw fetchError
+      }
+    } catch (error) {
+      console.error(`Fatal error in processJobAsync for job ${jobId}:`, error)
+      await this.handleJobError(jobId, error)
+    }
+  }
+  
+  private async processZipContent(jobId: string, zipBuffer: Buffer): Promise<void> {
+
+    try {
+      // 3. Parse ZIP and update total trips
+      console.log(`Parsing ZIP content for job ${jobId}`)
       const parser = new ZipParser()
-      await parser.loadZip(job.zipData)
+      
+      await parser.loadZip(zipBuffer)
+      console.log(`ZIP loaded successfully`)
+      
+      const validationErrors = parser.validateZipStructure()
+      if (validationErrors.length > 0) {
+        console.error(`ZIP structure validation failed:`, validationErrors)
+        // Create detailed error message with each validation error
+        const detailedErrors = validationErrors.map((error, index) => `${index + 1}. ${error}`).join('\n')
+        throw new Error(`Struttura ZIP non valida:\n${detailedErrors}`)
+      }
+      console.log(`ZIP structure validation passed`)
+      
       const parsedData = await parser.parse()
+      console.log(`ZIP parsed successfully, found ${parsedData.trips.length} trips`)
+
+      await prisma.batchJob.update({
+        where: { id: jobId },
+        data: { totalTrips: parsedData.trips.length },
+      })
+      console.log(`Job ${jobId} total trips updated to ${parsedData.trips.length}`)
+
+      // 4. Process each trip
+      const job = await prisma.batchJob.findUnique({ where: { id: jobId } })
+      if (!job) throw new Error('Job not found during processing')
       
-      console.log(`✅ ZIP parsed successfully. Found ${parsedData.trips.length} trip(s)`)
-      
-      // Process each trip
       for (let i = 0; i < parsedData.trips.length; i++) {
+        const tripData = parsedData.trips[i]
+        console.log(`Processing trip ${i + 1}/${parsedData.trips.length}: ${tripData.title}`)
+        
         try {
-          console.log(`🎯 Processing trip ${i + 1}/${parsedData.trips.length}: "${parsedData.trips[i].title}"`)
-          const tripData = parsedData.trips[i]
           const createdTripId = await this.processSingleTrip(job.userId, tripData, i)
+          console.log(`Trip ${i + 1} processed successfully, created trip ID: ${createdTripId}`)
           
-          job.createdTripIds.push(createdTripId)
-          job.processedTrips++
-          console.log(`✅ Trip ${i + 1} created successfully with ID: ${createdTripId}`)
+          await prisma.batchJob.update({
+            where: { id: jobId },
+            data: {
+              processedTrips: { increment: 1 },
+              createdTripIds: { push: createdTripId },
+            },
+          })
         } catch (error) {
-          console.error(`❌ Error processing trip ${i + 1}:`, error)
-          job.errors.push({
-            tripIndex: i,
-            message: error instanceof Error ? error.message : 'Errore sconosciuto'
+          const errorMessage = error instanceof Error ? error.message : 'Errore sconosciuto'
+          console.error(`Error processing trip ${i + 1}:`, error)
+          
+          // Enhanced error context for better user understanding
+          const contextualError = ErrorUtils.enhanceErrorMessage(errorMessage, i, tripData.title)
+          
+          await prisma.batchJob.update({
+            where: { id: jobId },
+            data: {
+              errors: {
+                push: { 
+                  tripIndex: i, 
+                  message: contextualError,
+                  field: ErrorUtils.extractErrorField(errorMessage)
+                }
+              },
+            },
           })
         }
       }
+
+      // 5. Finalize job status
+      const finalJobState = await prisma.batchJob.findUnique({ where: { id: jobId } })
+      const finalStatus = (finalJobState?.createdTripIds.length ?? 0) > 0 ? BatchJobStatus.COMPLETED : BatchJobStatus.FAILED
       
-      // Determine final status: success if any trips were created, failed only if none were created
-      if (job.createdTripIds.length > 0) {
-        job.status = 'completed'
-      } else {
-        job.status = 'failed'
-      }
-      job.completedAt = new Date()
-      
-      console.log(`🏁 Job ${jobId} completed. Status: ${job.status}, Created: ${job.createdTripIds.length}, Errors: ${job.errors.length}`)
-      
-    } catch (error) {
-      console.error(`💥 Fatal error in job ${jobId}:`, error)
-      job.status = 'failed'
-      job.errors.push({
-        message: error instanceof Error ? error.message : 'Errore generale di processamento'
+      console.log(`Finalizing job ${jobId} with status ${finalStatus}, processed ${finalJobState?.processedTrips ?? 0} trips`)
+
+      await prisma.batchJob.update({
+        where: { id: jobId },
+        data: {
+          status: finalStatus,
+          completedAt: new Date(),
+        },
       })
-      job.completedAt = new Date()
+      
+      console.log(`Job ${jobId} completed successfully`)
+    } catch (error) {
+      console.error(`Error processing ZIP content for job ${jobId}:`, error)
+      throw error // Re-throw to be handled by processJobAsync
     }
   }
+  
+  private async handleJobError(jobId: string, error: unknown): Promise<void> {
+    const errorMessage = error instanceof Error ? error.message : 'Errore generale di processamento'
+    console.error(`Handling job error for ${jobId}:`, errorMessage)
+    
+    // Enhance error message for better user understanding
+    const userFriendlyError = ErrorUtils.enhanceGeneralErrorMessage(errorMessage)
+    
+    try {
+      await prisma.batchJob.update({
+        where: { id: jobId },
+        data: {
+          status: BatchJobStatus.FAILED,
+          errors: {
+            push: { message: userFriendlyError }
+          },
+          completedAt: new Date(),
+        },
+      })
+    } catch (updateError) {
+      console.error(`Failed to update job ${jobId} error status:`, updateError)
+    }
+  }
+  
 
   private async processSingleTrip(userId: string, tripData: ParsedTrip, tripIndex: number): Promise<string> {
-    console.log(`🔧 Processing single trip: "${tripData.title}" (user: ${userId})`)
-    console.log(`📊 Trip data: ${tripData.stages.length} stages, ${tripData.media.length} media files`)
+    console.log(`Processing single trip ${tripIndex}: ${tripData.title}`)
+    console.log(`Trip has ${tripData.media.length} media files and ${tripData.stages.length} stages`)
     
-    return await prisma.$transaction(async (tx) => {
-      try {
-        // 1. Upload and process main trip media
-        console.log(`📸 Processing ${tripData.media.length} media files for trip`)
-        const tripMedia = await this.processMediaFiles(tripData.media, `trip-${tripIndex}`)
-        console.log(`✅ Trip media processed: ${tripMedia.length} files`)
+    try {
+      // Process trip-level media files
+      console.log(`Processing ${tripData.media.length} trip media files`)
+      const tripMedia = await this.processMediaFiles(tripData.media, `trip-${tripIndex}`)
+      console.log(`Successfully processed ${tripMedia.length} trip media files`)
+      
+      // Process trip-level GPX file
+      const tripGpxFile = tripData.gpxFile ? await this.processGpxFile(tripData.gpxFile, `trip-${tripIndex}`) : null
+      if (tripGpxFile) {
+        console.log(`Successfully processed trip GPX file: ${tripGpxFile.filename}`)
+      }
+
+      // Process stages
+      console.log(`Processing ${tripData.stages.length} stages`)
+      const processedStages: Array<{
+        stageData: ParsedTrip['stages'][0];
+        media: MediaItem[];
+        gpxFile: GpxFile | null;
+      }> = [];
+
+      for (let stageIndex = 0; stageIndex < tripData.stages.length; stageIndex++) {
+        const stageData = tripData.stages[stageIndex]
+        console.log(`Processing stage ${stageIndex + 1}: ${stageData.title} (${stageData.media.length} media files)`)
         
-        // 2. Upload and process main trip GPX
-        const tripGpxFile = tripData.gpxFile 
-          ? await this.processGpxFile(tripData.gpxFile, `trip-${tripIndex}`)
-          : null
-        console.log(`🗺️ Trip GPX: ${tripGpxFile ? 'processed' : 'none'}`)
-        
-        // 3. Create trip
+        try {
+          const stageMedia = await this.processMediaFiles(stageData.media, `trip-${tripIndex}-stage-${stageIndex}`)
+          const stageGpxFile = stageData.gpxFile ? await this.processGpxFile(stageData.gpxFile, `trip-${tripIndex}-stage-${stageIndex}`) : null
+          processedStages.push({ stageData, media: stageMedia, gpxFile: stageGpxFile })
+          console.log(`Stage ${stageIndex + 1} processed successfully`)
+        } catch (stageError) {
+          console.error(`Error processing stage ${stageIndex + 1}:`, stageError)
+          // Continue processing other stages, but log the error
+          processedStages.push({ stageData, media: [], gpxFile: null })
+        }
+      }
+
+      // Create trip and stages in database transaction
+      console.log(`Creating trip in database: ${tripData.title}`)
+      return await prisma.$transaction(async (tx) => {
         const slug = this.slugify(tripData.title)
-        const calculatedDays = Math.max(1, tripData.stages.length)
+        console.log(`Generated slug: ${slug}`)
         
-        console.log(`🏗️ Creating trip in database with slug: ${slug}`)
         const newTrip = await tx.trip.create({
           data: {
             title: tripData.title,
@@ -180,37 +405,20 @@ export class BatchProcessor {
             recommended_seasons: tripData.recommended_seasons as RecommendedSeason[],
             tags: tripData.tags,
             travelDate: tripData.travelDate,
-            duration_days: calculatedDays,
+            duration_days: Math.max(1, tripData.stages.length),
             duration_nights: 0,
-            insights: null, // Explicitly null as per requirements
-            media: tripMedia as unknown as object[],
-            gpxFile: tripGpxFile as unknown as object,
+            insights: null,
+            media: tripMedia as unknown as Prisma.InputJsonValue[],
+            gpxFile: tripGpxFile as unknown as Prisma.JsonObject,
             slug,
             user_id: userId,
           },
         })
-        console.log(`✅ Trip created with ID: ${newTrip.id}`)
-        
-        // 4. Process and create stages
-        console.log(`🔗 Creating ${tripData.stages.length} stages`)
-        for (let stageIndex = 0; stageIndex < tripData.stages.length; stageIndex++) {
-          const stageData = tripData.stages[stageIndex]
-          
+        console.log(`Trip created with ID: ${newTrip.id}`)
+
+        // Create stages
+        for (const { stageData, media, gpxFile } of processedStages) {
           try {
-            console.log(`🎯 Processing stage ${stageIndex + 1}: "${stageData.title}"`)
-            
-            // Upload stage media
-            const stageMedia = await this.processMediaFiles(
-              stageData.media, 
-              `trip-${tripIndex}-stage-${stageIndex}`
-            )
-            
-            // Upload stage GPX
-            const stageGpxFile = stageData.gpxFile 
-              ? await this.processGpxFile(stageData.gpxFile, `trip-${tripIndex}-stage-${stageIndex}`)
-              : null
-            
-            // Create stage
             await tx.stage.create({
               data: {
                 tripId: newTrip.id,
@@ -219,91 +427,60 @@ export class BatchProcessor {
                 description: stageData.description || null,
                 routeType: stageData.routeType || null,
                 duration: stageData.duration || null,
-                media: stageMedia as unknown as object[],
-                gpxFile: stageGpxFile as unknown as object,
+                media: media as unknown as Prisma.InputJsonValue[],
+                gpxFile: gpxFile as unknown as Prisma.JsonObject,
               },
             })
-            console.log(`✅ Stage ${stageIndex + 1} created successfully`)
-          } catch (error) {
-            console.error(`❌ Error creating stage ${stageIndex + 1}:`, error)
-            throw new Error(`Errore nella tappa ${stageIndex + 1}: ${error instanceof Error ? error.message : 'Errore sconosciuto'}`)
+            console.log(`Stage created: ${stageData.title}`)
+          } catch (stageError) {
+            console.error(`Error creating stage ${stageData.title}:`, stageError)
+            throw stageError // This will rollback the transaction
           }
         }
         
-        console.log(`🎉 Trip "${tripData.title}" completed successfully with ${tripData.stages.length} stages`)
+        console.log(`Trip ${newTrip.id} and all stages created successfully`)
         return newTrip.id
-      } catch (error) {
-        console.error(`💥 Error in processSingleTrip for "${tripData.title}":`, error)
-        throw error
-      }
-    })
+      }, {
+        timeout: 60000, // 60 second timeout for the transaction
+      })
+    } catch (error) {
+      console.error(`Error processing single trip ${tripIndex}:`, error)
+      throw error
+    }
   }
 
   private async processMediaFiles(mediaFiles: ParsedMediaFile[], prefix: string): Promise<MediaItem[]> {
     const mediaItems: MediaItem[] = []
-    
     for (let i = 0; i < mediaFiles.length; i++) {
       const file = mediaFiles[i]
-      
       try {
-        // Convert buffer to File object for storage provider
         const fileObj = new File([file.buffer], file.filename, { type: file.mimeType })
-        
-        // Upload to storage
-        const uploadResult = await this.storageProvider.uploadFile(
-          fileObj,
-          `${prefix}-${i}-${file.filename}`
-        )
-        
-        const mediaItem: MediaItem = {
+        const uploadResult = await this.storageProvider.uploadFile(fileObj, `${prefix}-${i}-${file.filename}`)
+        mediaItems.push({
           id: `media_${Date.now()}_${i}`,
           type: file.mimeType.startsWith('image/') ? 'image' : 'video',
           url: uploadResult.url,
           caption: file.caption,
-          thumbnailUrl: file.mimeType.startsWith('video/') ? undefined : undefined,
-        }
-        
-        mediaItems.push(mediaItem)
+        })
       } catch (error) {
-        console.error(`Error uploading media file ${file.filename}:`, error)
-        // Don't fail the entire process for media upload errors - just skip this file
-        console.warn(`Skipping media file ${file.filename} due to upload error`)
+        console.warn(`Skipping media file ${file.filename} due to upload error`, error)
         continue
       }
     }
-    
     return mediaItems
   }
 
   private async processGpxFile(gpxFile: ParsedGpxFile, prefix: string): Promise<GpxFile> {
     try {
-      // Convert buffer to File object for storage provider
       const fileObj = new File([gpxFile.buffer], gpxFile.filename, { type: 'application/gpx+xml' })
-      
-      // Upload GPX file
-      const uploadResult = await this.storageProvider.uploadFile(
-        fileObj,
-        `${prefix}-${gpxFile.filename}`
-      )
-      
-      // Parse GPX metadata (simplified - could be enhanced with actual GPX parsing)
-      const gpxData: GpxFile = {
+      const uploadResult = await this.storageProvider.uploadFile(fileObj, `${prefix}-${gpxFile.filename}`)
+      return {
         url: uploadResult.url,
         filename: gpxFile.filename,
-        waypoints: 0, // Would be parsed from actual GPX content
-        distance: 0, // Would be calculated from GPX content  
-        elevationGain: undefined,
-        elevationLoss: undefined,
-        duration: undefined,
-        maxElevation: undefined,
-        minElevation: undefined,
-        startTime: undefined,
-        endTime: undefined,
-        isValid: true, // Would be validated from actual GPX parsing
-        keyPoints: undefined,
+        waypoints: 0,
+        distance: 0,
+        isValid: true,
       }
-      
-      return gpxData
     } catch (error) {
       console.error(`Error uploading GPX file ${gpxFile.filename}:`, error)
       throw new Error(`Errore caricamento GPX: ${gpxFile.filename}`)
@@ -311,31 +488,20 @@ export class BatchProcessor {
   }
 
   private slugify(text: string): string {
-    return text
-      .toString()
-      .toLowerCase()
-      .trim()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/\s+/g, '-')
-      .replace(/[^\w-]+/g, '-')
-      .replace(/-+/g, '-')
-      .replace(/^-+/, '')
-      .replace(/-+$/, '')
+    return text.toString().toLowerCase().trim()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/\s+/g, '-').replace(/[^\w-]+/g, '-')
+      .replace(/-+/g, '-').replace(/^-+/, '').replace(/-+$/, '')
   }
 
-  private generateJobId(): string {
-    return `batch_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-  }
-
-  // Cleanup old jobs (call periodically)
-  static cleanupOldJobs(maxAgeHours: number = 24): void {
+  static async cleanupOldJobs(maxAgeHours: number = 24): Promise<void> {
     const cutoff = new Date(Date.now() - maxAgeHours * 60 * 60 * 1000)
-    
-    BatchProcessor.jobs.forEach((job, jobId) => {
-      if (job.startedAt < cutoff) {
-        BatchProcessor.jobs.delete(jobId)
-      }
+    await prisma.batchJob.deleteMany({
+      where: {
+        startedAt: {
+          lt: cutoff,
+        },
+      },
     })
   }
 }

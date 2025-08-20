@@ -26,6 +26,7 @@ model User {
   sessions      Session[]
   trips         Trip[]
   purchases     TripPurchase[]
+  batchJobs     BatchJob[]
 
   @@map("users")
 }
@@ -197,4 +198,28 @@ enum PurchaseStatus {
   COMPLETED // Acquisto completato con successo
   FAILED    // Acquisto fallito
   REFUNDED  // Acquisto rimborsato
+}
+
+model BatchJob {
+  id              String          @id @default(cuid())
+  userId          String
+  status          BatchJobStatus  @default(PENDING)
+  zipFileUrl      String          // URL to the uploaded ZIP in blob storage
+  totalTrips      Int
+  processedTrips  Int             @default(0)
+  createdTripIds  String[]
+  errors          Json?           // Store errors as a JSON object
+  startedAt       DateTime        @default(now())
+  completedAt     DateTime?
+  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("batch_jobs")
+}
+
+enum BatchJobStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
 }
