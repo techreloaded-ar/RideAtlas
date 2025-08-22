@@ -4,7 +4,7 @@ import { auth } from '@/auth'
 import { parseGpxMetadata, createGpxFileFromMetadata, isValidGpxFile, isValidGpxFileSize, parseGPXContent, extractKeyPoints } from '@/lib/gpx/gpx-utils'
 import { getStorageProvider } from '@/lib/storage'
 
-// Funzione per l'upload tramite storage provider configurato
+// Funzione per l'upload tramite storage provider configurato (legacy)
 async function uploadFileToStorage(file: File, folder: string, userId: string): Promise<{ url: string; publicId: string }> {
   try {
     const storageProvider = getStorageProvider()
@@ -27,6 +27,72 @@ async function uploadFileToStorage(file: File, folder: string, userId: string): 
   }
 }
 
+// Funzione per l'upload con tripId (nuova struttura directory-based)
+async function uploadFileToStorageWithTripId(file: File, tripId: string): Promise<{ url: string; publicId: string }> {
+  try {
+    const storageProvider = getStorageProvider()
+    const uploadResult = await storageProvider.uploadFile(file, `gpx/${file.name}`, {
+      access: 'public',
+      tripId,
+      addRandomSuffix: false,
+    })
+    
+    console.log(`File GPX caricato con tripId: ${uploadResult.url}`)
+    
+    return {
+      url: uploadResult.url,
+      publicId: uploadResult.publicId
+    }
+  } catch (error) {
+    console.error('Errore durante l\'upload:', error)
+    throw new Error('Errore durante l\'upload del file su cloud storage')
+  }
+}
+
+// Funzione per l'upload con nuova struttura organizzata (tripId + tripName + stage opzionale)
+async function uploadFileToStorageWithTripStructure(
+  file: File, 
+  tripId: string, 
+  tripName: string, 
+  stageIndex?: string, 
+  stageName?: string
+): Promise<{ url: string; publicId: string }> {
+  try {
+    const storageProvider = getStorageProvider()
+    const uploadOptions: {
+      access: 'public';
+      tripId: string;
+      tripName: string;
+      addRandomSuffix: boolean;
+      stageIndex?: string;
+      stageName?: string;
+    } = {
+      access: 'public',
+      tripId,
+      tripName,
+      addRandomSuffix: false,
+    }
+    
+    // Se sono specificati stageIndex e stageName, è un file stage-level
+    if (stageIndex !== undefined && stageName) {
+      uploadOptions.stageIndex = stageIndex
+      uploadOptions.stageName = stageName
+    }
+    
+    const uploadResult = await storageProvider.uploadFile(file, file.name, uploadOptions)
+    
+    console.log(`File GPX caricato con struttura organizzata: ${uploadResult.url}`)
+    
+    return {
+      url: uploadResult.url,
+      publicId: uploadResult.publicId
+    }
+  } catch (error) {
+    console.error('Errore durante l\'upload:', error)
+    throw new Error('Errore durante l\'upload del file su cloud storage')
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     // Verifica autenticazione
@@ -38,9 +104,13 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Estrai il file dal form data
+    // Estrai il file e parametri opzionali dal form data
     const formData = await request.formData()
     const file = formData.get('gpx') as File
+    const tripId = formData.get('tripId') as string | null
+    const tripName = formData.get('tripName') as string | null
+    const stageIndex = formData.get('stageIndex') as string | null
+    const stageName = formData.get('stageName') as string | null
 
     if (!file) {
       return NextResponse.json(
@@ -78,8 +148,18 @@ export async function POST(request: NextRequest) {
       elevationGain: metadata.elevationGain
     })}`)
 
-    // Upload del file allo storage
-    const uploadResult = await uploadFileToStorage(file, 'gpx', session.user.id)
+    // Upload del file allo storage con nuova struttura organizzata
+    let uploadResult;
+    if (tripId && tripName) {
+      // Usa la nuova struttura organizzata
+      uploadResult = await uploadFileToStorageWithTripStructure(file, tripId, tripName, stageIndex || undefined, stageName || undefined)
+    } else if (tripId) {
+      // Fallback per compatibilità (vecchia struttura con solo tripId)  
+      uploadResult = await uploadFileToStorageWithTripId(file, tripId)
+    } else {
+      // Legacy per upload standalone
+      uploadResult = await uploadFileToStorage(file, 'gpx', session.user.id)
+    }
     console.log(`Upload completato: ${uploadResult.url}`)
 
     // Parse GPX content per estrarre punti chiave

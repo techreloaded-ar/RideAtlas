@@ -204,7 +204,7 @@ model BatchJob {
   id              String          @id @default(cuid())
   userId          String
   status          BatchJobStatus  @default(PENDING)
-  zipFileUrl      String          // URL to the uploaded ZIP in blob storage
+  zipFileUrl      String?         // URL to the uploaded ZIP in blob storage (optional since we don't save ZIP anymore)
   totalTrips      Int
   processedTrips  Int             @default(0)
   createdTripIds  String[]

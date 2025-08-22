@@ -1,6 +1,6 @@
 import { put, del } from '@vercel/blob';
 import { IFileStorageProvider } from '../interfaces/IFileStorageProvider';
-import { UploadResult, UploadOptions } from '../types/storage';
+import { UploadResult, UploadOptions, sanitizeDirectoryName } from '../types/storage';
 
 /**
  * Implementazione del provider Vercel Blob Storage
@@ -89,18 +89,44 @@ export class VercelBlobProvider implements IFileStorageProvider {
   
   /**
    * Genera il pathname per il file basato sulle opzioni
-   * Mantiene la logica esistente per compatibilità
+   * Supporta nuova struttura organizzata per trip e stage
    */
   private generatePathname(fileName: string, options: UploadOptions): string {
+    // Nuova struttura trip-based
+    if (options.tripId && options.tripName) {
+      const basePath = `trips/${sanitizeDirectoryName(`${options.tripId} - ${options.tripName}`)}`;
+      
+      // File stage-level: dentro sottodirectory stages
+      if (options.stageIndex !== undefined && options.stageName) {
+        const stagePath = `${basePath}/stages/${sanitizeDirectoryName(`${options.stageIndex} - ${options.stageName}`)}`;
+        
+        // Media della tappa vanno in sottodirectory media/
+        if (fileName.match(/\.(jpg|jpeg|png|webp|mp4|mov|avi)$/i)) {
+          return `${stagePath}/media/${fileName}`;
+        }
+        
+        // GPX della tappa nella root della directory stage
+        return `${stagePath}/${fileName}`;
+      }
+      
+      // File trip-level: nella root della directory trip
+      return `${basePath}/${fileName}`;
+    }
+    
+    // Struttura legacy con solo tripId (backward compatibility)
+    if (options.tripId) {
+      return `trips/${options.tripId}/${fileName}`;
+    }
+    
     if (options.folder && options.userId) {
-      // Logica per file con struttura cartelle (es. GPX)
+      // Logica legacy per file con struttura cartelle (es. GPX)
       const timestamp = Date.now();
       const sanitizedFilename = fileName.replace(/[^a-zA-Z0-9.-]/g, '_');
       const filename = `${options.userId}-${timestamp}-${sanitizedFilename}`;
       return `${options.folder}/${options.userId}/${filename}`;
     }
     
-    // Logica per media generici (mantenendo il comportamento esistente)
+    // Logica per media generici legacy (mantenendo il comportamento esistente)
     return fileName;
   }
 } 

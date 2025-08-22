@@ -1,6 +1,6 @@
 import { S3Client, PutObjectCommand, DeleteObjectCommand, HeadBucketCommand, S3ClientConfig } from '@aws-sdk/client-s3';
 import { IFileStorageProvider } from '../../interfaces/IFileStorageProvider';
-import { UploadResult, UploadOptions } from '../../types/storage';
+import { UploadResult, UploadOptions, sanitizeDirectoryName } from '../../types/storage';
 
 /**
  * Configurazione base comune per tutti i provider AWS
@@ -203,18 +203,45 @@ export abstract class AWSBaseProvider implements IFileStorageProvider {
   }
   
   /**
-   * Genera la key S3 per il file mantenendo la struttura compatibile con Vercel
+   * Genera la key S3 per il file usando la nuova struttura organizzata per trip e stage
+   * Mantiene compatibilità con Vercel
    */
   protected generateS3Key(fileName: string, options: UploadOptions): string {
+    // Nuova struttura trip-based
+    if (options.tripId && options.tripName) {
+      const basePath = `trips/${sanitizeDirectoryName(`${options.tripId} - ${options.tripName}`)}`;
+      
+      // File stage-level: dentro sottodirectory stages
+      if (options.stageIndex !== undefined && options.stageName) {
+        const stagePath = `${basePath}/stages/${sanitizeDirectoryName(`${options.stageIndex} - ${options.stageName}`)}`;
+        
+        // Media della tappa vanno in sottodirectory media/
+        if (fileName.match(/\.(jpg|jpeg|png|webp|mp4|mov|avi)$/i)) {
+          return `${stagePath}/media/${fileName}`;
+        }
+        
+        // GPX della tappa nella root della directory stage
+        return `${stagePath}/${fileName}`;
+      }
+      
+      // File trip-level: nella root della directory trip
+      return `${basePath}/${fileName}`;
+    }
+    
+    // Struttura legacy con solo tripId (backward compatibility)
+    if (options.tripId) {
+      return `trips/${options.tripId}/${fileName}`;
+    }
+    
     if (options.folder && options.userId) {
-      // Struttura per file con cartelle (es. GPX) - identica a Vercel
+      // Struttura legacy per file con cartelle (es. GPX) - identica a Vercel
       const timestamp = Date.now();
       const sanitizedFilename = fileName.replace(/[^a-zA-Z0-9.-]/g, '_');
       const filename = `${options.userId}-${timestamp}-${sanitizedFilename}`;
       return `${options.folder}/${options.userId}/${filename}`;
     }
     
-    // Struttura per media generici - identica a Vercel
+    // Struttura per media generici legacy - identica a Vercel
     return fileName;
   }
   

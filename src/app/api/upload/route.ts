@@ -16,6 +16,10 @@ export async function POST(request: NextRequest) {
 
     const formData = await request.formData()
     const file = formData.get('file') as File | null
+    const tripId = formData.get('tripId') as string | null
+    const tripName = formData.get('tripName') as string | null
+    const stageIndex = formData.get('stageIndex') as string | null
+    const stageName = formData.get('stageName') as string | null
 
     if (!file) {
       return NextResponse.json(
@@ -44,9 +48,34 @@ export async function POST(request: NextRequest) {
 
     // Upload tramite storage provider configurato
     const storageProvider = getStorageProvider()
-    const uploadResult = await storageProvider.uploadFile(file, file.name, {
-      access: 'public'
-    })
+    
+    // Prepara le opzioni per il nuovo sistema di storage organizzato
+    const uploadOptions: {
+      access: 'public';
+      tripId?: string;
+      tripName?: string;
+      stageIndex?: string;
+      stageName?: string;
+    } = {
+      access: 'public' as const,
+    }
+    
+    // Se abbiamo tripId e tripName, usa la nuova struttura organizzata
+    if (tripId && tripName) {
+      uploadOptions.tripId = tripId
+      uploadOptions.tripName = tripName
+      
+      // Se abbiamo anche stage info, è un file stage-level
+      if (stageIndex && stageName) {
+        uploadOptions.stageIndex = stageIndex // Ora è già una stringa
+        uploadOptions.stageName = stageName
+      }
+    } else if (tripId) {
+      // Fallback per compatibilità con vecchia struttura (solo tripId)
+      uploadOptions.tripId = tripId
+    }
+    
+    const uploadResult = await storageProvider.uploadFile(file, file.name, uploadOptions)
 
     return NextResponse.json({
       url: uploadResult.url,

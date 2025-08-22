@@ -5,7 +5,6 @@ import { prisma } from '@/lib/core/prisma'
 import { getStorageProvider } from '@/lib/storage'
 import { MediaItem, GpxFile } from '@/types/trip'
 import { RecommendedSeason, BatchJobStatus, Prisma } from '@prisma/client'
-import { put } from '@vercel/blob'
 import { ErrorUtils } from './ErrorUtils'
 
 interface BatchError {
@@ -23,21 +22,11 @@ export class BatchProcessor {
     console.log(`Environment: ${process.env.NODE_ENV}, Runtime: ${process.env.VERCEL ? 'Vercel' : 'Local'}`)
     
     try {
-      // 1. Upload ZIP to blob storage first
-      const zipFileName = `batch-uploads/batch_${Date.now()}_${userId.slice(-6)}.zip`
-      console.log(`Uploading ZIP to blob storage: ${zipFileName}`)
-      
-      const { url: zipFileUrl } = await put(zipFileName, zipBuffer, {
-        access: 'public',
-        contentType: 'application/zip',
-      });
-      console.log(`ZIP uploaded successfully to: ${zipFileUrl}`)
-
-      // 2. Create job record in database
+      // 1. Create job record in database (no ZIP upload to storage)
       const job = await prisma.batchJob.create({
         data: {
           userId,
-          zipFileUrl,
+          zipFileUrl: null, // Non salviamo più il ZIP
           status: BatchJobStatus.PENDING,
           totalTrips: 0, // Will be updated after parsing
           createdTripIds: [],
@@ -45,10 +34,10 @@ export class BatchProcessor {
       });
       console.log(`Batch job created: ${job.id}`)
 
-      // 3. Start processing asynchronously (fire and forget)
-      // Use setTimeout to ensure the response is sent before processing starts
+      // 2. Start processing asynchronously (fire and forget)
+      // Pass zipBuffer directly to avoid unnecessary storage roundtrip
       setTimeout(() => {
-        this.processJobAsync(job.id).catch((error) => {
+        this.processJobAsync(job.id, zipBuffer).catch((error) => {
           console.error(`Fatal error in processJobAsync for job ${job.id}:`, error)
           console.error(`Error stack:`, error instanceof Error ? error.stack : 'No stack')
           
@@ -180,7 +169,7 @@ export class BatchProcessor {
     }
   }
 
-  private async processJobAsync(jobId: string): Promise<void> {
+  private async processJobAsync(jobId: string, zipBuffer: Buffer): Promise<void> {
     console.log(`Starting processJobAsync for job ${jobId}`)
     
     try {
@@ -191,44 +180,10 @@ export class BatchProcessor {
       })
       console.log(`Job ${jobId} status updated to PROCESSING`)
 
-      const job = await prisma.batchJob.findUnique({ where: { id: jobId } })
-      if (!job) {
-        console.error(`Job ${jobId} not found after setting to processing`)
-        throw new Error('Job non trovato dopo averlo impostato come in elaborazione')
-      }
-
-      // 2. Download ZIP from storage with timeout and better error handling
-      console.log(`Downloading ZIP file from: ${job.zipFileUrl}`)
-      const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), 60000) // 60 second timeout
+      // 2. Process ZIP content directly (no download needed)
+      console.log(`Processing ZIP buffer directly, size: ${zipBuffer.length} bytes`)
+      await this.processZipContent(jobId, zipBuffer)
       
-      try {
-        const response = await fetch(job.zipFileUrl, { 
-          signal: controller.signal,
-          headers: {
-            'User-Agent': 'RideAtlas-BatchProcessor/1.0'
-          }
-        })
-        clearTimeout(timeoutId)
-        
-        if (!response.ok) {
-          console.error(`Failed to download ZIP file: ${response.status} ${response.statusText}`)
-          throw new Error(`Impossibile scaricare il file ZIP: ${response.status} ${response.statusText}`)
-        }
-        
-        console.log(`ZIP file downloaded successfully, content-length: ${response.headers.get('content-length')}`)
-        const zipBuffer = Buffer.from(await response.arrayBuffer())
-        console.log(`ZIP buffer created, size: ${zipBuffer.length} bytes`)
-        
-        await this.processZipContent(jobId, zipBuffer)
-        
-      } catch (fetchError) {
-        clearTimeout(timeoutId)
-        if (fetchError instanceof Error && fetchError.name === 'AbortError') {
-          throw new Error('Timeout durante il download del file ZIP')
-        }
-        throw fetchError
-      }
     } catch (error) {
       console.error(`Fatal error in processJobAsync for job ${jobId}:`, error)
       await this.handleJobError(jobId, error)
@@ -354,18 +309,47 @@ export class BatchProcessor {
     console.log(`Trip has ${tripData.media.length} media files and ${tripData.stages.length} stages`)
     
     try {
-      // Process trip-level media files
-      console.log(`Processing ${tripData.media.length} trip media files`)
-      const tripMedia = await this.processMediaFiles(tripData.media, `trip-${tripIndex}`)
+      // 1. Prima creiamo il trip nel database per ottenere il vero ID
+      console.log(`Creating trip in database: ${tripData.title}`)
+      const slug = this.slugify(tripData.title)
+      console.log(`Generated slug: ${slug}`)
+      
+      const newTrip = await prisma.trip.create({
+        data: {
+          title: tripData.title,
+          summary: tripData.summary,
+          destination: tripData.destination,
+          theme: tripData.theme,
+          characteristics: tripData.characteristics,
+          recommended_seasons: tripData.recommended_seasons as RecommendedSeason[],
+          tags: tripData.tags,
+          travelDate: tripData.travelDate,
+          duration_days: Math.max(1, tripData.stages.length),
+          duration_nights: 0,
+          insights: null,
+          media: [], // Inizialmente vuoto, verrà aggiornato dopo upload
+          gpxFile: undefined, // Inizialmente undefined, verrà aggiornato dopo upload
+          slug,
+          user_id: userId,
+        },
+      })
+      console.log(`Trip created with ID: ${newTrip.id}`)
+      
+      // 2. Ora possiamo usare il vero tripId per organizzare i file
+      const realTripId = newTrip.id
+      
+      // 3. Process trip-level media files con vero tripId e nome trip
+      console.log(`Processing ${tripData.media.length} trip media files with real tripId`)
+      const tripMedia = await this.processMediaFiles(tripData.media, realTripId, tripData.title)
       console.log(`Successfully processed ${tripMedia.length} trip media files`)
       
-      // Process trip-level GPX file
-      const tripGpxFile = tripData.gpxFile ? await this.processGpxFile(tripData.gpxFile, `trip-${tripIndex}`) : null
+      // 4. Process trip-level GPX file con vero tripId e nome trip
+      const tripGpxFile = tripData.gpxFile ? await this.processGpxFile(tripData.gpxFile, realTripId, tripData.title) : null
       if (tripGpxFile) {
         console.log(`Successfully processed trip GPX file: ${tripGpxFile.filename}`)
       }
 
-      // Process stages
+      // 5. Process stages con vero tripId e nome trip
       console.log(`Processing ${tripData.stages.length} stages`)
       const processedStages: Array<{
         stageData: ParsedTrip['stages'][0];
@@ -375,53 +359,40 @@ export class BatchProcessor {
 
       for (let stageIndex = 0; stageIndex < tripData.stages.length; stageIndex++) {
         const stageData = tripData.stages[stageIndex]
-        console.log(`Processing stage ${stageIndex + 1}: ${stageData.title} (${stageData.media.length} media files)`)
+        const formattedStageIndex = this.formatStageIndex(stageIndex + 1) // 01, 02, 03, etc.
+        console.log(`Processing stage ${formattedStageIndex}: ${stageData.title} (${stageData.media.length} media files)`)
         
         try {
-          const stageMedia = await this.processMediaFiles(stageData.media, `trip-${tripIndex}-stage-${stageIndex}`)
-          const stageGpxFile = stageData.gpxFile ? await this.processGpxFile(stageData.gpxFile, `trip-${tripIndex}-stage-${stageIndex}`) : null
+          // Usa la nuova struttura con stageIndex formattato (01, 02, etc.) e stageName
+          const stageMedia = await this.processStageMediaFiles(stageData.media, realTripId, tripData.title, formattedStageIndex, stageData.title)
+          const stageGpxFile = stageData.gpxFile ? await this.processStageGpxFile(stageData.gpxFile, realTripId, tripData.title, formattedStageIndex, stageData.title) : null
           processedStages.push({ stageData, media: stageMedia, gpxFile: stageGpxFile })
-          console.log(`Stage ${stageIndex + 1} processed successfully`)
+          console.log(`Stage ${formattedStageIndex} processed successfully`)
         } catch (stageError) {
-          console.error(`Error processing stage ${stageIndex + 1}:`, stageError)
+          console.error(`Error processing stage ${formattedStageIndex}:`, stageError)
           // Continue processing other stages, but log the error
           processedStages.push({ stageData, media: [], gpxFile: null })
         }
       }
 
-      // Create trip and stages in database transaction
-      console.log(`Creating trip in database: ${tripData.title}`)
+      // 6. Update trip con i file processati e crea stages in transazione
       return await prisma.$transaction(async (tx) => {
-        const slug = this.slugify(tripData.title)
-        console.log(`Generated slug: ${slug}`)
-        
-        const newTrip = await tx.trip.create({
+        // Aggiorna il trip con i media e GPX processati
+        await tx.trip.update({
+          where: { id: realTripId },
           data: {
-            title: tripData.title,
-            summary: tripData.summary,
-            destination: tripData.destination,
-            theme: tripData.theme,
-            characteristics: tripData.characteristics,
-            recommended_seasons: tripData.recommended_seasons as RecommendedSeason[],
-            tags: tripData.tags,
-            travelDate: tripData.travelDate,
-            duration_days: Math.max(1, tripData.stages.length),
-            duration_nights: 0,
-            insights: null,
             media: tripMedia as unknown as Prisma.InputJsonValue[],
             gpxFile: tripGpxFile as unknown as Prisma.JsonObject,
-            slug,
-            user_id: userId,
           },
         })
-        console.log(`Trip created with ID: ${newTrip.id}`)
+        console.log(`Trip ${realTripId} updated with processed files`)
 
-        // Create stages
+        // Crea stages
         for (const { stageData, media, gpxFile } of processedStages) {
           try {
             await tx.stage.create({
               data: {
-                tripId: newTrip.id,
+                tripId: realTripId,
                 orderIndex: stageData.orderIndex,
                 title: stageData.title,
                 description: stageData.description || null,
@@ -438,8 +409,8 @@ export class BatchProcessor {
           }
         }
         
-        console.log(`Trip ${newTrip.id} and all stages created successfully`)
-        return newTrip.id
+        console.log(`Trip ${realTripId} and all stages created successfully`)
+        return realTripId
       }, {
         timeout: 60000, // 60 second timeout for the transaction
       })
@@ -449,13 +420,17 @@ export class BatchProcessor {
     }
   }
 
-  private async processMediaFiles(mediaFiles: ParsedMediaFile[], prefix: string): Promise<MediaItem[]> {
+  private async processMediaFiles(mediaFiles: ParsedMediaFile[], tripId: string, tripName: string): Promise<MediaItem[]> {
     const mediaItems: MediaItem[] = []
     for (let i = 0; i < mediaFiles.length; i++) {
       const file = mediaFiles[i]
       try {
         const fileObj = new File([file.buffer], file.filename, { type: file.mimeType })
-        const uploadResult = await this.storageProvider.uploadFile(fileObj, `${prefix}-${i}-${file.filename}`)
+        // Trip-level media vanno nella root della directory trip
+        const uploadResult = await this.storageProvider.uploadFile(fileObj, file.filename, { 
+          tripId, 
+          tripName 
+        })
         mediaItems.push({
           id: `media_${Date.now()}_${i}`,
           type: file.mimeType.startsWith('image/') ? 'image' : 'video',
@@ -470,10 +445,14 @@ export class BatchProcessor {
     return mediaItems
   }
 
-  private async processGpxFile(gpxFile: ParsedGpxFile, prefix: string): Promise<GpxFile> {
+  private async processGpxFile(gpxFile: ParsedGpxFile, tripId: string, tripName: string): Promise<GpxFile> {
     try {
       const fileObj = new File([gpxFile.buffer], gpxFile.filename, { type: 'application/gpx+xml' })
-      const uploadResult = await this.storageProvider.uploadFile(fileObj, `${prefix}-${gpxFile.filename}`)
+      // Trip-level GPX va nella root della directory trip
+      const uploadResult = await this.storageProvider.uploadFile(fileObj, gpxFile.filename, { 
+        tripId, 
+        tripName 
+      })
       return {
         url: uploadResult.url,
         filename: gpxFile.filename,
@@ -485,6 +464,61 @@ export class BatchProcessor {
       console.error(`Error uploading GPX file ${gpxFile.filename}:`, error)
       throw new Error(`Errore caricamento GPX: ${gpxFile.filename}`)
     }
+  }
+
+  private async processStageMediaFiles(mediaFiles: ParsedMediaFile[], tripId: string, tripName: string, stageIndex: string, stageName: string): Promise<MediaItem[]> {
+    const mediaItems: MediaItem[] = []
+    for (let i = 0; i < mediaFiles.length; i++) {
+      const file = mediaFiles[i]
+      try {
+        const fileObj = new File([file.buffer], file.filename, { type: file.mimeType })
+        // Stage media vanno in stages/{n} - {name}/media/{filename}
+        const uploadResult = await this.storageProvider.uploadFile(fileObj, file.filename, { 
+          tripId, 
+          tripName,
+          stageIndex,
+          stageName
+        })
+        mediaItems.push({
+          id: `media_${Date.now()}_${i}`,
+          type: file.mimeType.startsWith('image/') ? 'image' : 'video',
+          url: uploadResult.url,
+          caption: file.caption,
+        })
+      } catch (error) {
+        console.warn(`Skipping stage media file ${file.filename} due to upload error`, error)
+        continue
+      }
+    }
+    return mediaItems
+  }
+
+  private async processStageGpxFile(gpxFile: ParsedGpxFile, tripId: string, tripName: string, stageIndex: string, stageName: string): Promise<GpxFile> {
+    try {
+      const fileObj = new File([gpxFile.buffer], gpxFile.filename, { type: 'application/gpx+xml' })
+      // Stage GPX va nella root della directory stage: stages/{n} - {name}/{filename}
+      const uploadResult = await this.storageProvider.uploadFile(fileObj, gpxFile.filename, { 
+        tripId, 
+        tripName,
+        stageIndex,
+        stageName
+      })
+      return {
+        url: uploadResult.url,
+        filename: gpxFile.filename,
+        waypoints: 0,
+        distance: 0,
+        isValid: true,
+      }
+    } catch (error) {
+      console.error(`Error uploading stage GPX file ${gpxFile.filename}:`, error)
+      throw new Error(`Errore caricamento GPX stage: ${gpxFile.filename}`)
+    }
+  }
+
+  private formatStageIndex(index: number): string {
+    // Formatta l'indice con padding zero (01, 02, 03, etc.)
+    return index.toString().padStart(2, '0');
   }
 
   private slugify(text: string): string {

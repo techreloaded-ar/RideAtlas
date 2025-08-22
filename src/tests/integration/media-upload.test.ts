@@ -18,8 +18,12 @@ const mockFormData = {
   get: jest.fn()
 };
 
-const createMockRequest = (file: File | null) => {
-  mockFormData.get.mockReturnValue(file);
+const createMockRequest = (file: File | null, tripId?: string) => {
+  mockFormData.get.mockImplementation((key: string) => {
+    if (key === 'file') return file;
+    if (key === 'tripId') return tripId || null;
+    return null;
+  });
   
   return {
     formData: jest.fn().mockResolvedValue(mockFormData)
@@ -85,13 +89,73 @@ describe('API Media Upload', () => {
     expect(body).toHaveProperty('error', 'File troppo grande. Massimo 5MB.');
   });
   
-  it('deve gestire correttamente l\'upload di file validi', async () => {
+  it('deve gestire correttamente l\'upload di file validi (comportamento legacy senza tripId)', async () => {
     const validFile = new File(['valid content'], 'valid.jpg', { type: 'image/jpeg' });
     const request = createMockRequest(validFile);
     const response = await uploadHandler(request);
     const body = await response.json();
     
     expect(put).toHaveBeenCalledWith('valid.jpg', validFile, { access: 'public', addRandomSuffix: false, allowOverwrite: true });
+    expect(response.status).toBe(200);
+    expect(body).toHaveProperty('url', 'https://example.com/uploaded-image.jpg');
+  });
+
+  it('deve gestire correttamente l\'upload di file validi con tripId', async () => {
+    const validFile = new File(['valid content'], 'valid.jpg', { type: 'image/jpeg' });
+    const tripId = 'trip-123';
+    const request = createMockRequest(validFile, tripId);
+    const response = await uploadHandler(request);
+    const body = await response.json();
+    
+    expect(put).toHaveBeenCalledWith('trips/trip-123/valid.jpg', validFile, { access: 'public', addRandomSuffix: false, allowOverwrite: true });
+    expect(response.status).toBe(200);
+    expect(body).toHaveProperty('url', 'https://example.com/uploaded-image.jpg');
+  });
+
+  it('deve gestire correttamente l\'upload di file validi con nuova struttura organizzata', async () => {
+    const validFile = new File(['valid content'], 'valid.jpg', { type: 'image/jpeg' });
+    const tripId = 'trip-abc123';
+    const tripName = 'Viaggio in Toscana';
+    
+    // Mock per includere tripId e tripName
+    mockFormData.get.mockImplementation((key: string) => {
+      if (key === 'file') return validFile;
+      if (key === 'tripId') return tripId;
+      if (key === 'tripName') return tripName;
+      return null;
+    });
+    
+    const request = { formData: jest.fn().mockResolvedValue(mockFormData) } as unknown as NextRequest;
+    const response = await uploadHandler(request);
+    const body = await response.json();
+    
+    expect(put).toHaveBeenCalledWith('trips/trip-abc123 - Viaggio in Toscana/valid.jpg', validFile, { access: 'public', addRandomSuffix: false, allowOverwrite: true });
+    expect(response.status).toBe(200);
+    expect(body).toHaveProperty('url', 'https://example.com/uploaded-image.jpg');
+  });
+
+  it('deve gestire correttamente l\'upload di file stage-level', async () => {
+    const validFile = new File(['stage content'], 'stage.jpg', { type: 'image/jpeg' });
+    const tripId = 'trip-abc123';
+    const tripName = 'Viaggio in Toscana';
+    const stageIndex = '01';
+    const stageName = 'Firenze Centro';
+    
+    // Mock per includere tutti i parametri stage
+    mockFormData.get.mockImplementation((key: string) => {
+      if (key === 'file') return validFile;
+      if (key === 'tripId') return tripId;
+      if (key === 'tripName') return tripName;
+      if (key === 'stageIndex') return stageIndex;
+      if (key === 'stageName') return stageName;
+      return null;
+    });
+    
+    const request = { formData: jest.fn().mockResolvedValue(mockFormData) } as unknown as NextRequest;
+    const response = await uploadHandler(request);
+    const body = await response.json();
+    
+    expect(put).toHaveBeenCalledWith('trips/trip-abc123 - Viaggio in Toscana/stages/01 - Firenze Centro/media/stage.jpg', validFile, { access: 'public', addRandomSuffix: false, allowOverwrite: true });
     expect(response.status).toBe(200);
     expect(body).toHaveProperty('url', 'https://example.com/uploaded-image.jpg');
   });
