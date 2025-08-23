@@ -25,6 +25,12 @@ export interface IFileStorageProvider {
   deleteFile(publicId: string): Promise<void>;
   
   /**
+   * Elimina una directory e tutto il suo contenuto dal provider di storage
+   * @param directoryPath Path della directory da eliminare (senza leading slash)
+   */
+  deleteDirectory(directoryPath: string): Promise<void>;
+  
+  /**
    * Ottiene l'URL pubblico di un file
    * @param publicId ID pubblico del file
    * @returns URL pubblico del file

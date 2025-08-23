@@ -144,6 +144,15 @@ export async function DELETE(
 
     // 5. Cleanup storage files BEFORE deleting from database
     console.log(`🧹 Inizio cleanup storage per viaggio: ${tripId}`)
+    console.log(`📊 Dati viaggio da pulire:`)
+    console.log(`   - Media viaggio: ${Array.isArray(tripWithStages.media) ? tripWithStages.media.length : 'N/A'} elementi`)
+    console.log(`   - GPX viaggio: ${tripWithStages.gpxFile ? 'presente' : 'assente'}`)
+    console.log(`   - Tappe: ${tripWithStages.stages.length}`)
+    
+    tripWithStages.stages.forEach((stage, index) => {
+      console.log(`   - Tappa ${index}: ${Array.isArray(stage.media) ? stage.media.length : 'N/A'} media, GPX ${stage.gpxFile ? 'presente' : 'assente'}`)
+    })
+    
     try {
       const cleanupResult = await storageCleanupService.cleanupTripStorage(
         tripWithStages.media as unknown[],
@@ -157,13 +166,33 @@ export async function DELETE(
       console.log(`✅ Storage cleanup completato:`)
       console.log(`   - File eliminati: ${cleanupResult.deletedFiles.length}`)
       console.log(`   - File falliti: ${cleanupResult.failedFiles.length}`)
+      console.log(`   - Errori: ${cleanupResult.errors.length}`)
+      
+      if (cleanupResult.deletedFiles.length > 0) {
+        console.log(`📁 Dettaglio file eliminati:`)
+        cleanupResult.deletedFiles.forEach((file, i) => {
+          console.log(`     ${i + 1}. ${file}`)
+        })
+      }
       
       if (cleanupResult.failedFiles.length > 0) {
-        console.warn(`⚠️ Alcuni file non sono stati eliminati dallo storage:`, cleanupResult.failedFiles)
-        // Non blocchiamo l'eliminazione del viaggio anche se alcuni file storage falliscono
+        console.warn(`⚠️ Alcuni file non sono stati eliminati dallo storage:`)
+        cleanupResult.failedFiles.forEach((file, i) => {
+          console.warn(`     ${i + 1}. ${file}`)
+        })
+      }
+      
+      if (cleanupResult.errors.length > 0) {
+        console.error(`💥 Errori dettagliati durante cleanup:`)
+        cleanupResult.errors.forEach((error, i) => {
+          console.error(`     ${i + 1}. ${error}`)
+        })
       }
     } catch (storageError) {
       console.error(`❌ Errore durante cleanup storage per viaggio ${tripId}:`, storageError)
+      if (storageError instanceof Error && storageError.stack) {
+        console.error(`Stack trace:`, storageError.stack)
+      }
       // Non blocchiamo l'eliminazione del viaggio anche se il cleanup storage fallisce completamente
       console.warn(`⚠️ Continuando con eliminazione database nonostante errori storage`)
     }

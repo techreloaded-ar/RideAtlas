@@ -1,4 +1,4 @@
-import { S3Client, PutObjectCommand, DeleteObjectCommand, HeadBucketCommand, S3ClientConfig } from '@aws-sdk/client-s3';
+import { S3Client, PutObjectCommand, DeleteObjectCommand, ListObjectsV2Command, HeadBucketCommand, S3ClientConfig } from '@aws-sdk/client-s3';
 import { IFileStorageProvider } from '../../interfaces/IFileStorageProvider';
 import { UploadResult, UploadOptions, sanitizeDirectoryName } from '../../types/storage';
 
@@ -173,6 +173,48 @@ export abstract class AWSBaseProvider implements IFileStorageProvider {
     } catch (error) {
       console.error('Errore eliminazione file AWS S3:', error);
       throw new Error('Errore durante l\'eliminazione del file da AWS S3');
+    }
+  }
+  
+  /**
+   * Elimina una directory e tutto il suo contenuto da AWS S3
+   */
+  async deleteDirectory(directoryPath: string): Promise<void> {
+    try {
+      // Lista tutti gli oggetti nella directory
+      const listCommand = new ListObjectsV2Command({
+        Bucket: this.config.bucket,
+        Prefix: directoryPath + '/', // Assicura che il prefisso termini con slash
+      });
+      
+      const listResponse = await this.s3Client.send(listCommand);
+      
+      if (!listResponse.Contents || listResponse.Contents.length === 0) {
+        console.log(`Directory AWS S3 già vuota o non esistente: ${directoryPath}`);
+        return;
+      }
+      
+      // Elimina tutti gli oggetti trovati
+      console.log(`Eliminazione directory AWS S3: ${directoryPath} (${listResponse.Contents.length} oggetti)`);
+      
+      const deletePromises = listResponse.Contents.map(async (object) => {
+        if (object.Key) {
+          await this.deleteFile(object.Key);
+        }
+      });
+      
+      await Promise.all(deletePromises);
+      console.log(`Directory completamente eliminata da AWS S3: ${directoryPath}`);
+      
+      // Gestione per directory con più di 1000 oggetti (paginazione S3)
+      if (listResponse.IsTruncated) {
+        console.log(`Directory aveva più di 1000 oggetti, continuando eliminazione...`);
+        await this.deleteDirectory(directoryPath);
+      }
+      
+    } catch (error) {
+      console.error(`Errore eliminazione directory AWS S3 ${directoryPath}:`, error);
+      throw new Error(`Errore durante l'eliminazione della directory da AWS S3: ${directoryPath}`);
     }
   }
   
