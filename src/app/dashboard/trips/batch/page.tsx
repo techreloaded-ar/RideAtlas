@@ -172,7 +172,7 @@ export default function BatchUploadPage() {
                 {/* Actions */}
                 <div className="flex flex-col sm:flex-row gap-3 justify-center">
                   <Link
-                    href="/dashboard/trips"
+                    href="/dashboard/"
                     className="px-6 py-3 bg-primary-600 text-white text-sm font-medium rounded-md hover:bg-primary-700 text-center"
                   >
                     Vai ai tuoi viaggi

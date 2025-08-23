@@ -449,12 +449,12 @@ export default function TripManagement() {
                             </button>
                           )}
                           
-                          {/* Delete button - for all trips */}
+                          {/* Delete button - only for draft trips */}
                           <button
                             onClick={() => handleDeleteTrip(trip)}
-                            disabled={deletingTrip === trip.id}
+                            disabled={deletingTrip === trip.id || trip.status !== 'Bozza'}
                             className="text-red-600 hover:text-red-900 p-1 rounded disabled:opacity-50"
-                            title="Elimina viaggio"
+                            title={trip.status !== 'Bozza' ? 'Puoi eliminare solo viaggi in bozza' : 'Elimina viaggio'}
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>

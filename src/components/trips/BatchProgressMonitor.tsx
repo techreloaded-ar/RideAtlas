@@ -259,7 +259,7 @@ export const BatchProgressMonitor = ({ jobId, onComplete, onError }: BatchProgre
       {result.isComplete && (
         <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
           <button
-            onClick={() => window.location.href = '/dashboard/trips'}
+            onClick={() => window.location.href = '/dashboard/'}
             className="px-4 py-2 bg-primary-600 text-white text-sm font-medium rounded-md hover:bg-primary-700"
           >
             Vai ai tuoi viaggi

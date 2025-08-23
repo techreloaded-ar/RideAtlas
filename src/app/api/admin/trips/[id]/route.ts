@@ -101,6 +101,27 @@ export async function DELETE(
       )
     }
 
+    // 2.5. Check trip status - Only draft trips can be deleted
+    const tripStatus = await prisma.trip.findUnique({
+      where: { id: tripId },
+      select: { status: true, title: true }
+    })
+
+    if (!tripStatus) {
+      return NextResponse.json(
+        { error: 'Viaggio non trovato' },
+        { status: 404 }
+      )
+    }
+
+    if (tripStatus.status !== 'Bozza') {
+      console.error(`❌ Tentativo di eliminazione viaggio non in bozza: ${tripId} (stato: ${tripStatus.status})`)
+      return NextResponse.json(
+        { error: 'È possibile eliminare solo viaggi in stato bozza.' },
+        { status: 400 }
+      )
+    }
+
     // 3. Validate trip ID
     if (!tripId || typeof tripId !== 'string') {
       return NextResponse.json(
