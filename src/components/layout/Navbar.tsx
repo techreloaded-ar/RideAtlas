@@ -42,7 +42,6 @@ export default function Navbar() {
     { name: 'Home', href: '/' },
     { name: 'Viaggi', href: '/trips' },
     { name: 'Trip Builder', href: '/trip-builder' },
-    { name: 'Community', href: '/community' },
   ];
 
   return (

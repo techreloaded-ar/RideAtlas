@@ -48,11 +48,6 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/community" className="text-gray-300 hover:text-white">
-                  Community
-                </Link>
-              </li>
-              <li>
                 <Link href="/ranger" className="text-gray-300 hover:text-white">
                   Diventa Ranger
                 </Link>
