@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { type StageCreationData } from '@/schemas/trip';
-import { GripVertical } from 'lucide-react';
+import { GripVertical, MapPin, Clock  } from 'lucide-react';
 import MediaUpload from '@/components/upload/MediaUpload';
 import { generateTempMediaId } from '@/lib/ui/temp-id-service';
 import { DraggableAttributes, DraggableSyntheticListeners } from '@dnd-kit/core';
@@ -89,11 +89,21 @@ export const EditableStageItem = ({
               <h4 className="text-sm font-medium text-gray-900">
                 {stage.title || `Tappa ${index + 1}`}
               </h4>
-              {stage.description && (
-                <p className="text-xs text-gray-500 mt-1 truncate max-w-md">
-                  {stage.description}
-                </p>
-              )}
+              {/* Info compatte nell'header */}
+               <div className="flex items-center space-x-4 text-sm text-gray-600 mt-1">
+                  {stage.gpxFile?.distance != 0 && stage.gpxFile?.distance && (
+                    <div className="flex items-center space-x-1">
+                      <MapPin className="w-3 h-3" />
+                      <span>{(stage.gpxFile.distance / 1000).toFixed(1)} km</span>
+                    </div>
+                  )}
+                  {stage.duration && (
+                    <div className="flex items-center space-x-1">
+                      <Clock className="w-3 h-3" />
+                      <span>{stage.duration}</span>
+                    </div>
+                  )}
+                </div>   
             </div>
           </div>
           <div className="flex items-center space-x-2">

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Stage } from '@/types/trip';
-import { ChevronDown, ChevronRight, MapPin } from 'lucide-react';
+import { ChevronDown, ChevronRight, MapPin, Clock } from 'lucide-react';
 import { UnifiedMediaGallery } from '@/components/ui/UnifiedMediaGallery';
 import GPXSectionStage from '@/components/stages/GPXSectionStage';
 
@@ -55,11 +55,12 @@ export default function StageDisplay({
                   <span>{(stage.gpxFile.distance / 1000).toFixed(1)} km</span>
                 </div>
               )}
-              {stage.description && (
-              <p className="text-sm text-gray-600 truncate max-w-md">
-                {stage.description}
-              </p>
-            )}
+              {stage.duration && (
+                <div className="flex items-center space-x-1">
+                  <Clock className="w-3 h-3" />
+                  <span>{stage.duration}</span>
+                </div>
+              )}
             </div>            
           </div>
         </div>
