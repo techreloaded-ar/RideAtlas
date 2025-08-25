@@ -58,8 +58,7 @@ interface TripWithStages extends TripData {
 }
 
 interface TripDetailClientProps {
-  trip: TripData
-  tripWithStages: TripWithStages
+  trip: TripWithStages
   isOwner: boolean
   isSentinel: boolean
   canEdit: boolean
@@ -70,7 +69,6 @@ interface TripDetailClientProps {
 
 export function TripDetailClient({
   trip,
-  tripWithStages,
   isOwner,
   isSentinel,
   canEdit,
@@ -84,7 +82,7 @@ export function TripDetailClient({
     setHasValidationErrors(hasErrors)
   }, [])
   
-  const isMultiStage = tripWithStages.stages?.length > 0
+  const isMultiStage = trip.stages?.length > 0
   const galleryMediaItems = [...tripMediaItems, ...allStageMediaItems]
 
   return (
@@ -123,7 +121,7 @@ export function TripDetailClient({
         
         <TripChips 
           duration={isMultiStage 
-            ? `${tripWithStages.stages.length} giorni`
+            ? `${trip.stages.length} giorni`
             : `${trip.duration_days} giorni`
           }
           location={trip.destination}
@@ -189,7 +187,7 @@ export function TripDetailClient({
       )}
 
       {/* Trip Stages Section - Solo per viaggi multi-tappa */}
-      {isMultiStage && tripWithStages.stages.length > 0 && (
+      {isMultiStage && trip.stages.length > 0 && (
         <div>
           <h2 className="text-2xl font-bold text-gray-900 mb-6">Tappe del viaggio</h2>
 
@@ -199,7 +197,7 @@ export function TripDetailClient({
             showPreview={true}
           >
             <StageTimeline
-              stages={tripWithStages.stages}
+              stages={trip.stages}
               isEditable={false}
             />
           </AccessGate>

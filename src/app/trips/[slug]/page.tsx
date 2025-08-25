@@ -77,11 +77,15 @@ export default async function TripDetailPage({ params }: { params: Promise<{ slu
   };
   const mappedSeasons = trip.recommended_seasons.map(season => seasonMapping[season]);
 
+  
+  const serializedTripWithStages = {
+    ...tripWithStages,
+    price: tripWithStages.price.toNumber() // Converte Decimal in number per serializzare oggetto Server -> Client
+  }
 
   return (
     <TripDetailClient
-      trip={trip}
-      tripWithStages={tripWithStages}
+      trip={serializedTripWithStages}
       isOwner={isOwner}
       isSentinel={isSentinel}
       canEdit={canEdit}

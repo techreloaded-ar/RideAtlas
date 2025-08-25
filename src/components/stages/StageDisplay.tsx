@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Stage } from '@/types/trip';
-import { ChevronDown, ChevronRight, MapPin, Clock } from 'lucide-react';
+import { ChevronDown, ChevronRight, MapPin } from 'lucide-react';
 import { UnifiedMediaGallery } from '@/components/ui/UnifiedMediaGallery';
 import GPXSectionStage from '@/components/stages/GPXSectionStage';
 
@@ -46,22 +46,21 @@ export default function StageDisplay({
             <h3 className="text-lg font-semibold text-gray-900">
               Tappa {stageNumber}: {stage.title}
             </h3>
-            
+
             {/* Info compatte nell'header */}
             <div className="flex items-center space-x-4 text-sm text-gray-600 mt-1">
-              {stage.gpxFile?.distance && (
+              {stage.gpxFile?.distance != 0 && stage.gpxFile?.distance && (
                 <div className="flex items-center space-x-1">
                   <MapPin className="w-3 h-3" />
                   <span>{(stage.gpxFile.distance / 1000).toFixed(1)} km</span>
                 </div>
               )}
-              {stage.duration && (
-                <div className="flex items-center space-x-1">
-                  <Clock className="w-3 h-3" />
-                  <span>{stage.duration}</span>
-                </div>
-              )}
-            </div>
+              {stage.description && (
+              <p className="text-sm text-gray-600 truncate max-w-md">
+                {stage.description}
+              </p>
+            )}
+            </div>            
           </div>
         </div>
       </div>
@@ -73,7 +72,7 @@ export default function StageDisplay({
         <div className="p-4 space-y-6">
           {/* Informazioni dettagliate */}
           <div className="space-y-2">
-            {stage.gpxFile?.distance && (
+            {stage.gpxFile?.distance != 0 && stage.gpxFile?.distance && (
               <div className="text-sm text-gray-700">
                 <span className="font-bold">Distanza:</span> {(stage.gpxFile.distance / 1000).toFixed(1)} km
               </div>
