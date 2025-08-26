@@ -7,8 +7,8 @@ import { MapViewerProps, GPXTrack } from '@/types/gpx'
 import LayerControl from '@/components/maps/LayerControl'
 import dynamic from 'next/dynamic'
 
-// Componente mappa con import dinamico per evitare problemi SSR
-const DynamicMap = dynamic(() => import('@/components/maps/LeafletMapRenderer').then(mod => ({ default: mod.default })), { 
+// Componente mappa diretto senza react-leaflet per evitare problemi di inizializzazione
+const DirectMap = dynamic(() => import('@/components/maps/DirectLeafletMap'), { 
   ssr: false,
   loading: () => (
     <div className="w-full h-full bg-gray-100 flex items-center justify-center rounded-lg">
@@ -251,9 +251,9 @@ export default function GPXMapViewer({
           </div>
         )}
 
-        {/* Mappa dinamica per evitare problemi SSR */}
+        {/* Mappa diretta senza react-leaflet per evitare problemi di inizializzazione */}
         {isClient && (allTracks.length > 0 || routes.length > 0 || waypoints.length > 0) ? (
-          <DynamicMap
+          <DirectMap
             key={mapKey}
             allTracks={allTracks}
             routes={routes}
