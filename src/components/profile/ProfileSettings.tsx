@@ -1,0 +1,315 @@
+'use client';
+
+import { useState } from 'react';
+import React from 'react';
+import { useSession } from 'next-auth/react';
+import { ChevronDown, ChevronUp, Lock, User, Settings } from 'lucide-react';
+import ChangePasswordForm from './ChangePasswordForm';
+
+interface SettingsSectionProps {
+  title: string;
+  description: string;
+  icon: React.ReactNode;
+  isOpen: boolean;
+  onToggle: () => void;
+  children: React.ReactNode;
+}
+
+function SettingsSection({ 
+  title, 
+  description, 
+  icon, 
+  isOpen, 
+  onToggle, 
+  children 
+}: SettingsSectionProps) {
+  return (
+    <div className="border border-gray-200 rounded-lg">
+      <button
+        onClick={onToggle}
+        className="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-gray-50 transition-colors"
+      >
+        <div className="flex items-center space-x-3">
+          {icon}
+          <div>
+            <h3 className="text-lg font-medium text-gray-900">{title}</h3>
+            <p className="text-sm text-gray-600">{description}</p>
+          </div>
+        </div>
+        {isOpen ? (
+          <ChevronUp className="w-5 h-5 text-gray-500" />
+        ) : (
+          <ChevronDown className="w-5 h-5 text-gray-500" />
+        )}
+      </button>
+      
+      {isOpen && (
+        <div className="px-6 pb-6 border-t border-gray-200">
+          <div className="pt-4">
+            {children}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default function ProfileSettings() {
+  const { data: session, update } = useSession();
+  const [openSections, setOpenSections] = useState<Record<string, boolean>>({
+    security: false,
+    personal: false,
+    preferences: false,
+  });
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [updateSuccess, setUpdateSuccess] = useState(false);
+  const [updateError, setUpdateError] = useState('');
+  const [formData, setFormData] = useState({
+    name: '',
+    bio: '',
+  });
+
+  // Aggiorna i dati del form quando la sessione cambia
+  React.useEffect(() => {
+    if (session?.user) {
+      setFormData({
+        name: session.user.name || '',
+        bio: (session.user as { bio?: string }).bio || '',
+      });
+    }
+  }, [session]);
+
+  const toggleSection = (section: string) => {
+    setOpenSections(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }));
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setFormData(prev => ({
+      ...prev,
+      [e.target.name]: e.target.value
+    }));
+    // Reset success/error states
+    setUpdateSuccess(false);
+    setUpdateError('');
+  };
+
+  const handleSaveProfile = async () => {
+    setIsUpdating(true);
+    setUpdateError('');
+    setUpdateSuccess(false);
+    
+    try {
+      const response = await fetch('/api/profile/update', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Errore durante il salvataggio');
+      }
+
+      // Aggiorna la sessione con i nuovi dati
+      if (session) {
+        await update({
+          ...session,
+          user: {
+            ...session.user,
+            name: data.user.name,
+            bio: data.user.bio,
+          }
+        });
+      }
+
+      setUpdateSuccess(true);
+      
+      // Nascondi il messaggio di successo dopo 3 secondi
+      setTimeout(() => {
+        setUpdateSuccess(false);
+      }, 3000);
+    } catch (error) {
+      setUpdateError(error instanceof Error ? error.message : 'Errore durante il salvataggio');
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  if (!session?.user) return null;
+
+  return (
+    <div className="space-y-6">
+      <div className="bg-white border border-gray-200 rounded-lg p-6">
+        <div className="flex items-center space-x-3 mb-6">
+          <Settings className="w-6 h-6 text-primary-600" />
+          <div>
+            <h2 className="text-xl font-semibold text-gray-900">Impostazioni Profilo</h2>
+            <p className="text-sm text-gray-600">
+              Gestisci le impostazioni del tuo account e le preferenze
+            </p>
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          {/* Personal Information Section - Prima posizione */}
+          <SettingsSection
+            title="Informazioni Personali"
+            description="Modifica le tue informazioni personali"
+            icon={<User className="w-5 h-5 text-blue-600" />}
+            isOpen={openSections.personal}
+            onToggle={() => toggleSection('personal')}
+          >
+            <div className="space-y-4">
+              {/* Messaggi di feedback */}
+              {updateSuccess && (
+                <div className="bg-green-50 border border-green-200 rounded-md p-4">
+                  <div className="flex">
+                    <svg className="w-5 h-5 text-green-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    <p className="text-sm text-green-800">Profilo aggiornato con successo!</p>
+                  </div>
+                </div>
+              )}
+
+              {updateError && (
+                <div className="bg-red-50 border border-red-200 rounded-md p-4">
+                  <div className="flex">
+                    <svg className="w-5 h-5 text-red-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                    </svg>
+                    <p className="text-sm text-red-800">{updateError}</p>
+                  </div>
+                </div>
+              )}
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Nome Completo
+                </label>
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                  placeholder="Il tuo nome completo"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  value={session.user.email || ''}
+                  disabled
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-50 text-gray-500 cursor-not-allowed"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  L&apos;email non può essere modificata
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Bio Personale
+                </label>
+                <textarea
+                  name="bio"
+                  value={formData.bio}
+                  onChange={handleInputChange}
+                  rows={3}
+                  maxLength={200}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                  placeholder="Racconta qualcosa di te..."
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  {formData.bio.length}/200 caratteri
+                </p>
+              </div>
+
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  onClick={handleSaveProfile}
+                  disabled={isUpdating}
+                  className="px-4 py-2 bg-primary-600 text-white text-sm font-medium rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isUpdating ? 'Salvataggio...' : 'Salva Modifiche'}
+                </button>
+              </div>
+            </div>
+          </SettingsSection>
+
+          {/* Security Section */}
+          <SettingsSection
+            title="Sicurezza"
+            description="Gestisci la sicurezza del tuo account"
+            icon={<Lock className="w-5 h-5 text-red-600" />}
+            isOpen={openSections.security}
+            onToggle={() => toggleSection('security')}
+          >
+            <div className="bg-gray-50 rounded-lg p-4">
+              <ChangePasswordForm 
+                onSuccess={() => {
+                  // Opzionalmente chiudi la sezione dopo il successo
+                  setTimeout(() => {
+                    toggleSection('security');
+                  }, 3000);
+                }}
+              />
+            </div>
+          </SettingsSection>
+
+          {/* Preferences Section - Future Development */}
+          <SettingsSection
+            title="Preferenze"
+            description="Personalizza la tua esperienza"
+            icon={<Settings className="w-5 h-5 text-green-600" />}
+            isOpen={openSections.preferences}
+            onToggle={() => toggleSection('preferences')}
+          >
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="text-sm font-medium text-gray-900">
+                    Notifiche Email
+                  </h4>
+                  <p className="text-xs text-gray-600">
+                    Ricevi aggiornamenti sui tuoi viaggi
+                  </p>
+                </div>
+                <button className="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 bg-gray-200">
+                  <span className="translate-x-0 pointer-events-none relative inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"></span>
+                </button>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="text-sm font-medium text-gray-900">
+                    Tema Scuro
+                  </h4>
+                  <p className="text-xs text-gray-600">
+                    Usa il tema scuro per l&apos;interfaccia
+                  </p>
+                </div>
+                <button className="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 bg-gray-200">
+                  <span className="translate-x-0 pointer-events-none relative inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"></span>
+                </button>
+              </div>
+
+            </div>
+          </SettingsSection>
+        </div>
+      </div>
+    </div>
+  );
+}
