@@ -59,6 +59,7 @@ describe('/api/admin/trips/[id] DELETE', () => {
     id: 'trip-123',
     title: 'Test Trip',
     destination: 'Test Destination',
+    status: 'Bozza',
     media: [
       { url: 'https://blob.vercel-storage.com/hero.jpg', type: 'image' }
     ],
@@ -128,15 +129,17 @@ describe('/api/admin/trips/[id] DELETE', () => {
       mockAuth.mockResolvedValue(mockSentinelSession)
     })
 
-    it('should return 400 for invalid trip ID', async () => {
+    it('should return 404 for empty trip ID', async () => {
+      mockPrisma.trip.findUnique.mockResolvedValue(null)
+      
       const request = createMockRequest('http://localhost:3000/api/admin/trips/invalid')
       const params = Promise.resolve({ id: '' })
       
       const response = await DELETE(request, { params })
       
-      expect(response.status).toBe(400)
+      expect(response.status).toBe(404)
       const data = await response.json()
-      expect(data.error).toBe('ID viaggio non valido')
+      expect(data.error).toBe('Viaggio non trovato')
     })
 
     it('should return 404 if trip does not exist', async () => {
@@ -157,7 +160,10 @@ describe('/api/admin/trips/[id] DELETE', () => {
     beforeEach(() => {
       jest.clearAllMocks()
       mockAuth.mockResolvedValue(mockSentinelSession)
-      mockPrisma.trip.findUnique.mockResolvedValue(mockTripWithStages as any)
+      // Mock the first findUnique call for status check
+      mockPrisma.trip.findUnique.mockResolvedValueOnce({ status: 'Bozza', title: 'Test Trip' } as any)
+      // Mock the second findUnique call for full trip data
+      mockPrisma.trip.findUnique.mockResolvedValueOnce(mockTripWithStages as any)
       mockPrisma.trip.delete.mockResolvedValue(mockTripWithStages as any)
       mockCleanupTripStorage.mockResolvedValue({
         deletedFiles: ['file1.jpg', 'file2.gpx'],
@@ -196,6 +202,10 @@ describe('/api/admin/trips/[id] DELETE', () => {
 
     it('should continue deletion even if storage cleanup fails', async () => {
       mockCleanupTripStorage.mockRejectedValue(new Error('Storage error'))
+      // Need to reset mocks for this specific test
+      mockPrisma.trip.findUnique.mockReset()
+      mockPrisma.trip.findUnique.mockResolvedValueOnce({ status: 'Bozza', title: 'Test Trip' } as any)
+      mockPrisma.trip.findUnique.mockResolvedValueOnce(mockTripWithStages as any)
 
       const request = createMockRequest('http://localhost:3000/api/admin/trips/trip-123')
       const params = Promise.resolve({ id: 'trip-123' })
@@ -218,6 +228,10 @@ describe('/api/admin/trips/[id] DELETE', () => {
         failedFiles: ['file2.gpx'],
         errors: ['file2.gpx: Access denied']
       })
+      // Need to reset mocks for this specific test
+      mockPrisma.trip.findUnique.mockReset()
+      mockPrisma.trip.findUnique.mockResolvedValueOnce({ status: 'Bozza', title: 'Test Trip' } as any)
+      mockPrisma.trip.findUnique.mockResolvedValueOnce(mockTripWithStages as any)
 
       const request = createMockRequest('http://localhost:3000/api/admin/trips/trip-123')
       const params = Promise.resolve({ id: 'trip-123' })
@@ -238,7 +252,10 @@ describe('/api/admin/trips/[id] DELETE', () => {
   describe('Database Errors', () => {
     beforeEach(() => {
       mockAuth.mockResolvedValue(mockSentinelSession)
-      mockPrisma.trip.findUnique.mockResolvedValue(mockTripWithStages as any)
+      // Mock the first findUnique call for status check
+      mockPrisma.trip.findUnique.mockResolvedValueOnce({ status: 'Bozza', title: 'Test Trip' } as any)
+      // Mock the second findUnique call for full trip data
+      mockPrisma.trip.findUnique.mockResolvedValueOnce(mockTripWithStages as any)
       mockCleanupTripStorage.mockResolvedValue({
         deletedFiles: [],
         failedFiles: [],
