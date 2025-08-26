@@ -151,13 +151,22 @@ export default function UserTrips() {
             {trips.length === 0 ? 'Nessun viaggio creato' : `${trips.length} viaggio${trips.length !== 1 ? 'i' : ''}`}
           </p>
         </div>
-        <Link
-          href="/create-trip"
-          className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-        >
-          <Plus className="w-4 h-4 mr-1" />
-          Nuovo Viaggio
-        </Link>
+        <div className="flex space-x-2">
+          <Link
+            href="/create-trip"
+            className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          >
+            <Plus className="w-4 h-4 mr-1" />
+            Nuovo Viaggio
+          </Link>
+          <Link
+            href="/dashboard/trips/batch"
+            className="inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          >
+            <Send className="w-4 h-4 mr-1" />
+            Caricamento Batch
+          </Link>
+        </div>
       </div>
 
       {trips.length === 0 ? (
@@ -169,13 +178,22 @@ export default function UserTrips() {
           <p className="text-gray-500 mb-6">
             Inizia a creare il tuo primo viaggio e condividilo con la community!
           </p>
-          <Link
-            href="/create-trip"
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Crea il tuo primo viaggio
-          </Link>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Link
+              href="/create-trip"
+              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Crea il tuo primo viaggio
+            </Link>
+            <Link
+              href="/dashboard/trips/batch"
+              className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+            >
+              <Send className="w-4 h-4 mr-2" />
+              Caricamento Batch
+            </Link>
+          </div>
         </div>
       ) : (
         <div className="space-y-4">

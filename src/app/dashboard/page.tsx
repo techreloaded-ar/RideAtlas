@@ -3,7 +3,6 @@
 import { useSession } from 'next-auth/react';
 import { redirect, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
-import Link from 'next/link';
 import { UserRole, UserRoleLabels, UserRoleDescriptions, UserPermissions } from '@/types/profile';
 import { useEffect, useState, Suspense } from 'react';
 import UserTrips from '@/components/trips/UserTrips';
@@ -103,129 +102,16 @@ function DashboardContent() {
               </div>
             </div>
 
-            {/* Quick Actions */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {/* Esplora Viaggi - Disponibile per tutti */}
-              <div className="bg-green-50 border border-green-200 rounded-lg p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-lg font-medium text-green-900">
-                      Esplora Viaggi
-                    </h3>
-                    <p className="text-green-700 mt-1">
-                      Scopri i viaggi disponibili
-                    </p>
-                  </div>
-                  <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-1.447-.894L15 9m0 8V9m0 0L9 7" />
-                  </svg>
-                </div>
-                <div className="mt-4">
-                  <Link
-                    href="/trips"
-                    className="inline-flex items-center text-sm font-medium text-green-600 hover:text-green-500"
-                  >
-                    Vedi tutti i viaggi →
-                  </Link>
-                </div>
-              </div>
-
-              {/* Crea Viaggio - Solo Ranger e Sentinel */}
-              {UserPermissions.canCreateTrips(userRole) && (
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="text-lg font-medium text-blue-900">
-                        Crea Viaggio
-                      </h3>
-                      <p className="text-blue-700 mt-1">
-                        Organizza un nuovo viaggio
-                      </p>
-                    </div>
-                    <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
-                    </svg>
-                  </div>
-                  <div className="mt-4 space-y-2">
-                    <Link
-                      href="/create-trip"
-                      className="block text-sm font-medium text-blue-600 hover:text-blue-500"
-                    >
-                      Crea singolo viaggio →
-                    </Link>
-                    <Link
-                      href="/dashboard/trips/batch"
-                      className="block text-sm font-medium text-blue-600 hover:text-blue-500"
-                    >
-                      Caricamento batch →
-                    </Link>
-                  </div>
-                </div>
-              )}
-
-              {/* Gestione Utenti - Solo Sentinel */}
-              {UserPermissions.canAccessAdminPanel(userRole) && (
-                <div className="bg-purple-50 border border-purple-200 rounded-lg p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="text-lg font-medium text-purple-900">
-                        Amministrazione
-                      </h3>
-                      <p className="text-purple-700 mt-1">
-                        Gestisci utenti e sistema
-                      </p>
-                    </div>
-                    <svg className="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                    </svg>
-                  </div>
-                  <div className="mt-4">
-                    <Link
-                      href="/admin"
-                      className="inline-flex items-center text-sm font-medium text-purple-600 hover:text-purple-500"
-                    >
-                      Vai al pannello →
-                    </Link>
-                  </div>
-                </div>
-              )}
-
-              {/* Sicurezza Account - Disponibile per tutti */}
-              <div className="bg-orange-50 border border-orange-200 rounded-lg p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-lg font-medium text-orange-900">
-                      Sicurezza Account
-                    </h3>
-                    <p className="text-orange-700 mt-1">
-                      Gestisci la sicurezza del tuo account
-                    </p>
-                  </div>
-                  <svg className="w-8 h-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                  </svg>
-                </div>
-                <div className="mt-4">
-                  <button
-                    onClick={() => setShowChangePasswordModal(true)}
-                    className="inline-flex items-center text-sm font-medium text-orange-600 hover:text-orange-500"
-                  >
-                    Cambia password →
-                  </button>
-                </div>
-              </div>
+            {/* Main Content Sections */}
+            <div className="space-y-6">
 
               {/* I tuoi viaggi - Solo per utenti che possono creare viaggi */}
               {UserPermissions.canCreateTrips(userRole) && (
-                <div className="md:col-span-2 lg:col-span-3">
-                  <UserTrips />
-                </div>
+                <UserTrips />
               )}
 
               {/* Viaggi acquistati - Per tutti gli utenti */}
-              <div className="md:col-span-2 lg:col-span-3">
-                <PurchasedTrips />
-              </div>
+              <PurchasedTrips />
             </div>
           </div>
         </div>

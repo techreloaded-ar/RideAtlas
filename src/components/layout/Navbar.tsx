@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
 import UserAvatar from '@/components/ui/UserAvatar';
+import ChangePasswordForm from '@/components/profile/ChangePasswordForm';
+import { UserRole } from '@/types/profile';
 
 export default function Navbar() {
   const { data: session, status } = useSession({
@@ -17,6 +19,7 @@ export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
 
   // Assicuriamoci che il componente sia montato lato client
@@ -105,6 +108,24 @@ export default function Navbar() {
                     >
                       Dashboard
                     </Link>
+                    <button
+                      onClick={() => {
+                        setUserMenuOpen(false);
+                        setShowChangePasswordModal(true);
+                      }}
+                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-200"
+                    >
+                      Cambia password
+                    </button>
+                    {session.user.role === UserRole.Sentinel && (
+                      <Link
+                        href="/admin"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-200"
+                        onClick={() => setUserMenuOpen(false)}
+                      >
+                        Amministrazione
+                      </Link>
+                    )}
                     <button
                       onClick={() => {
                         setUserMenuOpen(false);
@@ -223,6 +244,23 @@ export default function Navbar() {
                   Dashboard
                 </Link>
                 <button
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    setShowChangePasswordModal(true);
+                  }}
+                  className="block w-full text-left px-4 py-2 text-base font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-800"
+                >
+                  Cambia password
+                </button>
+                {session.user.role === UserRole.Sentinel && (
+                  <Link
+                    href="/admin"
+                    className="block px-4 py-2 text-base font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-800"
+                  >
+                    Amministrazione
+                  </Link>
+                )}
+                <button
                   onClick={() => signOut()}
                   className="block w-full text-left px-4 py-2 text-base font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-800"
                 >
@@ -245,6 +283,20 @@ export default function Navbar() {
                 </Link>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Modal per Cambio Password */}
+      {showChangePasswordModal && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 xl:w-2/5 shadow-lg rounded-md bg-white">
+            <ChangePasswordForm
+              onSuccess={() => {
+                setTimeout(() => setShowChangePasswordModal(false), 2000);
+              }}
+              onCancel={() => setShowChangePasswordModal(false)}
+            />
           </div>
         </div>
       )}
