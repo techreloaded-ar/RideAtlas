@@ -13,13 +13,13 @@ export const createLeafletMocks = () => {
     fitBounds: jest.fn(),
   };
 
-  const mockTileLayer = {
-    addTo: jest.fn(() => mockTileLayer),
+  const mockTileLayer: any = {
+    addTo: jest.fn().mockReturnThis(),
     remove: jest.fn(),
   };
 
-  const mockControl = {
-    addTo: jest.fn(() => mockControl),
+  const mockControl: any = {
+    addTo: jest.fn().mockReturnThis(),
     getContainer: jest.fn(() => {
       const div = document.createElement('div');
       div.style.background = '';
@@ -31,13 +31,13 @@ export const createLeafletMocks = () => {
     }),
   };
 
-  const mockPolyline = {
-    addTo: jest.fn(() => mockPolyline),
+  const mockPolyline: any = {
+    addTo: jest.fn().mockReturnThis(),
   };
 
-  const mockMarker = {
-    addTo: jest.fn(() => mockMarker),
-    bindPopup: jest.fn(() => mockMarker),
+  const mockMarker: any = {
+    addTo: jest.fn().mockReturnThis(),
+    bindPopup: jest.fn().mockReturnThis(),
   };
 
   return {
