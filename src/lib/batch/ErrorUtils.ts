@@ -77,6 +77,9 @@ export class ErrorUtils {
     if (message.includes('campo') && message.includes('mancante')) {
       return 'Aggiungi tutti i campi obbligatori nel viaggi.json'
     }
+    if (message.includes('viaggio già esistente') || message.includes('cambia titolo')) {
+      return 'Modifica il titolo del viaggio nel file viaggi.json per renderlo unico'
+    }
     
     return null
   }
@@ -95,6 +98,9 @@ export class ErrorUtils {
     }
     if (message.includes('json')) {
       return '{\n  "title": "Giro delle Dolomiti",\n  "summary": "Descrizione...",\n  ...\n}'
+    }
+    if (message.includes('viaggio già esistente') || message.includes('cambia titolo')) {
+      return '"title": "Giro delle Dolomiti - Settembre 2024"\n(aggiungi data, versione o dettaglio specifico)'
     }
     
     return null
@@ -129,6 +135,10 @@ export class ErrorUtils {
       return `Viaggio ${tripContext}: ${originalMessage}. Controlla i file GPX nelle cartelle tappe.`
     }
     
+    if (originalMessage.includes('Viaggio già esistente. Cambia titolo.')) {
+      return `Viaggio ${tripContext}: ${originalMessage}. Un viaggio con questo titolo esiste già nel database.`
+    }
+    
     return `Viaggio ${tripContext}: ${originalMessage}`
   }
   
@@ -159,7 +169,7 @@ export class ErrorUtils {
   static extractErrorField(errorMessage: string): string | undefined {
     if (errorMessage.includes('characteristics')) return 'characteristics'
     if (errorMessage.includes('recommended_seasons')) return 'recommended_seasons'
-    if (errorMessage.includes('title')) return 'title'
+    if (errorMessage.includes('title') || errorMessage.includes('Viaggio già esistente')) return 'title'
     if (errorMessage.includes('summary')) return 'summary'
     if (errorMessage.includes('destination')) return 'destination'
     if (errorMessage.includes('theme')) return 'theme'

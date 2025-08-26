@@ -314,25 +314,39 @@ export class BatchProcessor {
       const slug = this.slugify(tripData.title)
       console.log(`Generated slug: ${slug}`)
       
-      const newTrip = await prisma.trip.create({
-        data: {
-          title: tripData.title,
-          summary: tripData.summary,
-          destination: tripData.destination,
-          theme: tripData.theme,
-          characteristics: tripData.characteristics,
-          recommended_seasons: tripData.recommended_seasons as RecommendedSeason[],
-          tags: tripData.tags,
-          travelDate: tripData.travelDate,
-          duration_days: Math.max(1, tripData.stages.length),
-          duration_nights: 0,
-          insights: null,
-          media: [], // Inizialmente vuoto, verrà aggiornato dopo upload
-          gpxFile: undefined, // Inizialmente undefined, verrà aggiornato dopo upload
-          slug,
-          user_id: userId,
-        },
-      })
+      let newTrip
+      try {
+        newTrip = await prisma.trip.create({
+          data: {
+            title: tripData.title,
+            summary: tripData.summary,
+            destination: tripData.destination,
+            theme: tripData.theme,
+            characteristics: tripData.characteristics,
+            recommended_seasons: tripData.recommended_seasons as RecommendedSeason[],
+            tags: tripData.tags,
+            travelDate: tripData.travelDate,
+            duration_days: Math.max(1, tripData.stages.length),
+            duration_nights: 0,
+            insights: null,
+            media: [], // Inizialmente vuoto, verrà aggiornato dopo upload
+            gpxFile: undefined, // Inizialmente undefined, verrà aggiornato dopo upload
+            slug,
+            user_id: userId,
+          },
+        })
+      } catch (error: unknown) {
+        // Type guard per errori Prisma
+        const prismaError = error as { code?: string; meta?: { target?: string[] }; message?: string };
+        
+        // Gestione errore di duplicazione slug (constraint unique) - stesso handling del manual upload
+        if (prismaError.code === 'P2002' && prismaError.meta?.target?.includes('slug')) {
+          throw new Error("Viaggio già esistente. Cambia titolo.")
+        }
+        
+        // Re-throw other errors
+        throw error
+      }
       console.log(`Trip created with ID: ${newTrip.id}`)
       
       // 2. Ora possiamo usare il vero tripId per organizzare i file
