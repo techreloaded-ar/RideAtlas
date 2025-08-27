@@ -311,9 +311,14 @@ describe('/api/trips GET - Lista viaggi con stages', () => {
               }
             }
           },
-          orderBy: {
-            created_at: 'desc'
-          }
+          orderBy: [
+            {
+              orderIndex: 'asc'
+            },
+            {
+              created_at: 'desc'
+            }
+          ]
         })
       )
     })

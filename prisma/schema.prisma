@@ -115,6 +115,7 @@ model Trip {
   status             TripStatus        @default(Bozza)
   price              Decimal           @default(5.00) @db.Decimal(10,2)
   travelDate         DateTime?         // Data in cui il ranger ha fatto il viaggio
+  orderIndex         Int?              // Campo per ordinamento personalizzato amministratore
   created_at         DateTime          @default(now())
   updated_at         DateTime          @updatedAt
   user_id            String

@@ -139,9 +139,14 @@ export async function GET() {
           }
         }
       },
-      orderBy: {
-        created_at: 'desc'
-      }
+      orderBy: [
+        {
+          orderIndex: 'asc'
+        },
+        {
+          created_at: 'desc'
+        }
+      ]
     });
     
     // Arricchisci ogni viaggio con calcoli aggiornati
@@ -215,6 +220,15 @@ export async function POST(request: NextRequest) {
       
       // Crea il viaggio con i dati di base in una transazione
       const result = await prisma.$transaction(async (tx) => {
+        // Ottieni il prossimo orderIndex disponibile
+        const maxOrderIndex = await tx.trip.findFirst({
+          select: { orderIndex: true },
+          orderBy: { orderIndex: 'desc' },
+          where: { orderIndex: { not: null } }
+        });
+        
+        const nextOrderIndex = (maxOrderIndex?.orderIndex ?? -1) + 1;
+        
         // Crea il viaggio
         const newTrip = await tx.trip.create({
           data: {
@@ -231,6 +245,7 @@ export async function POST(request: NextRequest) {
             media: (tripData.media || []) as unknown as object[],
             gpxFile: (tripData.gpxFile || null) as unknown as object,
             travelDate: tripData.travelDate ? new Date(tripData.travelDate) : null,
+            orderIndex: nextOrderIndex, // Assegna automaticamente il prossimo orderIndex
             slug,
             user_id: user.id,
           },

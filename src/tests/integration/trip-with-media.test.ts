@@ -23,8 +23,11 @@ jest.mock('@/lib/core/prisma', () => {
   const tripCreateMock = jest.fn();
   const tripUpdateMock = jest.fn();
   const tripFindUniqueMock = jest.fn();
+  const tripFindFirstMock = jest.fn();
   const tripDeleteMock = jest.fn();
   const stageCreateManyMock = jest.fn();
+  const userUpsertMock = jest.fn();
+  const userFindFirstMock = jest.fn();
 
   const prismaMock = {
     ...originalPrisma.prisma,
@@ -32,10 +35,15 @@ jest.mock('@/lib/core/prisma', () => {
       create: tripCreateMock,
       update: tripUpdateMock,
       findUnique: tripFindUniqueMock,
+      findFirst: tripFindFirstMock,
       delete: tripDeleteMock,
     },
     stage: {
       createMany: stageCreateManyMock,
+    },
+    user: {
+      upsert: userUpsertMock,
+      findFirst: userFindFirstMock,
     },
     $transaction: jest.fn().mockImplementation(async (callback) => {
       return callback({
@@ -43,10 +51,15 @@ jest.mock('@/lib/core/prisma', () => {
           create: tripCreateMock,
           update: tripUpdateMock,
           findUnique: tripFindUniqueMock,
+          findFirst: tripFindFirstMock,
           delete: tripDeleteMock,
         },
         stage: {
           createMany: stageCreateManyMock,
+        },
+        user: {
+          upsert: userUpsertMock,
+          findFirst: userFindFirstMock,
         },
       });
     }),
@@ -112,6 +125,9 @@ describe('Trip API con Media Integration', () => {
       user: { id: 'user-123', name: 'Test User', role: 'Ranger' }
     });
     
+    // Mock per orderIndex calculation - restituisce un viaggio con orderIndex 5
+    (prisma.trip.findFirst as jest.Mock).mockResolvedValue({ orderIndex: 5 });
+    
     // Mock delle risposte del database  
     (prisma.trip.create as jest.Mock).mockImplementation(({ data }) => {
       return Promise.resolve({
@@ -155,6 +171,7 @@ describe('Trip API con Media Integration', () => {
       const createCall = (prisma.trip.create as jest.Mock).mock.calls[0][0];
       expect(createCall.data.media).toEqual(mockMediaItems);
       expect(createCall.data.title).toBe('Viaggio Test con Media');
+      expect(createCall.data.orderIndex).toBe(6); // maxOrderIndex + 1
       
       // Verifica che il risultato contenga i media
       expect(result.media).toEqual(mockMediaItems);
@@ -186,6 +203,7 @@ describe('Trip API con Media Integration', () => {
       const createCall = (prisma.trip.create as jest.Mock).mock.calls[0][0];
       expect(createCall.data.media).toEqual([]); // Dovrebbe avere array vuoto per default
       expect(createCall.data.title).toBe('Viaggio Test Senza Media');
+      expect(createCall.data.orderIndex).toBe(6); // maxOrderIndex + 1
     });
   });
   
@@ -298,6 +316,9 @@ describe('Trip API con Media Integration', () => {
       updated_at: new Date(),
       user_id: 'user-123'
     };    beforeEach(() => {
+      // Ensure findFirst mock is set for orderIndex calculation
+      (prisma.trip.findFirst as jest.Mock).mockResolvedValue({ orderIndex: 5 });
+      
       (prisma.trip.create as jest.Mock).mockImplementation(({ data }) => {
         return Promise.resolve({
           ...tripWithInsights,
@@ -338,7 +359,8 @@ describe('Trip API con Media Integration', () => {
           data: expect.objectContaining({
             insights: tripWithInsights.insights,
             media: [],
-            gpxFile: null
+            gpxFile: null,
+            orderIndex: 6 // maxOrderIndex + 1
           })
         })
       );

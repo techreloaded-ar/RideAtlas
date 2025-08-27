@@ -19,6 +19,7 @@ jest.mock('@/lib/core/prisma', () => ({
 }))
 
 const mockAuth = auth as jest.Mock
+const mockPrisma = prisma as jest.Mocked<typeof prisma>
 
 describe('GET /api/admin/trips - Gestione Admin Viaggi', () => {
   beforeEach(() => {
@@ -106,8 +107,8 @@ describe('GET /api/admin/trips - Gestione Admin Viaggi', () => {
     })
 
     it('should return all trips with default pagination', async () => {
-      ;(prisma.trip.findMany as jest.Mock).mockResolvedValue(mockTripData)
-      ;(prisma.trip.count as jest.Mock).mockResolvedValue(2)
+      ;(mockPrisma.trip.findMany as jest.Mock).mockResolvedValue(mockTripData)
+      ;(mockPrisma.trip.count as jest.Mock).mockResolvedValue(2)
 
       const request = createMockRequest()
       const response = await GET(request)
@@ -134,9 +135,14 @@ describe('GET /api/admin/trips - Gestione Admin Viaggi', () => {
             },
           },
         },
-        orderBy: {
-          created_at: 'desc',
-        },
+        orderBy: [
+          {
+            orderIndex: 'asc',
+          },
+          {
+            created_at: 'desc',
+          },
+        ],
         skip: 0,
         take: 10,
       })

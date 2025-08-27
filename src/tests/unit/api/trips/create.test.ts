@@ -16,9 +16,14 @@ jest.mock('@/lib/core/prisma', () => ({
       create: jest.fn(),
       findUnique: jest.fn(),
       update: jest.fn(),
+      findFirst: jest.fn(),
     },
     stage: {
       createMany: jest.fn(),
+    },
+    user: {
+      upsert: jest.fn(),
+      findFirst: jest.fn(),
     },
     $transaction: jest.fn(),
   },
@@ -51,9 +56,27 @@ describe('POST /api/trips - Creazione Viaggi', () => {
     calculateTotalDistance.mockReturnValue(0)
     calculateTripDuration.mockReturnValue({ days: 3, nights: 2 })
     
-    // Mock $transaction per eseguire la callback con il mock prisma
+    // Setup prisma mocks
+    ;(mockPrisma.trip.findFirst as jest.Mock).mockResolvedValue({ orderIndex: 5 })
+    
+    // Mock $transaction con un transaction context completo
     mockPrisma.$transaction.mockImplementation(async (callback) => {
-      return callback(mockPrisma);
+      const mockTx = {
+        trip: {
+          findFirst: mockPrisma.trip.findFirst,
+          create: mockPrisma.trip.create,
+          findMany: mockPrisma.trip.findMany,
+          update: mockPrisma.trip.update,
+        },
+        stage: {
+          createMany: mockPrisma.stage.createMany,
+        },
+        user: {
+          upsert: mockPrisma.user.upsert,
+          findFirst: mockPrisma.user.findFirst,
+        },
+      };
+      return callback(mockTx);
     });
   })
 
@@ -130,6 +153,7 @@ describe('POST /api/trips - Creazione Viaggi', () => {
           media: [],
           gpxFile: null,
           travelDate: null,
+          orderIndex: 6,
           slug: 'viaggio-in-toscana',
           user_id: 'user-123',
         },
@@ -174,6 +198,7 @@ describe('POST /api/trips - Creazione Viaggi', () => {
           media: [],
           gpxFile: null,
           travelDate: null,
+          orderIndex: 6,
           slug: 'viaggio-minimo',
           duration_days: 1,
           duration_nights: 0,
@@ -215,6 +240,7 @@ describe('POST /api/trips - Creazione Viaggi', () => {
           media: [],
           gpxFile: null,
           travelDate: null,
+          orderIndex: 6,
           slug: 'viaggio-in-toscana-versione-2',
           user_id: 'user-123',
         },
@@ -493,6 +519,7 @@ describe('POST /api/trips - Creazione Viaggi', () => {
             media: [],
             gpxFile: null,
             travelDate: null,
+            orderIndex: 6,
             slug: expectedSlug,
             user_id: 'user-123',
           },

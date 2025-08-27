@@ -18,6 +18,14 @@ jest.mock('@/lib/core/prisma', () => ({
       create: jest.fn(),
       findUnique: jest.fn(),
       update: jest.fn(),
+      findFirst: jest.fn(),
+    },
+    stage: {
+      createMany: jest.fn(),
+    },
+    user: {
+      upsert: jest.fn(),
+      findFirst: jest.fn(),
     },
     $transaction: jest.fn(),
   },
@@ -49,9 +57,28 @@ describe('Trip API - Optional Fields Support', () => {
     });
     mockEnsureUserExists.mockResolvedValue(mockUser);
     
-    // Mock $transaction per eseguire la callback con il mock prisma
+    // Setup prisma mocks
+    ;(mockPrisma.trip.findFirst as jest.Mock).mockResolvedValue({ orderIndex: 5 });
+    
+    // Mock $transaction con un transaction context completo
     mockPrisma.$transaction.mockImplementation(async (callback) => {
-      return callback(mockPrisma);
+      const mockTx = {
+        trip: {
+          findFirst: mockPrisma.trip.findFirst,
+          findUnique: mockPrisma.trip.findUnique,
+          create: mockPrisma.trip.create,
+          findMany: mockPrisma.trip.findMany,
+          update: mockPrisma.trip.update,
+        },
+        stage: {
+          createMany: mockPrisma.stage.createMany,
+        },
+        user: {
+          upsert: mockPrisma.user.upsert,
+          findFirst: mockPrisma.user.findFirst,
+        },
+      };
+      return callback(mockTx);
     });
   });
 
@@ -105,6 +132,7 @@ describe('Trip API - Optional Fields Support', () => {
           media: [],
           gpxFile: null,
           travelDate: null,
+          orderIndex: 6,
           slug: 'viaggio-minimale',
           user_id: 'user-123',
           // L'API ricalcola duration basandosi su stages (0 stages = 1 day, 0 nights)
@@ -127,12 +155,15 @@ describe('Trip API - Optional Fields Support', () => {
         recommended_seasons: [RecommendedSeason.Primavera],
       };
 
-      mockPrisma.trip.create.mockResolvedValue({
+      const createdTrip = {
         id: 'trip-124',
         ...tripDataMinimal,
         slug: 'viaggio-minimale',
         user_id: 'user-123',
-      });
+      };
+
+      mockPrisma.trip.create.mockResolvedValue(createdTrip);
+      mockPrisma.trip.findUnique.mockResolvedValue(createdTrip);
 
       const request = createMockRequest(tripDataMinimal);
       const response = await POST(request);
@@ -196,6 +227,8 @@ describe('Trip API - Optional Fields Support', () => {
           media: [],
           gpxFile: null,
           travelDate: null,
+          insights: undefined,
+          orderIndex: 6,
           slug: 'viaggio-senza-tag',
           user_id: 'user-123',
           // L'API ricalcola duration basandosi su stages (0 stages = 1 day, 0 nights)
@@ -319,6 +352,8 @@ describe('Trip API - Optional Fields Support', () => {
           ...tripDataWithTravelDate,
           media: [],
           gpxFile: null,
+          insights: undefined,
+          orderIndex: 6,
           travelDate: new Date('2023-05-15T00:00:00.000Z'),
           slug: 'viaggio-con-data',
           user_id: 'user-123',
@@ -357,6 +392,8 @@ describe('Trip API - Optional Fields Support', () => {
           ...tripDataWithNullTravelDate,
           media: [],
           gpxFile: null,
+          insights: undefined,
+          orderIndex: 6,
           travelDate: null,
           slug: 'viaggio-senza-data',
           user_id: 'user-123',

@@ -5,28 +5,17 @@ import { useSession } from 'next-auth/react'
 import { useToast } from '@/hooks/ui/useToast'
 import Image from 'next/image'
 import { UserRole } from '@/types/profile'
-import { TripValidationError } from '@/types/trip'
-import { Calendar, MapPin, User, Clock, Navigation, Eye, Edit, AlertTriangle, Send, Trash2, RotateCcw } from 'lucide-react'
+import { TripValidationError, Trip } from '@/types/trip'
+import { User as UserType } from '@/types/profile';
+import { TripReorderSection } from '@/components/admin/TripReorderSection'
+import { Calendar, MapPin, User, Clock, Navigation, Eye, Edit, AlertTriangle, Send, Trash2, RotateCcw, ArrowUpDown, List } from 'lucide-react'
 
-interface Trip {
-  id: string
-  slug: string
-  title: string
-  destination: string
-  duration_days: number
-  theme: string
-  status: string
-  created_at: Date
-  user: {
-    id: string
-    name: string | null
-    email: string
-    image: string | null
-  }
+interface TripWithUser extends Trip {
+  user: UserType
 }
 
 interface TripsData {
-  trips: Trip[]
+  trips: TripWithUser[]
   pagination: {
     page: number
     limit: number
@@ -47,9 +36,10 @@ export default function TripManagement() {
   const [approvingTrip, setApprovingTrip] = useState<string | null>(null)
   const [revertingTrip, setRevertingTrip] = useState<string | null>(null)
   const [deletingTrip, setDeletingTrip] = useState<string | null>(null)
-  const [tripToDelete, setTripToDelete] = useState<Trip | null>(null)
+  const [tripToDelete, setTripToDelete] = useState<TripWithUser | null>(null)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [validationErrors, setValidationErrors] = useState<Record<string, TripValidationError[]>>({})
+  const [showReorderMode, setShowReorderMode] = useState(false)
 
   const fetchTrips = useCallback(async () => {
     try {
@@ -138,7 +128,7 @@ export default function TripManagement() {
     }
   }
 
-  const handleDeleteTrip = async (trip: Trip) => {
+  const handleDeleteTrip = async (trip: TripWithUser) => {
     setTripToDelete(trip)
     setShowDeleteConfirm(true)
   }
@@ -255,40 +245,73 @@ export default function TripManagement() {
           </p>
         </div>
 
-        {/* Filters */}
+        {/* Filters and Controls */}
         <div className="bg-white p-6 rounded-lg shadow mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label htmlFor="search" className="block text-sm font-medium text-gray-700 mb-1">
-                Cerca viaggi
-              </label>
-              <input
-                type="text"
-                id="search"
-                value={search}
-                onChange={(e) => handleSearchChange(e.target.value)}
-                placeholder="Titolo, destinazione o creatore..."
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-              />
-            </div>
-            <div>
-              <label htmlFor="statusFilter" className="block text-sm font-medium text-gray-700 mb-1">
-                Filtra per stato
-              </label>
-              <select
-                id="statusFilter"
-                value={statusFilter}
-                onChange={(e) => handleStatusFilterChange(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-medium text-gray-900">Controlli e Filtri</h2>
+            
+            {/* Mode Toggle */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setShowReorderMode(false)}
+                className={`inline-flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                  !showReorderMode
+                    ? 'bg-primary-100 text-primary-700 border border-primary-200'
+                    : 'text-gray-700 hover:bg-gray-50 border border-gray-300'
+                }`}
               >
-                <option value="">Tutti gli stati</option>
-                <option value="Bozza">Bozza</option>
-                <option value="Pubblicato">Pubblicato</option>
-                <option value="Pronto_per_revisione">Pronto per revisione</option>
-                <option value="Archiviato">Archiviato</option>
-              </select>
+                <List className="w-4 h-4" />
+                Visualizza Lista
+              </button>
+              <button
+                onClick={() => setShowReorderMode(true)}
+                className={`inline-flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                  showReorderMode
+                    ? 'bg-primary-100 text-primary-700 border border-primary-200'
+                    : 'text-gray-700 hover:bg-gray-50 border border-gray-300'
+                }`}
+              >
+                <ArrowUpDown className="w-4 h-4" />
+                Riordina Viaggi
+              </button>
             </div>
           </div>
+          
+          {/* Filters - only show in list mode */}
+          {!showReorderMode && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="search" className="block text-sm font-medium text-gray-700 mb-1">
+                  Cerca viaggi
+                </label>
+                <input
+                  type="text"
+                  id="search"
+                  value={search}
+                  onChange={(e) => handleSearchChange(e.target.value)}
+                  placeholder="Titolo, destinazione o creatore..."
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                />
+              </div>
+              <div>
+                <label htmlFor="statusFilter" className="block text-sm font-medium text-gray-700 mb-1">
+                  Filtra per stato
+                </label>
+                <select
+                  id="statusFilter"
+                  value={statusFilter}
+                  onChange={(e) => handleStatusFilterChange(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                >
+                  <option value="">Tutti gli stati</option>
+                  <option value="Bozza">Bozza</option>
+                  <option value="Pubblicato">Pubblicato</option>
+                  <option value="Pronto_per_revisione">Pronto per revisione</option>
+                  <option value="Archiviato">Archiviato</option>
+                </select>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Errors */}
@@ -311,8 +334,19 @@ export default function TripManagement() {
           </div>
         )}
 
+        {/* Trip Reorder Mode */}
+        {!loading && tripsData && showReorderMode && (
+          <TripReorderSection
+            trips={tripsData.trips as Trip[]} // Type conversion needed due to interface differences
+            onReorderComplete={() => {
+              // Refresh trips data after reordering
+              fetchTrips();
+            }}
+          />
+        )}
+
         {/* Trips table */}
-        {!loading && tripsData && (
+        {!loading && tripsData && !showReorderMode && (
           <div className="bg-white shadow rounded-lg overflow-hidden">
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
@@ -584,7 +618,7 @@ export default function TripManagement() {
         )}
 
         {/* Empty state */}
-        {!loading && tripsData && tripsData.trips.length === 0 && (
+        {!loading && tripsData && tripsData.trips.length === 0 && !showReorderMode && (
           <div className="bg-white rounded-lg shadow p-8 text-center">
             <Navigation className="w-16 h-16 text-gray-300 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-gray-900 mb-2">

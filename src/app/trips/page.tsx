@@ -115,9 +115,14 @@ export default async function TripsPage() {
         }
       }
     },
-    orderBy: {
-      created_at: 'desc'
-    }
+    orderBy: [
+      {
+        orderIndex: 'asc'
+      },
+      {
+        created_at: 'desc'
+      }
+    ]
   });
 
   // Converte i GPX per ogni viaggio per uso interno, manteniamo i tipi Prisma

@@ -74,9 +74,14 @@ export async function GET() {
         slug: true,
         gpxFile: true,
       },
-      orderBy: {
-        created_at: 'desc'
-      }
+      orderBy: [
+        {
+          orderIndex: 'asc'
+        },
+        {
+          created_at: 'desc'
+        }
+      ]
     });
 
     // Process trips for AI consumption
