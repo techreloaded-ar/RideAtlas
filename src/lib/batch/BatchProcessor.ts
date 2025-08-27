@@ -6,6 +6,7 @@ import { getStorageProvider } from '@/lib/storage'
 import { MediaItem, GpxFile } from '@/types/trip'
 import { RecommendedSeason, BatchJobStatus, Prisma } from '@prisma/client'
 import { ErrorUtils } from './ErrorUtils'
+import { parseGPXCore, createGpxFileFromMetadata } from '@/lib/gpx/gpx-utils'
 
 interface BatchError {
   message: string;
@@ -434,6 +435,30 @@ export class BatchProcessor {
     }
   }
 
+  /**
+   * Helper function to parse GPX metadata from buffer and create GpxFile with real metadata
+   */
+  private async parseGpxMetadataFromBuffer(gpxFile: ParsedGpxFile): Promise<GpxFile> {
+    let gpxMetadata;
+    try {
+      const gpxContent = gpxFile.buffer.toString('utf-8')
+      const parseResult = parseGPXCore(gpxContent, gpxFile.filename)
+      gpxMetadata = parseResult.metadata
+      console.log(`GPX metadata calculated for ${gpxFile.filename}: distance=${gpxMetadata.distance}m, waypoints=${gpxMetadata.waypoints}`)
+    } catch (parseError) {
+      console.warn(`Failed to parse GPX metadata for ${gpxFile.filename}:`, parseError)
+      // Fallback to default values if parsing fails
+      gpxMetadata = {
+        filename: gpxFile.filename,
+        distance: 0,
+        waypoints: 0
+      }
+    }
+    
+    // Create GpxFile object with metadata (URL will be set after upload)
+    return createGpxFileFromMetadata(gpxMetadata, '', true)
+  }
+
   private async processMediaFiles(mediaFiles: ParsedMediaFile[], tripId: string, tripName: string): Promise<MediaItem[]> {
     const mediaItems: MediaItem[] = []
     for (let i = 0; i < mediaFiles.length; i++) {
@@ -461,19 +486,21 @@ export class BatchProcessor {
 
   private async processGpxFile(gpxFile: ParsedGpxFile, tripId: string, tripName: string): Promise<GpxFile> {
     try {
+      // Parse metadata using helper function
+      const gpxFileWithMetadata = await this.parseGpxMetadataFromBuffer(gpxFile)
+      
+      // Upload file to storage
       const fileObj = new File([gpxFile.buffer], gpxFile.filename, { type: 'application/gpx+xml' })
-      // Trip-level GPX va nella root della directory trip
       const uploadResult = await this.storageProvider.uploadFile(fileObj, gpxFile.filename, { 
         tripId, 
         tripName 
       })
-      return {
-        url: uploadResult.url,
-        filename: gpxFile.filename,
-        waypoints: 0,
-        distance: 0,
-        isValid: true,
-      }
+      
+      // Update with actual URL and log
+      const result = { ...gpxFileWithMetadata, url: uploadResult.url }
+      console.log(`Trip GPX processed: ${gpxFile.filename} - ${result.distance}m, ${result.waypoints} waypoints`)
+      
+      return result
     } catch (error) {
       console.error(`Error uploading GPX file ${gpxFile.filename}:`, error)
       throw new Error(`Errore caricamento GPX: ${gpxFile.filename}`)
@@ -509,21 +536,23 @@ export class BatchProcessor {
 
   private async processStageGpxFile(gpxFile: ParsedGpxFile, tripId: string, tripName: string, stageIndex: string, stageName: string): Promise<GpxFile> {
     try {
+      // Parse metadata using helper function
+      const gpxFileWithMetadata = await this.parseGpxMetadataFromBuffer(gpxFile)
+      
+      // Upload file to storage (Stage GPX va nella root della directory stage)
       const fileObj = new File([gpxFile.buffer], gpxFile.filename, { type: 'application/gpx+xml' })
-      // Stage GPX va nella root della directory stage: stages/{n} - {name}/{filename}
       const uploadResult = await this.storageProvider.uploadFile(fileObj, gpxFile.filename, { 
         tripId, 
         tripName,
         stageIndex,
         stageName
       })
-      return {
-        url: uploadResult.url,
-        filename: gpxFile.filename,
-        waypoints: 0,
-        distance: 0,
-        isValid: true,
-      }
+      
+      // Update with actual URL and log
+      const result = { ...gpxFileWithMetadata, url: uploadResult.url }
+      console.log(`Stage GPX processed: ${gpxFile.filename} - ${result.distance}m, ${result.waypoints} waypoints`)
+      
+      return result
     } catch (error) {
       console.error(`Error uploading stage GPX file ${gpxFile.filename}:`, error)
       throw new Error(`Errore caricamento GPX stage: ${gpxFile.filename}`)

@@ -409,7 +409,7 @@ function createMetadata(
 /**
  * Parse GPX content from string - UNIFIED core parsing function
  */
-function parseGPXCore(gpxContent: string, filename: string): GPXParseResult {
+export function parseGPXCore(gpxContent: string, filename: string): GPXParseResult {
   const parser = new XMLParser(XML_PARSER_CONFIG)
   const xmlDoc = parser.parse(gpxContent)
   
