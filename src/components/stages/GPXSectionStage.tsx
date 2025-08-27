@@ -127,7 +127,7 @@ export default function GPXSectionStage({
           aria-label={`Scarica traccia GPX ${filename}`}
         >
           <Download className='w-4 h-4' aria-hidden='true' />
-          Download
+          Scarica GPX
         </button>
       </div>
 
