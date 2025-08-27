@@ -1,10 +1,12 @@
-import { Clock, MapPin, Mountain, Leaf, Sun } from 'lucide-react';
+import { Clock, MapPin, Mountain } from 'lucide-react';
+import { SeasonIcon } from '@/components/ui/SeasonIcon';
+import { RecommendedSeason } from '@/types/trip';
 
 interface TripChipsProps {
   duration: string;
   location: string;
   terrain: string;
-  seasons: string[];
+  seasons: RecommendedSeason[];
 }
 
 export function TripChips({ duration, location, terrain, seasons }: TripChipsProps) {
@@ -34,7 +36,7 @@ export function TripChips({ duration, location, terrain, seasons }: TripChipsPro
           key={index}
           className="flex items-center gap-2 bg-orange-100 text-orange-700 px-3 py-1 rounded-full text-sm"
         >
-          {season === 'Autunno' ? <Leaf className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
+          <SeasonIcon season={season} />
           <span>{season}</span>
         </div>
       ))}

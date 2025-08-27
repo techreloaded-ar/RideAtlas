@@ -9,6 +9,7 @@ import { TripValidationError, Trip } from '@/types/trip'
 import { User as UserType } from '@/types/profile';
 import { TripReorderSection } from '@/components/admin/TripReorderSection'
 import { Calendar, MapPin, User, Clock, Navigation, Eye, Edit, AlertTriangle, Send, Trash2, RotateCcw, ArrowUpDown, List } from 'lucide-react'
+import { getTripStatusColor, getTripStatusLabel } from '@/lib/utils/tripStatusUtils'
 
 interface TripWithUser extends Trip {
   user: UserType
@@ -181,35 +182,6 @@ export default function TripManagement() {
     setPage(1) // Reset to first page when filtering
   }
 
-  const getStatusBadgeColor = (status: string) => {
-    switch (status) {
-      case 'Bozza':
-        return 'bg-yellow-100 text-yellow-800'
-      case 'Pubblicato':
-        return 'bg-green-100 text-green-800'
-      case 'Pronto_per_revisione':
-        return 'bg-blue-100 text-blue-800'
-      case 'Archiviato':
-        return 'bg-gray-100 text-gray-800'
-      default:
-        return 'bg-gray-100 text-gray-800'
-    }
-  }
-
-  const getStatusLabel = (status: string) => {
-    switch (status) {
-      case 'Bozza':
-        return 'Bozza'
-      case 'Pubblicato':
-        return 'Pubblicato'
-      case 'Pronto_per_revisione':
-        return 'Pronto per revisione'
-      case 'Archiviato':
-        return 'Archiviato'
-      default:
-        return status
-    }
-  }
 
   const formatDate = (date: Date) => {
     return new Intl.DateTimeFormat('it-IT', {
@@ -421,8 +393,8 @@ export default function TripManagement() {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusBadgeColor(trip.status)}`}>
-                          {getStatusLabel(trip.status)}
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getTripStatusColor(trip.status)}`}>
+                          {getTripStatusLabel(trip.status)}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">

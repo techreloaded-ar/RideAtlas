@@ -4,7 +4,9 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Calendar, MapPin, Tag, User, Clock, Navigation } from 'lucide-react';
 import { castToGpxFile, castToMediaItems, MediaItem, GpxFile } from '@/types/trip'; // Importa la funzione helper
+import { SeasonIcon } from '@/components/ui/SeasonIcon';
 import { Prisma } from '@prisma/client';
+import { getTripStatusColor, getTripStatusLabel, shouldShowStatusBadge } from '@/lib/utils/tripStatusUtils';
 
 
 // Force dynamic rendering
@@ -96,6 +98,7 @@ export default async function TripsPage() {
   const whereClause = { status: TripStatus.Pubblicato };
   // Recupera i viaggi dal database con filtri basati sui ruoli
   const trips: TripWithRelations[] = await prisma.trip.findMany({
+    
     where: whereClause,
     include: {
       user: {
@@ -215,18 +218,14 @@ export default async function TripsPage() {
                     );
                   })()}
                   
-                  {/* Status badge */}
-                  <div className="absolute top-4 right-4">
-                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                      trip.status === 'Pubblicato' 
-                        ? 'bg-green-500 text-white' 
-                        : trip.status === 'Bozza'
-                        ? 'bg-yellow-500 text-white'
-                        : 'bg-blue-500 text-white'
-                    }`}>
-                      {trip.status}
-                    </span>
-                  </div>
+                  {/* Status badge - Show only for non-published trips */}
+                  {shouldShowStatusBadge(trip.status, true) && (
+                    <div className="absolute top-4 right-4">
+                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getTripStatusColor(trip.status)}`}>
+                        {getTripStatusLabel(trip.status)}
+                      </span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Contenuto della card */}
@@ -298,15 +297,26 @@ export default async function TripsPage() {
                       </div>
                     </div>
                   )}                  {/* Stagioni consigliate */}
-                  <div className="mb-4">
-                    <div className="flex flex-wrap gap-2">
-                      {trip.recommended_seasons.map((season, index) => (
-                        <span key={index} className={`px-3 py-1 rounded-full text-sm font-medium ${getSeasonColor(season)}`}>
-                          📅 {season}
-                        </span>
-                      ))}
+                  {trip.recommended_seasons.length > 0 && (
+                    <div className="mb-4">
+                      <div className="flex flex-wrap gap-2">
+                        {trip.recommended_seasons.slice(0, 3).map((season, index) => (
+                          <span 
+                            key={index} 
+                            className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium ${getSeasonColor(season)}`}
+                          >
+                            <SeasonIcon season={season} size="w-3 h-3" />
+                            {season}
+                          </span>
+                        ))}
+                        {trip.recommended_seasons.length > 3 && (
+                          <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-700">
+                            +{trip.recommended_seasons.length - 3}
+                          </span>
+                        )}
+                      </div>
                     </div>
-                  </div>
+                  )}
 
                   {/* Creatore del viaggio */}
                   <div className="border-t pt-4 mt-4">

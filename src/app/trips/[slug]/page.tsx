@@ -3,7 +3,7 @@ import { prisma } from '@/lib/core/prisma';
 import { notFound } from 'next/navigation';
 import { auth } from '@/auth';
 import { UserRole } from '@/types/profile';
-import { transformPrismaStages, RecommendedSeason } from '@/types/trip';
+import { transformPrismaStages } from '@/types/trip';
 import { TripDetailClient } from '@/components/trips/TripDetailClient';
 
 // Force dynamic rendering
@@ -68,14 +68,8 @@ export default async function TripDetailPage({ params }: { params: Promise<{ slu
   // Combina media del viaggio + media delle tappe (viaggio prima, poi tappe in ordine)
   // const galleryMediaItems = [...tripMediaItems, ...allStageMediaItems];
 
-  // Mappa le stagioni per il formato chip
-  const seasonMapping: Record<RecommendedSeason, string> = {
-    Primavera: 'Primavera',
-    Estate: 'Estate', 
-    Autunno: 'Autunno',
-    Inverno: 'Inverno'
-  };
-  const mappedSeasons = trip.recommended_seasons.map(season => seasonMapping[season]);
+  // Usa direttamente le stagioni tipizzate
+  const mappedSeasons = trip.recommended_seasons;
 
   
   const serializedTripWithStages = {

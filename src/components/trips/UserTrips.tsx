@@ -17,6 +17,7 @@ import {
   RotateCcw
 } from 'lucide-react'
 import { TripStatus, TripValidationError } from '@/types/trip'
+import { getTripStatusColor, getTripStatusLabel } from '@/lib/utils/tripStatusUtils'
 
 interface UserTrip {
   id: string
@@ -93,18 +94,6 @@ export default function UserTrips() {
     }
   }, [session?.user?.id, fetchUserTrips])
 
-  const getStatusColor = (status: TripStatus) => {
-    switch (status) {
-      case 'Bozza':
-        return 'bg-yellow-100 text-yellow-800'
-      case 'Pubblicato':
-        return 'bg-green-100 text-green-800'
-      case 'Archiviato':
-        return 'bg-gray-100 text-gray-800'
-      default:
-        return 'bg-gray-100 text-gray-800'
-    }
-  }
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('it-IT', {
@@ -205,8 +194,8 @@ export default function UserTrips() {
                     <h4 className="text-sm font-medium text-gray-900 truncate">
                       {trip.title}
                     </h4>
-                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${getStatusColor(trip.status)}`}>
-                      {trip.status}
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${getTripStatusColor(trip.status)}`}>
+                      {getTripStatusLabel(trip.status)}
                     </span>
                   </div>
                   

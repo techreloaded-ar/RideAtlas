@@ -9,7 +9,7 @@ import StageTimeline from '@/components/stages/StageTimeline'
 import AccessGate from '@/components/auth/AccessGate'
 import { PublishTripButton } from '@/components/trips/PublishTripButton'
 import { TripValidationWarning } from '@/components/trips/TripValidationWarning'
-import { GpxFile } from '@/types/trip'
+import { GpxFile, RecommendedSeason } from '@/types/trip'
 
 interface MediaItem {
   id: string
@@ -64,7 +64,7 @@ interface TripDetailClientProps {
   canEdit: boolean
   tripMediaItems: MediaItem[]
   allStageMediaItems: MediaItem[]
-  mappedSeasons: string[]
+  mappedSeasons: RecommendedSeason[]
 }
 
 export function TripDetailClient({
