@@ -1,50 +1,20 @@
 // src/tests/tripAnalysisService.test.ts
 import { TripAnalysisService } from '@/lib/trips/tripAnalysisService';
+import { TripTestFactory } from '@/tests/unit/factories/TripTestFactory';
 
-const mockTrips = [
-  {
-    id: '1',
-    title: 'Viaggio in Toscana',
-    summary: 'Bellissimo viaggio tra le colline toscane',
-    destination: 'Toscana',
-    duration_days: 3,
-    duration_nights: 2,
-    tags: ['natura', 'cultura'],
-    theme: 'Cultura e paesaggio',
-    characteristics: ['Curve strette', 'Bel paesaggio'],
-    recommended_seasons: ['Primavera', 'Estate'],
-    slug: 'viaggio-toscana',
-    gpxData: { hasGpx: true, distance: 250, elevationGain: 1200, waypoints: 15 }
-  },
-  {
-    id: '2',
-    title: 'Avventura in Veneto',
-    summary: 'Percorso mozzafiato nel Veneto',
-    destination: 'Veneto',
-    duration_days: 5,
-    duration_nights: 4,
-    tags: ['montagna', 'avventura'],
-    theme: 'Montagna e avventura',
-    characteristics: ['Curve strette', 'Strade sterrate'],
-    recommended_seasons: ['Estate', 'Autunno'],
-    slug: 'avventura-veneto',
-    gpxData: { hasGpx: true, distance: 400, elevationGain: 2500, waypoints: 25 }
-  },
-  {
-    id: '3',
-    title: 'Costa Amalfitana',
-    summary: 'Viaggio lungo la splendida costiera amalfitana',
-    destination: 'Amalfi',
-    duration_days: 2,
-    duration_nights: 1,
-    tags: ['mare', 'panorama'],
-    theme: 'Mare e relax',
-    characteristics: ['Bel paesaggio', 'Curve strette'],
-    recommended_seasons: ['Primavera', 'Estate'],
-    slug: 'costa-amalfitana',
-    gpxData: { hasGpx: false }
+// Utilizziamo scenari predefiniti dalla factory
+const mockTrips = TripTestFactory.createTripsForAnalysis().map(trip => ({
+  ...trip,
+  // Adatta il formato per TripAnalysisService (gpxData invece di gpxFile)
+  gpxData: trip.gpxFile ? {
+    hasGpx: true,
+    distance: trip.gpxFile.distance / 1000, // Converti da metri a km per analysis service
+    elevationGain: trip.gpxFile.elevationGain,
+    waypoints: trip.gpxFile.waypoints
+  } : {
+    hasGpx: false
   }
-];
+}));
 
 describe('TripAnalysisService', () => {
   describe('extractPreferences', () => {
@@ -119,7 +89,7 @@ describe('TripAnalysisService', () => {
       const result = TripAnalysisService.analyzeTrips(mockTrips, message);
 
       expect(result.recommendations.length).toBeGreaterThan(0);
-      expect(result.recommendations[0].title).toBe('Viaggio in Toscana');
+      expect(result.recommendations[0].title).toBe(mockTrips[0].title); // Usa il titolo dalla factory
       expect(result.recommendations[0].relevanceScore).toBeGreaterThan(50); // Should have high score for exact match
     });
 
@@ -148,10 +118,15 @@ describe('TripAnalysisService', () => {
     });
 
     it('should return optimized order for multiple trips', () => {
-      const trips = [
-        { id: '1', title: 'Roma Trip', destination: 'Roma', duration_days: 1, summary: '', slug: '' },
-        { id: '2', title: 'Milano Trip', destination: 'Milano', duration_days: 1, summary: '', slug: '' }
-      ];
+      // Usa i primi due trip dalla factory
+      const trips = mockTrips.slice(0, 2).map(trip => ({
+        id: trip.id,
+        title: trip.title,
+        destination: trip.destination,
+        duration_days: trip.duration_days,
+        summary: trip.summary,
+        slug: trip.slug
+      }));
       const order = TripAnalysisService.optimizeTripOrder(trips);
       
       expect(order).toHaveLength(2);
@@ -162,15 +137,30 @@ describe('TripAnalysisService', () => {
 
   describe('createDetailedItinerary', () => {
     it('should create day-by-day breakdown', () => {
+      // Usa trip dalla factory con durate specifiche per il test
       const trips = [
-        { id: '1', title: 'Trip 1', destination: 'Roma', duration_days: 2, summary: '', slug: '' },
-        { id: '2', title: 'Trip 2', destination: 'Milano', duration_days: 3, summary: '', slug: '' }
+        { 
+          id: mockTrips[2].id, 
+          title: mockTrips[2].title, 
+          destination: mockTrips[2].destination, 
+          duration_days: 2, // Costa Amalfitana - 2 giorni
+          summary: mockTrips[2].summary, 
+          slug: mockTrips[2].slug 
+        },
+        { 
+          id: mockTrips[0].id, 
+          title: mockTrips[0].title, 
+          destination: mockTrips[0].destination, 
+          duration_days: 3, // Toscana - 3 giorni
+          summary: mockTrips[0].summary, 
+          slug: mockTrips[0].slug 
+        }
       ];
       const itinerary = TripAnalysisService.createDetailedItinerary(trips);
       
       expect(itinerary.totalDays).toBe(6); // 2 + 1 (transfer) + 3
       expect(itinerary.dailyBreakdown).toHaveLength(6);
-      expect(itinerary.dailyBreakdown[0].activity).toContain('Inizio Trip 1');
+      expect(itinerary.dailyBreakdown[0].activity).toContain(`Inizio ${mockTrips[2].title}`);
       expect(itinerary.dailyBreakdown[2].activity).toContain('Trasferimento');
     });
   });

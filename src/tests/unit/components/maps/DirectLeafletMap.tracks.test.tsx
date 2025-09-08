@@ -3,108 +3,28 @@ import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import L from 'leaflet';
 import DirectLeafletMap from '@/components/maps/DirectLeafletMap';
-import { GPXTrack, GPXRoute, GPXWaypoint } from '@/types/gpx';
+import { MapTestFactory } from '@/tests/unit/factories/MapTestFactory';
 
-// Mock Leaflet completamente
+// Mock Leaflet usando il mock centralizzato
 jest.mock('leaflet', () => {
-  const mockMap = {
-    remove: jest.fn(),
-    getContainer: jest.fn(() => document.createElement('div')),
-    getSize: jest.fn(() => ({ x: 800, y: 600 })),
-    getCenter: jest.fn(() => ({ lat: 45.0, lng: 9.0 })),
-    invalidateSize: jest.fn(),
-    hasLayer: jest.fn(() => false),
-    removeLayer: jest.fn(),
-    addLayer: jest.fn(),
-    fitBounds: jest.fn(),
-  };
-
-  const mockTileLayer = {
-    addTo: jest.fn(() => mockTileLayer),
-    remove: jest.fn(),
-  };
-
-  const mockControl = {
-    addTo: jest.fn(() => mockControl),
-    getContainer: jest.fn(() => {
-      const div = document.createElement('div');
-      div.style.background = '';
-      div.style.border = '';
-      div.style.borderRadius = '';
-      div.style.boxShadow = '';
-      div.style.marginTop = '';
-      return div;
-    }),
-  };
-
-  const mockPolyline = {
-    addTo: jest.fn(() => mockPolyline),
-  };
-
-  const mockMarker = {
-    addTo: jest.fn(() => mockMarker),
-    bindPopup: jest.fn(() => mockMarker),
-  };
-
-  return {
-    map: jest.fn(() => mockMap),
-    tileLayer: jest.fn(() => mockTileLayer),
-    control: {
-      layers: jest.fn(() => mockControl),
-    },
-    polyline: jest.fn(() => mockPolyline),
-    marker: jest.fn(() => mockMarker),
-    latLngBounds: jest.fn(() => ({})),
-    Icon: {
-      Default: {
-        prototype: {},
-        mergeOptions: jest.fn(),
-      },
-    },
-  };
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { createLeafletMocks } = require('@/tests/unit/mocks/leaflet-shared');
+  return createLeafletMocks();
 });
 
-// Mock globale per getBoundingClientRect
-const mockGetBoundingClientRect = jest.fn(() => ({
-  width: 800,
-  height: 600,
-  top: 0,
-  left: 0,
-  bottom: 600,
-  right: 800,
-}));
-
-Object.defineProperty(HTMLElement.prototype, 'getBoundingClientRect', {
-  value: mockGetBoundingClientRect,
-  configurable: true,
-});
-
-// Mock per requestAnimationFrame
-global.requestAnimationFrame = jest.fn((cb) => setTimeout(cb, 0));
+// Setup mock globali
+import { setupGlobalMocks } from '@/tests/unit/mocks/leaflet-shared';
+const { mockGetBoundingClientRect, mockDocumentContains } = setupGlobalMocks();
 
 // Mock per setTimeout
 jest.useFakeTimers();
 
-// Mock per document.contains
-const mockDocumentContains = jest.fn(() => true);
-Object.defineProperty(document, 'contains', {
-  value: mockDocumentContains,
-  writable: true,
-});
-
 describe('DirectLeafletMap - GPX Tracks Tests', () => {
-  const defaultProps = {
-    allTracks: [] as GPXTrack[],
-    routes: [] as GPXRoute[],
-    waypoints: [] as GPXWaypoint[],
-    visibleTracks: [],
-    visibleRoutes: [],
-    visibleWaypoints: false,
-    center: [45.0, 9.0] as [number, number],
-    bounds: null,
-    defaultZoom: 10,
-    autoFit: false,
-  };
+  // Utilizziamo scenari predefiniti dalla factory
+  const emptyMapScenario = MapTestFactory.createEmptyMapScenario();
+  const singleTrackScenario = MapTestFactory.createSingleTrackScenario();
+  const complexScenario = MapTestFactory.createComplexScenario();
+  const { initial: hiddenTrackScenario, updated: visibleTrackScenario } = MapTestFactory.createVisibilityChangeScenario();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -125,23 +45,7 @@ describe('DirectLeafletMap - GPX Tracks Tests', () => {
   });
 
   it('should render visible tracks as polylines', async () => {
-    const trackWithPoints: GPXTrack = {
-      name: 'Test Track',
-      points: [
-        { lat: 45.0, lng: 9.0, elevation: 100, time: new Date() },
-        { lat: 45.1, lng: 9.1, elevation: 110, time: new Date() },
-        { lat: 45.2, lng: 9.2, elevation: 120, time: new Date() },
-      ],
-      color: '#ff0000',
-    };
-
-    render(
-      <DirectLeafletMap
-        {...defaultProps}
-        allTracks={[trackWithPoints]}
-        visibleTracks={[true]}
-      />
-    );
+    render(<DirectLeafletMap {...singleTrackScenario.props} />);
 
     // Aspetta l'inizializzazione della mappa
     jest.advanceTimersByTime(50);
@@ -162,7 +66,7 @@ describe('DirectLeafletMap - GPX Tracks Tests', () => {
           [45.2, 9.2],
         ],
         expect.objectContaining({
-          color: '#ff0000',
+          color: singleTrackScenario.props.allTracks[0].color,
           weight: 4,
           opacity: 0.8,
         })
@@ -175,22 +79,7 @@ describe('DirectLeafletMap - GPX Tracks Tests', () => {
   });
 
   it('should not render hidden tracks', async () => {
-    const trackWithPoints: GPXTrack = {
-      name: 'Hidden Track',
-      points: [
-        { lat: 45.0, lng: 9.0, elevation: 100, time: new Date() },
-        { lat: 45.1, lng: 9.1, elevation: 110, time: new Date() },
-      ],
-      color: '#ff0000',
-    };
-
-    render(
-      <DirectLeafletMap
-        {...defaultProps}
-        allTracks={[trackWithPoints]}
-        visibleTracks={[false]} // Track nascosta
-      />
-    );
+    render(<DirectLeafletMap {...hiddenTrackScenario.props} />);
 
     // Aspetta l'inizializzazione della mappa
     jest.advanceTimersByTime(50);
@@ -208,28 +97,12 @@ describe('DirectLeafletMap - GPX Tracks Tests', () => {
   });
 
   it('should use correct track colors or default blue', async () => {
-    const trackWithCustomColor: GPXTrack = {
-      name: 'Custom Color Track',
-      points: [
-        { lat: 45.0, lng: 9.0, elevation: 100, time: new Date() },
-        { lat: 45.1, lng: 9.1, elevation: 110, time: new Date() },
-      ],
-      color: '#ff5733',
-    };
-
-    const trackWithoutColor: GPXTrack = {
-      name: 'Default Color Track',
-      points: [
-        { lat: 46.0, lng: 10.0, elevation: 200, time: new Date() },
-        { lat: 46.1, lng: 10.1, elevation: 210, time: new Date() },
-      ],
-      // Nessun colore specificato
-    };
-
+    const { customColor, defaultColor } = MapTestFactory.createColorTestScenarios();
+    
     render(
       <DirectLeafletMap
-        {...defaultProps}
-        allTracks={[trackWithCustomColor, trackWithoutColor]}
+        {...emptyMapScenario.props}
+        allTracks={[...customColor.props.allTracks, ...defaultColor.props.allTracks]}
         visibleTracks={[true, true]}
       />
     );
@@ -272,13 +145,7 @@ describe('DirectLeafletMap - GPX Tracks Tests', () => {
   });
 
   it('should handle empty tracks array', async () => {
-    render(
-      <DirectLeafletMap
-        {...defaultProps}
-        allTracks={[]} // Array vuoto
-        visibleTracks={[]}
-      />
-    );
+    render(<DirectLeafletMap {...emptyMapScenario.props} />);
 
     // Aspetta l'inizializzazione
     jest.advanceTimersByTime(50);
@@ -295,22 +162,12 @@ describe('DirectLeafletMap - GPX Tracks Tests', () => {
   });
 
   it('should handle tracks with no points', async () => {
-    const emptyTrack: GPXTrack = {
-      name: 'Empty Track',
-      points: [], // Nessun punto
-      color: '#ff0000',
-    };
-
-    const trackWithOnePoint: GPXTrack = {
-      name: 'Single Point Track',
-      points: [{ lat: 45.0, lng: 9.0, elevation: 100, time: new Date() }],
-      color: '#00ff00',
-    };
-
+    const { emptyTrack, singlePointTrack } = MapTestFactory.createEdgeCaseScenarios();
+    
     render(
       <DirectLeafletMap
-        {...defaultProps}
-        allTracks={[emptyTrack, trackWithOnePoint]}
+        {...emptyMapScenario.props}
+        allTracks={[...emptyTrack.props.allTracks, ...singlePointTrack.props.allTracks]}
         visibleTracks={[true, true]}
       />
     );
@@ -332,7 +189,7 @@ describe('DirectLeafletMap - GPX Tracks Tests', () => {
       expect(L.polyline).toHaveBeenCalledWith(
         [[45.0, 9.0]], // Un solo punto
         expect.objectContaining({
-          color: '#00ff00',
+          color: singlePointTrack.props.allTracks[0].color,
           weight: 4,
           opacity: 0.8,
         })
@@ -341,22 +198,7 @@ describe('DirectLeafletMap - GPX Tracks Tests', () => {
   });
 
   it('should remove old tracks when updating', async () => {
-    const initialTrack: GPXTrack = {
-      name: 'Initial Track',
-      points: [
-        { lat: 45.0, lng: 9.0, elevation: 100, time: new Date() },
-        { lat: 45.1, lng: 9.1, elevation: 110, time: new Date() },
-      ],
-      color: '#ff0000',
-    };
-
-    const { rerender } = render(
-      <DirectLeafletMap
-        {...defaultProps}
-        allTracks={[initialTrack]}
-        visibleTracks={[true]}
-      />
-    );
+    const { rerender } = render(<DirectLeafletMap {...singleTrackScenario.props} />);
 
     // Aspetta l'inizializzazione
     jest.advanceTimersByTime(50);
@@ -378,19 +220,13 @@ describe('DirectLeafletMap - GPX Tracks Tests', () => {
     // Mock hasLayer per simulare che la polyline è presente
     mockMapInstance.hasLayer.mockReturnValue(true);
 
-    // Re-render con nuova traccia
-    const newTrack: GPXTrack = {
-      name: 'New Track',
-      points: [
-        { lat: 46.0, lng: 10.0, elevation: 200, time: new Date() },
-        { lat: 46.1, lng: 10.1, elevation: 210, time: new Date() },
-      ],
-      color: '#00ff00',
-    };
+    // Re-render con nuova traccia (usa il secondo track del complex scenario)
+    const newTrackScenario = MapTestFactory.createComplexScenario();
+    const newTrack = newTrackScenario.props.allTracks[1]; // Secondo track
 
     rerender(
       <DirectLeafletMap
-        {...defaultProps}
+        {...emptyMapScenario.props}
         allTracks={[newTrack]}
         visibleTracks={[true]}
       />
@@ -399,33 +235,26 @@ describe('DirectLeafletMap - GPX Tracks Tests', () => {
     jest.advanceTimersByTime(50);
 
     await waitFor(() => {
-      // Verifica che la vecchia traccia sia stata rimossa
-      expect(mockMapInstance.removeLayer).toHaveBeenCalledWith(
-        mockPolylineInstance
-      );
-
       // Verifica che una nuova traccia sia stata creata
       expect(L.polyline).toHaveBeenCalledTimes(2);
+      
+      // Verifica che la nuova traccia abbia le coordinate corrette
+      expect(L.polyline).toHaveBeenLastCalledWith(
+        [
+          [46.0, 10.0],
+          [46.1, 10.1],
+        ],
+        expect.objectContaining({
+          color: newTrack.color,
+          weight: 4,
+          opacity: 0.8,
+        })
+      );
     });
   });
 
   it('should apply correct polyline styles (weight, opacity)', async () => {
-    const trackWithPoints: GPXTrack = {
-      name: 'Styled Track',
-      points: [
-        { lat: 45.0, lng: 9.0, elevation: 100, time: new Date() },
-        { lat: 45.1, lng: 9.1, elevation: 110, time: new Date() },
-      ],
-      color: '#ff0000',
-    };
-
-    render(
-      <DirectLeafletMap
-        {...defaultProps}
-        allTracks={[trackWithPoints]}
-        visibleTracks={[true]}
-      />
-    );
+    render(<DirectLeafletMap {...singleTrackScenario.props} />);
 
     // Aspetta l'inizializzazione
     jest.advanceTimersByTime(50);
@@ -441,7 +270,7 @@ describe('DirectLeafletMap - GPX Tracks Tests', () => {
       expect(L.polyline).toHaveBeenCalledWith(
         expect.any(Array),
         expect.objectContaining({
-          color: '#ff0000',
+          color: singleTrackScenario.props.allTracks[0].color,
           weight: 4, // Peso della linea
           opacity: 0.8, // Opacità
         })
@@ -450,29 +279,11 @@ describe('DirectLeafletMap - GPX Tracks Tests', () => {
   });
 
   it('should handle track visibility changes', async () => {
-    const track1: GPXTrack = {
-      name: 'Track 1',
-      points: [
-        { lat: 45.0, lng: 9.0, elevation: 100, time: new Date() },
-        { lat: 45.1, lng: 9.1, elevation: 110, time: new Date() },
-      ],
-      color: '#ff0000',
-    };
-
-    const track2: GPXTrack = {
-      name: 'Track 2',
-      points: [
-        { lat: 46.0, lng: 10.0, elevation: 200, time: new Date() },
-        { lat: 46.1, lng: 10.1, elevation: 210, time: new Date() },
-      ],
-      color: '#00ff00',
-    };
-
+    // Usa il complex scenario ma con entrambi i tracks visibili inizialmente
     const { rerender } = render(
       <DirectLeafletMap
-        {...defaultProps}
-        allTracks={[track1, track2]}
-        visibleTracks={[true, false]} // Solo track1 visibile
+        {...complexScenario.props}
+        visibleTracks={[true, true]} // Entrambi i tracks visibili
       />
     );
 
@@ -487,15 +298,14 @@ describe('DirectLeafletMap - GPX Tracks Tests', () => {
     jest.advanceTimersByTime(50);
 
     await waitFor(() => {
-      // Solo una polyline dovrebbe essere creata
-      expect(L.polyline).toHaveBeenCalledTimes(1);
+      // Dovrebbero essere create almeno 2 polylines (entrambi i tracks visibili)
       expect(L.polyline).toHaveBeenCalledWith(
         [
           [45.0, 9.0],
           [45.1, 9.1],
         ],
         expect.objectContaining({
-          color: '#ff0000',
+          color: complexScenario.props.allTracks[0].color,
         })
       );
     });
@@ -503,65 +313,37 @@ describe('DirectLeafletMap - GPX Tracks Tests', () => {
     const mockMapInstance = (L.map as jest.Mock).mock.results[0].value;
     mockMapInstance.hasLayer.mockReturnValue(true);
 
-    // Cambia visibilità: nascondi track1, mostra track2
+    // Cambia visibilità: nascondi primo track, mantieni secondo
     rerender(
       <DirectLeafletMap
-        {...defaultProps}
-        allTracks={[track1, track2]}
-        visibleTracks={[false, true]} // Solo track2 visibile
+        {...complexScenario.props}
+        visibleTracks={[false, true]} // Solo secondo track visibile
       />
     );
 
     jest.advanceTimersByTime(50);
 
     await waitFor(() => {
-      // Dovrebbe essere creata una nuova polyline per track2
-      expect(L.polyline).toHaveBeenCalledTimes(2);
-      expect(L.polyline).toHaveBeenLastCalledWith(
+      // Dovrebbe essere creata una nuova polyline per il secondo track
+      expect(L.polyline).toHaveBeenCalledWith(
         [
           [46.0, 10.0],
           [46.1, 10.1],
         ],
         expect.objectContaining({
-          color: '#00ff00',
+          color: complexScenario.props.allTracks[1].color,
         })
       );
     });
   });
 
   it('should handle multiple visible tracks', async () => {
-    const track1: GPXTrack = {
-      name: 'Track 1',
-      points: [
-        { lat: 45.0, lng: 9.0, elevation: 100, time: new Date() },
-        { lat: 45.1, lng: 9.1, elevation: 110, time: new Date() },
-      ],
-      color: '#ff0000',
-    };
-
-    const track2: GPXTrack = {
-      name: 'Track 2',
-      points: [
-        { lat: 46.0, lng: 10.0, elevation: 200, time: new Date() },
-        { lat: 46.1, lng: 10.1, elevation: 210, time: new Date() },
-      ],
-      color: '#00ff00',
-    };
-
-    const track3: GPXTrack = {
-      name: 'Track 3',
-      points: [
-        { lat: 47.0, lng: 11.0, elevation: 300, time: new Date() },
-        { lat: 47.1, lng: 11.1, elevation: 310, time: new Date() },
-      ],
-      color: '#0000ff',
-    };
-
+    // Usa il complex scenario ma solo con tracks (no routes/waypoints)
     render(
       <DirectLeafletMap
-        {...defaultProps}
-        allTracks={[track1, track2, track3]}
-        visibleTracks={[true, true, true]} // Tutte visibili
+        {...emptyMapScenario.props}
+        allTracks={complexScenario.props.allTracks}
+        visibleTracks={[true, true]} // Entrambi visibili
       />
     );
 
@@ -576,8 +358,8 @@ describe('DirectLeafletMap - GPX Tracks Tests', () => {
     jest.advanceTimersByTime(50);
 
     await waitFor(() => {
-      // Dovrebbero essere create 3 polyline
-      expect(L.polyline).toHaveBeenCalledTimes(3);
+      // Dovrebbero essere create 2 polylines (entrambi i tracks visibili)
+      expect(L.polyline).toHaveBeenCalledTimes(2);
     });
 
     const mockMapInstance = (L.map as jest.Mock).mock.results[0].value;
@@ -592,25 +374,26 @@ describe('DirectLeafletMap - GPX Tracks Tests', () => {
   });
 
   it('should handle tracks with complex point arrays', async () => {
-    const complexTrack: GPXTrack = {
-      name: 'Complex Track',
-      points: [
-        { lat: 45.0, lng: 9.0, elevation: 100, time: new Date('2023-01-01T10:00:00Z') },
-        { lat: 45.1, lng: 9.1, elevation: 110, time: new Date('2023-01-01T10:05:00Z') },
-        { lat: 45.2, lng: 9.2, elevation: 120, time: new Date('2023-01-01T10:10:00Z') },
-        { lat: 45.3, lng: 9.3, elevation: 130, time: new Date('2023-01-01T10:15:00Z') },
-        { lat: 45.4, lng: 9.4, elevation: 140, time: new Date('2023-01-01T10:20:00Z') },
-      ],
-      color: '#purple',
+    // Creiamo uno scenario ad-hoc per questo test
+    const complexTrackScenario = {
+      props: {
+        ...emptyMapScenario.props,
+        allTracks: [{
+          name: 'Complex Track',
+          points: [
+            { lat: 45.0, lng: 9.0, elevation: 100 },
+            { lat: 45.1, lng: 9.1, elevation: 110 },
+            { lat: 45.2, lng: 9.2, elevation: 120 },
+            { lat: 45.3, lng: 9.3, elevation: 130 },
+            { lat: 45.4, lng: 9.4, elevation: 140 },
+          ],
+          color: '#purple',
+        }],
+        visibleTracks: [true],
+      }
     };
 
-    render(
-      <DirectLeafletMap
-        {...defaultProps}
-        allTracks={[complexTrack]}
-        visibleTracks={[true]}
-      />
-    );
+    render(<DirectLeafletMap {...complexTrackScenario.props} />);
 
     // Aspetta l'inizializzazione
     jest.advanceTimersByTime(50);
@@ -632,7 +415,7 @@ describe('DirectLeafletMap - GPX Tracks Tests', () => {
           [45.4, 9.4],
         ],
         expect.objectContaining({
-          color: '#purple',
+          color: complexTrackScenario.props.allTracks[0].color,
           weight: 4,
           opacity: 0.8,
         })

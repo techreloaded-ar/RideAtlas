@@ -242,6 +242,135 @@ export class MapTestFactory {
   }
 
   /**
+   * Creates scenarios for testing track colors
+   */
+  static createColorTestScenarios(): {
+    customColor: MapTestScenario;
+    defaultColor: MapTestScenario;
+  } {
+    const trackWithCustomColor = createTestGPXTrack('Custom Color Track', [
+      createTestGPXPoint(45.0, 9.0, 100),
+      createTestGPXPoint(45.1, 9.1, 110),
+    ], '#ff5733');
+
+    const trackWithoutColor = createTestGPXTrack('Default Color Track', [
+      createTestGPXPoint(46.0, 10.0, 200),
+      createTestGPXPoint(46.1, 10.1, 210),
+    ]); // No color specified
+
+    return {
+      customColor: {
+        name: 'Custom Color Track',
+        description: 'Track with custom color',
+        props: {
+          allTracks: [trackWithCustomColor],
+          routes: [],
+          waypoints: [],
+          visibleTracks: [true],
+          visibleRoutes: [],
+          visibleWaypoints: false,
+          center: [45.0, 9.0],
+          bounds: null,
+          defaultZoom: 10,
+          autoFit: false,
+        },
+        expectedBehavior: {
+          shouldCreateMap: true,
+          shouldCreateTracks: 1,
+          shouldCreateRoutes: 0,
+          shouldCreateWaypoints: 0,
+          shouldFitBounds: false,
+        },
+      },
+      defaultColor: {
+        name: 'Default Color Track',
+        description: 'Track without color (should use default)',
+        props: {
+          allTracks: [trackWithoutColor],
+          routes: [],
+          waypoints: [],
+          visibleTracks: [true],
+          visibleRoutes: [],
+          visibleWaypoints: false,
+          center: [46.0, 10.0],
+          bounds: null,
+          defaultZoom: 10,
+          autoFit: false,
+        },
+        expectedBehavior: {
+          shouldCreateMap: true,
+          shouldCreateTracks: 1,
+          shouldCreateRoutes: 0,
+          shouldCreateWaypoints: 0,
+          shouldFitBounds: false,
+        },
+      },
+    };
+  }
+
+  /**
+   * Creates scenarios for testing edge cases with track points
+   */
+  static createEdgeCaseScenarios(): {
+    emptyTrack: MapTestScenario;
+    singlePointTrack: MapTestScenario;
+  } {
+    const emptyTrack = createTestGPXTrack('Empty Track', []);
+    const singlePointTrack = createTestGPXTrack('Single Point Track', [
+      createTestGPXPoint(45.0, 9.0, 100)
+    ], '#00ff00');
+
+    return {
+      emptyTrack: {
+        name: 'Empty Track',
+        description: 'Track with no points',
+        props: {
+          allTracks: [emptyTrack],
+          routes: [],
+          waypoints: [],
+          visibleTracks: [true],
+          visibleRoutes: [],
+          visibleWaypoints: false,
+          center: [45.0, 9.0],
+          bounds: null,
+          defaultZoom: 10,
+          autoFit: false,
+        },
+        expectedBehavior: {
+          shouldCreateMap: true,
+          shouldCreateTracks: 0,
+          shouldCreateRoutes: 0,
+          shouldCreateWaypoints: 0,
+          shouldFitBounds: false,
+        },
+      },
+      singlePointTrack: {
+        name: 'Single Point Track',
+        description: 'Track with only one point',
+        props: {
+          allTracks: [singlePointTrack],
+          routes: [],
+          waypoints: [],
+          visibleTracks: [true],
+          visibleRoutes: [],
+          visibleWaypoints: false,
+          center: [45.0, 9.0],
+          bounds: null,
+          defaultZoom: 10,
+          autoFit: false,
+        },
+        expectedBehavior: {
+          shouldCreateMap: true,
+          shouldCreateTracks: 1,
+          shouldCreateRoutes: 0,
+          shouldCreateWaypoints: 0,
+          shouldFitBounds: false,
+        },
+      },
+    };
+  }
+
+  /**
    * Gets all available test scenarios
    */
   static getAllScenarios(): MapTestScenario[] {

@@ -59,3 +59,52 @@ export interface ValidationResult<T = unknown> {
   data?: T;
   error?: string;
 }
+
+/**
+ * Social media links structure stored in user profile
+ */
+export interface SocialLinks {
+  instagram?: string;
+  youtube?: string;
+  facebook?: string;
+  tiktok?: string;
+  linkedin?: string;
+  website?: string;
+}
+
+/**
+ * Social links with all fields optional for form handling
+ */
+export type SocialLinksFormData = Partial<SocialLinks>;
+
+/**
+ * Enum for supported social platforms
+ */
+export enum SocialPlatform {
+  INSTAGRAM = 'instagram',
+  YOUTUBE = 'youtube',
+  FACEBOOK = 'facebook',
+  TIKTOK = 'tiktok',
+  LINKEDIN = 'linkedin',
+  WEBSITE = 'website'
+}
+
+/**
+ * Configuration for each social platform
+ */
+export interface SocialPlatformConfig {
+  platform: SocialPlatform;
+  label: string;
+  placeholder: string;
+  validator: (url: string) => boolean;
+  urlPattern: RegExp;
+  baseUrl: string;
+}
+
+/**
+ * Validation rules for social media URLs
+ */
+export interface SocialValidationRule {
+  pattern: RegExp;
+  message: string;
+}

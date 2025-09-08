@@ -3,7 +3,7 @@ import { POST as createTripHandler } from '@/app/api/trips/route';
 import { GET as getTripHandler, PUT as updateTripHandler } from '@/app/api/trips/[id]/route';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/core/prisma';
-import { MediaItem } from '@/types/trip';
+import { TripTestFactory } from '@/tests/unit/factories/TripTestFactory';
 import { NextRequest } from 'next/server';
 
 // Mock delle dipendenze
@@ -68,7 +68,7 @@ jest.mock('@/lib/core/prisma', () => {
   return { prisma: prismaMock };
 });
 
-// Utility per creare un mock di NextRequest
+// Utility per creare un mock di NextRequest usando la factory
 const createMockRequest = (body: any, params = {}) => {
   return {
     json: jest.fn().mockResolvedValue(body),
@@ -76,63 +76,30 @@ const createMockRequest = (body: any, params = {}) => {
   } as unknown as NextRequest;
 };
 
-// Mock per i route params
-const mockParams = (id: string) => ({
-  params: { id }
-});
+// Mock per i route params usando la factory
+const mockParams = (id: string) => TripTestFactory.createMockParams(id);
 
 describe('Trip API con Media Integration', () => {
-  // Dati di esempio
-  const mockMediaItems: MediaItem[] = [
-    {
-      id: 'media-1',
-      type: 'image',
-      url: 'https://example.com/image.jpg',
-      caption: 'Immagine di test'
-    },
-    {
-      id: 'media-2',
-      type: 'video',
-      url: 'https://www.youtube.com/embed/abcdef12345',
-      thumbnailUrl: 'https://img.youtube.com/vi/abcdef12345/maxresdefault.jpg',
-      caption: 'Video di test'
-    }
-  ];
-  
-  const mockTrip = {
-    id: 'trip-123',
-    title: 'Viaggio Test con Media',
-    summary: 'Un viaggio di test per verificare la funzionalità dei media',
-    destination: 'Destinazione test',
-    duration_days: 5,
-    duration_nights: 4,
-    tags: ['test', 'media', 'integrazione'],    theme: 'Avventura',
-    characteristics: ['Percorso panoramico', 'Strade di montagna'],
-    recommended_seasons: ['Estate'],
-    media: mockMediaItems,
-    slug: 'viaggio-test-con-media',
-    status: 'Bozza',
-    created_at: new Date(),
-    updated_at: new Date(),
-    user_id: 'user-123'
-  };
+  // Utilizziamo scenari predefiniti dalla factory
+  const { trips, users } = TripTestFactory.getAllScenarios();
+  const mockMediaItems = TripTestFactory.createMediaItems();
+  const mockTrip = trips.withMedia;
 
   beforeEach(() => {
     jest.clearAllMocks();
     
-    // Mock dell'autenticazione
+    // Mock dell'autenticazione usando la factory
     (auth as jest.Mock).mockResolvedValue({
-      user: { id: 'user-123', name: 'Test User', role: 'Ranger' }
+      user: users.tripOwner
     });
     
     // Mock per orderIndex calculation - restituisce un viaggio con orderIndex 5
     (prisma.trip.findFirst as jest.Mock).mockResolvedValue({ orderIndex: 5 });
     
-    // Mock delle risposte del database  
+    // Mock delle risposte del database usando la factory
     (prisma.trip.create as jest.Mock).mockImplementation(({ data }) => {
       return Promise.resolve({
         ...mockTrip,
-        id: 'trip-123',
         ...data,  // Include i media se passati
         slug: data.title ? data.title.toLowerCase().replace(/\s+/g, '-') : mockTrip.slug
       });

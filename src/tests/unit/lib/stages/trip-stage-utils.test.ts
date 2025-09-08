@@ -5,108 +5,17 @@ import {
   validateStageOrder,
   reorderStages
 } from '@/lib/trips/trip-utils';
-import { Trip, Stage, TripStatus, RecommendedSeason } from '@/types/trip';
+import { TripTestFactory } from '@/tests/unit/factories/TripTestFactory';
+import { Trip, Stage } from '@/types/trip';
 
-// Mock data per i test
-const mockLegacyTrip: Trip = {
-  id: 'trip-legacy-1',
-  title: 'Viaggio Legacy',
-  summary: 'Un viaggio tradizionale',
-  destination: 'Roma',
-  duration_days: 3,
-  duration_nights: 2,
-  tags: ['montagna'],
-  theme: 'natura',
-  characteristics: ['panoramico'],
-  recommended_seasons: [RecommendedSeason.Primavera],
-  media: [],
-  gpxFile: {
-    url: 'test.gpx',
-    filename: 'test.gpx',
-    waypoints: 100,
-    distance: 15000, // 15km
-    elevationGain: 500,
-    elevationLoss: 400,
-    isValid: true
-  },
-  insights: null,
-  slug: 'viaggio-legacy',
-  status: TripStatus.Pubblicato,
-  created_at: new Date(),
-  updated_at: new Date(),
-  user_id: 'user-1'
-};
-
-const mockStage1: Stage = {
-  id: 'stage-1',
-  tripId: 'trip-multi-1',
-  orderIndex: 0,
-  title: 'Prima tappa',
-  description: 'Descrizione prima tappa',
-  routeType: 'Asfalto',
-  media: [],
-  gpxFile: {
-    url: 'stage1.gpx',
-    filename: 'stage1.gpx',
-    waypoints: 50,
-    distance: 8000, // 8km
-    elevationGain: 200,
-    elevationLoss: 150,
-    isValid: true
-  },
-  createdAt: new Date(),
-  updatedAt: new Date()
-};
-
-const mockStage2: Stage = {
-  id: 'stage-2',
-  tripId: 'trip-multi-1',
-  orderIndex: 1,
-  title: 'Seconda tappa',
-  description: 'Descrizione seconda tappa',
-  routeType: 'Sterrato',
-  media: [],
-  gpxFile: {
-    url: 'stage2.gpx',
-    filename: 'stage2.gpx',
-    waypoints: 75,
-    distance: 12000, // 12km
-    elevationGain: 300,
-    elevationLoss: 250,
-    isValid: true
-  },
-  createdAt: new Date(),
-  updatedAt: new Date()
-};
-
-const mockStage3: Stage = {
-  id: 'stage-3',
-  tripId: 'trip-multi-1',
-  orderIndex: 2,
-  title: 'Terza tappa',
-  description: 'Descrizione terza tappa',
-  routeType: 'Misto',
-  media: [],
-  gpxFile: null, // Tappa senza GPX
-  createdAt: new Date(),
-  updatedAt: new Date()
-};
-
-const mockMultiStageTrip: Trip = {
-  ...mockLegacyTrip,
-  id: 'trip-multi-1',
-  title: 'Viaggio Multi-Tappa',
-  slug: 'viaggio-multi-tappa',
-  stages: [mockStage1, mockStage2, mockStage3]
-};
-
-const mockEmptyStagesTrip: Trip = {
-  ...mockLegacyTrip,
-  id: 'trip-empty-stages',
-  title: 'Viaggio con Stages Vuote',
-  slug: 'viaggio-empty-stages',
-  stages: []
-};
+// Utilizziamo scenari predefiniti dalla factory
+const { utilsTrips, utilsStages } = TripTestFactory.getAllScenarios();
+const mockLegacyTrip = utilsTrips.legacyTrip;
+const mockMultiStageTrip = utilsTrips.multiStageTrip;
+const mockEmptyStagesTrip = utilsTrips.emptyStagesTrip;
+const mockStage1 = utilsStages.stage1;
+const mockStage2 = utilsStages.stage2;
+const mockStage3 = utilsStages.stage3;
 
 describe('tripStageUtilities', () => {
   describe('isMultiStageTripUtil', () => {

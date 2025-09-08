@@ -38,9 +38,13 @@ export default auth((req) => {
   )
 
   // Redirect to signin if trying to access protected route while not logged in
-  // or if user doesn't have a valid role
-  if (isProtectedRoute && (!isLoggedIn || !userRole)) {
+  if (isProtectedRoute && !isLoggedIn) {
     return NextResponse.redirect(new URL('/auth/signin', nextUrl))
+  }
+  
+  // If user is logged in but doesn't have a role, redirect to dashboard with error
+  if (isProtectedRoute && isLoggedIn && !userRole) {
+    return NextResponse.redirect(new URL('/dashboard?error=role-missing', nextUrl))
   }
 
   // Check role-based permissions

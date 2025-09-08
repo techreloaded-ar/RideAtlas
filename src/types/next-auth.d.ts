@@ -1,9 +1,12 @@
 import { UserRole } from '@prisma/client'
+import { SocialLinks } from '@/types/user'
 
 declare module 'next-auth' {
   interface User {
     id: string
     role: UserRole
+    bio?: string | null
+    socialLinks?: SocialLinks | null
   }
 
   interface Session {
@@ -13,6 +16,8 @@ declare module 'next-auth' {
       email?: string | null
       image?: string | null
       role: UserRole
+      bio?: string | null
+      socialLinks?: SocialLinks | null
     }
   }
 }

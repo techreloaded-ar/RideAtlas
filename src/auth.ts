@@ -8,6 +8,7 @@ import { z } from "zod"
 import { UserRole } from "@/types/profile"
 import { passwordSchema } from "@/lib/auth/password-validation"
 
+
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: PrismaAdapter(prisma),
   providers: [
@@ -143,34 +144,47 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         token.picture = profile.picture
       }
       
-      // If user data is available from database, use it
+      // If user data is available from database, use it (first login or refresh)
       if (user) {
         token.id = user.id
         token.role = (user as { role?: string }).role
       }
       
-      // Se non abbiamo ancora il ruolo, lo recuperiamo dal database
+      // Se non abbiamo ancora il ruolo, lo recuperiamo dal database (solo una volta)
       if (!token.role && token.email) {
-        const dbUser = await prisma.user.findUnique({
-          where: { email: token.email },
-          select: { role: true }
-        })
-        if (dbUser) {
-          token.role = dbUser.role
+        try {
+          const dbUser = await prisma.user.findUnique({
+            where: { email: token.email },
+            select: { id: true, role: true }
+          })
+          if (dbUser) {
+            token.id = dbUser.id
+            token.role = dbUser.role
+          }
+        } catch (error) {
+          console.error('Error fetching user role:', error)
+          // Don't fail the entire auth process if DB query fails
         }
       }
       
       return token
     },
     session: async ({ session, token }) => {
-      return {
-        ...session,
-        user: {
-          ...session.user,
-          id: token.id as string,
-          role: token.role as UserRole,
-        },
+      // Use token data primarily, only fetch from DB when necessary
+      if (token.id) {
+        return {
+          ...session,
+          user: {
+            ...session.user,
+            id: token.id as string,
+            role: token.role as UserRole,
+            // Keep existing session user data for bio and socialLinks
+            // These will be updated when the user modifies their profile
+          },
+        }
       }
+      
+      return session
     },
   },
   pages: {

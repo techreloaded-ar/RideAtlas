@@ -3,8 +3,11 @@
 import { useState } from 'react';
 import React from 'react';
 import { useSession } from 'next-auth/react';
-import { ChevronDown, ChevronUp, Lock, User, Settings } from 'lucide-react';
+import { ChevronDown, ChevronUp, Lock, User, Settings, Loader2 } from 'lucide-react';
 import ChangePasswordForm from './ChangePasswordForm';
+import SocialLinksSection from './SocialLinksSection';
+import { SocialLinks } from '@/types/user';
+import { useProfile } from '@/hooks/profile/useProfile';
 
 interface SettingsSectionProps {
   title: string;
@@ -56,6 +59,7 @@ function SettingsSection({
 
 export default function ProfileSettings() {
   const { data: session, update } = useSession();
+  const { profile, isLoading: isLoadingProfile, error: profileError, refetch } = useProfile();
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
     security: false,
     personal: false,
@@ -67,17 +71,19 @@ export default function ProfileSettings() {
   const [formData, setFormData] = useState({
     name: '',
     bio: '',
+    socialLinks: {} as SocialLinks,
   });
 
-  // Aggiorna i dati del form quando la sessione cambia
+  // Aggiorna i dati del form quando il profilo viene caricato
   React.useEffect(() => {
-    if (session?.user) {
+    if (profile) {
       setFormData({
-        name: session.user.name || '',
-        bio: (session.user as { bio?: string }).bio || '',
+        name: profile.name || '',
+        bio: profile.bio || '',
+        socialLinks: profile.socialLinks || {},
       });
     }
-  }, [session]);
+  }, [profile]);
 
   const toggleSection = (section: string) => {
     setOpenSections(prev => ({
@@ -90,6 +96,16 @@ export default function ProfileSettings() {
     setFormData(prev => ({
       ...prev,
       [e.target.name]: e.target.value
+    }));
+    // Reset success/error states
+    setUpdateSuccess(false);
+    setUpdateError('');
+  };
+
+  const handleSocialLinksChange = (socialLinks: SocialLinks) => {
+    setFormData(prev => ({
+      ...prev,
+      socialLinks
     }));
     // Reset success/error states
     setUpdateSuccess(false);
@@ -123,10 +139,12 @@ export default function ProfileSettings() {
           user: {
             ...session.user,
             name: data.user.name,
-            bio: data.user.bio,
           }
         });
       }
+
+      // Ricarica il profilo per avere i dati aggiornati
+      await refetch();
 
       setUpdateSuccess(true);
       
@@ -142,6 +160,41 @@ export default function ProfileSettings() {
   };
 
   if (!session?.user) return null;
+
+  // Mostra loading durante il caricamento iniziale del profilo
+  if (isLoadingProfile) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="flex items-center space-x-2">
+          <Loader2 className="w-5 h-5 animate-spin text-primary-600" />
+          <span className="text-gray-600">Caricamento profilo...</span>
+        </div>
+      </div>
+    );
+  }
+
+  // Mostra errore se il caricamento del profilo fallisce
+  if (profileError) {
+    return (
+      <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+        <div className="flex items-center space-x-2">
+          <svg className="w-5 h-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+          </svg>
+          <div>
+            <h3 className="text-sm font-medium text-red-800">Errore nel caricamento del profilo</h3>
+            <p className="text-sm text-red-700 mt-1">{profileError}</p>
+            <button
+              onClick={refetch}
+              className="mt-2 text-sm text-red-600 hover:text-red-500 underline"
+            >
+              Riprova
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -209,7 +262,7 @@ export default function ProfileSettings() {
                 </label>
                 <input
                   type="email"
-                  value={session.user.email || ''}
+                  value={profile?.email || ''}
                   disabled
                   className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-50 text-gray-500 cursor-not-allowed"
                 />
@@ -234,6 +287,15 @@ export default function ProfileSettings() {
                 <p className="text-xs text-gray-500 mt-1">
                   {formData.bio.length}/200 caratteri
                 </p>
+              </div>
+
+              {/* Social Links Section */}
+              <div className="pt-6 border-t border-gray-200">
+                <SocialLinksSection
+                  initialData={formData.socialLinks}
+                  onUpdate={handleSocialLinksChange}
+                  isLoading={isUpdating}
+                />
               </div>
 
               <div className="flex justify-end">

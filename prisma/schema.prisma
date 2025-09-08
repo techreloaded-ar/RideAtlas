@@ -20,6 +20,7 @@ model User {
   password      String?
   role          UserRole  @default(Explorer)
   bio           String?
+  socialLinks   Json?     // Social media links stored as JSON
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   accounts      Account[]

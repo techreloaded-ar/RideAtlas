@@ -2,10 +2,23 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/core/prisma';
 import { z } from 'zod';
+import { validateAndSanitizeUrl } from '@/lib/utils/url-sanitizer';
+import { SocialPlatform } from '@/types/user';
+
+// Social links validation schema
+const socialLinksSchema = z.object({
+  instagram: z.string().optional(),
+  youtube: z.string().optional(),
+  facebook: z.string().optional(),
+  tiktok: z.string().optional(),
+  linkedin: z.string().optional(),
+  website: z.string().optional(),
+}).optional();
 
 const updateProfileSchema = z.object({
   name: z.string().min(1, 'Il nome è obbligatorio').max(100, 'Il nome è troppo lungo'),
   bio: z.string().max(200, 'La bio deve essere massimo 200 caratteri').optional(),
+  socialLinks: socialLinksSchema,
 });
 
 export async function PUT(request: NextRequest) {
@@ -29,21 +42,68 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    const { name, bio } = validation.data;
+    const { name, bio, socialLinks } = validation.data;
     const userId = session.user.id;
+
+    // Validate and sanitize social links if provided
+    let sanitizedSocialLinks: Record<string, string> | null = null;
+    if (socialLinks) {
+      const socialLinksErrors: string[] = [];
+      const tempSocialLinks: Record<string, string | null> = {};
+
+      // Validate each social link
+      Object.entries(socialLinks).forEach(([platform, url]) => {
+        if (url && url.trim()) {
+          const result = validateAndSanitizeUrl(platform as SocialPlatform, url);
+          if (result.isValid) {
+            tempSocialLinks[platform] = result.sanitizedUrl;
+          } else {
+            socialLinksErrors.push(`${platform}: ${result.error}`);
+          }
+        } else {
+          // Empty values are allowed
+          tempSocialLinks[platform] = null;
+        }
+      });
+
+      // If there are validation errors, return them
+      if (socialLinksErrors.length > 0) {
+        return NextResponse.json(
+          { 
+            error: 'Link social non validi', 
+            details: socialLinksErrors 
+          }, 
+          { status: 400 }
+        );
+      }
+
+      // Remove null values for cleaner storage
+      const validLinks = Object.fromEntries(
+        Object.entries(tempSocialLinks).filter(([, value]) => value !== null)
+      ) as Record<string, string>;
+
+      // If no valid links, set to null
+      if (Object.keys(validLinks).length === 0) {
+        sanitizedSocialLinks = null;
+      } else {
+        sanitizedSocialLinks = validLinks;
+      }
+    }
 
     // Aggiorna le informazioni dell'utente
     const updatedUser = await prisma.user.update({
       where: { id: userId },
       data: {
         name,
-        bio: bio || null
+        bio: bio || null,
+        socialLinks: sanitizedSocialLinks ?? undefined
       },
       select: {
         id: true,
         name: true,
         bio: true,
-        email: true
+        email: true,
+        socialLinks: true
       }
     });
 

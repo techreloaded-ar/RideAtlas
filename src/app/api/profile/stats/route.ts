@@ -1,13 +1,20 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/core/prisma';
-import { TripStatus } from '@prisma/client';
+import { TripStatus, type Prisma } from '@prisma/client';
 import { castToGpxFile } from '@/types/trip';
 
 interface ProfileStats {
   tripsCreated: number;
   totalKilometers: number;
   memberSince: string;
+  user: {
+    id: string;
+    name: string | null;
+    bio: string | null;
+    email: string;
+    socialLinks: Prisma.JsonValue; // JSON field from Prisma
+  };
 }
 
 export async function GET() {
@@ -72,10 +79,16 @@ export async function GET() {
 
     const totalKilometers = Math.round((kmFromUserTrips + kmFromPurchasedTrips) * 100) / 100;
 
-    // 4. Recupera la data di registrazione dell'utente
+    // 4. Recupera la data di registrazione dell'utente e i social links
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      select: { createdAt: true }
+      select: { 
+        createdAt: true,
+        socialLinks: true,
+        name: true,
+        bio: true,
+        email: true
+      }
     });
 
     if (!user) {
@@ -85,7 +98,14 @@ export async function GET() {
     const stats: ProfileStats = {
       tripsCreated,
       totalKilometers,
-      memberSince: user.createdAt.toISOString()
+      memberSince: user.createdAt.toISOString(),
+      user: {
+        id: userId,
+        name: user.name,
+        bio: user.bio,
+        email: user.email,
+        socialLinks: user.socialLinks
+      }
     };
 
     return NextResponse.json(stats);

@@ -3,101 +3,25 @@ import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import L from 'leaflet';
 import DirectLeafletMap from '@/components/maps/DirectLeafletMap';
-import { GPXTrack, GPXRoute, GPXWaypoint } from '@/types/gpx';
+import { MapTestFactory } from '@/tests/unit/factories/MapTestFactory';
 
-// Mock Leaflet completamente
+// Mock Leaflet usando il mock centralizzato
 jest.mock('leaflet', () => {
-  const mockMap = {
-    remove: jest.fn(),
-    getContainer: jest.fn(() => document.createElement('div')),
-    getSize: jest.fn(() => ({ x: 800, y: 600 })),
-    getCenter: jest.fn(() => ({ lat: 45.0, lng: 9.0 })),
-    invalidateSize: jest.fn(),
-    hasLayer: jest.fn(() => false),
-    removeLayer: jest.fn(),
-    addLayer: jest.fn(),
-    fitBounds: jest.fn(),
-  };
-
-  const mockTileLayer = {
-    addTo: jest.fn(() => mockTileLayer),
-    remove: jest.fn(),
-  };
-
-  const mockControl = {
-    addTo: jest.fn(() => mockControl),
-    getContainer: jest.fn(() => {
-      const div = document.createElement('div');
-      div.style.background = '';
-      div.style.border = '';
-      div.style.borderRadius = '';
-      div.style.boxShadow = '';
-      div.style.marginTop = '';
-      return div;
-    }),
-  };
-
-  const mockPolyline = {
-    addTo: jest.fn(() => mockPolyline),
-  };
-
-  const mockMarker = {
-    addTo: jest.fn(() => mockMarker),
-    bindPopup: jest.fn(() => mockMarker),
-  };
-
-  return {
-    map: jest.fn(() => mockMap),
-    tileLayer: jest.fn(() => mockTileLayer),
-    control: {
-      layers: jest.fn(() => mockControl),
-    },
-    polyline: jest.fn(() => mockPolyline),
-    marker: jest.fn(() => mockMarker),
-    latLngBounds: jest.fn(() => ({})),
-    Icon: {
-      Default: {
-        prototype: {},
-        mergeOptions: jest.fn(),
-      },
-    },
-  };
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { createLeafletMocks } = require('@/tests/unit/mocks/leaflet-shared');
+  return createLeafletMocks();
 });
 
-// Mock globale per getBoundingClientRect
-const mockGetBoundingClientRect = jest.fn(() => ({
-  width: 800,
-  height: 600,
-  top: 0,
-  left: 0,
-  bottom: 600,
-  right: 800,
-}));
-
-Object.defineProperty(HTMLElement.prototype, 'getBoundingClientRect', {
-  value: mockGetBoundingClientRect,
-  configurable: true,
-});
-
-// Mock per requestAnimationFrame
-global.requestAnimationFrame = jest.fn((cb) => setTimeout(cb, 0));
+// Setup mock globali
+import { setupGlobalMocks } from '@/tests/unit/mocks/leaflet-shared';
+const { mockGetBoundingClientRect } = setupGlobalMocks();
 
 // Mock per setTimeout
 jest.useFakeTimers();
 
 describe('DirectLeafletMap - Initialization Tests', () => {
-  const defaultProps = {
-    allTracks: [] as GPXTrack[],
-    routes: [] as GPXRoute[],
-    waypoints: [] as GPXWaypoint[],
-    visibleTracks: [],
-    visibleRoutes: [],
-    visibleWaypoints: false,
-    center: [45.0, 9.0] as [number, number],
-    bounds: null,
-    defaultZoom: 10,
-    autoFit: false,
-  };
+  // Utilizziamo lo scenario vuoto come base per i test di inizializzazione
+  const emptyMapScenario = MapTestFactory.createEmptyMapScenario();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -118,7 +42,7 @@ describe('DirectLeafletMap - Initialization Tests', () => {
   });
 
   it('should initialize map with correct center and zoom', async () => {
-    render(<DirectLeafletMap {...defaultProps} />);
+    render(<DirectLeafletMap {...emptyMapScenario.props} />);
 
     // Simula il check delle dimensioni
     jest.advanceTimersByTime(50);
@@ -137,7 +61,7 @@ describe('DirectLeafletMap - Initialization Tests', () => {
 
   it('should create unique container ID for each map instance', async () => {
     const { rerender, container } = render(
-      <DirectLeafletMap {...defaultProps} />
+      <DirectLeafletMap {...emptyMapScenario.props} />
     );
 
     jest.advanceTimersByTime(50);
@@ -146,7 +70,7 @@ describe('DirectLeafletMap - Initialization Tests', () => {
     const firstId = firstContainer?.id;
 
     // Re-render per creare una nuova istanza
-    rerender(<DirectLeafletMap {...defaultProps} center={[46.0, 10.0]} />);
+    rerender(<DirectLeafletMap {...emptyMapScenario.props} center={[46.0, 10.0]} />);
 
     jest.advanceTimersByTime(50);
 
@@ -171,7 +95,7 @@ describe('DirectLeafletMap - Initialization Tests', () => {
       writable: true,
     });
 
-    render(<DirectLeafletMap {...defaultProps} />);
+    render(<DirectLeafletMap {...emptyMapScenario.props} />);
 
     jest.advanceTimersByTime(50);
 
@@ -188,7 +112,7 @@ describe('DirectLeafletMap - Initialization Tests', () => {
   });
 
   it('should create street and satellite tile layers', async () => {
-    render(<DirectLeafletMap {...defaultProps} />);
+    render(<DirectLeafletMap {...emptyMapScenario.props} />);
 
     jest.advanceTimersByTime(50);
 
@@ -214,7 +138,7 @@ describe('DirectLeafletMap - Initialization Tests', () => {
   });
 
   it('should add layer control with correct position', async () => {
-    render(<DirectLeafletMap {...defaultProps} />);
+    render(<DirectLeafletMap {...emptyMapScenario.props} />);
 
     jest.advanceTimersByTime(50);
 
@@ -233,7 +157,7 @@ describe('DirectLeafletMap - Initialization Tests', () => {
   });
 
   it('should apply custom styles to layer control', async () => {
-    render(<DirectLeafletMap {...defaultProps} />);
+    render(<DirectLeafletMap {...emptyMapScenario.props} />);
 
     jest.advanceTimersByTime(50);
 
@@ -294,7 +218,7 @@ describe('DirectLeafletMap - Initialization Tests', () => {
       }
     });
 
-    render(<DirectLeafletMap {...defaultProps} />);
+    render(<DirectLeafletMap {...emptyMapScenario.props} />);
 
     // Primo check - dimensioni zero
     jest.advanceTimersByTime(50);
@@ -312,7 +236,7 @@ describe('DirectLeafletMap - Initialization Tests', () => {
   });
 
   it('should cleanup previous map instance on re-render', async () => {
-    const { rerender } = render(<DirectLeafletMap {...defaultProps} />);
+    const { rerender } = render(<DirectLeafletMap {...emptyMapScenario.props} />);
 
     jest.advanceTimersByTime(50);
 
@@ -323,7 +247,7 @@ describe('DirectLeafletMap - Initialization Tests', () => {
     const mockMapInstance = (L.map as jest.Mock).mock.results[0].value;
 
     // Re-render con props diverse
-    rerender(<DirectLeafletMap {...defaultProps} center={[46.0, 10.0]} />);
+    rerender(<DirectLeafletMap {...emptyMapScenario.props} center={[46.0, 10.0]} />);
 
     jest.advanceTimersByTime(50);
 
@@ -334,7 +258,7 @@ describe('DirectLeafletMap - Initialization Tests', () => {
   });
 
   it('should invalidate map size after initialization', async () => {
-    render(<DirectLeafletMap {...defaultProps} />);
+    render(<DirectLeafletMap {...emptyMapScenario.props} />);
 
     jest.advanceTimersByTime(50); // checkDimensions
     jest.advanceTimersByTime(100); // invalidateSize timeout
@@ -359,7 +283,7 @@ describe('DirectLeafletMap - Initialization Tests', () => {
       right: 0,
     });
 
-    const { unmount } = render(<DirectLeafletMap {...defaultProps} />);
+    const { unmount } = render(<DirectLeafletMap {...emptyMapScenario.props} />);
 
     // Unmount prima che l'inizializzazione sia completata
     unmount();
@@ -374,7 +298,7 @@ describe('DirectLeafletMap - Initialization Tests', () => {
     const customClassName = 'custom-map-class';
 
     const { container } = render(
-      <DirectLeafletMap {...defaultProps} className={customClassName} />
+      <DirectLeafletMap {...emptyMapScenario.props} className={customClassName} />
     );
 
     const mapContainer = container.querySelector('div');
@@ -384,11 +308,11 @@ describe('DirectLeafletMap - Initialization Tests', () => {
   });
 
   it('should handle multiple rapid re-renders without errors', async () => {
-    const { rerender } = render(<DirectLeafletMap {...defaultProps} />);
+    const { rerender } = render(<DirectLeafletMap {...emptyMapScenario.props} />);
 
     // Simula rapid re-renders
     for (let i = 0; i < 5; i++) {
-      rerender(<DirectLeafletMap {...defaultProps} center={[45 + i, 9 + i]} />);
+      rerender(<DirectLeafletMap {...emptyMapScenario.props} center={[45 + i, 9 + i]} />);
       jest.advanceTimersByTime(10);
     }
 
