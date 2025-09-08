@@ -5,36 +5,76 @@ import { auth } from '@/auth';
 import { UserRole } from '@/types/profile';
 import { transformPrismaStages } from '@/types/trip';
 import { TripDetailClient } from '@/components/trips/TripDetailClient';
+import { checkTripAccess } from '@/lib/auth/trip-access';
+import { DraftAccessRestricted } from '@/components/trips/DraftAccessRestricted';
+import { TripAccessErrorBoundary } from '@/components/trips/TripAccessErrorBoundary';
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic';
 
 export default async function TripDetailPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params;
-  const session = await auth();
-  const trip = await prisma.trip.findUnique({
-    where: { slug },
-    include: {
-      user: {
-        select: {
-          id: true,
-          name: true,
-          email: true
-        }
-      },
-      stages: {
-        orderBy: {
-          orderIndex: 'asc'
+  try {
+    const { slug } = await params;
+    
+    // Validate slug parameter
+    if (!slug || typeof slug !== 'string') {
+      console.error('Invalid slug parameter:', slug);
+      notFound();
+    }
+
+    const session = await auth();
+    const trip = await prisma.trip.findUnique({
+      where: { slug },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true
+          }
+        },
+        stages: {
+          orderBy: {
+            orderIndex: 'asc'
+          }
         }
       }
+    });
+
+    if (!trip) {
+      notFound();
     }
-  });
 
-  if (!trip) {
-    notFound();
-  }
+    // Check access control for draft trips
+    const accessResult = await checkTripAccess(
+      {
+        id: trip.id,
+        status: trip.status,
+        user_id: trip.user_id
+      },
+      session
+    );
 
-
+    // If access is denied, show the restricted access component
+    if (!accessResult.hasAccess) {
+      // Handle different denial reasons
+      if (accessResult.reason === 'not-authenticated') {
+        // This should be handled by middleware, but as a fallback
+        notFound();
+      }
+      
+      if (accessResult.reason === 'database-error' || accessResult.reason === 'session-invalid') {
+        // For system errors, throw to trigger error boundary
+        throw new Error(`Access control error: ${accessResult.reason}`);
+      }
+      
+      // For draft-unauthorized, show the informational component
+      return (
+        <TripAccessErrorBoundary>
+          <DraftAccessRestricted />
+        </TripAccessErrorBoundary>
+      );
+    }
 
   // Trasforma le stages di Prisma nel formato corretto per l'interfaccia
   const tripWithStages = {
@@ -77,15 +117,23 @@ export default async function TripDetailPage({ params }: { params: Promise<{ slu
     price: tripWithStages.price.toNumber() // Converte Decimal in number per serializzare oggetto Server -> Client
   }
 
-  return (
-    <TripDetailClient
-      trip={serializedTripWithStages}
-      isOwner={isOwner}
-      isSentinel={isSentinel}
-      canEdit={canEdit}
-      tripMediaItems={tripMediaItems}
-      allStageMediaItems={allStageMediaItems}
-      mappedSeasons={mappedSeasons}
-    />
-  );
+    return (
+      <TripAccessErrorBoundary>
+        <TripDetailClient
+          trip={serializedTripWithStages}
+          isOwner={isOwner}
+          isSentinel={isSentinel}
+          canEdit={canEdit}
+          tripMediaItems={tripMediaItems}
+          allStageMediaItems={allStageMediaItems}
+          mappedSeasons={mappedSeasons}
+        />
+      </TripAccessErrorBoundary>
+    );
+  } catch (error) {
+    console.error('Error in TripDetailPage:', error);
+    
+    // For database connection errors or other system errors, show error boundary
+    throw error;
+  }
 }
