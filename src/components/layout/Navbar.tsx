@@ -45,6 +45,20 @@ export default function Navbar() {
     { name: 'Trip Builder', href: '/trip-builder' },
   ];
 
+  // Enhanced logout function with redirect
+  const handleLogout = async () => {
+    try {
+      await signOut({ 
+        callbackUrl: '/auth/signin?message=logout-success',
+        redirect: true 
+      });
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Fallback: redirect manually
+      window.location.href = '/auth/signin?message=logout-success';
+    }
+  };
+
   return (
     <nav className="bg-white shadow-sm">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -130,7 +144,7 @@ export default function Navbar() {
                     <button
                       onClick={() => {
                         setUserMenuOpen(false);
-                        signOut();
+                        handleLogout();
                       }}
                       className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-200"
                     >
@@ -267,7 +281,7 @@ export default function Navbar() {
                   </Link>
                 )}
                 <button
-                  onClick={() => signOut()}
+                  onClick={() => handleLogout()}
                   className="block w-full text-left px-4 py-2 text-base font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-800"
                 >
                   Esci

@@ -80,6 +80,7 @@ function SignInContent() {
     'email-verified': 'Email verificata con successo! Ora puoi accedere.',
     'password-reset-success':
       'Password reimpostata con successo! Ora puoi accedere con la nuova password.',
+    'logout-success': 'Logout completato con successo. Accedi nuovamente se necessario.',
     default: "Si è verificato un errore durante l'accesso.",
   };
 
@@ -103,7 +104,7 @@ function SignInContent() {
         {(error || credentialsError) && (
           <div
             className={`border rounded-md p-4 ${
-              ['email-verified', 'password-reset-success'].includes(
+              ['email-verified', 'password-reset-success', 'logout-success'].includes(
                 searchParams.get('message') || ''
               )
                 ? 'bg-green-50 border-green-200'
@@ -112,7 +113,7 @@ function SignInContent() {
           >
             <div
               className={`text-sm ${
-                ['email-verified', 'password-reset-success'].includes(
+                ['email-verified', 'password-reset-success', 'logout-success'].includes(
                   searchParams.get('message') || ''
                 )
                   ? 'text-green-800'
@@ -129,7 +130,7 @@ function SignInContent() {
           </div>
         )}
 
-        {['email-verified', 'password-reset-success'].includes(
+        {['email-verified', 'password-reset-success', 'logout-success'].includes(
           searchParams.get('message') || ''
         ) &&
           !error &&
