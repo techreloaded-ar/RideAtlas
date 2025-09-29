@@ -187,7 +187,7 @@ describe('Trip Access Control - Edge Cases and Error Handling', () => {
       await checkTripAccess(validTrip, null)
 
       expect(console.warn).toHaveBeenCalledWith(
-        `Unauthorized access attempt to draft trip ${validTrip.id} by unauthenticated user`
+        `Unauthorized access attempt to ${validTrip.status} trip ${validTrip.id} by unauthenticated user`
       )
     })
 
@@ -233,6 +233,15 @@ describe('Trip Access Control - Edge Cases and Error Handling', () => {
       }
 
       await checkTripAccess(publishedTrip, explorerSession)
+
+      expect(console.warn).not.toHaveBeenCalled()
+      expect(console.error).not.toHaveBeenCalled()
+    })
+
+    it('should not log for published trips accessed by unauthenticated users', async () => {
+      const publishedTrip = { ...validTrip, status: TripStatus.Pubblicato }
+
+      await checkTripAccess(publishedTrip, null)
 
       expect(console.warn).not.toHaveBeenCalled()
       expect(console.error).not.toHaveBeenCalled()

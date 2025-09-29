@@ -92,15 +92,9 @@ describe('Trip Page Access Control Logic', () => {
       for (const session of sessions) {
         const result = await checkTripAccess(mockPublishedTrip, session)
         
-        if (session === null) {
-          // Unauthenticated users should be denied
-          expect(result.hasAccess).toBe(false)
-          expect(result.reason).toBe('not-authenticated')
-        } else {
-          // Authenticated users should have access to published trips
-          expect(result.hasAccess).toBe(true)
-          expect(result.reason).toBeUndefined()
-        }
+        // All users (including unauthenticated) should have access to published trips
+        expect(result.hasAccess).toBe(true)
+        expect(result.reason).toBeUndefined()
       }
     })
   })

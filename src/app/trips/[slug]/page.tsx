@@ -45,7 +45,7 @@ export default async function TripDetailPage({ params }: { params: Promise<{ slu
       notFound();
     }
 
-    // Check access control for draft trips
+    // Check access control
     const accessResult = await checkTripAccess(
       {
         id: trip.id,
@@ -55,11 +55,9 @@ export default async function TripDetailPage({ params }: { params: Promise<{ slu
       session
     );
 
-    // If access is denied, show the restricted access component
+    // If access is denied, handle different denial reasons
     if (!accessResult.hasAccess) {
-      // Handle different denial reasons
-      if (accessResult.reason === 'not-authenticated') {
-        // This should be handled by middleware, but as a fallback
+      if (accessResult.reason === 'not-found') {
         notFound();
       }
       
@@ -68,12 +66,14 @@ export default async function TripDetailPage({ params }: { params: Promise<{ slu
         throw new Error(`Access control error: ${accessResult.reason}`);
       }
       
-      // For draft-unauthorized, show the informational component
-      return (
-        <TripAccessErrorBoundary>
-          <DraftAccessRestricted />
-        </TripAccessErrorBoundary>
-      );
+      // For not-authenticated or draft-unauthorized, show the informational component
+      if (accessResult.reason === 'not-authenticated' || accessResult.reason === 'draft-unauthorized') {
+        return (
+          <TripAccessErrorBoundary>
+            <DraftAccessRestricted />
+          </TripAccessErrorBoundary>
+        );
+      }
     }
 
   // Trasforma le stages di Prisma nel formato corretto per l'interfaccia

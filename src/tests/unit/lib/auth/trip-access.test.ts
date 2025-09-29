@@ -79,7 +79,7 @@ describe('Trip Access Control', () => {
   })
 
   describe('checkTripAccess', () => {
-    it('should deny access to unauthenticated users', async () => {
+    it('should deny access to unauthenticated users for draft trips', async () => {
       const result = await checkTripAccess(mockTrip, null)
       
       expect(result).toEqual({
@@ -132,6 +132,14 @@ describe('Trip Access Control', () => {
       expect(explorerResult).toEqual({ hasAccess: true })
       expect(rangerResult).toEqual({ hasAccess: true })
       expect(sentinelResult).toEqual({ hasAccess: true })
+    })
+
+    it('should allow unauthenticated users access to published trip', async () => {
+      const publishedTrip = { ...mockTrip, status: TripStatus.Pubblicato }
+      
+      const result = await checkTripAccess(publishedTrip, null)
+      
+      expect(result).toEqual({ hasAccess: true })
     })
 
     it('should handle Pronto_per_revisione status like draft', async () => {

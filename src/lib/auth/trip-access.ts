@@ -47,31 +47,29 @@ export async function checkTripAccess(
       }
     }
 
-    // If user is not authenticated
+    // If trip is published, everyone can access (including unauthenticated users)
+    if (trip.status === TripStatus.Pubblicato) {
+      return {
+        hasAccess: true
+      }
+    }
+
+    // For non-published trips, authentication is required
     if (!session?.user?.id) {
       // Log unauthorized access attempt for draft trips
-      if (requiresAccessControl(trip.status)) {
-        console.warn(`Unauthorized access attempt to draft trip ${trip.id} by unauthenticated user`)
-      }
+      console.warn(`Unauthorized access attempt to ${trip.status} trip ${trip.id} by unauthenticated user`)
       return {
         hasAccess: false,
         reason: 'not-authenticated'
       }
     }
 
-    // Validate session data
+    // Validate session data for authenticated users
     if (!session.user.role) {
       console.error(`Invalid session data - missing role for user ${session.user.id}`)
       return {
         hasAccess: false,
         reason: 'session-invalid'
-      }
-    }
-
-    // If trip is published, everyone with valid session can access
-    if (trip.status === TripStatus.Pubblicato) {
-      return {
-        hasAccess: true
       }
     }
 
