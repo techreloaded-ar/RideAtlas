@@ -17,6 +17,7 @@ jest.mock('@/lib/core/prisma', () => ({
     },
     tripPurchase: {
       findUnique: jest.fn(),
+      findFirst: jest.fn(),
     },
   },
 }))
@@ -26,7 +27,8 @@ global.fetch = jest.fn()
 
 const mockAuth = auth as jest.Mock
 const mockPrismaTrip = prisma.trip.findUnique as jest.Mock
-const mockPrismaTripPurchase = prisma.tripPurchase.findUnique as jest.Mock
+const mockPrismaTripPurchaseFindUnique = prisma.tripPurchase.findUnique as jest.Mock
+const mockPrismaTripPurchaseFindFirst = prisma.tripPurchase.findFirst as jest.Mock
 const mockFetch = global.fetch as jest.Mock
 
 describe('GET /api/trips/[id]/gpx - Download GPX', () => {
@@ -117,14 +119,17 @@ describe('GET /api/trips/[id]/gpx - Download GPX', () => {
 
     it('deve richiedere acquisto per viaggio pubblico con utente non proprietario', async () => {
       mockPrismaTrip.mockResolvedValue(mockTrip)
-      mockPrismaTripPurchase.mockResolvedValue(null) // No purchase found
+      // Mock for canAccessPremiumContent -> trip.findUnique
+      mockPrismaTrip.mockResolvedValueOnce(mockTrip)
+      // Mock for hasPurchasedTrip -> tripPurchase.findFirst
+      mockPrismaTripPurchaseFindFirst.mockResolvedValue(null)
       mockAuth.mockResolvedValue({
         user: { id: 'another-user', role: 'User' }
       })
-      
+
       const request = createMockRequest()
       const response = await GET(request, { params: { id: 'trip-123' } })
-      
+
       expect(response.status).toBe(403)
       const body = await response.json()
       expect(body.error).toBe('È necessario acquistare questo viaggio per scaricare il file GPX')
@@ -165,31 +170,38 @@ describe('GET /api/trips/[id]/gpx - Download GPX', () => {
     })
 
     it('deve negare il download a utenti autenticati per viaggi privati di altri', async () => {
-      mockPrismaTrip.mockResolvedValue({
+      const bozzaTrip = {
         ...mockTrip,
         status: 'Bozza',
         user_id: 'other-user'
-      })
-      mockPrismaTripPurchase.mockResolvedValue(null) // No purchase found
+      }
+      mockPrismaTrip.mockResolvedValue(bozzaTrip)
+      // Mock for canAccessPremiumContent -> trip.findUnique
+      mockPrismaTrip.mockResolvedValueOnce(bozzaTrip)
+      // Mock for hasPurchasedTrip -> tripPurchase.findFirst
+      mockPrismaTripPurchaseFindFirst.mockResolvedValue(null)
       mockAuth.mockResolvedValue({
         user: { id: 'user-123', role: 'User' }
       })
-      
+
       const request = createMockRequest()
       const response = await GET(request, { params: { id: 'trip-123' } })
-      
+
       expect(response.status).toBe(403)
       const body = await response.json()
       expect(body.error).toBe('È necessario acquistare questo viaggio per scaricare il file GPX')
     })
 
     it('deve permettere il download ai Sentinel', async () => {
-      mockPrismaTrip.mockResolvedValue({
+      const sentinelTrip = {
         ...mockTrip,
         status: 'Bozza',
         user_id: 'other-user'
-      })
-      mockPrismaTripPurchase.mockResolvedValue(null) // Not needed for Sentinel
+      }
+      mockPrismaTrip.mockResolvedValue(sentinelTrip)
+      // Mock for canAccessPremiumContent (even though Sentinel bypasses it)
+      mockPrismaTrip.mockResolvedValueOnce(sentinelTrip)
+      mockPrismaTripPurchaseFindFirst.mockResolvedValue(null)
       mockAuth.mockResolvedValue({
         user: { id: 'admin-123', role: UserRole.Sentinel }
       })

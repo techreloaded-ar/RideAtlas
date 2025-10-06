@@ -170,12 +170,16 @@ model TripPurchase {
   purchasedAt     DateTime?       // Quando l'acquisto è stato completato
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
-  
+
   user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   trip            Trip            @relation(fields: [tripId], references: [id], onDelete: Cascade)
   transactions    TripPurchaseTransaction[]
 
-  @@unique([userId, tripId])
+  // Removed @@unique([userId, tripId]) to allow multiple purchases (e.g., after refunds)
+  // Performance indexes for common queries
+  @@index([userId, tripId, status])
+  @@index([userId, status])
+  @@index([tripId, status])
   @@map("trip_purchases")
 }
 

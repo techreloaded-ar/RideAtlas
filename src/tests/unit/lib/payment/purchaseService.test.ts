@@ -9,6 +9,7 @@ jest.mock('@/lib/core/prisma', () => ({
     },
     tripPurchase: {
       findUnique: jest.fn(),
+      findFirst: jest.fn(),
       findMany: jest.fn(),
       create: jest.fn(),
       update: jest.fn()
@@ -30,7 +31,7 @@ describe('PurchaseService', () => {
 
   describe('hasPurchasedTrip', () => {
     it('should return true if user has completed purchase', async () => {
-      mockPrisma.tripPurchase.findUnique.mockResolvedValue({
+      mockPrisma.tripPurchase.findFirst.mockResolvedValue({
         id: 'purchase-1',
         userId: 'user-1',
         tripId: 'trip-1',
@@ -44,52 +45,43 @@ describe('PurchaseService', () => {
       } as any);
 
       const result = await PurchaseService.hasPurchasedTrip('user-1', 'trip-1');
-      
+
       expect(result).toBe(true);
-      expect(mockPrisma.tripPurchase.findUnique).toHaveBeenCalledWith({
+      expect(mockPrisma.tripPurchase.findFirst).toHaveBeenCalledWith({
         where: {
-          userId_tripId: {
-            userId: 'user-1',
-            tripId: 'trip-1'
-          }
+          userId: 'user-1',
+          tripId: 'trip-1',
+          status: PurchaseStatus.COMPLETED
+        },
+        orderBy: {
+          purchasedAt: 'desc'
         }
       });
     });
 
     it('should return false if user has pending purchase', async () => {
-      mockPrisma.tripPurchase.findUnique.mockResolvedValue({
-        id: 'purchase-1',
-        userId: 'user-1',
-        tripId: 'trip-1',
-        amount: 5.00,
-        status: PurchaseStatus.PENDING,
-        paymentMethod: null,
-        stripePaymentId: null,
-        purchasedAt: null,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      } as any);
+      mockPrisma.tripPurchase.findFirst.mockResolvedValue(null);
 
       const result = await PurchaseService.hasPurchasedTrip('user-1', 'trip-1');
-      
+
       expect(result).toBe(false);
     });
 
     it('should return false if no purchase exists', async () => {
-      mockPrisma.tripPurchase.findUnique.mockResolvedValue(null);
+      mockPrisma.tripPurchase.findFirst.mockResolvedValue(null);
 
       const result = await PurchaseService.hasPurchasedTrip('user-1', 'trip-1');
-      
+
       expect(result).toBe(false);
     });
 
     it('should return false for invalid parameters', async () => {
       const result1 = await PurchaseService.hasPurchasedTrip('', 'trip-1');
       const result2 = await PurchaseService.hasPurchasedTrip('user-1', '');
-      
+
       expect(result1).toBe(false);
       expect(result2).toBe(false);
-      expect(mockPrisma.tripPurchase.findUnique).not.toHaveBeenCalled();
+      expect(mockPrisma.tripPurchase.findFirst).not.toHaveBeenCalled();
     });
   });
 
@@ -111,13 +103,13 @@ describe('PurchaseService', () => {
         user_id: 'other-user'
       } as any);
 
-      mockPrisma.tripPurchase.findUnique.mockResolvedValue({
+      mockPrisma.tripPurchase.findFirst.mockResolvedValue({
         id: 'purchase-1',
         status: PurchaseStatus.COMPLETED
       } as any);
 
       const result = await PurchaseService.canAccessPremiumContent('user-1', 'trip-1');
-      
+
       expect(result).toBe(true);
     });
 
@@ -127,10 +119,10 @@ describe('PurchaseService', () => {
         user_id: 'other-user'
       } as any);
 
-      mockPrisma.tripPurchase.findUnique.mockResolvedValue(null);
+      mockPrisma.tripPurchase.findFirst.mockResolvedValue(null);
 
       const result = await PurchaseService.canAccessPremiumContent('user-1', 'trip-1');
-      
+
       expect(result).toBe(false);
     });
 
@@ -152,7 +144,10 @@ describe('PurchaseService', () => {
         status: 'Pubblicato'
       } as any);
 
-      mockPrisma.tripPurchase.findUnique.mockResolvedValue(null);
+      // No active COMPLETED purchase
+      mockPrisma.tripPurchase.findFirst.mockResolvedValueOnce(null);
+      // No existing PENDING purchase
+      mockPrisma.tripPurchase.findFirst.mockResolvedValueOnce(null);
 
       mockPrisma.tripPurchase.create.mockResolvedValue({
         id: 'purchase-1',
@@ -166,7 +161,7 @@ describe('PurchaseService', () => {
       } as any);
 
       const result = await PurchaseService.createPurchase('user-1', 'trip-1');
-      
+
       expect(result.success).toBe(true);
       expect(result.purchaseId).toBe('purchase-1');
     });
@@ -212,15 +207,72 @@ describe('PurchaseService', () => {
         status: 'Pubblicato'
       } as any);
 
-      mockPrisma.tripPurchase.findUnique.mockResolvedValue({
+      // Active COMPLETED purchase exists
+      mockPrisma.tripPurchase.findFirst.mockResolvedValue({
         id: 'purchase-1',
         status: PurchaseStatus.COMPLETED
       } as any);
 
       const result = await PurchaseService.createPurchase('user-1', 'trip-1');
-      
+
       expect(result.success).toBe(false);
       expect(result.error).toBe('Hai già acquistato questo viaggio');
+    });
+
+    it('should reuse existing PENDING purchase', async () => {
+      mockPrisma.trip.findUnique.mockResolvedValue({
+        id: 'trip-1',
+        price: 5.00,
+        user_id: 'other-user',
+        status: 'Pubblicato'
+      } as any);
+
+      // No active COMPLETED purchase
+      mockPrisma.tripPurchase.findFirst.mockResolvedValueOnce(null);
+      // Existing PENDING purchase
+      mockPrisma.tripPurchase.findFirst.mockResolvedValueOnce({
+        id: 'purchase-pending',
+        status: PurchaseStatus.PENDING,
+        userId: 'user-1',
+        tripId: 'trip-1'
+      } as any);
+
+      const result = await PurchaseService.createPurchase('user-1', 'trip-1');
+
+      expect(result.success).toBe(true);
+      expect(result.purchaseId).toBe('purchase-pending');
+      expect(mockPrisma.tripPurchase.create).not.toHaveBeenCalled();
+    });
+
+    it('should create new purchase after refund', async () => {
+      mockPrisma.trip.findUnique.mockResolvedValue({
+        id: 'trip-1',
+        price: 5.00,
+        user_id: 'other-user',
+        status: 'Pubblicato'
+      } as any);
+
+      // No active COMPLETED purchase (was refunded)
+      mockPrisma.tripPurchase.findFirst.mockResolvedValueOnce(null);
+      // No PENDING purchase
+      mockPrisma.tripPurchase.findFirst.mockResolvedValueOnce(null);
+
+      mockPrisma.tripPurchase.create.mockResolvedValue({
+        id: 'purchase-new',
+        userId: 'user-1',
+        tripId: 'trip-1'
+      } as any);
+
+      mockPrisma.tripPurchaseTransaction.create.mockResolvedValue({
+        id: 'transaction-new',
+        purchaseId: 'purchase-new'
+      } as any);
+
+      const result = await PurchaseService.createPurchase('user-1', 'trip-1');
+
+      expect(result.success).toBe(true);
+      expect(result.purchaseId).toBe('purchase-new');
+      expect(mockPrisma.tripPurchase.create).toHaveBeenCalled();
     });
   });
 

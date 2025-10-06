@@ -36,19 +36,17 @@ export class StripeService {
       console.log(`🔄 [STRIPE SERVICE] Creazione Payment Intent - amount: €${amount}, purchaseId: ${purchaseId}`);
 
       const existingPaymentIntent = await this.findExistingPaymentIntent(purchaseId);
-      
-      if (existingPaymentIntent) {
-        console.log(`♻️ [STRIPE SERVICE] Payment Intent esistente trovato: ${existingPaymentIntent.id}`);
-        
-        if (existingPaymentIntent.status === 'succeeded') {
-          return {
-            success: false,
-            error: 'Il pagamento è già stato completato'
-          };
-        }
 
-        if (existingPaymentIntent.status === 'requires_payment_method' || 
-            existingPaymentIntent.status === 'requires_confirmation') {
+      if (existingPaymentIntent) {
+        console.log(`♻️ [STRIPE SERVICE] Payment Intent esistente trovato: ${existingPaymentIntent.id}, status: ${existingPaymentIntent.status}`);
+
+        // If succeeded, this might be from a previous purchase that was refunded
+        // Create a new Payment Intent instead of reusing (allows repurchase after refund)
+        if (existingPaymentIntent.status === 'succeeded') {
+          console.log(`⚠️ [STRIPE SERVICE] Payment Intent succeeded trovato - potrebbe essere un acquisto precedente rimborsato. Creazione nuovo Payment Intent.`);
+          // Fall through to create new Payment Intent
+        } else if (existingPaymentIntent.status === 'requires_payment_method' ||
+                   existingPaymentIntent.status === 'requires_confirmation') {
           return {
             success: true,
             paymentIntent: existingPaymentIntent,

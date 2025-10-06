@@ -44,22 +44,26 @@ describe('Purchase Flow Integration', () => {
 
   describe('Complete Purchase Flow', () => {
     it('should complete full purchase workflow', async () => {
-      // Mock initial state - no purchase exists
-      mockPrisma.tripPurchase.findUnique.mockResolvedValueOnce(null);
-      mockPrisma.trip.findUnique.mockResolvedValueOnce(testTrip as any);
-      
       // 1. Initially user should not have access
+      // Mock for canAccessPremiumContent -> trip.findUnique
+      mockPrisma.trip.findUnique.mockResolvedValueOnce(testTrip as any);
+      // Mock for hasPurchasedTrip -> tripPurchase.findFirst
+      mockPrisma.tripPurchase.findFirst.mockResolvedValueOnce(null);
+
       const initialAccess = await PurchaseService.canAccessPremiumContent(testUser.id, testTrip.id);
       expect(initialAccess).toBe(false);
 
-      // Mock for hasPurchasedTrip check
-      mockPrisma.tripPurchase.findUnique.mockResolvedValueOnce(null);
+      // Mock for hasPurchasedTrip check -> tripPurchase.findFirst
+      mockPrisma.tripPurchase.findFirst.mockResolvedValueOnce(null);
       const initialPurchaseStatus = await PurchaseService.hasPurchasedTrip(testUser.id, testTrip.id);
       expect(initialPurchaseStatus).toBe(false);
 
       // 2. Create purchase - mock the database operations
       mockPrisma.trip.findUnique.mockResolvedValueOnce(testTrip as any);
-      mockPrisma.tripPurchase.findUnique.mockResolvedValueOnce(null); // No existing purchase
+      // Mock for createPurchase -> findFirst (check active COMPLETED)
+      mockPrisma.tripPurchase.findFirst.mockResolvedValueOnce(null);
+      // Mock for createPurchase -> findFirst (check existing PENDING)
+      mockPrisma.tripPurchase.findFirst.mockResolvedValueOnce(null);
       
       const newPurchase = {
         id: 'purchase-1',
@@ -99,13 +103,16 @@ describe('Purchase Flow Integration', () => {
       expect(completeResult.success).toBe(true);
 
       // 4. User should now have access
+      // Mock for canAccessPremiumContent -> trip.findUnique
       mockPrisma.trip.findUnique.mockResolvedValueOnce(testTrip as any);
-      mockPrisma.tripPurchase.findUnique.mockResolvedValueOnce(completedPurchase as any);
-      
+      // Mock for hasPurchasedTrip -> tripPurchase.findFirst
+      mockPrisma.tripPurchase.findFirst.mockResolvedValueOnce(completedPurchase as any);
+
       const finalAccess = await PurchaseService.canAccessPremiumContent(testUser.id, testTrip.id);
       expect(finalAccess).toBe(true);
 
-      mockPrisma.tripPurchase.findUnique.mockResolvedValueOnce(completedPurchase as any);
+      // Mock for hasPurchasedTrip -> tripPurchase.findFirst
+      mockPrisma.tripPurchase.findFirst.mockResolvedValueOnce(completedPurchase as any);
       const finalPurchaseStatus = await PurchaseService.hasPurchasedTrip(testUser.id, testTrip.id);
       expect(finalPurchaseStatus).toBe(true);
     });
@@ -124,7 +131,8 @@ describe('Purchase Flow Integration', () => {
       };
 
       mockPrisma.trip.findUnique.mockResolvedValueOnce(testTrip as any);
-      mockPrisma.tripPurchase.findUnique.mockResolvedValueOnce(existingPurchase as any);
+      // Mock for createPurchase -> findFirst (check active COMPLETED)
+      mockPrisma.tripPurchase.findFirst.mockResolvedValueOnce(existingPurchase as any);
 
       const result = await PurchaseService.createPurchase(testUser.id, testTrip.id);
       expect(result.success).toBe(false);
@@ -157,7 +165,8 @@ describe('Purchase Flow Integration', () => {
       };
 
       mockPrisma.trip.findUnique.mockResolvedValueOnce(unpublishedTrip as any);
-      mockPrisma.tripPurchase.findUnique.mockResolvedValueOnce(null);
+      // Mock for createPurchase -> findFirst (check active COMPLETED)
+      mockPrisma.tripPurchase.findFirst.mockResolvedValueOnce(null);
 
       const result = await PurchaseService.createPurchase(testUser.id, testTrip.id);
       expect(result.success).toBe(false);

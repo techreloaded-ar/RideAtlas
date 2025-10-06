@@ -6,7 +6,9 @@ jest.mock('@/lib/core/prisma', () => ({
   prisma: {
     tripPurchase: {
       findUnique: jest.fn(),
+      findFirst: jest.fn(),
       update: jest.fn(),
+      create: jest.fn(),
       upsert: jest.fn(),
       findMany: jest.fn(),
       count: jest.fn(),
@@ -91,8 +93,9 @@ describe('PurchaseService - Admin Functions', () => {
 
     it('should successfully gift a trip to a user', async () => {
       mockPrisma.trip.findUnique.mockResolvedValue(mockTrip);
-      mockPrisma.tripPurchase.findUnique.mockResolvedValue(null);
-      
+      // No existing COMPLETED purchase
+      mockPrisma.tripPurchase.findFirst.mockResolvedValue(null);
+
       const mockCreatedPurchase = {
         id: 'new-purchase-1',
         userId: 'user-1',
@@ -100,8 +103,8 @@ describe('PurchaseService - Admin Functions', () => {
         amount: 0,
         status: PurchaseStatus.COMPLETED,
       };
-      
-      mockPrisma.tripPurchase.upsert.mockResolvedValue(mockCreatedPurchase);
+
+      mockPrisma.tripPurchase.create.mockResolvedValue(mockCreatedPurchase);
       mockPrisma.tripPurchaseTransaction.create.mockResolvedValue({});
 
       const result = await PurchaseService.giftTrip('user-1', 'trip-1', 'admin-1', 'Holiday gift');
@@ -151,7 +154,8 @@ describe('PurchaseService - Admin Functions', () => {
 
     it('should fail if user already purchased the trip', async () => {
       mockPrisma.trip.findUnique.mockResolvedValue(mockTrip);
-      mockPrisma.tripPurchase.findUnique.mockResolvedValue({
+      // Existing COMPLETED purchase
+      mockPrisma.tripPurchase.findFirst.mockResolvedValue({
         id: 'existing-purchase',
         status: PurchaseStatus.COMPLETED
       });
