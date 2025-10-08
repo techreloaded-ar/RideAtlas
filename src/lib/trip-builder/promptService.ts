@@ -71,10 +71,12 @@ Il tuo compito è aiutare gli utenti a pianificare viaggi in moto personalizzati
 
   private static buildGpxInfo(gpxData: NonNullable<Trip['gpxData']>): string {
     let gpxInfo = '';
-    
+
     if (gpxData.distance) {
-      gpxInfo += `\n- Distanza GPX: ${gpxData.distance}km (DATO PRECISO)`;
-      gpxInfo += `\n- Tempo stimato: ${Math.round(gpxData.distance / 50 * 60)} minuti di guida`;
+      // gpxData.distance è in metri, convertiamo in km
+      const distanceKm = gpxData.distance / 1000;
+      gpxInfo += `\n- Distanza GPX: ${distanceKm.toFixed(1)}km (DATO PRECISO)`;
+      gpxInfo += `\n- Tempo stimato: ${Math.round(distanceKm / 50 * 60)} minuti di guida`;
     }
     
     if (gpxData.elevationGain) {

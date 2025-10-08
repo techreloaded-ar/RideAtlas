@@ -273,9 +273,11 @@ export class TripAnalysisService {
     
     // Calculate totals
     const totalDuration = recommendations.reduce((sum, trip) => sum + trip.duration_days, 0);
+    // gpxData.distance è in metri, convertiamo in km
     const totalDistance = recommendations.reduce((sum, trip) => {
       const tripData = trips.find(t => t.id === trip.id);
-      return sum + (tripData?.gpxData?.distance || 0);
+      const distanceMeters = tripData?.gpxData?.distance || 0;
+      return sum + (distanceMeters / 1000);
     }, 0);
     
     // Suggest optimal order using a simplified nearest neighbor approach

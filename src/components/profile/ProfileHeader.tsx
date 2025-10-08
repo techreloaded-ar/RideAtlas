@@ -8,8 +8,8 @@ import AvatarUploadModal from './AvatarUploadModal';
 import { UserRole, UserRoleLabels, UserRoleDescriptions } from '@/types/profile';
 
 interface ProfileStats {
-  tripsCreated: number;
-  totalKilometers: number;
+  tripsCreated?: number;
+  totalKilometers?: number;
   memberSince: string;
 }
 
@@ -42,10 +42,17 @@ export default function ProfileHeader() {
 
   const formatMemberSince = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('it-IT', { 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
+    return date.toLocaleDateString('it-IT', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
+
+  const formatKilometers = (km: number) => {
+    return km.toLocaleString('it-IT', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
     });
   };
 
@@ -113,40 +120,43 @@ export default function ProfileHeader() {
                 {UserRoleLabels[userRole]}
               </span>
             </div>
-            
+
             <p className="text-gray-600 mb-1">
               {session.user.email}
             </p>
-            
-            <p className="text-sm text-gray-500">
+
+            <p className="text-sm text-gray-500 mb-2">
               {UserRoleDescriptions[userRole]}
+            </p>
+
+            {/* Member Since - visibile per tutti */}
+            <p className="text-sm text-gray-600">
+              Membro dal: <span className="font-medium">
+                {loading ? '...' : stats?.memberSince ? formatMemberSince(stats.memberSince) : '--'}
+              </span>
             </p>
           </div>
         </div>
 
-        {/* Quick Stats */}
-        <div className="mt-6 pt-6 border-t border-gray-200">
-          <div className="grid grid-cols-3 gap-4 text-center">
-            <div>
-              <p className="text-2xl font-semibold text-gray-900">
-                {loading ? '...' : stats?.tripsCreated || 0}
-              </p>
-              <p className="text-sm text-gray-500">Viaggi creati</p>
-            </div>
-            <div>
-              <p className="text-2xl font-semibold text-gray-900">
-                {loading ? '...' : `${stats?.totalKilometers || 0}`}
-              </p>
-              <p className="text-sm text-gray-500">Km percorsi</p>
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-gray-900">
-                {loading ? '...' : stats?.memberSince ? formatMemberSince(stats.memberSince) : '--'}
-              </p>
-              <p className="text-sm text-gray-500">Membro dal</p>
+        {/* Quick Stats - solo per Ranger e Sentinel */}
+        {userRole !== UserRole.Explorer && (
+          <div className="mt-6 pt-6 border-t border-gray-200">
+            <div className="grid grid-cols-2 gap-4 text-center">
+              <div>
+                <p className="text-2xl font-semibold text-gray-900">
+                  {loading ? '...' : stats?.tripsCreated || 0}
+                </p>
+                <p className="text-sm text-gray-500">Viaggi creati</p>
+              </div>
+              <div>
+                <p className="text-2xl font-semibold text-gray-900">
+                  {loading ? '...' : formatKilometers(stats?.totalKilometers || 0)}
+                </p>
+                <p className="text-sm text-gray-500">Km percorsi</p>
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Avatar Upload Modal */}
