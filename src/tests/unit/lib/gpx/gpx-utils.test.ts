@@ -5,6 +5,7 @@ import {
   createGpxFileFromMetadata,
   isValidGpxFile,
   isValidGpxFileSize,
+  extractKeyPoints,
   type GpxMetadata,
   type GPXParseResult
 } from '@/lib/gpx/gpx-utils'
@@ -858,6 +859,219 @@ describe('GPX Utils', () => {
       expect(() => {
         parseGPXContent(completelyInvalidXml, 'malformed.gpx')
       }).toThrow()
+    })
+  })
+
+  describe('extractKeyPoints', () => {
+    /**
+     * Test per la funzione extractKeyPoints che estrae punti chiave dal tracciato GPX
+     * Bug fix: Il calcolo dell'intervallo era sbagliato (30 metri invece di 30km)
+     */
+
+    it('should extract key points at correct interval (30km default)', () => {
+      // Crea un GPX che simula un percorso di ~360km
+      // Dobbiamo creare punti abbastanza distanti per raggiungere questa distanza
+      const longRouteGpx = `<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="Test">
+  <trk>
+    <name>Long Route</name>
+    <trkseg>
+      <trkpt lat="43.6142" lon="13.5173"><ele>100</ele></trkpt>
+      <trkpt lat="43.7142" lon="13.6173"><ele>150</ele></trkpt>
+      <trkpt lat="43.8142" lon="13.7173"><ele>200</ele></trkpt>
+      <trkpt lat="43.9142" lon="13.8173"><ele>250</ele></trkpt>
+      <trkpt lat="44.0142" lon="13.9173"><ele>300</ele></trkpt>
+      <trkpt lat="44.1142" lon="14.0173"><ele>350</ele></trkpt>
+      <trkpt lat="44.2142" lon="14.1173"><ele>400</ele></trkpt>
+      <trkpt lat="44.3142" lon="14.2173"><ele>450</ele></trkpt>
+      <trkpt lat="44.4142" lon="14.3173"><ele>500</ele></trkpt>
+    </trkseg>
+  </trk>
+</gpx>`
+
+      const result = parseGPXContent(longRouteGpx, 'long-route.gpx')
+      const keyPoints = extractKeyPoints(result.tracks, result.routes, 30)
+
+      // Dovremmo avere: start + punti ogni 30km + end
+      // Con ~100km per ogni grado di latitudine, dovremmo avere circa 10-15 keyPoints
+      expect(keyPoints.length).toBeGreaterThan(2) // Almeno start + end
+      expect(keyPoints.length).toBeLessThan(50) // Non migliaia come nel bug
+
+      // Primo punto deve essere 'start'
+      expect(keyPoints[0].type).toBe('start')
+      expect(keyPoints[0].description).toBe('Partenza')
+      expect(keyPoints[0].distanceFromStart).toBe(0)
+
+      // Ultimo punto deve essere 'end'
+      expect(keyPoints[keyPoints.length - 1].type).toBe('end')
+      expect(keyPoints[keyPoints.length - 1].description).toContain('Arrivo')
+
+      // Punti intermedi devono avere type 'intermediate'
+      const intermediatePoints = keyPoints.filter(p => p.type === 'intermediate')
+      intermediatePoints.forEach(point => {
+        expect(point.distanceFromStart).toBeGreaterThan(0)
+        expect(point.description).toMatch(/\d+km/)
+      })
+    })
+
+    it('REGRESSION TEST: should NOT generate thousands of keyPoints for 360km route', () => {
+      // Test specifico per il bug riportato: 3591 keyPoints per 360km
+      // Simula un percorso di 360km con molti punti GPS
+      const gpxContent = `<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="GPS Device">
+  <trk>
+    <name>360km Route</name>
+    <trkseg>`
+
+      // Crea punti ogni ~0.01 gradi (circa 1km) per simulare tracciato GPS reale
+      let content = gpxContent
+      for (let i = 0; i < 400; i++) {
+        const lat = 43.6142 + (i * 0.01)
+        const lon = 13.5173 + (i * 0.01)
+        const ele = 100 + (i % 100)
+        content += `<trkpt lat="${lat}" lon="${lon}"><ele>${ele}</ele></trkpt>\n`
+      }
+
+      content += `</trkseg></trk></gpx>`
+
+      const result = parseGPXContent(content, 'bug-test.gpx')
+      const keyPoints = extractKeyPoints(result.tracks, result.routes, 30)
+
+      // CRITICO: Per 360km con intervallo di 30km dovremmo avere circa 13-15 punti
+      // (start + ~12 intermedi + end)
+      expect(keyPoints.length).toBeLessThan(30) // MAI migliaia
+      expect(keyPoints.length).toBeGreaterThan(5) // Ragionevole per 360km
+
+      // Verifica che la distanza totale sia ragionevole (in km)
+      const lastPoint = keyPoints[keyPoints.length - 1]
+      expect(lastPoint.distanceFromStart).toBeGreaterThan(100) // Almeno 100km
+
+      console.log(`Test 360km route: ${keyPoints.length} keyPoints for ${lastPoint.distanceFromStart.toFixed(1)}km total distance`)
+    })
+
+    it('should work with custom interval (50km)', () => {
+      const gpxContent = `<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="Test">
+  <trk>
+    <name>Test Route</name>
+    <trkseg>
+      <trkpt lat="43.0" lon="13.0"><ele>100</ele></trkpt>
+      <trkpt lat="44.0" lon="14.0"><ele>200</ele></trkpt>
+      <trkpt lat="45.0" lon="15.0"><ele>300</ele></trkpt>
+      <trkpt lat="46.0" lon="16.0"><ele>400</ele></trkpt>
+    </trkseg>
+  </trk>
+</gpx>`
+
+      const result = parseGPXContent(gpxContent, 'test.gpx')
+      const keyPoints = extractKeyPoints(result.tracks, result.routes, 50) // 50km interval
+
+      // Con intervallo di 50km dovremmo avere meno punti che con 30km
+      expect(keyPoints.length).toBeGreaterThan(2)
+      expect(keyPoints[0].type).toBe('start')
+      expect(keyPoints[keyPoints.length - 1].type).toBe('end')
+    })
+
+    it('should handle single point GPX', () => {
+      const singlePointGpx = `<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="Test">
+  <trk>
+    <name>Single Point</name>
+    <trkseg>
+      <trkpt lat="43.6142" lon="13.5173"><ele>100</ele></trkpt>
+    </trkseg>
+  </trk>
+</gpx>`
+
+      const result = parseGPXContent(singlePointGpx, 'single.gpx')
+      const keyPoints = extractKeyPoints(result.tracks, result.routes)
+
+      expect(keyPoints).toHaveLength(1)
+      expect(keyPoints[0].type).toBe('start')
+      expect(keyPoints[0].description).toBe('Punto unico')
+    })
+
+    it('should handle empty tracks/routes', () => {
+      const keyPoints = extractKeyPoints([], [])
+      expect(keyPoints).toHaveLength(0)
+    })
+
+    it('should combine tracks and routes', () => {
+      const gpxWithBoth = `<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="Test">
+  <trk>
+    <name>Track</name>
+    <trkseg>
+      <trkpt lat="43.0" lon="13.0"><ele>100</ele></trkpt>
+      <trkpt lat="43.5" lon="13.5"><ele>150</ele></trkpt>
+    </trkseg>
+  </trk>
+  <rte>
+    <name>Route</name>
+    <rtept lat="44.0" lon="14.0"><ele>200</ele></rtept>
+    <rtept lat="44.5" lon="14.5"><ele>250</ele></rtept>
+  </rte>
+</gpx>`
+
+      const result = parseGPXContent(gpxWithBoth, 'combined.gpx')
+      const keyPoints = extractKeyPoints(result.tracks, result.routes)
+
+      // Dovrebbe combinare tutti i punti di tracks e routes
+      expect(keyPoints.length).toBeGreaterThan(0)
+      expect(keyPoints[0].type).toBe('start')
+      expect(keyPoints[keyPoints.length - 1].type).toBe('end')
+    })
+
+    it('should calculate distanceFromStart in kilometers', () => {
+      const gpxContent = `<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="Test">
+  <trk>
+    <name>Distance Test</name>
+    <trkseg>
+      <trkpt lat="43.0" lon="13.0"><ele>100</ele></trkpt>
+      <trkpt lat="44.0" lon="14.0"><ele>200</ele></trkpt>
+      <trkpt lat="45.0" lon="15.0"><ele>300</ele></trkpt>
+    </trkseg>
+  </trk>
+</gpx>`
+
+      const result = parseGPXContent(gpxContent, 'distance-test.gpx')
+      const keyPoints = extractKeyPoints(result.tracks, result.routes)
+
+      // distanceFromStart dovrebbe essere in km (non metri)
+      const lastPoint = keyPoints[keyPoints.length - 1]
+      expect(lastPoint.distanceFromStart).toBeGreaterThan(10) // Almeno 10km
+      expect(lastPoint.distanceFromStart).toBeLessThan(500) // Non migliaia (sarebbe in metri)
+
+      // Verifica che la descrizione corrisponda alla distanza
+      expect(lastPoint.description).toContain(Math.round(lastPoint.distanceFromStart).toString())
+    })
+
+    it('should include elevation data in key points when available', () => {
+      const gpxWithElevation = `<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="Test">
+  <trk>
+    <name>Elevation Test</name>
+    <trkseg>
+      <trkpt lat="43.0" lon="13.0"><ele>100</ele></trkpt>
+      <trkpt lat="43.5" lon="13.5"><ele>500</ele></trkpt>
+      <trkpt lat="44.0" lon="14.0"><ele>1000</ele></trkpt>
+    </trkseg>
+  </trk>
+</gpx>`
+
+      const result = parseGPXContent(gpxWithElevation, 'elevation-test.gpx')
+      const keyPoints = extractKeyPoints(result.tracks, result.routes)
+
+      // Tutti i keyPoints dovrebbero avere elevation
+      keyPoints.forEach(point => {
+        expect(point.elevation).toBeDefined()
+        expect(typeof point.elevation).toBe('number')
+      })
+
+      // Verifica valori specifici
+      expect(keyPoints[0].elevation).toBe(100)
+      expect(keyPoints[keyPoints.length - 1].elevation).toBe(1000)
     })
   })
 })

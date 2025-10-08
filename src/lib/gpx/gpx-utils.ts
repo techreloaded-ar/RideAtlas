@@ -511,6 +511,9 @@ export function extractKeyPoints(tracks: GPXTrack[], routes: GPXRoute[], interva
   let cumulativeDistance = 0
   let lastKeyPointDistance = 0
 
+  // Convert interval from km to meters (calculateDistance returns meters)
+  const intervalMeters = intervalKm * 1000
+
   // Add start point
   const startPoint = allPoints[0]
   keyPoints.push({
@@ -527,7 +530,7 @@ export function extractKeyPoints(tracks: GPXTrack[], routes: GPXRoute[], interva
     const currentPoint = allPoints[i]
     const previousPoint = allPoints[i - 1]
 
-    // Calculate distance from previous point
+    // Calculate distance from previous point (returns meters)
     const segmentDistance = calculateDistance(
       previousPoint.lat, previousPoint.lng,
       currentPoint.lat, currentPoint.lng
@@ -538,14 +541,14 @@ export function extractKeyPoints(tracks: GPXTrack[], routes: GPXRoute[], interva
     // Check if we should add a key point (every intervalKm)
     const distanceSinceLastKey = cumulativeDistance - lastKeyPointDistance
 
-    if (distanceSinceLastKey >= intervalKm) {
+    if (distanceSinceLastKey >= intervalMeters) {
       keyPoints.push({
         lat: currentPoint.lat,
         lng: currentPoint.lng,
         elevation: currentPoint.elevation,
-        distanceFromStart: cumulativeDistance,
+        distanceFromStart: cumulativeDistance / 1000, // Convert meters to km for display
         type: 'intermediate',
-        description: `${Math.round(cumulativeDistance)}km`
+        description: `${Math.round(cumulativeDistance / 1000)}km`
       })
 
       lastKeyPointDistance = cumulativeDistance
@@ -559,13 +562,13 @@ export function extractKeyPoints(tracks: GPXTrack[], routes: GPXRoute[], interva
       lat: endPoint.lat,
       lng: endPoint.lng,
       elevation: endPoint.elevation,
-      distanceFromStart: cumulativeDistance,
+      distanceFromStart: cumulativeDistance / 1000, // Convert meters to km for display
       type: 'end',
-      description: `Arrivo (${Math.round(cumulativeDistance)}km)`
+      description: `Arrivo (${Math.round(cumulativeDistance / 1000)}km)`
     })
   }
 
-  console.log(`extractKeyPoints: Generated ${keyPoints.length} key points, total distance: ${cumulativeDistance.toFixed(2)}km`)
+  console.log(`extractKeyPoints: Generated ${keyPoints.length} key points, total distance: ${(cumulativeDistance / 1000).toFixed(2)}km`)
   return keyPoints
 }
 
