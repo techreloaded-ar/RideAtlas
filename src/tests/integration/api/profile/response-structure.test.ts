@@ -47,6 +47,7 @@ describe('Profile API Response Structure', () => {
       id: mockUserId,
       name: 'Test User',
       bio: 'Test bio',
+      bikeDescription: null,
       email: 'test@example.com',
       socialLinks: {
         instagram: 'https://instagram.com/testuser',
@@ -92,6 +93,7 @@ describe('Profile API Response Structure', () => {
         id: true,
         name: true,
         bio: true,
+        bikeDescription: true,
         email: true,
         socialLinks: true
       }
@@ -108,6 +110,7 @@ describe('Profile API Response Structure', () => {
       id: mockUserId,
       name: 'Test User',
       bio: null,
+      bikeDescription: null,
       email: 'test@example.com',
       socialLinks: null
     };

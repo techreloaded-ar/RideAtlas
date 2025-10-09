@@ -4,6 +4,7 @@ import { prisma } from '@/lib/core/prisma';
 import { z } from 'zod';
 import { validateAndSanitizeUrl } from '@/lib/utils/url-sanitizer';
 import { SocialPlatform } from '@/types/user';
+import { updateProfileSchema as sharedUpdateProfileSchema } from '@/schemas/profile';
 
 // Social links validation schema
 const socialLinksSchema = z.object({
@@ -15,9 +16,8 @@ const socialLinksSchema = z.object({
   website: z.string().optional(),
 }).optional();
 
-const updateProfileSchema = z.object({
-  name: z.string().min(1, 'Il nome è obbligatorio').max(100, 'Il nome è troppo lungo'),
-  bio: z.string().max(200, 'La bio deve essere massimo 200 caratteri').optional(),
+// Extended profile update schema including social links
+const updateProfileSchema = sharedUpdateProfileSchema.extend({
   socialLinks: socialLinksSchema,
 });
 
@@ -42,7 +42,7 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    const { name, bio, socialLinks } = validation.data;
+    const { name, bio, bikeDescription, socialLinks } = validation.data;
     const userId = session.user.id;
 
     // Validate and sanitize social links if provided
@@ -96,12 +96,14 @@ export async function PUT(request: NextRequest) {
       data: {
         name,
         bio: bio || null,
+        bikeDescription: bikeDescription || null,
         socialLinks: sanitizedSocialLinks ?? undefined
       },
       select: {
         id: true,
         name: true,
         bio: true,
+        bikeDescription: true,
         email: true,
         socialLinks: true
       }

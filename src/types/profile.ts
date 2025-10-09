@@ -35,3 +35,28 @@ export const UserRoleDescriptions: Record<UserRole, string> = {
   [UserRole.Ranger]: 'Può creare, modificare e partecipare ai viaggi',
   [UserRole.Sentinel]: 'Può gestire utenti e ha accesso completo al sistema',
 } as const
+
+// Media Item type (reused from trip media pattern)
+export interface MediaItem {
+  id: string;           // Temporary ID generated client-side
+  type: 'image';        // Only 'image' for bike photos
+  url: string;          // Full public URL from storage provider
+  caption?: string;     // Optional description/caption
+  uploadedAt?: string;  // Optional ISO timestamp for chronological ordering
+}
+
+// Public profile (no sensitive data exposed)
+export interface PublicUserProfile {
+  id: string;
+  name: string | null;
+  image: string | null;
+  bio: string | null;
+  bikeDescription: string | null;
+  bikePhotos: MediaItem[];
+}
+
+// Email change request
+export interface EmailChangeRequest {
+  newEmail: string;
+  password: string;
+}

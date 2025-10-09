@@ -201,21 +201,21 @@ export async function sendPasswordResetEmail(email: string, token: string): Prom
 }
 
 export async function sendRoleChangeNotificationEmail(
-  email: string, 
-  userName: string, 
-  newRole: string, 
+  email: string,
+  userName: string,
+  newRole: string,
   changedBy: string
 ): Promise<EmailResult> {
   // Converti il ruolo in italiano per l'email
   const roleTranslations: Record<string, string> = {
     'Explorer': 'Explorer',
-    'Ranger': 'Ranger', 
+    'Ranger': 'Ranger',
     'Sentinel': 'Sentinel'
   };
 
   const roleInItalian = roleTranslations[newRole] || newRole;
   const dashboardUrl = `${process.env.NEXTAUTH_URL}/dashboard`;
-  
+
   const templateData: EmailTemplateData = {
     title: 'Aggiornamento Ruolo Account',
     welcomeText: `Ciao ${userName || 'Utente'},\n\nTi informiamo che un amministratore (${changedBy}) ha aggiornato il tuo ruolo su RideAtlas.\n\nIl tuo nuovo ruolo: ${roleInItalian}\n\nQuesto cambiamento potrebbe influenzare le tue autorizzazioni e l'accesso a determinate funzioni della piattaforma. Accedi al tuo account per vedere i nuovi privilegi disponibili.`,
@@ -232,4 +232,19 @@ export async function sendRoleChangeNotificationEmail(
   };
 
   return sendTemplatedEmail(email, 'Aggiornamento ruolo account - RideAtlas', templateData, 'Email di notifica ruolo');
+}
+
+export async function sendEmailChangeVerification(newEmail: string, token: string): Promise<EmailResult> {
+  const verificationUrl = `${process.env.NEXTAUTH_URL}/api/profile/verify-email-change?token=${token}`;
+
+  const templateData: EmailTemplateData = {
+    title: 'Verifica il cambio email',
+    welcomeText: 'Hai richiesto di modificare l\'indirizzo email associato al tuo account RideAtlas. Per completare il processo, clicca sul pulsante qui sotto per verificare il tuo nuovo indirizzo email.',
+    buttonText: 'Verifica Nuova Email',
+    buttonUrl: verificationUrl,
+    warningText: '<strong>⚠️ Importante:</strong> Questo link scadrà tra 24 ore per motivi di sicurezza. Se non hai richiesto questo cambio email, ignora questa email e contatta il supporto.',
+    footerText: 'Il link scadrà tra 24 ore per motivi di sicurezza.'
+  };
+
+  return sendTemplatedEmail(newEmail, 'Verifica il cambio email - RideAtlas', templateData, 'Email di verifica cambio email');
 }

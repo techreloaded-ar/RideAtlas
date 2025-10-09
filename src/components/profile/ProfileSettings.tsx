@@ -3,11 +3,13 @@
 import { useState } from 'react';
 import React from 'react';
 import { useSession } from 'next-auth/react';
-import { ChevronDown, ChevronUp, Lock, User, Settings, Loader2 } from 'lucide-react';
+import { ChevronDown, ChevronUp, Lock, User, Settings, Loader2, Bike } from 'lucide-react';
 import ChangePasswordForm from './ChangePasswordForm';
 import SocialLinksSection from './SocialLinksSection';
+import BikePhotosUpload from './BikePhotosUpload';
 import { SocialLinks } from '@/types/user';
 import { useProfile } from '@/hooks/profile/useProfile';
+import type { MediaItem } from '@/types/profile';
 
 interface SettingsSectionProps {
   title: string;
@@ -18,13 +20,13 @@ interface SettingsSectionProps {
   children: React.ReactNode;
 }
 
-function SettingsSection({ 
-  title, 
-  description, 
-  icon, 
-  isOpen, 
-  onToggle, 
-  children 
+function SettingsSection({
+  title,
+  description,
+  icon,
+  isOpen,
+  onToggle,
+  children
 }: SettingsSectionProps) {
   return (
     <div className="border border-gray-200 rounded-lg">
@@ -45,7 +47,7 @@ function SettingsSection({
           <ChevronDown className="w-5 h-5 text-gray-500" />
         )}
       </button>
-      
+
       {isOpen && (
         <div className="px-6 pb-6 border-t border-gray-200">
           <div className="pt-4">
@@ -63,6 +65,7 @@ export default function ProfileSettings() {
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
     security: false,
     personal: false,
+    motorcycle: false,
     preferences: false,
   });
   const [isUpdating, setIsUpdating] = useState(false);
@@ -74,6 +77,13 @@ export default function ProfileSettings() {
     socialLinks: {} as SocialLinks,
   });
 
+  // Motorcycle-specific state
+  const [bikeDescription, setBikeDescription] = useState('');
+  const [bikePhotos, setBikePhotos] = useState<MediaItem[]>([]);
+  const [isSavingBike, setIsSavingBike] = useState(false);
+  const [bikeSuccess, setBikeSuccess] = useState(false);
+  const [bikeError, setBikeError] = useState('');
+
   // Aggiorna i dati del form quando il profilo viene caricato
   React.useEffect(() => {
     if (profile) {
@@ -82,6 +92,8 @@ export default function ProfileSettings() {
         bio: profile.bio || '',
         socialLinks: profile.socialLinks || {},
       });
+      setBikeDescription(profile.bikeDescription || '');
+      setBikePhotos(profile.bikePhotos || []);
     }
   }, [profile]);
 
@@ -116,7 +128,7 @@ export default function ProfileSettings() {
     setIsUpdating(true);
     setUpdateError('');
     setUpdateSuccess(false);
-    
+
     try {
       const response = await fetch('/api/profile/update', {
         method: 'PUT',
@@ -147,7 +159,7 @@ export default function ProfileSettings() {
       await refetch();
 
       setUpdateSuccess(true);
-      
+
       // Nascondi il messaggio di successo dopo 3 secondi
       setTimeout(() => {
         setUpdateSuccess(false);
@@ -156,6 +168,40 @@ export default function ProfileSettings() {
       setUpdateError(error instanceof Error ? error.message : 'Errore durante il salvataggio');
     } finally {
       setIsUpdating(false);
+    }
+  };
+
+  const handleSaveBikeDescription = async () => {
+    setIsSavingBike(true);
+    setBikeError('');
+    setBikeSuccess(false);
+
+    try {
+      const response = await fetch('/api/profile/update', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: session?.user?.name || '',
+          bikeDescription,
+        }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Errore durante il salvataggio');
+      }
+
+      // Ricarica il profilo per avere i dati aggiornati
+      await refetch();
+
+      setBikeSuccess(true);
+      setTimeout(() => setBikeSuccess(false), 3000);
+    } catch (error) {
+      setBikeError(error instanceof Error ? error.message : 'Errore durante il salvataggio');
+    } finally {
+      setIsSavingBike(false);
     }
   };
 
@@ -210,7 +256,7 @@ export default function ProfileSettings() {
         </div>
 
         <div className="space-y-4">
-          {/* Personal Information Section - Prima posizione */}
+          {/* Personal Information Section */}
           <SettingsSection
             title="Informazioni Personali"
             description="Modifica le tue informazioni personali"
@@ -273,19 +319,23 @@ export default function ProfileSettings() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Bio Personale
+                  Biografia
                 </label>
                 <textarea
                   name="bio"
                   value={formData.bio}
                   onChange={handleInputChange}
-                  rows={3}
-                  maxLength={200}
+                  rows={4}
+                  maxLength={1000}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500"
                   placeholder="Racconta qualcosa di te..."
                 />
-                <p className="text-xs text-gray-500 mt-1">
-                  {formData.bio.length}/200 caratteri
+                <p className={`text-xs mt-1 ${
+                  formData.bio.length > 1000 ? 'text-red-600' :
+                  formData.bio.length > 900 ? 'text-yellow-600' :
+                  'text-gray-500'
+                }`}>
+                  {formData.bio.length}/1000 caratteri
                 </p>
               </div>
 
@@ -320,7 +370,7 @@ export default function ProfileSettings() {
             onToggle={() => toggleSection('security')}
           >
             <div className="bg-gray-50 rounded-lg p-4">
-              <ChangePasswordForm 
+              <ChangePasswordForm
                 onSuccess={() => {
                   // Opzionalmente chiudi la sezione dopo il successo
                   setTimeout(() => {
@@ -330,6 +380,80 @@ export default function ProfileSettings() {
               />
             </div>
           </SettingsSection>
+
+          {/* Motorcycle Information Section - Only for Ranger users */}
+          {session.user.role === 'Ranger' && (
+            <SettingsSection
+              title="Informazioni Motociclistiche"
+              description="Descrizione e foto della tua moto"
+              icon={<Bike className="w-5 h-5 text-orange-600" />}
+              isOpen={openSections.motorcycle}
+              onToggle={() => toggleSection('motorcycle')}
+            >
+              <div className="space-y-6">
+                {/* Success/Error Messages */}
+                {bikeSuccess && (
+                  <div className="bg-green-50 border border-green-200 rounded-md p-4">
+                    <div className="flex">
+                      <svg className="w-5 h-5 text-green-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      </svg>
+                      <p className="text-sm text-green-800">Salvato con successo!</p>
+                    </div>
+                  </div>
+                )}
+
+                {bikeError && (
+                  <div className="bg-red-50 border border-red-200 rounded-md p-4">
+                    <div className="flex">
+                      <svg className="w-5 h-5 text-red-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                      </svg>
+                      <p className="text-sm text-red-800">{bikeError}</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Bike Description */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Descrizione della tua moto
+                  </label>
+                  <textarea
+                    value={bikeDescription}
+                    onChange={(e) => setBikeDescription(e.target.value)}
+                    maxLength={500}
+                    rows={4}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                    placeholder="Es: BMW R1250GS Adventure, personalizzata per lunghi viaggi..."
+                  />
+                  <p className={`text-xs mt-1 ${
+                    bikeDescription.length > 500 ? 'text-red-600' :
+                    bikeDescription.length > 450 ? 'text-yellow-600' :
+                    'text-gray-500'
+                  }`}>
+                    {bikeDescription.length}/500 caratteri
+                  </p>
+
+                  <button
+                    onClick={handleSaveBikeDescription}
+                    disabled={isSavingBike}
+                    className="mt-3 px-4 py-2 bg-primary-600 text-white text-sm font-medium rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isSavingBike ? 'Salvataggio...' : 'Salva Descrizione'}
+                  </button>
+                </div>
+
+                {/* Bike Photos */}
+                <div className="pt-6 border-t border-gray-200">
+                  <BikePhotosUpload
+                    photos={bikePhotos}
+                    onPhotosChange={setBikePhotos}
+                  />
+                </div>
+              </div>
+            </SettingsSection>
+          )}
 
           {/* Preferences Section - Future Development */}
           <SettingsSection
@@ -367,7 +491,6 @@ export default function ProfileSettings() {
                   <span className="translate-x-0 pointer-events-none relative inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"></span>
                 </button>
               </div>
-
             </div>
           </SettingsSection>
         </div>

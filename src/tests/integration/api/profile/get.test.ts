@@ -54,7 +54,7 @@ describe('/api/profile GET', () => {
 
       expect(response.status).toBe(200);
       expect(data.success).toBe(true);
-      expect(data.user).toMatchObject({
+      expect(data.profile).toMatchObject({
         id: testUser.id,
         name: testUser.name,
         email: testUser.email,
@@ -65,9 +65,9 @@ describe('/api/profile GET', () => {
           website: 'https://testuser.com'
         }
       });
-      expect(data.user.role).toBeDefined();
-      expect(data.user.createdAt).toBeDefined();
-      expect(data.user.updatedAt).toBeDefined();
+      expect(data.profile.role).toBeDefined();
+      expect(data.profile.createdAt).toBeDefined();
+      expect(data.profile.updatedAt).toBeDefined();
     });
 
     it('should return empty social links object when user has no social links', async () => {
@@ -92,7 +92,7 @@ describe('/api/profile GET', () => {
 
       expect(response.status).toBe(200);
       expect(data.success).toBe(true);
-      expect(data.user.socialLinks).toEqual({});
+      expect(data.profile.socialLinks).toEqual({});
     });
   });
 
@@ -131,22 +131,22 @@ describe('/api/profile GET', () => {
       const data = await response.json();
 
       expect(data).toHaveProperty('success', true);
-      expect(data).toHaveProperty('user');
-      
-      const user = data.user;
-      expect(typeof user.id).toBe('string');
-      expect(typeof user.name).toBe('string');
-      expect(typeof user.email).toBe('string');
-      expect(typeof user.role).toBe('string');
-      expect(typeof user.createdAt).toBe('string');
-      expect(typeof user.updatedAt).toBe('string');
-      
+      expect(data).toHaveProperty('profile');
+
+      const profile = data.profile;
+      expect(typeof profile.id).toBe('string');
+      expect(typeof profile.name).toBe('string');
+      expect(typeof profile.email).toBe('string');
+      expect(typeof profile.role).toBe('string');
+      expect(typeof profile.createdAt).toBe('string');
+      expect(typeof profile.updatedAt).toBe('string');
+
       // Bio può essere string o null
-      expect(['string', 'object'].includes(typeof user.bio)).toBe(true);
-      
+      expect(['string', 'object'].includes(typeof profile.bio)).toBe(true);
+
       // Social links deve essere un oggetto
-      expect(typeof user.socialLinks).toBe('object');
-      expect(user.socialLinks).not.toBeNull();
+      expect(typeof profile.socialLinks).toBe('object');
+      expect(profile.socialLinks).not.toBeNull();
     });
   });
 });

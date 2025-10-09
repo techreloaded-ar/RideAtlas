@@ -12,6 +12,7 @@ export interface MockUser {
   name: string;
   email: string;
   bio?: string | null;
+  bikeDescription?: string | null;
   socialLinks?: SocialLinks | null;
   role?: string;
   createdAt?: string;
@@ -37,6 +38,7 @@ export class TestDataFactory {
     name: 'Test User',
     email: 'test@example.com',
     bio: null,
+    bikeDescription: null,
     socialLinks: null,
     role: 'EXPLORER',
     createdAt: '2024-01-01T00:00:00Z',

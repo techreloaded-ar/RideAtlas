@@ -53,6 +53,7 @@ describe('/api/profile/update', () => {
       ProfileTestHelpers.expectPrismaUpdateCalledWith(TEST_CONSTANTS.MOCK_USER_ID, {
         name: 'Test User',
         bio: 'Test bio',
+        bikeDescription: null,
         socialLinks: validSocialLinks
       });
     });
@@ -76,6 +77,7 @@ describe('/api/profile/update', () => {
       ProfileTestHelpers.expectPrismaUpdateCalledWith(TEST_CONSTANTS.MOCK_USER_ID, {
         name: 'Test User',
         bio: null,
+        bikeDescription: null,
         socialLinks: undefined
       });
     });
@@ -100,6 +102,7 @@ describe('/api/profile/update', () => {
       ProfileTestHelpers.expectPrismaUpdateCalledWith(TEST_CONSTANTS.MOCK_USER_ID, {
         name: 'Test User',
         bio: null,
+        bikeDescription: null,
         socialLinks: expectedSanitizedLinks
       });
     });
@@ -124,6 +127,7 @@ describe('/api/profile/update', () => {
       ProfileTestHelpers.expectPrismaUpdateCalledWith(TEST_CONSTANTS.MOCK_USER_ID, {
         name: 'Test User',
         bio: null,
+        bikeDescription: null,
         socialLinks: expectedPartialLinks
       });
     });

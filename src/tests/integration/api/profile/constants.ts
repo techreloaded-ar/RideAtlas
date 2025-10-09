@@ -6,7 +6,7 @@ export const TEST_CONSTANTS = {
   MOCK_USER_ID: 'test-user-id',
   MOCK_EMAIL: 'test@example.com',
   API_ENDPOINT: 'http://localhost:3000/api/profile/update',
-  MAX_BIO_LENGTH: 200,
+  MAX_BIO_LENGTH: 1000,
 
   ERROR_MESSAGES: {
     UNAUTHORIZED: 'Non autorizzato',

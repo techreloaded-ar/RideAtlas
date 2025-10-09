@@ -131,6 +131,7 @@ export class ProfileTestHelpers {
         id: true,
         name: true,
         bio: true,
+        bikeDescription: true,
         email: true,
         socialLinks: true
       }

@@ -42,4 +42,6 @@ CLAUDE.md
 .bmad-core/
 .kiro/
 .augment/
+.specify/
+specs/
 GEMINI.md

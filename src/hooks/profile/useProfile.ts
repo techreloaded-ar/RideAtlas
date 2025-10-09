@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { SocialLinks } from '@/types/user';
+import type { MediaItem } from '@/types/profile';
 
 interface ProfileData {
   id: string;
@@ -8,6 +9,8 @@ interface ProfileData {
   email: string;
   socialLinks: SocialLinks;
   role: string;
+  bikeDescription?: string | null;
+  bikePhotos?: MediaItem[];
   createdAt: string;
   updatedAt: string;
 }
@@ -36,7 +39,7 @@ export function useProfile(): UseProfileReturn {
         throw new Error(data.error || 'Errore nel caricamento del profilo');
       }
 
-      setProfile(data.user);
+      setProfile(data.profile);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Errore sconosciuto');
       setProfile(null); // Reset profile in caso di errore

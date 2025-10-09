@@ -19,7 +19,7 @@ describe('useProfile Hook', () => {
     it('should load profile data successfully', async () => {
       const mockProfileData = {
         success: true,
-        user: {
+        profile: {
           id: 'user-1',
           name: 'Test User',
           email: 'test@example.com',
@@ -51,7 +51,7 @@ describe('useProfile Hook', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      expect(result.current.profile).toEqual(mockProfileData.user);
+      expect(result.current.profile).toEqual(mockProfileData.profile);
       expect(result.current.error).toBe(null);
       expect(mockFetch).toHaveBeenCalledWith('/api/profile');
     });
@@ -59,7 +59,7 @@ describe('useProfile Hook', () => {
     it('should handle profile with empty social links', async () => {
       const mockProfileData = {
         success: true,
-        user: {
+        profile: {
           id: 'user-2',
           name: 'User No Social',
           email: 'nosocial@example.com',
@@ -82,7 +82,7 @@ describe('useProfile Hook', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      expect(result.current.profile).toEqual(mockProfileData.user);
+      expect(result.current.profile).toEqual(mockProfileData.profile);
       expect(result.current.profile?.socialLinks).toEqual({});
     });
   });
@@ -144,7 +144,7 @@ describe('useProfile Hook', () => {
     it('should refetch profile data when refetch is called', async () => {
       const initialData = {
         success: true,
-        user: {
+        profile: {
           id: 'user-1',
           name: 'Initial Name',
           email: 'test@example.com',
@@ -158,7 +158,7 @@ describe('useProfile Hook', () => {
 
       const updatedData = {
         success: true,
-        user: {
+        profile: {
           ...initialData.user,
           name: 'Updated Name',
           bio: 'Updated bio',
@@ -209,7 +209,7 @@ describe('useProfile Hook', () => {
         ok: true,
         json: async () => ({
           success: true,
-          user: {
+          profile: {
             id: 'user-1',
             name: 'Test User',
             email: 'test@example.com',

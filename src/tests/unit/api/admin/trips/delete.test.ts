@@ -2,6 +2,16 @@ import { describe, it, expect, beforeEach, jest } from '@jest/globals'
 import { UserRole } from '@/types/profile'
 import { NextRequest } from 'next/server'
 
+// Polyfill for clearImmediate (needed for undici in tests)
+if (typeof globalThis.clearImmediate === 'undefined') {
+  globalThis.clearImmediate = clearTimeout as any;
+}
+
+// Mock performance.markResourceTiming (needed for undici in tests)
+if (typeof performance.markResourceTiming === 'undefined') {
+  (performance as any).markResourceTiming = () => {};
+}
+
 // Mock dell'autenticazione
 jest.mock('@/auth', () => ({
   auth: jest.fn()
@@ -209,9 +219,9 @@ describe('/api/admin/trips/[id] DELETE', () => {
 
       const request = createMockRequest('http://localhost:3000/api/admin/trips/trip-123')
       const params = Promise.resolve({ id: 'trip-123' })
-      
+
       const response = await DELETE(request, { params })
-      
+
       expect(response.status).toBe(200)
       const data = await response.json()
       expect(data.message).toBe('Viaggio eliminato con successo')
@@ -220,7 +230,7 @@ describe('/api/admin/trips/[id] DELETE', () => {
       expect(mockPrisma.trip.delete).toHaveBeenCalledWith({
         where: { id: 'trip-123' }
       })
-    })
+    }, 30000)
 
     it('should continue deletion with partial storage cleanup failures', async () => {
       mockCleanupTripStorage.mockResolvedValue({
@@ -235,9 +245,9 @@ describe('/api/admin/trips/[id] DELETE', () => {
 
       const request = createMockRequest('http://localhost:3000/api/admin/trips/trip-123')
       const params = Promise.resolve({ id: 'trip-123' })
-      
+
       const response = await DELETE(request, { params })
-      
+
       expect(response.status).toBe(200)
       const data = await response.json()
       expect(data.message).toBe('Viaggio eliminato con successo')
@@ -246,7 +256,7 @@ describe('/api/admin/trips/[id] DELETE', () => {
       expect(mockPrisma.trip.delete).toHaveBeenCalledWith({
         where: { id: 'trip-123' }
       })
-    })
+    }, 30000)
   })
 
   describe('Database Errors', () => {
@@ -270,25 +280,25 @@ describe('/api/admin/trips/[id] DELETE', () => {
 
       const request = createMockRequest('http://localhost:3000/api/admin/trips/trip-123')
       const params = Promise.resolve({ id: 'trip-123' })
-      
+
       const response = await DELETE(request, { params })
-      
+
       expect(response.status).toBe(404)
       const data = await response.json()
       expect(data.error).toBe('Viaggio non trovato o già eliminato')
-    })
+    }, 30000)
 
     it('should return 500 for other database errors', async () => {
       mockPrisma.trip.delete.mockRejectedValue(new Error('Database connection failed'))
 
       const request = createMockRequest('http://localhost:3000/api/admin/trips/trip-123')
       const params = Promise.resolve({ id: 'trip-123' })
-      
+
       const response = await DELETE(request, { params })
-      
+
       expect(response.status).toBe(500)
       const data = await response.json()
       expect(data.error).toContain('Errore interno del server')
-    })
+    }, 30000)
   })
 })

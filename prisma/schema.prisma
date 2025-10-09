@@ -19,7 +19,9 @@ model User {
   image         String?
   password      String?
   role          UserRole  @default(Explorer)
-  bio           String?
+  bio           String?   @db.Text // Biografia utente (max 1000 caratteri validato a livello applicazione)
+  bikeDescription String? @db.Text // Descrizione moto Ranger (max 500 caratteri)
+  bikePhotos    Json[]    @default([]) // Array MediaItem[] per foto moto
   socialLinks   Json?     // Social media links stored as JSON
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -28,6 +30,7 @@ model User {
   trips         Trip[]
   purchases     TripPurchase[]
   batchJobs     BatchJob[]
+  emailChangeTokens EmailChangeToken[]
 
   @@map("users")
 }
@@ -228,4 +231,20 @@ enum BatchJobStatus {
   PROCESSING
   COMPLETED
   FAILED
+}
+
+model EmailChangeToken {
+  id        String   @id @default(cuid())
+  userId    String
+  oldEmail  String
+  newEmail  String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+  @@map("email_change_tokens")
 }

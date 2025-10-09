@@ -22,6 +22,8 @@ export async function GET() {
         email: true,
         socialLinks: true,
         role: true,
+        bikeDescription: true,
+        bikePhotos: true,
         createdAt: true,
         updatedAt: true
       }
@@ -33,9 +35,10 @@ export async function GET() {
 
     return NextResponse.json({
       success: true,
-      user: {
+      profile: {
         ...user,
-        socialLinks: user.socialLinks || {}
+        socialLinks: user.socialLinks || {},
+        bikePhotos: user.bikePhotos || []
       }
     });
   } catch (error) {
