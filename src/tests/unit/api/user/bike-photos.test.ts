@@ -41,19 +41,22 @@ const createMockRequest = (body?: any, searchParams?: Record<string, string>): a
 
 describe('POST /api/user/bike-photos', () => {
   let POST: any;
-  let uploadLimitTracker: any;
+  let clearAllRateLimits: any;
 
   beforeAll(async () => {
     const routeModule = await import('@/app/api/user/bike-photos/route');
     POST = routeModule.POST;
-    uploadLimitTracker = routeModule.uploadLimitTracker;
+
+    // Import rate limiting functions
+    const rateLimitModule = await import('@/lib/rate-limiting');
+    clearAllRateLimits = rateLimitModule.clearAllRateLimits;
   });
 
   beforeEach(() => {
     jest.clearAllMocks();
     mockGenerateTempMediaId.mockReturnValue('temp_123456_abc');
     // Clear rate limiting tracker before each test
-    uploadLimitTracker.clear();
+    clearAllRateLimits();
   });
 
   describe('Authentication', () => {

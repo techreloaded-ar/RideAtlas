@@ -4,12 +4,13 @@ import { prisma } from '@/lib/core/prisma';
 import { generateTempMediaId, castToMediaItems } from '@/lib/utils/media';
 import type { MediaItem } from '@/types/profile';
 import { Prisma } from '@prisma/client';
+import { checkRateLimit } from '@/lib/rate-limiting';
 
 const MAX_PHOTOS = 10;
-
-// Rate limiting tracker (in-memory, future: Redis)
-// Export for testing purposes
-export const uploadLimitTracker = new Map<string, { count: number; resetAt: Date }>();
+const RATE_LIMIT_CONFIG = {
+  maxRequests: 10,
+  windowMs: 10 * 60 * 1000, // 10 minutes
+};
 
 export async function POST(request: NextRequest) {
   try {
@@ -30,23 +31,13 @@ export async function POST(request: NextRequest) {
     const userId = session.user.id;
 
     // 3. Rate limiting check
-    const userLimits = uploadLimitTracker.get(userId);
-    const now = new Date();
+    const rateLimitResult = checkRateLimit(userId, RATE_LIMIT_CONFIG);
 
-    if (userLimits && userLimits.resetAt > now) {
-      if (userLimits.count >= 10) {
-        return NextResponse.json(
-          { error: 'Limite upload raggiunto. Riprova tra qualche minuto.' },
-          { status: 429 }
-        );
-      }
-      userLimits.count++;
-    } else {
-      // Reset counter (10 minutes window)
-      uploadLimitTracker.set(userId, {
-        count: 1,
-        resetAt: new Date(Date.now() + 10 * 60 * 1000),
-      });
+    if (!rateLimitResult.allowed) {
+      return NextResponse.json(
+        { error: 'Limite upload raggiunto. Riprova tra qualche minuto.' },
+        { status: 429 }
+      );
     }
 
     // 4. Parse JSON body (expects URL from /api/upload)
