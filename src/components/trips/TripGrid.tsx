@@ -15,6 +15,7 @@ type TripWithRelations = Prisma.TripGetPayload<{
         name: true;
         email: true;
         image: true;
+        role: true;
       };
     };
     stages: {
@@ -281,9 +282,18 @@ const TripGrid: React.FC<TripGridProps> = React.memo(({ trips }) => {
                   </div>
                 )}
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900 truncate">
-                    {trip.user.name || 'Utente anonimo'}
-                  </p>
+                  {trip.user.role === 'Ranger' || trip.user.role === 'Sentinel' ? (
+                    <Link
+                      href={`/ranger/${encodeURIComponent(trip.user.name || '')}`}
+                      className="text-sm font-medium text-gray-900 hover:text-blue-600 hover:underline transition-colors truncate block"
+                    >
+                      {trip.user.name || 'Utente anonimo'}
+                    </Link>
+                  ) : (
+                    <p className="text-sm font-medium text-gray-900 truncate">
+                      {trip.user.name || 'Utente anonimo'}
+                    </p>
+                  )}
                 </div>
               </div>
               

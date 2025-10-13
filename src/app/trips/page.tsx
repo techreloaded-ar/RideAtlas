@@ -16,6 +16,7 @@ type TripWithRelations = Prisma.TripGetPayload<{
         name: true;
         email: true;
         image: true;
+        role: true;
       };
     };
     stages: {
@@ -42,7 +43,8 @@ export default async function TripsPage() {
         select: {
           name: true,
           email: true,
-          image: true
+          image: true,
+          role: true
         }
       },
       stages: {

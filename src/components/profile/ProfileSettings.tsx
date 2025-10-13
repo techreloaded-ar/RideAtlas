@@ -9,7 +9,7 @@ import SocialLinksSection from './SocialLinksSection';
 import BikePhotosUpload from './BikePhotosUpload';
 import { SocialLinks } from '@/types/user';
 import { useProfile } from '@/hooks/profile/useProfile';
-import type { MediaItem } from '@/types/profile';
+import { UserRole, type MediaItem } from '@/types/profile';
 
 interface SettingsSectionProps {
   title: string;
@@ -382,7 +382,8 @@ export default function ProfileSettings() {
           </SettingsSection>
 
           {/* Motorcycle Information Section - Only for Ranger users */}
-          {session.user.role === 'Ranger' && (
+          {(session.user.role === UserRole.Ranger || 
+          session.user.role === UserRole.Sentinel) && (
             <SettingsSection
               title="Informazioni Motociclistiche"
               description="Descrizione e foto della tua moto"

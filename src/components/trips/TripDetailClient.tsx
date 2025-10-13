@@ -23,6 +23,7 @@ interface TripUser {
   id: string
   name: string | null
   email: string
+  role: 'Ranger' | 'Sentinel' | 'Explorer'
 }
 
 interface TripStage {
@@ -129,9 +130,10 @@ export function TripDetailClient({
           seasons={mappedSeasons}
         />
         
-        <TripMeta 
+        <TripMeta
           author={trip.user.name || trip.user.email}
           travelDate={trip.travelDate}
+          authorRole={trip.user.role}
         />
       </div>
 

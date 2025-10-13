@@ -17,6 +17,7 @@ type TripWithRelations = Prisma.TripGetPayload<{
         name: true;
         email: true;
         image: true;
+        role: true;
       };
     };
     stages: {
