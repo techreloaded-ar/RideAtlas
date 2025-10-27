@@ -66,7 +66,6 @@ export default function ProfileSettings() {
     security: false,
     personal: false,
     motorcycle: false,
-    preferences: false,
   });
   const [isUpdating, setIsUpdating] = useState(false);
   const [updateSuccess, setUpdateSuccess] = useState(false);
@@ -458,45 +457,6 @@ export default function ProfileSettings() {
               </div>
             </SettingsSection>
           )}
-
-          {/* Preferences Section - Future Development */}
-          <SettingsSection
-            title="Preferenze"
-            description="Personalizza la tua esperienza"
-            icon={<Settings className="w-5 h-5 text-green-600" />}
-            isOpen={openSections.preferences}
-            onToggle={() => toggleSection('preferences')}
-          >
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h4 className="text-sm font-medium text-gray-900">
-                    Notifiche Email
-                  </h4>
-                  <p className="text-xs text-gray-600">
-                    Ricevi aggiornamenti sui tuoi viaggi
-                  </p>
-                </div>
-                <button className="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 bg-gray-200">
-                  <span className="translate-x-0 pointer-events-none relative inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"></span>
-                </button>
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div>
-                  <h4 className="text-sm font-medium text-gray-900">
-                    Tema Scuro
-                  </h4>
-                  <p className="text-xs text-gray-600">
-                    Usa il tema scuro per l&apos;interfaccia
-                  </p>
-                </div>
-                <button className="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 bg-gray-200">
-                  <span className="translate-x-0 pointer-events-none relative inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"></span>
-                </button>
-              </div>
-            </div>
-          </SettingsSection>
         </div>
       </div>
     </div>

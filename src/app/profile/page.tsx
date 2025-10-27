@@ -32,7 +32,7 @@ function ProfileContent() {
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Il Mio Profilo</h1>
           <p className="text-gray-600">
-            Gestisci le informazioni del tuo account e le preferenze personali
+            Gestisci le informazioni del tuo account
           </p>
         </div>
 
