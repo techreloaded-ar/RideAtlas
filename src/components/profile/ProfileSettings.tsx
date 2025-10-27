@@ -135,7 +135,10 @@ export default function ProfileSettings() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          bikeDescription, // Include bikeDescription to prevent overwriting
+        }),
       });
 
       const data = await response.json();
@@ -183,7 +186,7 @@ export default function ProfileSettings() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          name: session?.user?.name || '',
+          ...formData, // Include name, bio, and socialLinks to prevent overwriting
           bikeDescription,
         }),
       });

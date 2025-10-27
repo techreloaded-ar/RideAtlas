@@ -30,7 +30,7 @@ describe('RangerProfileHeader', () => {
   it('should show placeholder when bio is null (FR-013)', () => {
     const rangerWithoutBio = { ...mockRanger, bio: null };
     render(<RangerProfileHeader ranger={rangerWithoutBio} />);
-    expect(screen.getByText('Biografia non disponibile.')).toBeInTheDocument();
+    expect(screen.getByText('Nessuna informazione personale')).toBeInTheDocument();
   });
 
   it('should render avatar image when provided', () => {
