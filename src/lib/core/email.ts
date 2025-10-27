@@ -92,7 +92,7 @@ function generateEmailTemplate(data: EmailTemplateData): string {
         
         <div style="border-top: 1px solid #eee; margin-top: 30px; padding-top: 20px; text-align: center;">
           <p style="color: #999; font-size: 12px; margin: 0;">
-            © 2024 RideAtlas. Tutti i diritti riservati.
+            © 2025 RideAtlas. Tutti i diritti riservati.
           </p>
         </div>
       </div>

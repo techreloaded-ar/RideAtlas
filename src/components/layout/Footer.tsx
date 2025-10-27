@@ -110,7 +110,7 @@ export default function Footer() {
         
         <div className="mt-8 pt-8 border-t border-gray-700">
           <p className="text-gray-400 text-center">
-            &copy; {new Date().getFullYear()} RideAtlas. Tutti i diritti riservati.
+            &copy; {new Date().getFullYear()} RideAtlas è una prodotto di AgileReloaded Srl, Via Cusani 10, Milano (IT), P.IVA 08798310960. Tutti i diritti riservati.
           </p>
         </div>
       </div>
