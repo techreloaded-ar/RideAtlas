@@ -42,7 +42,7 @@ export default function Navbar() {
   const navigation = [
     { name: 'Home', href: '/' },
     { name: 'Viaggi', href: '/trips' },
-    { name: 'Trip Builder', href: '/trip-builder' },
+    ...(session?.user?.role === UserRole.Sentinel ? [{ name: 'Trip Builder', href: '/trip-builder' }] : []),
   ];
 
   // Enhanced logout function with redirect

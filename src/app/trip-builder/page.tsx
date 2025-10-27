@@ -3,18 +3,83 @@
 
 
 import { useSession } from 'next-auth/react';
-import { MessageSquare, Route, MapPin, Clock, AlertTriangle } from 'lucide-react';
+import { MessageSquare, Route, MapPin, Clock, AlertTriangle, ShieldAlert } from 'lucide-react';
 import TripBuilderChat from '@/components/trip-builder/TripBuilderChat';
+import { UserRole } from '@/types/profile';
 
 export default function TripBuilderPage() {
   const { data: session, status } = useSession();
-;
 
   if (status === 'loading') {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
       </div>
+    );
+  }
+
+  if (!session) {
+    return (
+      <main className="min-h-screen bg-gray-50">
+        <section className="bg-gradient-to-r from-primary-600 to-secondary-600 text-white py-12">
+          <div className="container mx-auto px-4">
+            <div className="text-center max-w-4xl mx-auto">
+              <div className="flex items-center justify-center mb-6">
+                <MessageSquare className="w-12 h-12 mr-4" />
+                <h1 className="text-4xl md:text-5xl font-display font-bold">
+                  Trip Builder AI
+                </h1>
+              </div>
+              <p className="text-xl text-primary-100 mb-6">
+                Il tuo assistente esperto per pianificare viaggi in moto personalizzati
+              </p>
+            </div>
+          </div>
+        </section>
+        <section className="container mx-auto px-4 py-8">
+          <div className="max-w-2xl mx-auto text-center py-12">
+            <div className="bg-white rounded-lg shadow-lg p-8">
+              <Clock className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">
+                Accesso Richiesto
+              </h2>
+              <p className="text-gray-600 mb-6">
+                Per utilizzare il Trip Builder AI e accedere a tutti i viaggi disponibili,
+                è necessario effettuare l&apos;accesso al tuo account.
+              </p>
+              <a
+                href="/auth/signin"
+                className="btn-primary inline-flex items-center gap-2"
+              >
+                <MessageSquare className="w-5 h-5" />
+                Accedi per iniziare
+              </a>
+            </div>
+          </div>
+        </section>
+      </main>
+    );
+  }
+
+  if (session.user.role !== UserRole.Sentinel) {
+    return (
+      <main className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+        <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8 text-center">
+          <ShieldAlert className="w-16 h-16 text-red-500 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">
+            Accesso Non Autorizzato
+          </h2>
+          <p className="text-gray-600 mb-6">
+            Questa funzionalità è riservata agli amministratori del sistema.
+          </p>
+          <a
+            href="/"
+            className="btn-primary inline-flex items-center gap-2"
+          >
+            Torna alla Home
+          </a>
+        </div>
+      </main>
     );
   }
 
@@ -62,33 +127,9 @@ export default function TripBuilderPage() {
 
       {/* Main Content */}
       <section className="container mx-auto px-4 py-8">
-        {!session ? (
-          // Not authenticated state
-          <div className="max-w-2xl mx-auto text-center py-12">
-            <div className="bg-white rounded-lg shadow-lg p-8">
-              <Clock className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                Accesso Richiesto
-              </h2>
-              <p className="text-gray-600 mb-6">
-                Per utilizzare il Trip Builder AI e accedere a tutti i viaggi disponibili, 
-                è necessario effettuare l&apos;accesso al tuo account.
-              </p>
-              <a
-                href="/auth/signin"
-                className="btn-primary inline-flex items-center gap-2"
-              >
-                <MessageSquare className="w-5 h-5" />
-                Accedi per iniziare
-              </a>
-            </div>
-          </div>
-        ) : (
-          // Authenticated state - Show chat interface
-          <div className="max-w-6xl mx-auto">
-            <TripBuilderChat />
-          </div>
-        )}
+        <div className="max-w-6xl mx-auto">
+          <TripBuilderChat />
+        </div>
       </section>
 
       {/* How it works section */}

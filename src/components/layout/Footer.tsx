@@ -43,11 +43,6 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/trip-builder" className="text-gray-300 hover:text-white">
-                  Trip Builder
-                </Link>
-              </li>
-              <li>
                 <Link href="/ranger" className="text-gray-300 hover:text-white">
                   Diventa Ranger
                 </Link>
