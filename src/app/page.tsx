@@ -32,9 +32,6 @@ export default function HomePage() {
                 <Link href="/trips" className="btn-primary">
                   Esplora Viaggi
                 </Link>
-                <Link href="/trip-builder" className="bg-white text-secondary-800 hover:bg-gray-100 font-semibold py-2 px-4 rounded-md transition-colors">
-                  Crea Itinerario
-                </Link>
               </div>
             </div>
             <div className="md:w-1/2 relative h-64 md:h-96 w-full rounded-lg overflow-hidden shadow-xl">

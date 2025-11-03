@@ -18,7 +18,6 @@ describe('HomePage', () => {
     
     // Verifica che i pulsanti di call-to-action siano presenti
     expect(screen.getByText('Esplora Viaggi')).toBeInTheDocument();
-    expect(screen.getByText('Crea Itinerario')).toBeInTheDocument();
   });
 
   it('renders the features section correctly', () => {
