@@ -59,6 +59,7 @@ describe('Purchase Flow Integration', () => {
       expect(initialPurchaseStatus).toBe(false);
 
       // 2. Create purchase - mock the database operations
+      mockPrisma.user.findUnique.mockResolvedValueOnce(testUser as any);
       mockPrisma.trip.findUnique.mockResolvedValueOnce(testTrip as any);
       // Mock for createPurchase -> findFirst (check active COMPLETED)
       mockPrisma.tripPurchase.findFirst.mockResolvedValueOnce(null);
@@ -130,6 +131,7 @@ describe('Purchase Flow Integration', () => {
         updatedAt: new Date()
       };
 
+      mockPrisma.user.findUnique.mockResolvedValueOnce(testUser as any);
       mockPrisma.trip.findUnique.mockResolvedValueOnce(testTrip as any);
       // Mock for createPurchase -> findFirst (check active COMPLETED)
       mockPrisma.tripPurchase.findFirst.mockResolvedValueOnce(existingPurchase as any);
@@ -149,6 +151,7 @@ describe('Purchase Flow Integration', () => {
     });
 
     it('should not allow owner to purchase own trip', async () => {
+      mockPrisma.user.findUnique.mockResolvedValueOnce(otherUser as any);
       mockPrisma.trip.findUnique.mockResolvedValueOnce(testTrip as any);
 
       const result = await PurchaseService.createPurchase(otherUser.id, testTrip.id);
@@ -164,9 +167,8 @@ describe('Purchase Flow Integration', () => {
         status: 'Bozza'
       };
 
+      mockPrisma.user.findUnique.mockResolvedValueOnce(testUser as any);
       mockPrisma.trip.findUnique.mockResolvedValueOnce(unpublishedTrip as any);
-      // Mock for createPurchase -> findFirst (check active COMPLETED)
-      mockPrisma.tripPurchase.findFirst.mockResolvedValueOnce(null);
 
       const result = await PurchaseService.createPurchase(testUser.id, testTrip.id);
       expect(result.success).toBe(false);
@@ -174,6 +176,7 @@ describe('Purchase Flow Integration', () => {
     });
 
     it('should handle non-existent trip', async () => {
+      mockPrisma.user.findUnique.mockResolvedValueOnce(testUser as any);
       mockPrisma.trip.findUnique.mockResolvedValueOnce(null);
 
       const result = await PurchaseService.createPurchase(testUser.id, 'non-existent-trip');

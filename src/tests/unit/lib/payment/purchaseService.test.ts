@@ -4,6 +4,9 @@ import { PurchaseStatus } from '@prisma/client';
 
 jest.mock('@/lib/core/prisma', () => ({
   prisma: {
+    user: {
+      findUnique: jest.fn()
+    },
     trip: {
       findUnique: jest.fn()
     },
@@ -137,6 +140,10 @@ describe('PurchaseService', () => {
 
   describe('createPurchase', () => {
     it('should create purchase successfully', async () => {
+      mockPrisma.user.findUnique.mockResolvedValue({
+        id: 'user-1'
+      } as any);
+
       mockPrisma.trip.findUnique.mockResolvedValue({
         id: 'trip-1',
         price: 5.00,
@@ -167,27 +174,39 @@ describe('PurchaseService', () => {
     });
 
     it('should fail if trip not found', async () => {
+      mockPrisma.user.findUnique.mockResolvedValue({
+        id: 'user-1'
+      } as any);
+
       mockPrisma.trip.findUnique.mockResolvedValue(null);
 
       const result = await PurchaseService.createPurchase('user-1', 'trip-1');
-      
+
       expect(result.success).toBe(false);
       expect(result.error).toBe('Viaggio non trovato');
     });
 
     it('should fail if user tries to buy own trip', async () => {
+      mockPrisma.user.findUnique.mockResolvedValue({
+        id: 'user-1'
+      } as any);
+
       mockPrisma.trip.findUnique.mockResolvedValue({
         id: 'trip-1',
         user_id: 'user-1'
       } as any);
 
       const result = await PurchaseService.createPurchase('user-1', 'trip-1');
-      
+
       expect(result.success).toBe(false);
       expect(result.error).toBe('Non puoi acquistare il tuo stesso viaggio');
     });
 
     it('should fail if trip is not published', async () => {
+      mockPrisma.user.findUnique.mockResolvedValue({
+        id: 'user-1'
+      } as any);
+
       mockPrisma.trip.findUnique.mockResolvedValue({
         id: 'trip-1',
         user_id: 'other-user',
@@ -195,12 +214,16 @@ describe('PurchaseService', () => {
       } as any);
 
       const result = await PurchaseService.createPurchase('user-1', 'trip-1');
-      
+
       expect(result.success).toBe(false);
       expect(result.error).toBe('Questo viaggio non è disponibile per l\'acquisto');
     });
 
     it('should fail if already purchased', async () => {
+      mockPrisma.user.findUnique.mockResolvedValue({
+        id: 'user-1'
+      } as any);
+
       mockPrisma.trip.findUnique.mockResolvedValue({
         id: 'trip-1',
         user_id: 'other-user',
@@ -220,6 +243,10 @@ describe('PurchaseService', () => {
     });
 
     it('should reuse existing PENDING purchase', async () => {
+      mockPrisma.user.findUnique.mockResolvedValue({
+        id: 'user-1'
+      } as any);
+
       mockPrisma.trip.findUnique.mockResolvedValue({
         id: 'trip-1',
         price: 5.00,
@@ -245,6 +272,10 @@ describe('PurchaseService', () => {
     });
 
     it('should create new purchase after refund', async () => {
+      mockPrisma.user.findUnique.mockResolvedValue({
+        id: 'user-1'
+      } as any);
+
       mockPrisma.trip.findUnique.mockResolvedValue({
         id: 'trip-1',
         price: 5.00,
