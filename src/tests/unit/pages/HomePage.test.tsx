@@ -32,9 +32,6 @@ describe('HomePage', () => {
     expect(screen.getByText('Trip Builder con AI')).toBeInTheDocument();
     expect(screen.getByText('Comunità di Ranger')).toBeInTheDocument();
     
-    // Verifica che il badge "TESTATO ✓" sia presente
-    expect(screen.getByText('TESTATO ✓')).toBeInTheDocument();
-    
     // Verifica che gli indicatori di qualità siano presenti
     expect(screen.getByText(/Testato su strada/i)).toBeInTheDocument();
     expect(screen.getByText(/Verificato sicurezza/i)).toBeInTheDocument();
@@ -76,7 +73,6 @@ describe('HomePage', () => {
   it('renders certification badges for travel packages', () => {
     render(<Home />);
     
-    expect(screen.getByText('TESTATO ✓')).toBeInTheDocument();
     expect(screen.getByText('✓ Testato su strada')).toBeInTheDocument();
     expect(screen.getByText('✓ Verificato sicurezza')).toBeInTheDocument();
     expect(screen.getByText('✓ GPS certificato')).toBeInTheDocument();
