@@ -246,7 +246,7 @@ export default function CookiePolicyPage() {
             Per domande riguardo questa Cookie Policy, contattaci:
           </p>
           <ul className="list-none pl-0">
-            <li><strong>Email:</strong> privacy@rideatlas.com</li>
+            <li><strong>Email:</strong> info@rideatlas.it</li>
             <li><strong>Privacy Policy completa:</strong> <a href="/privacy-policy" className="text-blue-600 hover:underline">/privacy-policy</a></li>
           </ul>
         </section>

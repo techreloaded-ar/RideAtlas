@@ -22,7 +22,7 @@ export default function PrivacyPolicyPage() {
             Il Titolare del trattamento dei dati è <strong>RideAtlas</strong>.
           </p>
           <p>
-            Per qualsiasi comunicazione relativa al trattamento dei dati personali è possibile contattarci all'indirizzo email: <strong>privacy@rideatlas.com</strong>
+            Per qualsiasi comunicazione relativa al trattamento dei dati personali è possibile contattarci all'indirizzo email: <strong>info@rideatlas.it</strong>
           </p>
         </section>
 
@@ -116,7 +116,7 @@ export default function PrivacyPolicyPage() {
           </ul>
           
           <p className="mb-4">
-            Per esercitare i tuoi diritti, contattaci a: <strong>privacy@rideatlas.com</strong>
+            Per esercitare i tuoi diritti, contattaci a: <strong>info@rideatlas.it</strong>
           </p>
           
           <p className="mb-4">
@@ -240,8 +240,8 @@ export default function PrivacyPolicyPage() {
             Per qualsiasi domanda relativa a questa Privacy Policy o al trattamento dei tuoi dati personali:
           </p>
           <ul className="list-none pl-0 mt-4">
-            <li><strong>Email:</strong> privacy@rideatlas.com</li>
-            <li><strong>Responsabile Privacy:</strong> privacy@rideatlas.com</li>
+            <li><strong>Email:</strong> info@rideatlas.it</li>
+            <li><strong>Responsabile Privacy:</strong> info@rideatlas.it</li>
           </ul>
         </section>
       </div>
