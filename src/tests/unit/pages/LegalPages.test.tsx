@@ -37,11 +37,11 @@ describe('Legal Pages - Critical Functionality', () => {
       expect(screen.getByText(/ultimo aggiornamento/i)).toBeInTheDocument()
       
       // Check critical internal links
-      const privacyLink = screen.getByRole('link', { name: /privacy policy/i })
-      expect(privacyLink).toHaveAttribute('href', '/privacy-policy')
+      const privacyLink = screen.getByRole('link', { name: /www.rideatlas.it\/privacy-policy/i });
+      expect(privacyLink).toHaveAttribute('href', 'http://www.rideatlas.it/privacy-policy');
       
-      const cookieLink = screen.getByRole('link', { name: /cookie policy/i })
-      expect(cookieLink).toHaveAttribute('href', '/cookie-policy')
+      const cookieLink = screen.getByRole('link', { name: /Cookie Policy/i });
+      expect(cookieLink).toHaveAttribute('href', '/cookie-policy');
     })
   })
 
@@ -68,7 +68,7 @@ describe('Legal Pages - Critical Functionality', () => {
       render(<TermsOfServicePage />)
       
       // Check for critical e-commerce terms sections
-      expect(screen.getByRole('heading', { name: /prodotti e servizi in vendita/i })).toBeInTheDocument()
+      expect(screen.getByRole('heading', { name: /Prodotti e condizioni commerciali/i })).toBeInTheDocument()
       expect(screen.getByRole('heading', { name: /processo di acquisto/i })).toBeInTheDocument()
       expect(screen.getByRole('heading', { name: /diritto di recesso/i })).toBeInTheDocument()
     })

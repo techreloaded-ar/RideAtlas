@@ -13,354 +13,291 @@ export default function TermsOfServicePage() {
       
       <div className="prose prose-gray max-w-none">
         <p className="text-sm text-gray-600 mb-6">
-          <strong>Ultimo aggiornamento:</strong> {new Date().toLocaleDateString('it-IT')}
+          <strong>Ultimo aggiornamento:</strong> 20/10/2025
         </p>
 
         <section className="mb-8">
-          <h2 className="text-2xl font-semibold mb-4">1. Accettazione dei Termini</h2>
+          <h2 className="text-2xl font-semibold mb-4">1. Accettazione dei termini</h2>
           <p className="mb-4">
-            Benvenuto su RideAtlas. Utilizzando i nostri servizi e acquistando i nostri prodotti, 
-            accetti di rispettare e di essere vincolato da questi Termini di Servizio ("Termini"). 
-            Se non accetti questi Termini, ti preghiamo di non utilizzare i nostri servizi.
+            RideAtlas è un prodotto sviluppato da Agile Reloaded S.r.l.
+          </p>
+          <p className="mb-4">
+            L’accettazione dei presenti termini e della licenza d’uso avviene esclusivamente <strong>al momento dell’acquisto di una traccia GPX o di altri contenuti digitali</strong>.
+            La semplice registrazione o navigazione sulla piattaforma non comporta accettazione dei termini, che divengono vincolanti solo al completamento dell’acquisto.
           </p>
           <p>
-            Questi Termini costituiscono un accordo legalmente vincolante tra te e RideAtlas.
+            I presenti termini costituiscono un accordo legalmente vincolante tra Agile Reloaded S.r.l., titolare della piattaforma RideAtlas, e l’utilizzatore dei servizi.
           </p>
         </section>
 
+        <hr className="my-8" />
+
         <section className="mb-8">
-          <h2 className="text-2xl font-semibold mb-4">2. Descrizione del Servizio</h2>
+          <h2 className="text-2xl font-semibold mb-4">2. Premessa fondamentale – natura del servizio</h2>
           <p className="mb-4">
-            RideAtlas è una piattaforma online che offre:
+            RideAtlas è una piattaforma per la vendita <strong>di contenuti digitali informativi</strong> (file GPX e altri contenuti digitali) a scopo informativo.
+            <strong>Non vengono forniti servizi di guida, accompagnamento, consulenza turistica o raccomandazioni operative.</strong>
+            L’acquisto e l’accesso ai file GPX non implicano alcuna verifica su capacità, età, abilitazioni o idoneità dell’acquirente.
+            L’uso dei contenuti è sotto la <strong>completa ed esclusiva responsabilità dell’utente finale.</strong>
+          </p>
+        </section>
+
+        <hr className="my-8" />
+
+        <section className="mb-8">
+          <h2 className="text-2xl font-semibold mb-4">3. Definizioni</h2>
+          <ul className="list-disc pl-6 mb-4">
+            <li><strong>Piattaforma:</strong> il sito web <a href="http://www.rideatlas.it">www.rideatlas.it</a> e le relative funzionalità web.</li>
+            <li><strong>Redazione:</strong> team di esperti che si occupano della cura dei contenuti informativi della piattaforma.</li>
+            <li><strong>Contenuti digitali:</strong> file GPX, descrizioni, immagini e materiali informativi acquistabili.</li>
+            <li><strong>Utente:</strong> chi accede all’applicazione RideAtlas o acquista/usa i contenuti digitali.</li>
+            <li><strong>Ranger:</strong> motociclisti esperti che collaborano con la redazione di RideAtlas e hanno testato i viaggi e prodotto i vari contenuti digitali, fra cui le tracce GPX, le foto e video.</li>
+            <li><strong>Licenza:</strong> diritto d’uso personale, non esclusivo e non trasferibile dei contenuti acquistati.</li>
+          </ul>
+        </section>
+
+        <hr className="my-8" />
+
+        <section className="mb-8">
+          <h2 className="text-2xl font-semibold mb-4">4. Descrizione del servizio</h2>
+          <p className="mb-4">
+            RideAtlas consente agli utenti di:
           </p>
           <ul className="list-disc pl-6 mb-4">
-            <li>Creazione e condivisione di itinerari per viaggi in moto</li>
-            <li>Gestione di contenuti multimediali (foto, file GPX)</li>
-            <li>Strumenti per la pianificazione di viaggi</li>
-            <li>Community per appassionati di viaggi in moto</li>
-            <li>Costruttore di percorsi assistito da intelligenza artificiale</li>
-            <li><strong>Vendita di viaggi completi</strong> con descrizioni dettagliate e tracce GPX di tutte le tappe</li>
+            <li>acquistare e scaricare viaggi e tracce GPX realizzati dai ranger;</li>
+            <li>accedere a informazioni su percorsi, punti di interesse e soste consigliate;</li>
+            <li>gestire i contenuti acquistati attraverso la propria area utente sull’applicazione web.</li>
           </ul>
           <p>
-            I servizi possono essere modificati, sospesi o interrotti in qualsiasi momento con ragionevole preavviso.
+            I servizi possono essere modificati, sospesi o interrotti con ragionevole preavviso.
           </p>
         </section>
 
+        <hr className="my-8" />
+
         <section className="mb-8">
-          <h2 className="text-2xl font-semibold mb-4">3. Prodotti e Servizi in Vendita</h2>
+          <h2 className="text-2xl font-semibold mb-4">5. Prodotti e condizioni commerciali</h2>
           
-          <h3 className="text-xl font-medium mb-3">3.1 Viaggi Completi</h3>
+          <h3 className="text-xl font-medium mb-3">5.1 Oggetto del contratto</h3>
           <p className="mb-4">
-            RideAtlas vende <strong>viaggi completi</strong> che includono:
+            L’acquisto dei contenuti digitali <strong>non trasferisce la proprietà</strong>, ma solo una <strong>licenza d’uso personale e limitata</strong>.
+            La licenza d’uso consente di:
           </p>
           <ul className="list-disc pl-6 mb-4">
-            <li>Descrizione dettagliata dell'intero itinerario</li>
-            <li>Tracce GPX di tutte le tappe che compongono il viaggio</li>
-            <li>Informazioni su punti di interesse, soste e raccomandazioni</li>
-            <li>Materiale multimediale (foto, video) quando disponibile</li>
-            <li>Istruzioni e consigli per la percorrenza</li>
+            <li>scaricare e conservare i contenuti per uso personale;</li>
+            <li>caricare i file GPX su dispositivi GPS di proprietà;</li>
+            <li>effettuare copie di backup personali.</li>
+          </ul>
+          <p className="mb-4">
+            È espressamente vietato:
+          </p>
+          <ul className="list-disc pl-6 mb-4">
+            <li>rivendere o redistribuire i contenuti;</li>
+            <li>condividere i file con terzi;</li>
+            <li>utilizzare i contenuti per scopi commerciali;</li>
+            <li>modificare i contenuti per creare prodotti derivati.</li>
+          </ul>
+          <p>
+            Accedendo o utilizzando l’applicazione RideAtlas, l’utente accetta integralmente i presenti termini.
+          </p>
+
+          <h3 className="text-xl font-medium mb-3">5.2 Processo di acquisto e pagamenti</h3>
+          <p className="mb-4">
+            Gli acquisti avvengono tramite piattaforme di pagamento sicure (es. Stripe e PayPal).
+            I prezzi sono espressi in euro (€) e includono IVA, salvo diversa indicazione.
+            Le modifiche di prezzo non si applicano retroattivamente.
+          </p>
+
+          <h3 className="text-xl font-medium mb-3">5.3 Diritto di recesso</h3>
+          <p className="mb-4">
+            Ai sensi dell’art. 59, comma 1, lettera m) del codice del consumo, <strong>il diritto di recesso è escluso</strong> per contenuti digitali forniti su supporto non materiale una volta iniziata la fornitura.
+            Procedendo con l’acquisto, l’utente <strong>richiede espressamente</strong> che la fornitura dei contenuti digitali inizi immediatamente e <strong>accetta di perdere il diritto di recesso</strong> previsto dall’art. 52 del Codice del Consumo.
+            L’utente <strong>acconsente all’esecuzione immediata</strong> e <strong>rinuncia al diritto di recesso.</strong>
+          </p>
+          <p className="mb-4">
+            Rimborsi eccezionali possono essere concessi in caso di:
+          </p>
+          <ul className="list-disc pl-6 mb-4">
+            <li>impossibilità tecnica di accedere ai contenuti acquistati;</li>
+            <li>file sostanzialmente difforme o corrotto;</li>
+            <li>doppio addebito per errore del sistema.</li>
+          </ul>
+          <p>
+            Eventuali rimborsi seguono le policy della piattaforma di pagamento utilizzata.
+          </p>
+        </section>
+
+        <hr className="my-8" />
+
+        <section className="mb-8">
+          <h2 className="text-2xl font-semibold mb-4">6. Natura dei contenuti</h2>
+
+          <h3 className="text-xl font-medium mb-3">6.1 Carattere informativo</h3>
+          <p className="mb-4">
+            I contenuti sono forniti <strong>a titolo informativo e orientativo</strong> e <strong>non costituiscono istruzioni operative o garanzie di sicurezza.</strong>
+            RideAtlas non garantisce l’attualità, la percorribilità o la sicurezza dei percorsi.
+          </p>
+
+          <h3 className="text-xl font-medium mb-3">6.2 Certificazione ranger</h3>
+          <p className="mb-4">
+            I percorsi “certificati ranger” attestano che il percorso è stato completato e testato, ma <strong>non garantiscono la sicurezza o la percorribilità attuale.</strong>
+          </p>
+
+          <h3 className="text-xl font-medium mb-3">6.3 Verifiche e responsabilità dell’utente</h3>
+          <p>
+            RideAtlas <strong>non effettua verifiche in tempo reale</strong> sulle condizioni dei percorsi.
+            È responsabilità dell’utente valutare la propria capacità, le condizioni del veicolo e del percorso.
+          </p>
+        </section>
+
+        <hr className="my-8" />
+
+        <section className="mb-8">
+          <h2 className="text-2xl font-semibold mb-4">7. Limitazioni di responsabilità</h2>
+
+          <h3 className="text-xl font-medium mb-3">7.1 Esclusioni generali</h3>
+          <p className="mb-4">
+            Il fornitore <strong>non sarà responsabile</strong> per danni, incidenti, perdite di dati, guasti o conseguenze derivanti dall’uso dei contenuti.
+            L’utente riconosce che la guida motociclistica comporta <strong>rischi intrinseci</strong> e se ne assume la piena responsabilità.
+          </p>
+
+          <h3 className="text-xl font-medium mb-3">7.2 Esclusione specifica</h3>
+          <p className="mb-4">
+            RideAtlas <strong>non è responsabile</strong> per:
+          </p>
+          <ul className="list-disc pl-6 mb-4">
+            <li>danni a persone, veicoli o cose derivanti dall’uso delle tracce;</li>
+            <li>infrazioni al codice della strada o normative locali;</li>
+            <li>multe, sequestri, o infortuni derivanti da percorsi inadeguati.</li>
           </ul>
 
-          <h3 className="text-xl font-medium mb-3">3.2 Natura del Prodotto</h3>
-          <div className="bg-blue-50 border-l-4 border-blue-400 p-4 mb-4">
-            <p className="text-sm">
-              <strong>Importante:</strong> I viaggi venduti sono <strong>prodotti digitali informativi</strong> 
-              che forniscono percorsi, tracce GPS e informazioni turistiche. Non includono:
-            </p>
-            <ul className="list-disc pl-6 mt-2 text-sm">
-              <li>Prenotazioni alberghiere</li>
-              <li>Servizi di trasporto</li>
-              <li>Guide fisiche o accompagnatori</li>
-              <li>Assicurazioni di viaggio</li>
-              <li>Noleggio mezzi o attrezzature</li>
-            </ul>
-          </div>
-
-          <h3 className="text-xl font-medium mb-3">3.3 Vendita per Viaggio Completo</h3>
+          <h3 className="text-xl font-medium mb-3">7.3 Assunzione di rischio e rinuncia ad azioni legali</h3>
           <p className="mb-4">
-            I viaggi sono venduti esclusivamente nella loro <strong>interezza</strong>. 
-            Non è possibile acquistare singole tappe o porzioni di un itinerario.
+            L’utente accetta di utilizzare i contenuti <strong>a proprio rischio e pericolo</strong>, rinunciando espressamente a qualsiasi azione o pretesa verso Agile Reloaded S.r.l.
+          </p>
+
+          <h3 className="text-xl font-medium mb-3">7.4 Fornitura “as is”</h3>
+          <p className="mb-4">
+            RideAtlas e i suoi contenuti sono forniti <strong>“così come sono” (“as is”)</strong> e <strong>“secondo disponibilità” (“as available”)</strong>, senza garanzie espresse o implicite.
+            La responsabilità complessiva del fornitore non potrà superare il prezzo pagato per il contenuto.
+          </p>
+
+          <h3 className="text-xl font-medium mb-3">7.5 Indennizzo e manleva</h3>
+          <p className="mb-4">
+            L'utente si impegna a manlevare e tenere indenne <strong>Agile Reloaded S.r.l.</strong>, i suoi dipendenti, collaboratori e partner da qualsiasi richiesta, reclamo o pretesa di terzi derivante dall'uso dei contenuti, incluse spese legali e risarcimenti.
+          </p>
+
+          <h3 className="text-xl font-medium mb-3">7.6 Forza maggiore</h3>
+          <p>
+            Agile Reloaded S.r.l. non sarà responsabile per inadempimenti dovuti a cause di forza maggiore quali interruzioni di servizio, attacchi informatici, eventi naturali o altre circostanze al di fuori del proprio controllo.
+          </p>
+        </section>
+
+        <hr className="my-8" />
+
+        <section className="mb-8">
+          <h2 className="text-2xl font-semibold mb-4">8. Garanzie sui contenuti digitali</h2>
+          <p className="mb-4">
+            I contenuti venduti:
+          </p>
+          <ul className="list-disc pl-6 mb-4">
+            <li>corrispondono alle descrizioni fornite;</li>
+            <li>sono tecnicamente accessibili e funzionanti;</li>
+            <li>includono i materiali descritti nel prodotto.</li>
+          </ul>
+          <p>
+            Non viene garantita l’accuratezza geografica o la sicurezza dei percorsi.
+          </p>
+        </section>
+
+        <hr className="my-8" />
+
+        <section className="mb-8">
+          <h2 className="text-2xl font-semibold mb-4">9. Proprietà intellettuale e dati</h2>
+          <p className="mb-4">
+            Tutti i contenuti, marchi e testi presenti su RideAtlas sono di proprietà di <strong>Agile Reloaded S.r.l.</strong> o dei rispettivi autori. Ogni uso non autorizzato è vietato.
+          </p>
+          <p>
+            Il trattamento dei dati personali è disciplinato dalla separata <strong>Informativa Privacy</strong> disponibile su <a href="http://www.rideatlas.it/privacy-policy">www.rideatlas.it/privacy-policy</a>, conforme al <strong>Regolamento UE 2016/679 (GDPR)</strong>.
+          </p>
+          <p>
+            La gestione dei cookie è descritta nella nostra <a href="/cookie-policy">Cookie Policy</a>.
           </p>
         </section>
 
         <section className="mb-8">
-          <h2 className="text-2xl font-semibold mb-4">4. Processo di Acquisto</h2>
-          
-          <h3 className="text-xl font-medium mb-3">4.1 Ordini e Prezzi</h3>
-          <ul className="list-disc pl-6 mb-4">
-            <li>Tutti i prezzi sono espressi in Euro (€) e includono IVA</li>
-            <li>I prezzi possono variare senza preavviso</li>
-            <li>Il prezzo applicabile è quello visualizzato al momento dell'ordine</li>
-            <li>Ci riserviamo il diritto di correggere errori di prezzo evidenti</li>
-          </ul>
+          <h2 className="text-2xl font-semibold mb-4">10. Risoluzione delle controversie</h2>
 
-          <h3 className="text-xl font-medium mb-3">4.2 Conferma Ordine</h3>
+          <h3 className="text-xl font-medium mb-3">10.1 Mediazione e ODR</h3>
           <p className="mb-4">
-            Riceverai una conferma d'ordine via email contenente:
-          </p>
-          <ul className="list-disc pl-6 mb-4">
-            <li>Dettagli del viaggio acquistato</li>
-            <li>Prezzo pagato</li>
-            <li>Numero dell'ordine</li>
-            <li>Istruzioni per l'accesso ai contenuti</li>
-          </ul>
-
-          <h3 className="text-xl font-medium mb-3">4.3 Pagamenti</h3>
-          <p className="mb-4">
-            Accettiamo i seguenti metodi di pagamento:
-          </p>
-          <ul className="list-disc pl-6 mb-4">
-            <li>Carte di credito/debito (Visa, Mastercard, American Express)</li>
-            <li>PayPal</li>
-            <li>Altri metodi di pagamento specificati al checkout</li>
-          </ul>
-        </section>
-
-        <section className="mb-8">
-          <h2 className="text-2xl font-semibold mb-4">5. Consegna e Accesso ai Contenuti</h2>
-          
-          <h3 className="text-xl font-medium mb-3">5.1 Consegna Digitale</h3>
-          <p className="mb-4">
-            Trattandosi di prodotti digitali, la consegna avviene <strong>immediatamente</strong> 
-            dopo la conferma del pagamento tramite:
-          </p>
-          <ul className="list-disc pl-6 mb-4">
-            <li>Accesso diretto ai contenuti dal tuo account</li>
-            <li>Download dei file GPX e materiali correlati</li>
-            <li>Link di accesso inviati via email</li>
-          </ul>
-
-          <h3 className="text-xl font-medium mb-3">5.2 Requisiti Tecnici</h3>
-          <p className="mb-4">
-            Per utilizzare i contenuti acquistati necessiti di:
-          </p>
-          <ul className="list-disc pl-6 mb-4">
-            <li>Dispositivo GPS o smartphone con app di navigazione</li>
-            <li>Capacità di aprire file GPX</li>
-            <li>Connessione internet per il download iniziale</li>
-          </ul>
-        </section>
-
-        <section className="mb-8">
-          <h2 className="text-2xl font-semibold mb-4">6. Diritto di Recesso (Art. 59-67 Codice del Consumo)</h2>
-          
-          <div className="bg-red-50 border-l-4 border-red-400 p-4 mb-6">
-            <h3 className="text-xl font-medium mb-3">6.1 Limitazioni per Contenuti Digitali</h3>
-            <p className="text-sm mb-2">
-              <strong>ATTENZIONE:</strong> In conformità all'Art. 59 comma 1, lettera m) del Codice del Consumo, 
-              il diritto di recesso è <strong>escluso</strong> per:
-            </p>
-            <ul className="list-disc pl-6 text-sm">
-              <li>Contenuti digitali forniti mediante un supporto non materiale</li>
-              <li>Se la fornitura è iniziata con il consenso espresso del consumatore</li>
-              <li>Con la rinuncia del consumatore al diritto di recesso</li>
-            </ul>
-          </div>
-
-          <h3 className="text-xl font-medium mb-3">6.2 Consenso Espresso</h3>
-          <p className="mb-4">
-            Effettuando l'acquisto, dichiari espressamente di:
-          </p>
-          <ul className="list-disc pl-6 mb-4">
-            <li>Essere consapevole che i contenuti digitali saranno forniti immediatamente</li>
-            <li>Acconsentire all'inizio immediato della fornitura</li>
-            <li>Rinunciare al diritto di recesso per i contenuti digitali</li>
-          </ul>
-
-          <h3 className="text-xl font-medium mb-3">6.3 Eccezioni</h3>
-          <p className="mb-4">
-            Il diritto di recesso rimane valido per 14 giorni solo se:
-          </p>
-          <ul className="list-disc pl-6 mb-4">
-            <li>Non hai ancora avuto accesso ai contenuti digitali</li>
-            <li>Si verifica un errore tecnico che impedisce l'accesso</li>
-            <li>I contenuti sono sostanzialmente diversi da quanto descritto</li>
-          </ul>
-        </section>
-
-        <section className="mb-8">
-          <h2 className="text-2xl font-semibold mb-4">7. Garanzie e Responsabilità</h2>
-          
-          <h3 className="text-xl font-medium mb-3">7.1 Garanzia sui Contenuti</h3>
-          <p className="mb-4">
-            Garantiamo che i contenuti venduti:
-          </p>
-          <ul className="list-disc pl-6 mb-4">
-            <li>Corrispondono alle descrizioni fornite</li>
-            <li>Sono tecnicamente funzionanti e accessibili</li>
-            <li>Includono tutti i materiali specificati nella descrizione</li>
-          </ul>
-
-          <h3 className="text-xl font-medium mb-3">7.2 Limitazioni di Responsabilità</h3>
-          <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-4">
-            <p className="text-sm mb-2">
-              <strong>Importante per la Sicurezza:</strong> I contenuti sono forniti esclusivamente 
-              a scopo informativo. L'utente è l'unico responsabile per:
-            </p>
-            <ul className="list-disc pl-6 text-sm">
-              <li>Verifica dell'accuratezza delle informazioni</li>
-              <li>Valutazione dei rischi e delle proprie capacità</li>
-              <li>Rispetto del codice della strada e normative locali</li>
-              <li>Utilizzo di adeguate misure di sicurezza</li>
-              <li>Aggiornamenti su chiusure strade o modifiche percorsi</li>
-            </ul>
-          </div>
-
-          <h3 className="text-xl font-medium mb-3">7.3 Esclusioni</h3>
-          <p className="mb-4">
-            Non siamo responsabili per:
-          </p>
-          <ul className="list-disc pl-6 mb-4">
-            <li>Danni derivanti dall'uso delle tracce GPS</li>
-            <li>Incidenti o inconvenienti durante i viaggi</li>
-            <li>Variazioni nelle condizioni stradali o meteorologiche</li>
-            <li>Chiusure temporanee di strade o attrazioni</li>
-            <li>Problemi con dispositivi GPS di terze parti</li>
-          </ul>
-        </section>
-
-        <section className="mb-8">
-          <h2 className="text-2xl font-semibold mb-4">8. Rimborsi e Reclami</h2>
-          
-          <h3 className="text-xl font-medium mb-3">8.1 Rimborsi Eccezionali</h3>
-          <p className="mb-4">
-            Rimborsi possono essere concessi solo in caso di:
-          </p>
-          <ul className="list-disc pl-6 mb-4">
-            <li>Impossibilità tecnica di accedere ai contenuti acquistati</li>
-            <li>Contenuti sostanzialmente diversi dalla descrizione</li>
-            <li>Doppio addebito per errore del sistema</li>
-          </ul>
-
-          <h3 className="text-xl font-medium mb-3">8.2 Procedura di Reclamo</h3>
-          <p className="mb-4">
-            Per richiedere un rimborso o presentare reclamo:
-          </p>
-          <ol className="list-decimal pl-6 mb-4">
-            <li>Contatta il supporto a <strong>support@rideatlas.com</strong></li>
-            <li>Fornisci numero d'ordine e descrizione del problema</li>
-            <li>Riceverai risposta entro 48 ore lavorative</li>
-            <li>I rimborsi saranno processati entro 14 giorni dalla risoluzione</li>
-          </ol>
-        </section>
-
-        <section className="mb-8">
-          <h2 className="text-2xl font-semibold mb-4">9. Proprietà Intellettuale e Licenza d'Uso</h2>
-          
-          <h3 className="text-xl font-medium mb-3">9.1 Licenza Personale</h3>
-          <p className="mb-4">
-            Acquistando un viaggio, ricevi una <strong>licenza personale, non esclusiva e non trasferibile</strong> per:
-          </p>
-          <ul className="list-disc pl-6 mb-4">
-            <li>Utilizzare le tracce GPS per i tuoi viaggi personali</li>
-            <li>Scaricare e conservare i contenuti sui tuoi dispositivi</li>
-            <li>Stampare le informazioni per uso personale</li>
-          </ul>
-
-          <h3 className="text-xl font-medium mb-3">9.2 Restrizioni d'Uso</h3>
-          <p className="mb-4">
-            È <strong>espressamente vietato</strong>:
-          </p>
-          <ul className="list-disc pl-6 mb-4">
-            <li>Rivendere, distribuire o condividere i contenuti acquistati</li>
-            <li>Utilizzare i contenuti per scopi commerciali</li>
-            <li>Modificare o creare opere derivative</li>
-            <li>Rimuovere copyright o marchi</li>
-            <li>Caricare i contenuti su altre piattaforme</li>
-          </ul>
-        </section>
-
-        <section className="mb-8">
-          <h2 className="text-2xl font-semibold mb-4">10. Account e Registrazione</h2>
-          
-          <h3 className="text-xl font-medium mb-3">10.1 Requisiti per l'Acquisto</h3>
-          <ul className="list-disc pl-6 mb-4">
-            <li>Devi avere almeno 18 anni per effettuare acquisti</li>
-            <li>Devi fornire informazioni di fatturazione accurate</li>
-            <li>È necessario un account registrato per accedere agli acquisti</li>
-          </ul>
-
-          <h3 className="text-xl font-medium mb-3">10.2 Accesso agli Acquisti</h3>
-          <p className="mb-4">
-            Gli acquisti sono collegati al tuo account e rimarranno accessibili fintanto che:
-          </p>
-          <ul className="list-disc pl-6 mb-4">
-            <li>Il tuo account rimane attivo</li>
-            <li>Non violi questi Termini di Servizio</li>
-            <li>RideAtlas continua ad operare</li>
-          </ul>
-        </section>
-
-        <section className="mb-8">
-          <h2 className="text-2xl font-semibold mb-4">11. Informazioni Obbligatorie per E-commerce</h2>
-          
-          <h3 className="text-xl font-medium mb-3">11.1 Dati dell'Azienda</h3>
-          <div className="bg-gray-50 p-4 rounded-lg mb-4">
-            <p className="text-sm">
-              <strong>Ragione Sociale:</strong> [Da completare con dati reali]<br/>
-              <strong>Partita IVA:</strong> [Da completare]<br/>
-              <strong>Sede Legale:</strong> [Da completare]<br/>
-              <strong>PEC:</strong> [Da completare]<br/>
-              <strong>Telefono:</strong> [Da completare]<br/>
-              <strong>Email:</strong> support@rideatlas.com
-            </p>
-          </div>
-
-          <h3 className="text-xl font-medium mb-3">11.2 Informazioni Precontrattuali</h3>
-          <p className="mb-4">
-            Prima di ogni acquisto, riceverai informazioni complete su:
-          </p>
-          <ul className="list-disc pl-6 mb-4">
-            <li>Caratteristiche del prodotto/servizio</li>
-            <li>Prezzo totale (IVA inclusa)</li>
-            <li>Modalità di pagamento e consegna</li>
-            <li>Durata del contratto</li>
-            <li>Diritti del consumatore</li>
-          </ul>
-        </section>
-
-        <section className="mb-8">
-          <h2 className="text-2xl font-semibold mb-4">12. Risoluzione delle Controversie</h2>
-          
-          <h3 className="text-xl font-medium mb-3">12.1 Mediazione</h3>
-          <p className="mb-4">
-            Prima di intraprendere azioni legali, ci impegniamo a tentare una risoluzione 
-            amichevole tramite mediazione presso un organismo di mediazione accreditato.
+            Le parti si impegnano a tentare una risoluzione amichevole mediante mediazione.
+            Per acquisti online, è disponibile la piattaforma ODR europea: <a href="https://ec.europa.eu/consumers/odr/">https://ec.europa.eu/consumers/odr/</a>
           </p>
 
-          <h3 className="text-xl font-medium mb-3">12.2 Risoluzione Online delle Controversie (ODR)</h3>
-          <p className="mb-4">
-            Per controversie relative ad acquisti online, puoi utilizzare la piattaforma europea ODR: 
-            <a href="https://ec.europa.eu/consumers/odr/" className="text-blue-600 hover:underline" target="_blank">
-              https://ec.europa.eu/consumers/odr/
-            </a>
-          </p>
-
-          <h3 className="text-xl font-medium mb-3">12.3 Foro Competente</h3>
-          <p className="mb-4">
-            Per qualsiasi controversia, è competente il foro del luogo di residenza del consumatore 
-            o della sede legale di RideAtlas.
+          <h3 className="text-xl font-medium mb-3">10.2 Legge applicabile e foro competente</h3>
+          <p>
+            Il contratto è regolato dalla <strong>legge italiana</strong>.
+            Il foro competente è quello di residenza del consumatore o la sede legale di Agile Reloaded S.r.l.
           </p>
         </section>
 
+        <hr className="my-8" />
+
         <section className="mb-8">
-          <h2 className="text-2xl font-semibold mb-4">13. Modifiche ai Termini</h2>
+          <h2 className="text-2xl font-semibold mb-4">11. Clausole finali</h2>
+
+          <h3 className="text-xl font-medium mb-3">11.1 Validità parziale</h3>
           <p className="mb-4">
-            Eventuali modifiche ai Termini saranno comunicate con almeno 30 giorni di preavviso 
-            e non si applicheranno retroattivamente agli acquisti già effettuati.
+            Se una disposizione è ritenuta invalida, le restanti restano efficaci.
+          </p>
+
+          <h3 className="text-xl font-medium mb-3">11.2 Modifiche ai termini</h3>
+          <p className="mb-4">
+            Agile Reloaded S.r.l. può modificare i presenti termini con preavviso pubblicato sull’applicazione web RideAtlas.
+          </p>
+
+          <h3 className="text-xl font-medium mb-3">11.3 Integralità dell’accordo</h3>
+          <p>
+            Il presente documento costituisce l’intero accordo tra le parti.
           </p>
         </section>
 
+        <hr className="my-8" />
+
         <section className="mb-8">
-          <h2 className="text-2xl font-semibold mb-4">14. Contatti</h2>
+          <h2 className="text-2xl font-semibold mb-4">12. Contatti</h2>
           <p className="mb-4">
-            Per domande sui Termini di Servizio o sugli acquisti:
+            📧 <strong>Email:</strong> info@rideatlas.it<br />
+            🌐 <strong>Sito:</strong> <a href="http://www.rideatlas.it">www.rideatlas.it</a>
           </p>
-          <ul className="list-none pl-0">
-            <li><strong>Supporto Clienti:</strong> support@rideatlas.com</li>
-            <li><strong>Questioni Legali:</strong> legal@rideatlas.com</li>
-            <li><strong>Privacy:</strong> <a href="/privacy-policy" className="text-blue-600 hover:underline">Privacy Policy</a></li>
-            <li><strong>Cookie:</strong> <a href="/cookie-policy" className="text-blue-600 hover:underline">Cookie Policy</a></li>
+        </section>
+
+        <hr className="my-8" />
+
+        <section className="mb-8">
+          <h2 className="text-2xl font-semibold mb-4">13. Dichiarazione finale di accettazione</h2>
+          <p className="mb-4">
+            Procedendo con l'acquisto, l'utente dichiara di aver letto, compreso e accettato integralmente i presenti Termini di Servizio. Ai sensi e per gli effetti degli articoli 1341 e 1342 del Codice Civile,  l'utente dichiara di aver preso specifica conoscenza e di approvare  espressamente le seguenti clausole vessatorie:
+          </p>
+          <ul className="list-disc pl-6 mb-4">
+            <li>Art. 5.1 - Limitazioni della licenza d'uso e divieti</li>
+            <li>Art. 5.3 - Esclusione del diritto di recesso per contenuti digitali</li>
+            <li>Art. 6 - Natura meramente informativa dei contenuti e assenza di garanzie</li>
+            <li>Art. 7.1 - Esclusioni generali di responsabilità</li>
+            <li>Art. 7.2 - Esclusioni specifiche di responsabilità per danni</li>
+            <li>Art. 7.3 - Assunzione del rischio e rinuncia ad azioni legali</li>
+            <li>Art. 7.4 - Fornitura dei servizi "as is" e "as available"</li>
+            <li>Art. 7.5 - Obbligo di indennizzo e manleva</li>
+            <li>Art. 10.2 - Legge applicabile e foro competente</li>
+          </ul>
+          <p className="mb-4">
+            L'utente riconosce inoltre che:
+          </p>
+          <ul className="list-disc pl-6 mb-4">
+            <li>I contenuti acquistati sono di natura puramente informativa</li>
+            <li>L'utilizzo è a proprio esclusivo rischio e pericolo</li>
+            <li>Agile Reloaded S.r.l. non effettua verifiche sull'idoneità dell'acquirente</li>
+            <li>La responsabilità massima è limitata al prezzo del singolo contenuto acquistato</li>
           </ul>
         </section>
       </div>
