@@ -10,7 +10,7 @@ export async function POST(
 ) {
   try {
     const session = await auth();
-    
+
     if (!session?.user?.id) {
       return NextResponse.json(
         { error: 'È necessario effettuare il login per acquistare un viaggio' },
@@ -18,26 +18,38 @@ export async function POST(
       );
     }
 
+    const tripId = (await params).id;
+    console.log(`📥 [PURCHASE API] Starting purchase for trip ${tripId}, user ${session.user.id}`);
+
     const result = await PurchaseService.createPurchase(
       session.user.id,
-      (await params).id
+      tripId
     );
 
+    console.log(`📤 [PURCHASE API] Purchase result:`, result);
+
     if (!result.success) {
+      console.log(`❌ [PURCHASE API] Purchase failed: ${result.error}`);
       return NextResponse.json(
         { error: result.error },
         { status: 400 }
       );
     }
 
-    return NextResponse.json({
+    const response = {
       success: true,
       purchaseId: result.purchaseId,
-      message: 'Acquisto iniziato con successo'
-    });
+      free: result.free || false,
+      message: result.free ? 'Viaggio acquisito gratuitamente' : 'Acquisto iniziato con successo'
+    };
+
+    console.log(`✅ [PURCHASE API] Returning response:`, response);
+
+    return NextResponse.json(response);
 
   } catch (error) {
-    console.error('Errore nella creazione dell\'acquisto:', error);
+    console.error('❌ [PURCHASE API] Errore nella creazione dell\'acquisto:', error);
+    console.error('❌ [PURCHASE API] Stack:', error instanceof Error ? error.stack : 'No stack');
     return NextResponse.json(
       { error: 'Errore interno del server' },
       { status: 500 }

@@ -313,9 +313,23 @@ const TripGrid: React.FC<TripGridProps> = React.memo(({ trips, userRole }) => {
               )}
             </div>
 
-            {/* Azioni */}
+            {/* Prezzo */}
             <div className="mt-6 pt-4 border-t">
-              <Link 
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <span className="text-lg font-bold text-blue-600">
+                    €{trip.price.toFixed(2)}
+                  </span>
+                  {trip.price === 0 && (
+                    <span className="px-2 py-1 bg-green-500 text-white text-xs font-bold rounded-md">
+                      Offerta IAD
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* Azioni */}
+              <Link
                 href={`/trips/${trip.slug}`}
                 className="w-full btn-primary text-center block"
               >

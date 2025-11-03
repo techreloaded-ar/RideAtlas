@@ -115,8 +115,18 @@ export class PurchaseService {
     return purchases;
   }
 
-  static async createPurchase(userId: string, tripId: string): Promise<{ success: boolean; purchaseId?: string; error?: string }> {
+  static async createPurchase(userId: string, tripId: string): Promise<{ success: boolean; purchaseId?: string; error?: string; free?: boolean }> {
     try {
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { id: true }
+      });
+
+      if (!user) {
+        console.error(`❌ [PURCHASE SERVICE] User ${userId} not found in database`);
+        return { success: false, error: 'Utente non valido. Effettua nuovamente il login.' };
+      }
+
       const trip = await prisma.trip.findUnique({
         where: { id: tripId },
         select: {
@@ -154,6 +164,47 @@ export class PurchaseService {
       if (activeCompletedPurchase) {
         console.log(`⚠️ [PURCHASE SERVICE] User ${userId} already has active purchase for trip ${tripId}`);
         return { success: false, error: 'Hai già acquistato questo viaggio' };
+      }
+
+      console.log(`💰 [PURCHASE SERVICE] Trip price raw:`, trip.price, `Type: ${typeof trip.price}`);
+
+      const tripPrice = typeof trip.price === 'object' && trip.price !== null && 'toNumber' in trip.price
+        ? (trip.price as { toNumber: () => number }).toNumber()
+        : Number(trip.price);
+
+      console.log(`💰 [PURCHASE SERVICE] Trip price converted: ${tripPrice}`);
+
+      const isFreeTrip = tripPrice <= 0;
+
+      if (isFreeTrip) {
+        console.log(`🎁 [PURCHASE SERVICE] Free trip detected (price: ${tripPrice}). Auto-completing purchase.`);
+
+        const now = new Date();
+
+        const [purchase] = await prisma.$transaction([
+          prisma.tripPurchase.create({
+            data: {
+              userId,
+              tripId,
+              amount: 0,
+              status: PurchaseStatus.COMPLETED,
+              paymentMethod: 'free',
+              purchasedAt: now
+            }
+          })
+        ]);
+
+        await prisma.tripPurchaseTransaction.create({
+          data: {
+            purchaseId: purchase.id,
+            amount: 0,
+            status: PurchaseStatus.COMPLETED,
+            paymentMethod: 'free'
+          }
+        });
+
+        console.log(`✅ [PURCHASE SERVICE] Free trip purchase completed: ${purchase.id}`);
+        return { success: true, purchaseId: purchase.id, free: true };
       }
 
       // Check if there's an existing PENDING purchase to reuse

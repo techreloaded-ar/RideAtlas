@@ -99,20 +99,31 @@ export default function AccessGate({
               Contenuto Premium
             </h3>
             <div className="mt-2 text-sm text-amber-700">
-              {accessInfo?.message || `Acquista questo viaggio per accedere a ${premiumContentType}.`}
+              {accessInfo?.message || `${accessInfo?.price === 0 ? 'Ottieni' : 'Acquista'} questo viaggio per accedere a ${premiumContentType}.`}
             </div>
-            {accessInfo?.price && (
-              <div className="mt-2 text-lg font-semibold text-amber-800">
-                €{accessInfo.price.toFixed(2)}
+            {accessInfo?.price !== undefined && (
+              <div className="mt-2 flex items-center gap-2">
+                <span className="text-lg font-semibold text-amber-800">
+                  €{accessInfo.price.toFixed(2)}
+                </span>
+                {accessInfo.price === 0 && (
+                  <span className="px-2 py-1 bg-green-500 text-white text-xs font-bold rounded-md">
+                    Offerta IAD
+                  </span>
+                )}
               </div>
             )}
             <div className="mt-4">
               <Link
                 href={`/purchase/${tripId}`}
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-amber-600 hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500"
+                className={`inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+                  accessInfo?.price === 0
+                    ? 'bg-green-600 hover:bg-green-700 focus:ring-green-500'
+                    : 'bg-amber-600 hover:bg-amber-700 focus:ring-amber-500'
+                }`}
               >
                 <ShoppingCart className="w-4 h-4 mr-2" />
-                Acquista ora
+                {accessInfo?.price === 0 ? 'Ottieni Gratis' : 'Acquista ora'}
               </Link>
             </div>
           </div>

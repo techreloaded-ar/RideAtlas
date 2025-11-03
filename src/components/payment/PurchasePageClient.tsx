@@ -46,12 +46,23 @@ export default function PurchasePageClient({ trip }: PurchasePageClientProps) {
 
       if (!response.ok) {
         const errorData = await response.json();
+        console.error('❌ [PURCHASE PAGE] Server error response:', errorData);
+        console.error('❌ [PURCHASE PAGE] Status:', response.status);
         throw new Error(errorData.error || 'Errore durante l\'avvio dell\'acquisto');
       }
 
       const data = await response.json();
+      console.log('✅ [PURCHASE PAGE] Server response:', data);
       setPurchaseId(data.purchaseId);
-      setStep('payment');
+
+      if (data.free) {
+        setStep('success');
+        setTimeout(() => {
+          router.push(`/trips/${trip.slug}?purchased=true`);
+        }, 2000);
+      } else {
+        setStep('payment');
+      }
 
     } catch (err) {
       console.error('Errore nell\'avvio dell\'acquisto:', err);
@@ -265,9 +276,16 @@ export default function PurchasePageClient({ trip }: PurchasePageClientProps) {
                   
                   <div className="flex justify-between items-center py-2 border-b">
                     <span className="text-gray-600">Prezzo:</span>
-                    <span className="text-2xl font-bold text-blue-600">
-                      €{trip.price.toFixed(2)}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-2xl font-bold text-blue-600">
+                        €{trip.price.toFixed(2)}
+                      </span>
+                      {trip.price === 0 && (
+                        <span className="px-2 py-1 bg-green-500 text-white text-xs font-bold rounded-md">
+                          Offerta IAD
+                        </span>
+                      )}
+                    </div>
                   </div>
 
                   <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
@@ -285,12 +303,21 @@ export default function PurchasePageClient({ trip }: PurchasePageClientProps) {
                   <button
                     onClick={handleStartPurchase}
                     disabled={loading}
-                    className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                    className={`w-full text-white py-3 px-4 rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center ${
+                      trip.price === 0
+                        ? 'bg-green-600 hover:bg-green-700'
+                        : 'bg-blue-600 hover:bg-blue-700'
+                    }`}
                   >
                     {loading ? (
                       <>
                         <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
                         Preparazione...
+                      </>
+                    ) : trip.price === 0 ? (
+                      <>
+                        <CheckCircle className="w-4 h-4 mr-2" />
+                        Ottieni Gratis
                       </>
                     ) : (
                       <>

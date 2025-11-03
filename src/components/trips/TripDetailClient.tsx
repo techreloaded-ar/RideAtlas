@@ -48,6 +48,7 @@ interface TripData {
   duration_days: number
   theme: string
   status: string
+  price: number
   characteristics: string[]
   tags: string[]
   travelDate?: Date | null
@@ -91,7 +92,19 @@ export function TripDetailClient({
       {/* Header */}
       <div className="mb-8">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-4">
-          <h1 className="text-4xl font-medium mb-4">{trip.title}</h1>
+          <div className="flex-1">
+            <h1 className="text-4xl font-medium mb-2">{trip.title}</h1>
+            <div className="flex items-center gap-2 mb-4">
+              <span className="text-2xl font-bold text-blue-600">
+                €{trip.price.toFixed(2)}
+              </span>
+              {trip.price === 0 && (
+                <span className="px-3 py-1 bg-green-500 text-white text-sm font-bold rounded-md">
+                  Offerta IAD
+                </span>
+              )}
+            </div>
+          </div>
           {canEdit && (
             <div className="flex gap-2">
               <Link
