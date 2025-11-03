@@ -248,3 +248,94 @@ export async function sendEmailChangeVerification(newEmail: string, token: strin
 
   return sendTemplatedEmail(newEmail, 'Verifica il cambio email - RideAtlas', templateData, 'Email di verifica cambio email');
 }
+
+export async function sendContactEmail(
+  nome: string,
+  senderEmail: string,
+  messaggio: string
+): Promise<EmailResult> {
+  const transporter = createTransporter();
+
+  if (!transporter) {
+    console.error('⚠️  Configurazione email non completa. Email di contatto non inviata.');
+    console.log('📧 Email di contatto simulata da:', senderEmail);
+    console.log('👤 Nome:', nome);
+    console.log('💬 Messaggio:', messaggio);
+
+    // In sviluppo, simula l'invio riuscito
+    if (process.env.NODE_ENV === 'development') {
+      return { success: true, simulated: true };
+    }
+
+    return { success: false, error: 'Configurazione email mancante' };
+  }
+
+  // Email HTML per il destinatario (info@rideatlas.it)
+  const htmlContent = `
+    <div style="max-width: 600px; margin: 0 auto; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+      <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px 20px; text-align: center; border-radius: 12px 12px 0 0;">
+        <h1 style="color: white; margin: 0; font-size: 28px; font-weight: bold;">Nuovo Messaggio di Contatto</h1>
+        <p style="color: rgba(255, 255, 255, 0.9); margin: 10px 0 0 0; font-size: 14px;">RideAtlas</p>
+      </div>
+
+      <div style="background: white; padding: 30px; border-radius: 0 0 12px 12px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);">
+        <div style="background: #f8f9ff; border-left: 4px solid #667eea; padding: 20px; margin-bottom: 20px; border-radius: 0 8px 8px 0;">
+          <p style="margin: 0 0 10px 0; color: #333; font-size: 14px;">
+            <strong>Da:</strong> ${nome}
+          </p>
+          <p style="margin: 0; color: #333; font-size: 14px;">
+            <strong>Email:</strong> <a href="mailto:${senderEmail}" style="color: #667eea; text-decoration: none;">${senderEmail}</a>
+          </p>
+        </div>
+
+        <div style="margin: 20px 0;">
+          <p style="margin: 0 0 10px 0; color: #666; font-size: 14px; font-weight: bold;">Messaggio:</p>
+          <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; border: 1px solid #e9ecef;">
+            <p style="margin: 0; color: #333; line-height: 1.6; white-space: pre-wrap; font-size: 15px;">${messaggio}</p>
+          </div>
+        </div>
+
+        <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
+          <p style="margin: 0; color: #999; font-size: 12px; text-align: center;">
+            Ricevuto il ${new Date().toLocaleString('it-IT')}
+          </p>
+        </div>
+      </div>
+    </div>
+  `;
+
+  // Testo semplice
+  const textContent = `
+Nuovo Messaggio di Contatto - RideAtlas
+
+Da: ${nome}
+Email: ${senderEmail}
+
+Messaggio:
+${messaggio}
+
+---
+Ricevuto il ${new Date().toLocaleString('it-IT')}
+  `.trim();
+
+  const mailOptions = {
+    from: process.env.SMTP_FROM || 'noreply@rideatlas.it',
+    to: 'info@rideatlas.it',
+    replyTo: senderEmail,
+    subject: `Nuovo messaggio di contatto da ${nome}`,
+    html: htmlContent,
+    text: textContent,
+  };
+
+  try {
+    console.log('📧 Tentativo di invio email di contatto a info@rideatlas.it da:', senderEmail);
+
+    await transporter.sendMail(mailOptions);
+    console.log('✅ Email di contatto inviata con successo');
+    return { success: true };
+  } catch (error: unknown) {
+    console.error('❌ Errore invio email di contatto:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Errore sconosciuto';
+    return { success: false, error: errorMessage };
+  }
+}
