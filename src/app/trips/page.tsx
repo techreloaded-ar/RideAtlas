@@ -3,6 +3,7 @@ import { TripStatus } from '@prisma/client';
 import { castToGpxFile, castToMediaItems } from '@/types/trip';
 import { Prisma } from '@prisma/client';
 import TripsPageClient from './TripsPageClient';
+import { auth } from '@/auth';
 
 
 // Force dynamic rendering
@@ -31,6 +32,10 @@ type TripWithRelations = Prisma.TripGetPayload<{
 
 
 export default async function TripsPage() {
+  // Recupera la sessione utente per determinare il ruolo
+  const session = await auth();
+  const userRole = session?.user?.role || null;
+
   // La pagina /trips mostra solo i viaggi pubblicati per tutti gli utenti
   // I viaggi in bozza sono visibili solo in Dashboard ("I miei Viaggi") e nel pannello Admin
   const whereClause = { status: TripStatus.Pubblicato };
@@ -93,7 +98,7 @@ export default async function TripsPage() {
       </section>
 
       {/* Contenuto principale con ricerca integrata */}
-      <TripsPageClient trips={tripsWithProcessedData} />
+      <TripsPageClient trips={tripsWithProcessedData} userRole={userRole} />
     </main>
   );
 }

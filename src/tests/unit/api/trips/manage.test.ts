@@ -60,7 +60,7 @@ describe('API /api/trips/[id] - Gestione Singolo Viaggio', () => {
     id: 'user-123',
     name: 'Test User',
     email: 'test@example.com',
-    role: UserRole.Explorer,
+    role: UserRole.Ranger, // Ranger può modificare viaggi
   }
 
   const mockSentinel = {
@@ -69,6 +69,14 @@ describe('API /api/trips/[id] - Gestione Singolo Viaggio', () => {
     email: 'sentinel@example.com',
     role: UserRole.Sentinel,
   }
+
+  const mockRanger = {
+    id: 'ranger-789',
+    name: 'Ranger User',
+    email: 'ranger@example.com',
+    role: UserRole.Ranger,
+  }
+
   const mockTrip = {
     id: 'trip-123',
     title: 'Viaggio in Toscana',
@@ -416,10 +424,43 @@ describe('API /api/trips/[id] - Gestione Singolo Viaggio', () => {
         expect(data.error).toBe('Non autorizzato')
       })
 
-      it('should reject request from non-owner Explorer', async () => {
-        const otherUser = { ...mockUser, id: 'other-user-456' }
+      it('should reject request from Explorer even if owner', async () => {
+        const explorerOwner = { ...mockUser, role: UserRole.Explorer }
         mockAuth.mockResolvedValue({
-          user: otherUser,
+          user: explorerOwner,
+          expires: '2024-12-31T23:59:59.999Z',
+        })
+        ;(prisma.trip.findUnique as jest.Mock).mockResolvedValue(mockExistingTrip)
+
+        const request = createMockRequest(validUpdateData)
+        const response = await PUT(request, { params: { id: 'trip-123' } })
+        const data = await response.json()
+
+        expect(response.status).toBe(403)
+        expect(data.error).toBe('Non hai i permessi per modificare viaggi. Solo Ranger e Sentinel possono modificare itinerari.')
+      })
+
+      it('should allow Ranger owner to update their trip', async () => {
+        const rangerOwner = { ...mockRanger, id: 'user-123' } // Same ID as trip owner
+        mockAuth.mockResolvedValue({
+          user: rangerOwner,
+          expires: '2024-12-31T23:59:59.999Z',
+        })
+        ;(prisma.trip.findUnique as jest.Mock)
+          .mockResolvedValueOnce(mockExistingTrip)
+          .mockResolvedValue(mockUpdatedTrip)
+        ;(prisma.trip.update as jest.Mock).mockResolvedValue(mockUpdatedTrip)
+
+        const request = createMockRequest(validUpdateData)
+        const response = await PUT(request, { params: { id: 'trip-123' } })
+
+        expect(response.status).toBe(200)
+      })
+
+      it('should reject request from Ranger non-owner', async () => {
+        const rangerNonOwner = { ...mockRanger, id: 'other-ranger-999' }
+        mockAuth.mockResolvedValue({
+          user: rangerNonOwner,
           expires: '2024-12-31T23:59:59.999Z',
         })
         ;(prisma.trip.findUnique as jest.Mock).mockResolvedValue(mockExistingTrip)
@@ -430,6 +471,21 @@ describe('API /api/trips/[id] - Gestione Singolo Viaggio', () => {
 
         expect(response.status).toBe(403)
         expect(data.error).toBe('Non hai i permessi per modificare questo viaggio')
+      })
+
+      it('should reject request from non-owner Explorer (blocked by role check)', async () => {
+        const otherExplorer = { ...mockUser, id: 'other-user-456', role: UserRole.Explorer }
+        mockAuth.mockResolvedValue({
+          user: otherExplorer,
+          expires: '2024-12-31T23:59:59.999Z',
+        })
+
+        const request = createMockRequest(validUpdateData)
+        const response = await PUT(request, { params: { id: 'trip-123' } })
+        const data = await response.json()
+
+        expect(response.status).toBe(403)
+        expect(data.error).toBe('Non hai i permessi per modificare viaggi. Solo Ranger e Sentinel possono modificare itinerari.')
       })
     })
 

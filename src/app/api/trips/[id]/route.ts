@@ -174,11 +174,20 @@ export async function PUT(
 ) {
   try {
     const session = await auth()
-    
+
     if (!session?.user?.id) {
       return NextResponse.json(
         { error: 'Non autorizzato' },
         { status: 401 }
+      )
+    }
+
+    // Validazione ruolo: solo Ranger e Sentinel possono modificare viaggi
+    const userRole = session.user.role as UserRole;
+    if (userRole !== UserRole.Ranger && userRole !== UserRole.Sentinel) {
+      return NextResponse.json(
+        { error: 'Non hai i permessi per modificare viaggi. Solo Ranger e Sentinel possono modificare itinerari.' },
+        { status: 403 }
       )
     }
 

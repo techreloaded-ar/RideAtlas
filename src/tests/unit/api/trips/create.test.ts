@@ -104,7 +104,7 @@ describe('POST /api/trips - Creazione Viaggi', () => {
     id: 'user-123',
     name: 'Test User',
     email: 'test@example.com',
-    role: 'Explorer',
+    role: 'Ranger', // Ranger può creare viaggi
   }
 
   const mockCreatedTrip = {
@@ -394,6 +394,67 @@ describe('POST /api/trips - Creazione Viaggi', () => {
 
       expect(response.status).toBe(401)
       expect(data.error).toBe('Utente non autorizzato.')
+    })
+
+    it('should reject request from Explorer user', async () => {
+      const explorerUser = { ...mockUser, role: 'Explorer' }
+      mockAuth.mockResolvedValue({
+        user: explorerUser,
+        expires: '2024-12-31T23:59:59.999Z',
+      })
+
+      const request = createMockRequest(validTripData)
+      const response = await POST(request)
+      const data = await response.json()
+
+      expect(response.status).toBe(403)
+      expect(data.error).toBe('Non hai i permessi per creare viaggi. Solo Ranger e Sentinel possono creare itinerari.')
+    })
+
+    it('should allow Ranger to create trip', async () => {
+      const rangerUser = { ...mockUser, role: 'Ranger' }
+      mockAuth.mockResolvedValue({
+        user: rangerUser,
+        expires: '2024-12-31T23:59:59.999Z',
+      })
+      mockEnsureUserExists.mockResolvedValue(rangerUser)
+
+      const mockTripWithStages = {
+        ...mockCreatedTrip,
+        user: rangerUser,
+        stages: []
+      }
+
+      ;(prisma.trip.create as jest.Mock).mockResolvedValue(mockTripWithStages)
+      ;(prisma.trip.findUnique as jest.Mock).mockResolvedValue(mockTripWithStages)
+
+      const request = createMockRequest(validTripData)
+      const response = await POST(request)
+
+      expect(response.status).toBe(201)
+    })
+
+    it('should allow Sentinel to create trip', async () => {
+      const sentinelUser = { ...mockUser, role: 'Sentinel' }
+      mockAuth.mockResolvedValue({
+        user: sentinelUser,
+        expires: '2024-12-31T23:59:59.999Z',
+      })
+      mockEnsureUserExists.mockResolvedValue(sentinelUser)
+
+      const mockTripWithStages = {
+        ...mockCreatedTrip,
+        user: sentinelUser,
+        stages: []
+      }
+
+      ;(prisma.trip.create as jest.Mock).mockResolvedValue(mockTripWithStages)
+      ;(prisma.trip.findUnique as jest.Mock).mockResolvedValue(mockTripWithStages)
+
+      const request = createMockRequest(validTripData)
+      const response = await POST(request)
+
+      expect(response.status).toBe(201)
     })
   })
 

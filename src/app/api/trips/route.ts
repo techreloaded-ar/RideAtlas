@@ -178,11 +178,20 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     console.log('Inizio elaborazione richiesta POST /trips');
-    
+
     const session = await auth();
     if (!session?.user?.id) {
       console.error('Errore autenticazione: sessione non presente');
       return NextResponse.json({ error: "Utente non autorizzato." }, { status: 401 });
+    }
+
+    // Validazione ruolo: solo Ranger e Sentinel possono creare viaggi
+    const userRole = session.user.role as UserRole;
+    if (userRole !== UserRole.Ranger && userRole !== UserRole.Sentinel) {
+      console.error(`Tentativo creazione viaggio da utente non autorizzato: ${userRole}`);
+      return NextResponse.json({
+        error: "Non hai i permessi per creare viaggi. Solo Ranger e Sentinel possono creare itinerari."
+      }, { status: 403 });
     }
 
     const body = await request.json();

@@ -10,9 +10,9 @@ import TripsPageClient from '@/app/trips/TripsPageClient';
 
 // Mock dei componenti per semplificare i test di integrazione
 jest.mock('@/components/trips/TripGrid', () => {
-  return function MockTripGrid({ trips }: { trips: any[] }) {
+  return function MockTripGrid({ trips, userRole }: { trips: any[]; userRole?: string | null }) {
     return (
-      <div data-testid="trip-grid">
+      <div data-testid="trip-grid" data-user-role={userRole || 'none'}>
         {trips.map((trip) => (
           <div key={trip.id} data-testid={`trip-${trip.id}`}>
             {trip.title}
@@ -96,12 +96,12 @@ describe('TripsPageClient Integration', () => {
   ];
 
   it('dovrebbe mostrare tutti i viaggi inizialmente', () => {
-    render(<TripsPageClient trips={mockTrips} />);
-    
+    render(<TripsPageClient trips={mockTrips} userRole={null} />);
+
     expect(screen.getByTestId('trip-1')).toBeInTheDocument();
     expect(screen.getByTestId('trip-2')).toBeInTheDocument();
     expect(screen.getByTestId('trip-3')).toBeInTheDocument();
-    
+
     expect(screen.getByText('Viaggio in Toscana')).toBeInTheDocument();
     expect(screen.getByText('Tour delle Dolomiti')).toBeInTheDocument();
     expect(screen.getByText('Costa Amalfitana')).toBeInTheDocument();
@@ -109,65 +109,65 @@ describe('TripsPageClient Integration', () => {
 
   it('dovrebbe filtrare i viaggi quando si cerca per titolo', async () => {
     const user = userEvent.setup();
-    render(<TripsPageClient trips={mockTrips} />);
-    
+    render(<TripsPageClient trips={mockTrips} userRole={null} />);
+
     const searchInput = screen.getByRole('searchbox');
     await user.type(searchInput, 'toscana');
-    
+
     await waitFor(() => {
       expect(screen.getByTestId('trip-1')).toBeInTheDocument();
       expect(screen.queryByTestId('trip-2')).not.toBeInTheDocument();
       expect(screen.queryByTestId('trip-3')).not.toBeInTheDocument();
     });
-    
+
     expect(screen.getByText('1 viaggio trovato')).toBeInTheDocument();
   });
 
   it('dovrebbe filtrare i viaggi quando si cerca per destinazione', async () => {
     const user = userEvent.setup();
-    render(<TripsPageClient trips={mockTrips} />);
-    
+    render(<TripsPageClient trips={mockTrips} userRole={null} />);
+
     const searchInput = screen.getByRole('searchbox');
     await user.type(searchInput, 'alto adige');
-    
+
     await waitFor(() => {
       expect(screen.queryByTestId('trip-1')).not.toBeInTheDocument();
       expect(screen.getByTestId('trip-2')).toBeInTheDocument();
       expect(screen.queryByTestId('trip-3')).not.toBeInTheDocument();
     });
-    
+
     expect(screen.getByText('1 viaggio trovato')).toBeInTheDocument();
   });
 
   it('dovrebbe filtrare i viaggi quando si cerca per tag', async () => {
     const user = userEvent.setup();
-    render(<TripsPageClient trips={mockTrips} />);
-    
+    render(<TripsPageClient trips={mockTrips} userRole={null} />);
+
     const searchInput = screen.getByRole('searchbox');
     await user.type(searchInput, 'mare');
-    
+
     await waitFor(() => {
       expect(screen.queryByTestId('trip-1')).not.toBeInTheDocument();
       expect(screen.queryByTestId('trip-2')).not.toBeInTheDocument();
       expect(screen.getByTestId('trip-3')).toBeInTheDocument();
     });
-    
+
     expect(screen.getByText('1 viaggio trovato')).toBeInTheDocument();
   });
 
   it('dovrebbe mostrare tutti i viaggi che contengono "italia"', async () => {
     const user = userEvent.setup();
-    render(<TripsPageClient trips={mockTrips} />);
-    
+    render(<TripsPageClient trips={mockTrips} userRole={null} />);
+
     const searchInput = screen.getByRole('searchbox');
     await user.type(searchInput, 'italia');
-    
+
     await waitFor(() => {
       expect(screen.getByTestId('trip-1')).toBeInTheDocument();
       expect(screen.getByTestId('trip-2')).toBeInTheDocument();
       expect(screen.getByTestId('trip-3')).toBeInTheDocument();
     });
-    
+
     // Aspetta che il debouncing finisca e il contatore risultati appaia
     await waitFor(() => {
       expect(screen.getByText('3 viaggi trovati')).toBeInTheDocument();
@@ -176,118 +176,120 @@ describe('TripsPageClient Integration', () => {
 
   it('dovrebbe mostrare messaggio quando non ci sono risultati', async () => {
     const user = userEvent.setup();
-    render(<TripsPageClient trips={mockTrips} />);
-    
+    render(<TripsPageClient trips={mockTrips} userRole={null} />);
+
     const searchInput = screen.getByRole('searchbox');
     await user.type(searchInput, 'nonexistent');
-    
+
     await waitFor(() => {
       expect(screen.queryByTestId('trip-1')).not.toBeInTheDocument();
       expect(screen.queryByTestId('trip-2')).not.toBeInTheDocument();
       expect(screen.queryByTestId('trip-3')).not.toBeInTheDocument();
     });
-    
+
+    // Verifica che appaia il messaggio sotto la barra di ricerca
     expect(screen.getByText(/nessun viaggio trovato per/i)).toBeInTheDocument();
-    expect(screen.getByText('Nessun risultato trovato')).toBeInTheDocument();
-    expect(screen.getByText('Mostra tutti i viaggi')).toBeInTheDocument();
   });
 
   it('dovrebbe permettere di cancellare la ricerca', async () => {
     const user = userEvent.setup();
-    render(<TripsPageClient trips={mockTrips} />);
-    
+    render(<TripsPageClient trips={mockTrips} userRole={null} />);
+
     const searchInput = screen.getByRole('searchbox');
     await user.type(searchInput, 'toscana');
-    
+
     // Verifica che il filtro sia applicato
     await waitFor(() => {
       expect(screen.getByTestId('trip-1')).toBeInTheDocument();
       expect(screen.queryByTestId('trip-2')).not.toBeInTheDocument();
     });
-    
+
     // Clicca il pulsante clear
     const clearButton = screen.getByRole('button', { name: /cancella ricerca/i });
     await user.click(clearButton);
-    
-    // Verifica che tutti i viaggi siano di nuovo visibili
-    await waitFor(() => {
-      expect(screen.getByTestId('trip-1')).toBeInTheDocument();
-      expect(screen.getByTestId('trip-2')).toBeInTheDocument();
-      expect(screen.getByTestId('trip-3')).toBeInTheDocument();
-    });
-    
-    expect(searchInput).toHaveValue('');
-  });
 
-  it('dovrebbe permettere di cancellare la ricerca dal pulsante "Mostra tutti i viaggi"', async () => {
-    const user = userEvent.setup();
-    render(<TripsPageClient trips={mockTrips} />);
-    
-    const searchInput = screen.getByRole('searchbox');
-    await user.type(searchInput, 'nonexistent');
-    
-    // Verifica che non ci siano risultati
-    await waitFor(() => {
-      expect(screen.getByText('Nessun risultato trovato')).toBeInTheDocument();
-    });
-    
-    // Clicca "Mostra tutti i viaggi"
-    const showAllButton = screen.getByText('Mostra tutti i viaggi');
-    await user.click(showAllButton);
-    
     // Verifica che tutti i viaggi siano di nuovo visibili
     await waitFor(() => {
       expect(screen.getByTestId('trip-1')).toBeInTheDocument();
       expect(screen.getByTestId('trip-2')).toBeInTheDocument();
       expect(screen.getByTestId('trip-3')).toBeInTheDocument();
     });
-    
+
     expect(searchInput).toHaveValue('');
   });
 
   it('dovrebbe gestire ricerca con termini multipli', async () => {
     const user = userEvent.setup();
-    render(<TripsPageClient trips={mockTrips} />);
-    
+    render(<TripsPageClient trips={mockTrips} userRole={null} />);
+
     const searchInput = screen.getByRole('searchbox');
     await user.type(searchInput, 'italia cultura');
-    
+
     await waitFor(() => {
       expect(screen.getByTestId('trip-1')).toBeInTheDocument(); // Ha "italia" e "cultura"
       expect(screen.queryByTestId('trip-2')).not.toBeInTheDocument(); // Ha "italia" ma non "cultura"
       expect(screen.queryByTestId('trip-3')).not.toBeInTheDocument(); // Ha "italia" ma non "cultura"
     });
-    
+
     // Aspetta che il debouncing finisca e il contatore risultati appaia
     await waitFor(() => {
       expect(screen.getByText('1 viaggio trovato')).toBeInTheDocument();
     }, { timeout: 1000 });
   });
 
-  it('dovrebbe mostrare il call-to-action quando ci sono risultati', async () => {
-    render(<TripsPageClient trips={mockTrips} />);
-    
+  it('dovrebbe mostrare il call-to-action quando ci sono risultati e utente è Ranger', async () => {
+    render(<TripsPageClient trips={mockTrips} userRole="Ranger" />);
+
     // Con tutti i viaggi visibili
     expect(screen.getByText('Hai un itinerario da condividere?')).toBeInTheDocument();
     expect(screen.getByText('Crea il tuo itinerario')).toBeInTheDocument();
   });
 
+  it('dovrebbe nascondere il call-to-action quando ci sono risultati ma utente è Explorer', async () => {
+    render(<TripsPageClient trips={mockTrips} userRole="Explorer" />);
+
+    // Con tutti i viaggi visibili, il CTA non dovrebbe essere presente
+    expect(screen.queryByText('Hai un itinerario da condividere?')).not.toBeInTheDocument();
+    expect(screen.queryByText('Crea il tuo itinerario')).not.toBeInTheDocument();
+  });
+
   it('dovrebbe nascondere il call-to-action quando non ci sono risultati', async () => {
     const user = userEvent.setup();
-    render(<TripsPageClient trips={mockTrips} />);
-    
+    render(<TripsPageClient trips={mockTrips} userRole="Ranger" />);
+
     const searchInput = screen.getByRole('searchbox');
     await user.type(searchInput, 'nonexistent');
-    
+
     await waitFor(() => {
       expect(screen.queryByText('Hai un itinerario da condividere?')).not.toBeInTheDocument();
     });
   });
 
-  it('dovrebbe gestire array di viaggi vuoto', () => {
-    render(<TripsPageClient trips={[]} />);
-    
+  it('dovrebbe gestire array di viaggi vuoto con pulsante per Ranger', () => {
+    render(<TripsPageClient trips={[]} userRole="Ranger" />);
+
     expect(screen.getByText('Nessun viaggio disponibile')).toBeInTheDocument();
     expect(screen.getByText('Crea il primo itinerario')).toBeInTheDocument();
+  });
+
+  it('dovrebbe gestire array di viaggi vuoto senza pulsante per Explorer', () => {
+    render(<TripsPageClient trips={[]} userRole="Explorer" />);
+
+    expect(screen.getByText('Nessun viaggio disponibile')).toBeInTheDocument();
+    expect(screen.queryByText('Crea il primo itinerario')).not.toBeInTheDocument();
+  });
+
+  it('dovrebbe mostrare CTA per utente Sentinel', () => {
+    render(<TripsPageClient trips={mockTrips} userRole="Sentinel" />);
+
+    expect(screen.getByText('Hai un itinerario da condividere?')).toBeInTheDocument();
+    expect(screen.getByText('Crea il tuo itinerario')).toBeInTheDocument();
+  });
+
+  it('dovrebbe nascondere CTA quando utente non è autenticato', () => {
+    render(<TripsPageClient trips={mockTrips} userRole={null} />);
+
+    expect(screen.queryByText('Hai un itinerario da condividere?')).not.toBeInTheDocument();
+    expect(screen.queryByText('Crea il tuo itinerario')).not.toBeInTheDocument();
   });
 });

@@ -5,7 +5,8 @@ import { Calendar, MapPin, Tag, User, Clock, Navigation } from 'lucide-react';
 import { castToMediaItems, MediaItem } from '@/types/trip';
 import { SeasonIcon } from '@/components/ui/SeasonIcon';
 import { getTripStatusColor, getTripStatusLabel, shouldShowStatusBadge } from '@/lib/utils/tripStatusUtils';
-import { Prisma } from '@prisma/client';
+import { Prisma, UserRole } from '@prisma/client';
+import { UserPermissions } from '@/types/profile';
 
 // Tipi per i dati del viaggio (copiati dalla pagina originale)
 type TripWithRelations = Prisma.TripGetPayload<{
@@ -35,6 +36,7 @@ type TripWithProcessedData = Omit<TripWithRelations, 'price'> & {
 
 interface TripGridProps {
   trips: TripWithProcessedData[];
+  userRole: UserRole | null;
 }
 
 // Funzioni helper (copiate dalla pagina originale)
@@ -94,7 +96,10 @@ const getCoverImage = (trip: TripWithProcessedData): MediaItem | null => {
  * Componente per visualizzare la griglia dei viaggi
  * Estratto dalla pagina trips per migliorare la riusabilità
  */
-const TripGrid: React.FC<TripGridProps> = React.memo(({ trips }) => {
+const TripGrid: React.FC<TripGridProps> = React.memo(({ trips, userRole }) => {
+  // Determina se l'utente può creare viaggi usando l'helper centralizzato
+  const canCreateTrip = userRole ? UserPermissions.canCreateTrips(userRole) : false;
+
   if (trips.length === 0) {
     return (
       <div className="text-center py-20">
@@ -108,13 +113,15 @@ const TripGrid: React.FC<TripGridProps> = React.memo(({ trips }) => {
               Prova a modificare i criteri di ricerca o esplora tutti i viaggi disponibili.
             </p>
           </div>
-          <Link 
-            href="/create-trip" 
-            className="btn-primary inline-flex items-center gap-2"
-          >
-            <Navigation className="w-5 h-5" />
-            Crea un nuovo itinerario
-          </Link>
+          {canCreateTrip && (
+            <Link
+              href="/create-trip"
+              className="btn-primary inline-flex items-center gap-2"
+            >
+              <Navigation className="w-5 h-5" />
+              Crea un nuovo itinerario
+            </Link>
+          )}
         </div>
       </div>
     );

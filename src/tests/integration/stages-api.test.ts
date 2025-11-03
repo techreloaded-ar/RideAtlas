@@ -211,6 +211,52 @@ describe('Stages API Integration Tests', () => {
         expect(data.error).toBe('Indice di ordinamento già utilizzato. Scegli un valore diverso.')
       })
     })
+
+    describe('Autorizzazione basata su ruolo', () => {
+      it('dovrebbe negare creazione tappa a Explorer', async () => {
+        mockAuth.mockResolvedValue({
+          user: users.explorer,
+          expires: '2024-12-31T23:59:59.999Z',
+        });
+
+        const request = createMockRequest('POST', validStageData)
+        const response = await StagesListPOST(request, TripTestFactory.createMockParams(mockTrip.id))
+        const data = await response.json()
+
+        expect(response.status).toBe(403)
+        expect(data.error).toBe('Non hai i permessi per creare tappe. Solo Ranger e Sentinel possono modificare itinerari.')
+      })
+
+      it('dovrebbe permettere a Ranger proprietario di creare tappa', async () => {
+        mockAuth.mockResolvedValue({
+          user: users.tripOwner, // tripOwner è Ranger
+          expires: '2024-12-31T23:59:59.999Z',
+        });
+        (prisma.trip.findUnique as jest.Mock).mockResolvedValue(mockTrip);
+        mockGetNextOrderIndex.mockResolvedValue(1);
+        mockCreateStage.mockResolvedValue({ ...mockStage, orderIndex: 1 });
+
+        const request = createMockRequest('POST', validStageData)
+        const response = await StagesListPOST(request, TripTestFactory.createMockParams(mockTrip.id))
+
+        expect(response.status).toBe(201)
+      })
+
+      it('dovrebbe permettere a Sentinel di creare tappa su qualsiasi viaggio', async () => {
+        mockAuth.mockResolvedValue({
+          user: users.sentinel,
+          expires: '2024-12-31T23:59:59.999Z',
+        });
+        (prisma.trip.findUnique as jest.Mock).mockResolvedValue(mockTrip);
+        mockGetNextOrderIndex.mockResolvedValue(1);
+        mockCreateStage.mockResolvedValue({ ...mockStage, orderIndex: 1 });
+
+        const request = createMockRequest('POST', validStageData)
+        const response = await StagesListPOST(request, TripTestFactory.createMockParams(mockTrip.id))
+
+        expect(response.status).toBe(201)
+      })
+    })
   })
 
   describe('GET /api/trips/[id]/stages/[stageId] - Dettaglio Tappa', () => {
