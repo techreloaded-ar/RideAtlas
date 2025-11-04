@@ -44,10 +44,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log(`📬 [STRIPE WEBHOOK] Ricevuto evento: ${event.type}, ID: ${event.id}`);
+    
 
     if (isEventProcessed(event.id)) {
-      console.log(`⚠️ [STRIPE WEBHOOK] Evento già processato: ${event.id}`);
+      
       return NextResponse.json({ received: true, status: 'already_processed' });
     }
 
@@ -67,13 +67,13 @@ export async function POST(request: NextRequest) {
         break;
       
       default:
-        console.log(`ℹ️ [STRIPE WEBHOOK] Evento non gestito: ${event.type}`);
+        
         return NextResponse.json({ received: true, status: 'ignored' });
     }
 
     if (result?.success) {
       addProcessedEvent(event.id);
-      console.log(`✅ [STRIPE WEBHOOK] Evento processato con successo: ${event.id}`);
+      
     } else {
       console.error(`❌ [STRIPE WEBHOOK] Errore nel processamento evento ${event.id}:`, result?.error);
     }
@@ -95,7 +95,7 @@ export async function POST(request: NextRequest) {
 
 async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent) {
   try {
-    console.log(`✅ [STRIPE WEBHOOK] Payment Intent successo: ${paymentIntent.id}`);
+    
 
     const { purchaseId } = paymentIntent.metadata;
 
@@ -114,7 +114,7 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
     const latestTransaction = existingPurchase[0];
     
     if (latestTransaction.status === 'COMPLETED') {
-      console.log(`ℹ️ [STRIPE WEBHOOK] Purchase già completato: ${purchaseId}`);
+      
       return { success: true, status: 'already_completed' };
     }
 
@@ -129,7 +129,7 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
       return { success: false, error: completionResult.error };
     }
 
-    console.log(`✅ [STRIPE WEBHOOK] Purchase completato con successo: ${purchaseId}`);
+    
     return { success: true };
 
   } catch (error) {
@@ -140,7 +140,7 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
 
 async function handlePaymentIntentFailed(paymentIntent: Stripe.PaymentIntent) {
   try {
-    console.log(`❌ [STRIPE WEBHOOK] Payment Intent fallito: ${paymentIntent.id}`);
+    
 
     const { purchaseId } = paymentIntent.metadata;
 
@@ -162,7 +162,7 @@ async function handlePaymentIntentFailed(paymentIntent: Stripe.PaymentIntent) {
       return { success: false, error: failureResult.error };
     }
 
-    console.log(`✅ [STRIPE WEBHOOK] Purchase segnato come fallito: ${purchaseId}`);
+    
     return { success: true };
 
   } catch (error) {
@@ -173,7 +173,7 @@ async function handlePaymentIntentFailed(paymentIntent: Stripe.PaymentIntent) {
 
 async function handlePaymentIntentCanceled(paymentIntent: Stripe.PaymentIntent) {
   try {
-    console.log(`🚫 [STRIPE WEBHOOK] Payment Intent cancellato: ${paymentIntent.id}`);
+    
 
     const { purchaseId } = paymentIntent.metadata;
 
@@ -193,7 +193,7 @@ async function handlePaymentIntentCanceled(paymentIntent: Stripe.PaymentIntent) 
       return { success: false, error: failureResult.error };
     }
 
-    console.log(`✅ [STRIPE WEBHOOK] Purchase segnato come cancellato: ${purchaseId}`);
+    
     return { success: true };
 
   } catch (error) {

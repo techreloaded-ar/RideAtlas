@@ -37,7 +37,7 @@ export const useTripSubmission = ({
       const method = getHttpMethod(mode);
       const submitData = transformTripDataForSubmission(data);
 
-      console.log('Frontend - Dati inviati al server:', submitData);
+      
 
       const apiResult = await submitTripToApi(url, method, submitData);
 

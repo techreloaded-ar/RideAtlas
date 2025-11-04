@@ -184,12 +184,6 @@ export async function POST(request: NextRequest) {
       }
     })
 
-    console.log('🔑 Token creato per setup password:', {
-      email,
-      token: verificationToken,
-      expiresAt: tokenExpiry,
-    })
-
     // Invia email con link per setup password
     if (sendWelcomeEmail) {
       const emailResult = await sendVerificationEmail(email, verificationToken, true) // true per setup password

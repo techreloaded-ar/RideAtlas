@@ -95,7 +95,7 @@ export class ZipParser {
 
   async loadZip(zipBuffer: Buffer): Promise<void> {
     try {
-      console.log(`Loading ZIP buffer of size ${zipBuffer.length} bytes`)
+      
       
       if (zipBuffer.length === 0) {
         throw new Error('ZIP buffer è vuoto')
@@ -110,7 +110,7 @@ export class ZipParser {
         createFolders: false
       })
       
-      console.log(`ZIP loaded successfully, contains ${Object.keys(this.zip.files).length} files`)
+      
       
       // Log system files that will be ignored
       const ignoredFiles: string[] = []
@@ -121,7 +121,7 @@ export class ZipParser {
       })
       
       if (ignoredFiles.length > 0) {
-        console.log(`Ignoring ${ignoredFiles.length} system files:`, ignoredFiles)
+        
       }
     } catch (error) {
       console.error('Error loading ZIP file:', error)
@@ -155,21 +155,21 @@ export class ZipParser {
   }
 
   private async parseViaggiJson(): Promise<BatchUpload> {
-    console.log('Parsing viaggi.json from ZIP')
+    
     
     // First try at root level
     let viaggiFile = this.zip.file('viaggi.json')
     
     // If not found, look for it in any subfolder
     if (!viaggiFile) {
-      console.log('viaggi.json not found at root, searching in subfolders')
+      
       const viaggiPath = this.findViaggiJsonPath()
       if (viaggiPath) {
-        console.log(`Found viaggi.json at path: ${viaggiPath}`)
+        
         viaggiFile = this.zip.file(viaggiPath)
         // Set the base path for other files
         this.basePath = viaggiPath.replace('viaggi.json', '')
-        console.log(`Set base path to: ${this.basePath}`)
+        
       }
     }
     
@@ -180,14 +180,14 @@ export class ZipParser {
 
     try {
       const content = await viaggiFile.async('text')
-      console.log(`viaggi.json content length: ${content.length}`)
+      
       
       if (!content || content.trim().length === 0) {
         throw new Error('File viaggi.json è vuoto. Aggiungi i metadati del viaggio nel formato JSON richiesto.')
       }
       
       const parsed = JSON.parse(content)
-      console.log('viaggi.json parsed successfully')
+      
       
       // Validate content after parsing
       this.validateViaggiJsonContent(parsed)

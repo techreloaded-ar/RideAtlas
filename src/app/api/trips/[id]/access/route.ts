@@ -10,11 +10,9 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  console.log(`🔍 [ACCESS API] Richiesta accesso per trip: ${id}`);
   
   // Validazione parametri di base
   if (!id || typeof id !== 'string') {
-    console.log(`❌ [ACCESS API] Parametro ID non valido: ${id}`);
     return NextResponse.json(
       { error: 'ID viaggio non valido' },
       { status: 400 }
@@ -22,11 +20,9 @@ export async function GET(
   }
   
   try {
-    console.log(`🔍 [ACCESS API] Verifico autenticazione...`);
     const session = await auth();
     
     if (!session?.user?.id) {
-      console.log(`❌ [ACCESS API] Utente non autenticato`);
       return NextResponse.json(
         { 
           canAccess: false, 
@@ -37,18 +33,12 @@ export async function GET(
       );
     }
 
-    console.log(`✅ [ACCESS API] Utente autenticato: ${session.user.id}`);
-    console.log(`🔍 [ACCESS API] Recupero informazioni viaggio tramite PurchaseService...`);
-
     const tripInfo = await PurchaseService.getTripWithPurchaseInfo(
       id, 
       session.user.id
     );
 
-    console.log(`🔍 [ACCESS API] TripInfo ricevuto:`, tripInfo);
-
     if (!tripInfo) {
-      console.log(`❌ [ACCESS API] Viaggio non trovato: ${id}`);
       return NextResponse.json(
         { error: 'Viaggio non trovato' },
         { status: 404 }
@@ -57,7 +47,6 @@ export async function GET(
 
     const isSentinel = session.user.role === UserRole.Sentinel;
     const canAccess = tripInfo.isOwner || tripInfo.hasPurchased || isSentinel;
-    console.log(`🔍 [ACCESS API] Controllo accesso - isOwner: ${tripInfo.isOwner}, hasPurchased: ${tripInfo.hasPurchased}, isSentinel: ${isSentinel}, canAccess: ${canAccess}`);
 
     const response = {
       canAccess,
@@ -68,7 +57,6 @@ export async function GET(
       message: canAccess ? null : 'È necessario acquistare questo viaggio per accedere al contenuto premium'
     };
 
-    console.log(`✅ [ACCESS API] Risposta:`, response);
     return NextResponse.json(response);
 
   } catch (error) {

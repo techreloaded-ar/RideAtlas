@@ -52,10 +52,10 @@ export class AWSCloudFrontProvider extends AWSBaseProvider {
       );
     }
 
-    console.log(`AWSCloudFrontProvider: Configurazione CloudFront caricata per dominio '${cloudfrontDomain}'`);
+    
 
     if (this.cloudfrontConfig.customDomain) {
-      console.log(`AWSCloudFrontProvider: Dominio personalizzato configurato: '${this.cloudfrontConfig.customDomain}'`);
+      
     }
   }
   

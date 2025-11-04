@@ -33,17 +33,17 @@ export class StripeService {
     description
   }: CreatePaymentIntentParams): Promise<CreatePaymentIntentResult> {
     try {
-      console.log(`🔄 [STRIPE SERVICE] Creazione Payment Intent - amount: €${amount}, purchaseId: ${purchaseId}`);
+      
 
       const existingPaymentIntent = await this.findExistingPaymentIntent(purchaseId);
 
       if (existingPaymentIntent) {
-        console.log(`♻️ [STRIPE SERVICE] Payment Intent esistente trovato: ${existingPaymentIntent.id}, status: ${existingPaymentIntent.status}`);
+        
 
         // If succeeded, this might be from a previous purchase that was refunded
         // Create a new Payment Intent instead of reusing (allows repurchase after refund)
         if (existingPaymentIntent.status === 'succeeded') {
-          console.log(`⚠️ [STRIPE SERVICE] Payment Intent succeeded trovato - potrebbe essere un acquisto precedente rimborsato. Creazione nuovo Payment Intent.`);
+          
           // Fall through to create new Payment Intent
         } else if (existingPaymentIntent.status === 'requires_payment_method' ||
                    existingPaymentIntent.status === 'requires_confirmation') {
@@ -72,7 +72,7 @@ export class StripeService {
         statement_descriptor_suffix: 'RIDEATLAS',
       });
 
-      console.log(`✅ [STRIPE SERVICE] Payment Intent creato: ${paymentIntent.id}`);
+      
 
       return {
         success: true,
@@ -92,7 +92,7 @@ export class StripeService {
 
   static async confirmPayment(paymentIntentId: string): Promise<ConfirmPaymentResult> {
     try {
-      console.log(`🔄 [STRIPE SERVICE] Conferma Payment Intent: ${paymentIntentId}`);
+      
 
       const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
 
@@ -103,7 +103,7 @@ export class StripeService {
         };
       }
 
-      console.log(`📊 [STRIPE SERVICE] Status Payment Intent: ${paymentIntent.status}`);
+      
 
       if (paymentIntent.status === 'succeeded') {
         return {
@@ -198,7 +198,7 @@ export class StripeService {
         };
       }
 
-      console.log(`✅ [STRIPE SERVICE] Pagamento riuscito per purchaseId: ${purchaseId}`);
+      
 
       return {
         success: true,
@@ -231,7 +231,7 @@ export class StripeService {
 
       const failureReason = paymentIntent.last_payment_error?.message || 'Pagamento fallito';
       
-      console.log(`❌ [STRIPE SERVICE] Pagamento fallito per purchaseId: ${purchaseId}, motivo: ${failureReason}`);
+      console.error(`❌ [STRIPE SERVICE] Pagamento fallito per purchaseId: ${purchaseId}, motivo: ${failureReason}`);
 
       return {
         success: true,

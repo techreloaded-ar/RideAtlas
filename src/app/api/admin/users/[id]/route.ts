@@ -98,7 +98,6 @@ export async function PATCH(
           role,
           session.user.name || 'Amministratore'
         );
-        console.log(`✅ Email di notifica ruolo inviata a ${updatedUser.email}`);
       } catch (emailError) {
         console.error('❌ Errore nell\'invio email di notifica ruolo:', emailError);
         // Non blocchiamo l'operazione anche se l'email fallisce

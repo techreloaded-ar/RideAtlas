@@ -81,7 +81,7 @@ export function useTripReorder(initialTrips: Trip[]): UseTripReorderReturn {
       // Aggiorna il riferimento originale con il nuovo ordine salvato
       originalTripsRef.current = [...reorderedTrips];
       
-      console.log(`Ordinamento salvato con successo: ${data.updatedCount} viaggi aggiornati`);
+      
 
     } catch (err) {
       console.error('Errore durante il salvataggio dell\'ordinamento:', err);

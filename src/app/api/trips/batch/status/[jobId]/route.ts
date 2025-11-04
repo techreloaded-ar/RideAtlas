@@ -9,7 +9,7 @@ export async function GET(
 ) {
   try {
     const params = await context.params
-    console.log(`Richiesta status per job: ${params.jobId}`)
+    
     
     // 1. Authentication check
     const session = await auth()
@@ -53,7 +53,7 @@ export async function GET(
         : Date.now() - jobStatus.startedAt.getTime(),
     }
 
-    console.log(`Status job ${params.jobId}: ${jobStatus.status} (${response.progress.percentage}%)`)
+    
 
     return NextResponse.json(response)
 
@@ -76,7 +76,7 @@ export async function DELETE(
 ) {
   try {
     const params = await context.params
-    console.log(`Richiesta cancellazione job: ${params.jobId}`)
+    
     
     // 1. Authentication check
     const session = await auth()
@@ -113,7 +113,7 @@ export async function DELETE(
     // Note: This is a simplified implementation. In a production system,
     // you'd need proper job cancellation with cleanup of partially created resources
     
-    console.log(`Job ${params.jobId} cancellazione richiesta (implementazione semplificata)`)
+    
 
     return NextResponse.json({ 
       message: "Richiesta di cancellazione ricevuta. Il job verrà fermato al prossimo checkpoint.",

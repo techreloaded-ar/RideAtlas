@@ -19,7 +19,6 @@ export async function GET(request: NextRequest) {
     // Verifica che l'URL sia formalmente valido
     try {
       new URL(blobUrl) // Validazione formale dell'URL
-      console.log(`URL validato: ${blobUrl}`)
     } catch {
       return NextResponse.json(
         { error: 'URL malformato' },
@@ -30,8 +29,6 @@ export async function GET(request: NextRequest) {
     // Scarica il file GPX direttamente con fetch
     let gpxContent: string
     try {
-      console.log(`Recupero del file GPX per preview da: ${blobUrl}`)
-      
       // Fetch del file originale dall'URL con timeout
       const controller = new AbortController()
       const timeoutId = setTimeout(() => controller.abort(), 15000) // 15 secondi timeout

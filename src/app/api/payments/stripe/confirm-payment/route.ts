@@ -25,8 +25,6 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { paymentIntentId, purchaseId } = ConfirmPaymentSchema.parse(body);
 
-    console.log(`🔄 [CONFIRM PAYMENT] Conferma per paymentIntentId: ${paymentIntentId}, purchaseId: ${purchaseId}`);
-
     const confirmResult = await StripeService.confirmPayment(paymentIntentId);
 
     if (!confirmResult.success || !confirmResult.paymentIntent) {
@@ -40,7 +38,7 @@ export async function POST(request: NextRequest) {
     const paymentIntent = confirmResult.paymentIntent;
 
     if (paymentIntent.status !== 'succeeded') {
-      console.log(`⚠️ [CONFIRM PAYMENT] Payment Intent non riuscito, status: ${paymentIntent.status}`);
+      console.warn(`⚠️ [CONFIRM PAYMENT] Payment Intent non riuscito, status: ${paymentIntent.status}`);
       
       if (paymentIntent.status === 'requires_action') {
         return NextResponse.json({
@@ -85,7 +83,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log(`✅ [CONFIRM PAYMENT] Pagamento e acquisto completati con successo`);
 
     return NextResponse.json({
       success: true,

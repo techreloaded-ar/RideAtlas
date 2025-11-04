@@ -15,7 +15,6 @@ export type { TripReorderRequest, TripReorderResponse };
 
 export async function PATCH(request: NextRequest) {
   try {
-    console.log('Inizio elaborazione richiesta PATCH /api/admin/trips/reorder');
     
     // Verifica autenticazione
     const session = await auth();
@@ -38,7 +37,6 @@ export async function PATCH(request: NextRequest) {
 
     // Parsing e validazione del body
     const body = await request.json();
-    console.log('Dati ricevuti:', JSON.stringify(body, null, 2));
     
     const parsed = reorderRequestSchema.safeParse(body);
     if (!parsed.success) {
@@ -99,9 +97,6 @@ export async function PATCH(request: NextRequest) {
       const updatedTrips = await Promise.all(updatePromises);
       return updatedTrips;
     });
-
-    console.log(`Aggiornati ${result.length} viaggi con nuovo ordinamento`);
-    console.log('Viaggi aggiornati:', result.map(trip => `${trip.title} (${trip.id})`));
 
     return NextResponse.json({
       success: true,

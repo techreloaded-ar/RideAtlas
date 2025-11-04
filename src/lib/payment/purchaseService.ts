@@ -162,22 +162,22 @@ export class PurchaseService {
       });
 
       if (activeCompletedPurchase) {
-        console.log(`⚠️ [PURCHASE SERVICE] User ${userId} already has active purchase for trip ${tripId}`);
+        
         return { success: false, error: 'Hai già acquistato questo viaggio' };
       }
 
-      console.log(`💰 [PURCHASE SERVICE] Trip price raw:`, trip.price, `Type: ${typeof trip.price}`);
+      
 
       const tripPrice = typeof trip.price === 'object' && trip.price !== null && 'toNumber' in trip.price
         ? (trip.price as { toNumber: () => number }).toNumber()
         : Number(trip.price);
 
-      console.log(`💰 [PURCHASE SERVICE] Trip price converted: ${tripPrice}`);
+      
 
       const isFreeTrip = tripPrice <= 0;
 
       if (isFreeTrip) {
-        console.log(`🎁 [PURCHASE SERVICE] Free trip detected (price: ${tripPrice}). Auto-completing purchase.`);
+        
 
         const now = new Date();
 
@@ -203,7 +203,7 @@ export class PurchaseService {
           }
         });
 
-        console.log(`✅ [PURCHASE SERVICE] Free trip purchase completed: ${purchase.id}`);
+        
         return { success: true, purchaseId: purchase.id, free: true };
       }
 
@@ -220,13 +220,13 @@ export class PurchaseService {
       });
 
       if (existingPendingPurchase) {
-        console.log(`♻️ [PURCHASE SERVICE] Reusing existing PENDING purchase ${existingPendingPurchase.id}`);
+        
         return { success: true, purchaseId: existingPendingPurchase.id };
       }
 
       // For REFUNDED or FAILED: always create a new purchase
       // This allows users to repurchase after refunds and keeps full history
-      console.log(`➕ [PURCHASE SERVICE] Creating new purchase for user ${userId}, trip ${tripId}`);
+      
       const purchase = await prisma.tripPurchase.create({
         data: {
           userId,
@@ -335,10 +335,10 @@ export class PurchaseService {
   }
 
   static async getTripWithPurchaseInfo(tripId: string, userId?: string): Promise<TripWithPurchaseInfo | null> {
-    console.log(`🔍 [PURCHASE SERVICE] getTripWithPurchaseInfo - tripId: ${tripId}, userId: ${userId}`);
+    
     
     try {
-      console.log(`🔍 [PURCHASE SERVICE] Recupero trip dal database...`);
+      
       const trip = await prisma.trip.findUnique({
         where: { id: tripId },
         select: {
@@ -349,21 +349,21 @@ export class PurchaseService {
         }
       });
 
-      console.log(`🔍 [PURCHASE SERVICE] Trip trovato:`, trip);
+      
 
       if (!trip) {
-        console.log(`❌ [PURCHASE SERVICE] Trip non trovato per ID: ${tripId}`);
+        
         return null;
       }
 
       const isOwner = userId ? trip.user_id === userId : false;
-      console.log(`🔍 [PURCHASE SERVICE] isOwner check - userId: ${userId}, trip.user_id: ${trip.user_id}, isOwner: ${isOwner}`);
+      
       
       let hasPurchased = false;
       let purchase = undefined;
 
       if (userId && !isOwner) {
-        console.log(`🔍 [PURCHASE SERVICE] Utente non proprietario, verifico acquisti...`);
+        
         // Get most recent purchase (allows multiple purchases after refunds)
         const userPurchase = await prisma.tripPurchase.findFirst({
           where: {
@@ -375,7 +375,7 @@ export class PurchaseService {
           }
         });
 
-        console.log(`🔍 [PURCHASE SERVICE] User purchase trovato:`, userPurchase);
+        
 
         // User has purchased only if the most recent purchase is COMPLETED
         hasPurchased = userPurchase?.status === PurchaseStatus.COMPLETED;
@@ -401,7 +401,7 @@ export class PurchaseService {
         purchase
       };
 
-      console.log(`✅ [PURCHASE SERVICE] Risultato finale:`, result);
+      
       return result;
 
     } catch (error) {

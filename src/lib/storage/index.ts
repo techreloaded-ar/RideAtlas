@@ -33,7 +33,7 @@ export class StorageFactory {
           throw new Error(`Provider storage non supportato: ${config.provider}`);
       }
       
-      console.log(`StorageFactory: Inizializzato provider '${config.provider}'`);
+      
     }
     
     return this.instance;

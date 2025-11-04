@@ -9,7 +9,6 @@ const MAX_FILE_SIZE = 100 * 1024 * 1024 // 100MB
 
 export async function POST(request: NextRequest) {
   try {
-    console.log('Elaborazione richiesta POST /api/trips/batch')
     
     // 1. Authentication check
     const session = await auth()
@@ -29,7 +28,7 @@ export async function POST(request: NextRequest) {
 
     // 3. Ensure user exists in database
     const user = await ensureUserExists(session)
-    console.log(`User ensured in database: ${user.id} - ${user.name}`)
+    
 
     // 4. Parse multipart form data
     const formData = await request.formData()
@@ -56,12 +55,12 @@ export async function POST(request: NextRequest) {
     }
 
     // 7. Convert file to buffer
-    console.log(`Converting file to buffer, file size: ${zipFile.size}`)
+    
     let zipBuffer: Buffer
     try {
       const arrayBuffer = await zipFile.arrayBuffer()
       zipBuffer = Buffer.from(arrayBuffer)
-      console.log(`Buffer created successfully, buffer size: ${zipBuffer.length}`)
+      
       
       if (zipBuffer.length !== zipFile.size) {
         console.warn(`Buffer size mismatch: expected ${zipFile.size}, got ${zipBuffer.length}`)
@@ -74,7 +73,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 8. Start batch processing job
-    console.log(`Starting batch processing job for user ${user.id}`)
+    
     const processor = new BatchProcessor()
     let jobId: string
     try {
@@ -88,7 +87,7 @@ export async function POST(request: NextRequest) {
       }, { status: 500 })
     }
 
-    console.log(`Batch job avviato: ${jobId} per utente ${user.id}`)
+    
 
     // 9. Return job ID for status tracking
     return NextResponse.json({

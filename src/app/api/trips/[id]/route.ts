@@ -193,7 +193,6 @@ export async function PUT(
 
     const tripId = (await params).id
     const body = await request.json()
-    console.log('Backend - Dati ricevuti:', body);
 
     // Validazione dei dati
     const parsed = tripUpdateSchema.safeParse(body)

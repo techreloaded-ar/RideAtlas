@@ -128,8 +128,8 @@ async function sendTemplatedEmail(
   
   if (!transporter) {
     console.error(`⚠️  Configurazione email non completa. ${logContext} non inviata.`);
-    console.log(`📧 ${logContext} simulata per:`, to);
-    console.log('🔗 Link:', templateData.buttonUrl);
+    
+    
     
     // In sviluppo, simula l'invio riuscito
     if (process.env.NODE_ENV === 'development') {
@@ -148,10 +148,10 @@ async function sendTemplatedEmail(
   };
 
   try {
-    console.log(`📧 Tentativo di invio ${logContext.toLowerCase()} a:`, to);
+    
     
     await transporter.sendMail(mailOptions);
-    console.log(`✅ ${logContext} inviata con successo a:`, to);
+    
     return { success: true };
   } catch (error: unknown) {
     console.error(`❌ Errore invio ${logContext.toLowerCase()}:`, error);
@@ -258,9 +258,9 @@ export async function sendContactEmail(
 
   if (!transporter) {
     console.error('⚠️  Configurazione email non completa. Email di contatto non inviata.');
-    console.log('📧 Email di contatto simulata da:', senderEmail);
-    console.log('👤 Nome:', nome);
-    console.log('💬 Messaggio:', messaggio);
+    
+    
+    
 
     // In sviluppo, simula l'invio riuscito
     if (process.env.NODE_ENV === 'development') {
@@ -328,10 +328,10 @@ Ricevuto il ${new Date().toLocaleString('it-IT')}
   };
 
   try {
-    console.log('📧 Tentativo di invio email di contatto a info@rideatlas.it da:', senderEmail);
+    
 
     await transporter.sendMail(mailOptions);
-    console.log('✅ Email di contatto inviata con successo');
+    
     return { success: true };
   } catch (error: unknown) {
     console.error('❌ Errore invio email di contatto:', error);

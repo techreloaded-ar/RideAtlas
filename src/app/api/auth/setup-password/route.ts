@@ -117,7 +117,6 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const token = searchParams.get('token');
 
-    console.log('🔍 Verifica token setup password:', token);
 
     if (!token) {
       return NextResponse.json(
@@ -130,12 +129,6 @@ export async function GET(request: NextRequest) {
     const verificationToken = await prisma.emailVerificationToken.findUnique({
       where: { token }
     });
-
-    console.log('🔑 Token trovato nel database:', verificationToken ? 'SI' : 'NO');
-    if (verificationToken) {
-      console.log('📅 Token scadenza:', verificationToken.expiresAt);
-      console.log('🕐 Data corrente:', new Date());
-    }
 
     if (!verificationToken) {
       return NextResponse.json(

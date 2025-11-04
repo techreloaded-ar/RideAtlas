@@ -487,10 +487,10 @@ export function extractKeyPoints(tracks: GPXTrack[], routes: GPXRoute[], interva
   tracks.forEach(track => allPoints.push(...track.points))
   routes.forEach(route => allPoints.push(...route.points))
 
-  console.log(`extractKeyPoints: Found ${allPoints.length} total points from ${tracks.length} tracks and ${routes.length} routes`)
+  
 
   if (allPoints.length === 0) {
-    console.log('extractKeyPoints: No points found, returning empty array')
+    
     return []
   }
 
@@ -568,7 +568,7 @@ export function extractKeyPoints(tracks: GPXTrack[], routes: GPXRoute[], interva
     })
   }
 
-  console.log(`extractKeyPoints: Generated ${keyPoints.length} key points, total distance: ${(cumulativeDistance / 1000).toFixed(2)}km`)
+  
   return keyPoints
 }
 

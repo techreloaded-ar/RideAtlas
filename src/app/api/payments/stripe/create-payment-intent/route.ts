@@ -26,7 +26,6 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { purchaseId, description } = CreatePaymentIntentSchema.parse(body);
 
-    console.log(`🔄 [CREATE PAYMENT INTENT] Richiesta per purchaseId: ${purchaseId}, userId: ${session.user.id}`);
 
     const tripInfo = await PurchaseService.getPurchaseTransactions(purchaseId);
     
@@ -98,7 +97,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log(`✅ [CREATE PAYMENT INTENT] Payment Intent creato: ${result.paymentIntent?.id}`);
 
     return NextResponse.json({
       success: true,

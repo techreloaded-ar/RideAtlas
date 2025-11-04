@@ -62,7 +62,7 @@ export abstract class AWSBaseProvider implements IFileStorageProvider {
       );
     }
     
-    console.log(`AWSBaseProvider: Configurazione caricata per bucket '${bucket}' in regione '${region}'`);
+    
   }
   
   /**
@@ -82,7 +82,7 @@ export abstract class AWSBaseProvider implements IFileStorageProvider {
     if (this.config.endpoint) {
       clientConfig.endpoint = this.config.endpoint;
       clientConfig.forcePathStyle = true; // Necessario per alcuni servizi S3-compatible
-      console.log(`AWSBaseProvider: Usando endpoint personalizzato: ${this.config.endpoint}`);
+      
     }
     
     return new S3Client(clientConfig);
@@ -99,7 +99,7 @@ export abstract class AWSBaseProvider implements IFileStorageProvider {
     try {
       // Verifica che il bucket sia accessibile
       await this.s3Client.send(new HeadBucketCommand({ Bucket: this.config.bucket }));
-      console.log(`AWSBaseProvider: Connessione al bucket '${this.config.bucket}' verificata`);
+      
       this.bucketInitialized = true;
     } catch (error) {
       console.error(`AWSBaseProvider: Errore verifica bucket '${this.config.bucket}':`, error);
@@ -143,7 +143,7 @@ export abstract class AWSBaseProvider implements IFileStorageProvider {
       await this.s3Client.send(putCommand);
       
       const url = this.generatePublicUrl(key);
-      console.log(`File caricato su AWS: ${url}`);
+      
       
       return {
         url,
@@ -169,7 +169,7 @@ export abstract class AWSBaseProvider implements IFileStorageProvider {
       });
       
       await this.s3Client.send(deleteCommand);
-      console.log(`File eliminato da AWS S3: ${publicId}`);
+      
     } catch (error) {
       console.error('Errore eliminazione file AWS S3:', error);
       throw new Error('Errore durante l\'eliminazione del file da AWS S3');
@@ -190,12 +190,12 @@ export abstract class AWSBaseProvider implements IFileStorageProvider {
       const listResponse = await this.s3Client.send(listCommand);
       
       if (!listResponse.Contents || listResponse.Contents.length === 0) {
-        console.log(`Directory AWS S3 già vuota o non esistente: ${directoryPath}`);
+        
         return;
       }
       
       // Elimina tutti gli oggetti trovati
-      console.log(`Eliminazione directory AWS S3: ${directoryPath} (${listResponse.Contents.length} oggetti)`);
+      
       
       const deletePromises = listResponse.Contents.map(async (object) => {
         if (object.Key) {
@@ -204,11 +204,11 @@ export abstract class AWSBaseProvider implements IFileStorageProvider {
       });
       
       await Promise.all(deletePromises);
-      console.log(`Directory completamente eliminata da AWS S3: ${directoryPath}`);
+      
       
       // Gestione per directory con più di 1000 oggetti (paginazione S3)
       if (listResponse.IsTruncated) {
-        console.log(`Directory aveva più di 1000 oggetti, continuando eliminazione...`);
+        
         await this.deleteDirectory(directoryPath);
       }
       
@@ -231,7 +231,7 @@ export abstract class AWSBaseProvider implements IFileStorageProvider {
    */
   async validateFile(file: File): Promise<boolean> {
     // Validazioni tecniche specifiche per AWS S3
-    console.log(`Validazione file AWS: ${file.name}, dimensione: ${file.size} bytes`);
+    
     
     // S3 ha un limite di 5TB per file singolo, ma per ora non implementiamo multipart
     const maxSingleUploadSize = 5 * 1024 * 1024 * 1024; // 5GB (limite pratico per singolo upload)

@@ -52,7 +52,7 @@ export default function PurchasePageClient({ trip }: PurchasePageClientProps) {
       }
 
       const data = await response.json();
-      console.log('✅ [PURCHASE PAGE] Server response:', data);
+      
       setPurchaseId(data.purchaseId);
 
       if (data.free) {

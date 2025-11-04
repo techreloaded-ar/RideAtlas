@@ -130,24 +130,6 @@ describe('useToast Hook', () => {
     expect(document.querySelectorAll('div[class*="bg-blue-500"]').length).toBe(1);
   });
 
-  it('should log toast messages to console', () => {
-    const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
-    const { result } = renderHook(() => useToast(), {
-      container: globalContainer
-    });
-
-    act(() => {
-      result.current.showSuccess('Test success');
-    });
-    expect(consoleSpy).toHaveBeenCalledWith('Toast success: Test success');
-
-    act(() => {
-      result.current.showError('Test error');
-    });
-    expect(consoleSpy).toHaveBeenCalledWith('Toast error: Test error');
-
-    consoleSpy.mockRestore();
-  });
 
   it('should handle toast auto-removal with timeouts', async () => {
     // Mock timers to control timeout execution

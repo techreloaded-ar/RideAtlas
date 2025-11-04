@@ -4,7 +4,7 @@ import JSZip from 'jszip'
 
 export async function GET() {
   try {
-    console.log('Generating batch upload template ZIP')
+    
     
     const zip = new JSZip()
     
@@ -202,7 +202,7 @@ Buon viaggio! 🚗🏔️`
       compressionOptions: { level: 6 }
     })
     
-    console.log(`Template ZIP generated successfully, size: ${zipBuffer.length} bytes`)
+    
     
     // Return ZIP as download
     return new Response(zipBuffer, {

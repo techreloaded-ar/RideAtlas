@@ -111,11 +111,7 @@ export async function parseApiErrorResponse(response: Response): Promise<string>
  */
 export async function fetchTripAccessFromApi(tripId: string): Promise<ApiResponse<TripAccessInfo>> {
   try {
-    console.log(`🔍 [TripAccess] Fetching access info for trip: ${tripId}`);
     const response = await fetch(`/api/trips/${tripId}/access`);
-    
-    console.log(`🔍 [TripAccess] Response status: ${response.status}`);
-    console.log(`🔍 [TripAccess] Response content-type: ${response.headers.get('content-type')}`);
     
     // Check if response is JSON
     if (!isJsonResponse(response)) {
@@ -125,7 +121,6 @@ export async function fetchTripAccessFromApi(tripId: string): Promise<ApiRespons
     
     // Handle 401 specially - return default access info
     if (response.status === 401) {
-      console.log(`🔍 [TripAccess] Utente non autenticato`);
       return { 
         success: true, 
         data: createUnauthenticatedAccessInfo() 
@@ -138,7 +133,6 @@ export async function fetchTripAccessFromApi(tripId: string): Promise<ApiRespons
     }
 
     const data = await response.json();
-    console.log(`✅ [TripAccess] Dati ricevuti:`, data);
     
     // Validate received data
     if (!validateTripAccessData(data)) {

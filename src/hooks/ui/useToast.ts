@@ -9,7 +9,7 @@ export function useToast() {
   const showToast = useCallback((message: string, type: 'success' | 'error' | 'warning' | 'info') => {
     // Per ora, usiamo un semplice alert
     // In futuro, questo sarà collegato al ToastProvider
-    console.log(`Toast ${type}: ${message}`)
+    
     
     // Mostra un alert temporaneo
     // const alertType = type === 'error' ? 'Error' : type === 'success' ? 'Success' : 'Info'

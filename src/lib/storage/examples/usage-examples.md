@@ -117,7 +117,7 @@ export async function deleteFile(publicId: string) {
   try {
     const storageProvider = getStorageProvider();
     await storageProvider.deleteFile(publicId);
-    console.log('File eliminato con successo');
+    
   } catch (error) {
     console.error('Errore eliminazione:', error.message);
   }
@@ -137,7 +137,7 @@ export function switchStorageProvider() {
   
   // Il prossimo getStorageProvider() creerà il nuovo provider
   const newProvider = getStorageProvider();
-  console.log('Provider cambiato con successo');
+  
 }
 ```
 
@@ -170,7 +170,7 @@ export async function migrateFiles(filesList: Array<{publicId: string, originalN
       const result = await targetProvider.uploadFile(file, fileInfo.originalName);
       
       // 3. Aggiorna database con nuovo URL
-      console.log(`Migrato: ${fileInfo.publicId} -> ${result.publicId}`);
+      
       
     } catch (error) {
       console.error(`Errore migrazione ${fileInfo.publicId}:`, error);

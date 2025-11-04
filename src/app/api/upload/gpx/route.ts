@@ -15,7 +15,7 @@ async function uploadFileToStorage(file: File, folder: string, userId: string): 
       addRandomSuffix: false,
     })
     
-    console.log(`File GPX caricato: ${uploadResult.url}`)
+    
     
     return {
       url: uploadResult.url,
@@ -37,7 +37,7 @@ async function uploadFileToStorageWithTripId(file: File, tripId: string): Promis
       addRandomSuffix: false,
     })
     
-    console.log(`File GPX caricato con tripId: ${uploadResult.url}`)
+    
     
     return {
       url: uploadResult.url,
@@ -81,7 +81,7 @@ async function uploadFileToStorageWithTripStructure(
     
     const uploadResult = await storageProvider.uploadFile(file, file.name, uploadOptions)
     
-    console.log(`File GPX caricato con struttura organizzata: ${uploadResult.url}`)
+    
     
     return {
       url: uploadResult.url,
@@ -137,16 +137,10 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       )
     }
-    console.log(`Inizio upload GPX per utente: ${session.user.id}, file: ${file.name}`)
+    
 
     // Estrai metadati completi
     const metadata = await parseGpxMetadata(file)
-    console.log(`Metadati GPX estratti: ${JSON.stringify({
-      filename: metadata.filename,
-      distance: metadata.distance,
-      waypoints: metadata.waypoints,
-      elevationGain: metadata.elevationGain
-    })}`)
 
     // Upload del file allo storage con nuova struttura organizzata
     let uploadResult;
@@ -160,18 +154,18 @@ export async function POST(request: NextRequest) {
       // Legacy per upload standalone
       uploadResult = await uploadFileToStorage(file, 'gpx', session.user.id)
     }
-    console.log(`Upload completato: ${uploadResult.url}`)
+    
 
     // Parse GPX content per estrarre punti chiave
     const gpxContent = await file.text()
     const gpxParseResult = parseGPXContent(gpxContent, file.name)
 
-    console.log(`GPX parsing result: tracks=${gpxParseResult.tracks.length}, routes=${gpxParseResult.routes.length}`)
+    
 
     // Estrai punti chiave ogni 30km
     const keyPoints = extractKeyPoints(gpxParseResult.tracks, gpxParseResult.routes, 30)
-    console.log(`Punti chiave estratti: ${keyPoints.length} punti`)
-    console.log('Key points:', keyPoints)
+    
+    
 
     // Crea l'oggetto GpxFile completo con punti chiave
     const baseGpxFile = createGpxFileFromMetadata(metadata, uploadResult.url, true)

@@ -19,8 +19,8 @@ export class BatchProcessor {
   private storageProvider = getStorageProvider()
 
   async startBatchJob(userId: string, zipBuffer: Buffer): Promise<string> {
-    console.log(`Starting batch job for user ${userId}, buffer size: ${zipBuffer.length}`)
-    console.log(`Environment: ${process.env.NODE_ENV}, Runtime: ${process.env.VERCEL ? 'Vercel' : 'Local'}`)
+    
+    
     
     try {
       // 1. Create job record in database (no ZIP upload to storage)
@@ -33,7 +33,7 @@ export class BatchProcessor {
           createdTripIds: [],
         },
       });
-      console.log(`Batch job created: ${job.id}`)
+      
 
       // 2. Start processing asynchronously (fire and forget)
       // Pass zipBuffer directly to avoid unnecessary storage roundtrip
@@ -73,11 +73,11 @@ export class BatchProcessor {
     if (!job) return null
 
     // Debug logging for errors field
-    console.log(`Job ${jobId} raw errors from DB:`, job.errors)
-    console.log(`Job ${jobId} errors type:`, typeof job.errors)
+    
+    
     
     const parsedErrors = this.parseJobErrors(job.errors)
-    console.log(`Job ${jobId} parsed errors:`, parsedErrors)
+    
 
     // Adapt the Prisma model to the BatchProcessingResult schema
     return {
@@ -171,7 +171,7 @@ export class BatchProcessor {
   }
 
   private async processJobAsync(jobId: string, zipBuffer: Buffer): Promise<void> {
-    console.log(`Starting processJobAsync for job ${jobId}`)
+    
     
     try {
       // 1. Set job to PROCESSING
@@ -179,10 +179,10 @@ export class BatchProcessor {
         where: { id: jobId },
         data: { status: BatchJobStatus.PROCESSING },
       })
-      console.log(`Job ${jobId} status updated to PROCESSING`)
+      
 
       // 2. Process ZIP content directly (no download needed)
-      console.log(`Processing ZIP buffer directly, size: ${zipBuffer.length} bytes`)
+      
       await this.processZipContent(jobId, zipBuffer)
       
     } catch (error) {
@@ -195,11 +195,11 @@ export class BatchProcessor {
 
     try {
       // 3. Parse ZIP and update total trips
-      console.log(`Parsing ZIP content for job ${jobId}`)
+      
       const parser = new ZipParser()
       
       await parser.loadZip(zipBuffer)
-      console.log(`ZIP loaded successfully`)
+      
       
       const validationErrors = parser.validateZipStructure()
       if (validationErrors.length > 0) {
@@ -208,16 +208,16 @@ export class BatchProcessor {
         const detailedErrors = validationErrors.map((error, index) => `${index + 1}. ${error}`).join('\n')
         throw new Error(`Struttura ZIP non valida:\n${detailedErrors}`)
       }
-      console.log(`ZIP structure validation passed`)
+      
       
       const parsedData = await parser.parse()
-      console.log(`ZIP parsed successfully, found ${parsedData.trips.length} trips`)
+      
 
       await prisma.batchJob.update({
         where: { id: jobId },
         data: { totalTrips: parsedData.trips.length },
       })
-      console.log(`Job ${jobId} total trips updated to ${parsedData.trips.length}`)
+      
 
       // 4. Process each trip
       const job = await prisma.batchJob.findUnique({ where: { id: jobId } })
@@ -225,11 +225,11 @@ export class BatchProcessor {
       
       for (let i = 0; i < parsedData.trips.length; i++) {
         const tripData = parsedData.trips[i]
-        console.log(`Processing trip ${i + 1}/${parsedData.trips.length}: ${tripData.title}`)
+        
         
         try {
           const createdTripId = await this.processSingleTrip(job.userId, tripData, i)
-          console.log(`Trip ${i + 1} processed successfully, created trip ID: ${createdTripId}`)
+          
           
           await prisma.batchJob.update({
             where: { id: jobId },
@@ -264,7 +264,7 @@ export class BatchProcessor {
       const finalJobState = await prisma.batchJob.findUnique({ where: { id: jobId } })
       const finalStatus = (finalJobState?.createdTripIds.length ?? 0) > 0 ? BatchJobStatus.COMPLETED : BatchJobStatus.FAILED
       
-      console.log(`Finalizing job ${jobId} with status ${finalStatus}, processed ${finalJobState?.processedTrips ?? 0} trips`)
+      
 
       await prisma.batchJob.update({
         where: { id: jobId },
@@ -274,7 +274,7 @@ export class BatchProcessor {
         },
       })
       
-      console.log(`Job ${jobId} completed successfully`)
+      
     } catch (error) {
       console.error(`Error processing ZIP content for job ${jobId}:`, error)
       throw error // Re-throw to be handled by processJobAsync
@@ -306,14 +306,14 @@ export class BatchProcessor {
   
 
   private async processSingleTrip(userId: string, tripData: ParsedTrip, tripIndex: number): Promise<string> {
-    console.log(`Processing single trip ${tripIndex}: ${tripData.title}`)
-    console.log(`Trip has ${tripData.media.length} media files and ${tripData.stages.length} stages`)
+    
+    
     
     try {
       // 1. Prima creiamo il trip nel database per ottenere il vero ID
-      console.log(`Creating trip in database: ${tripData.title}`)
+      
       const slug = this.slugify(tripData.title)
-      console.log(`Generated slug: ${slug}`)
+      
       
       let newTrip
       try {
@@ -348,24 +348,21 @@ export class BatchProcessor {
         // Re-throw other errors
         throw error
       }
-      console.log(`Trip created with ID: ${newTrip.id}`)
+      
       
       // 2. Ora possiamo usare il vero tripId per organizzare i file
       const realTripId = newTrip.id
       
       // 3. Process trip-level media files con vero tripId e nome trip
-      console.log(`Processing ${tripData.media.length} trip media files with real tripId`)
+      
       const tripMedia = await this.processMediaFiles(tripData.media, realTripId, tripData.title)
-      console.log(`Successfully processed ${tripMedia.length} trip media files`)
+      
       
       // 4. Process trip-level GPX file con vero tripId e nome trip
       const tripGpxFile = tripData.gpxFile ? await this.processGpxFile(tripData.gpxFile, realTripId, tripData.title) : null
-      if (tripGpxFile) {
-        console.log(`Successfully processed trip GPX file: ${tripGpxFile.filename}`)
-      }
 
       // 5. Process stages con vero tripId e nome trip
-      console.log(`Processing ${tripData.stages.length} stages`)
+      
       const processedStages: Array<{
         stageData: ParsedTrip['stages'][0];
         media: MediaItem[];
@@ -375,14 +372,14 @@ export class BatchProcessor {
       for (let stageIndex = 0; stageIndex < tripData.stages.length; stageIndex++) {
         const stageData = tripData.stages[stageIndex]
         const formattedStageIndex = this.formatStageIndex(stageIndex + 1) // 01, 02, 03, etc.
-        console.log(`Processing stage ${formattedStageIndex}: ${stageData.title} (${stageData.media.length} media files)`)
+        
         
         try {
           // Usa la nuova struttura con stageIndex formattato (01, 02, etc.) e stageName
           const stageMedia = await this.processStageMediaFiles(stageData.media, realTripId, tripData.title, formattedStageIndex, stageData.title)
           const stageGpxFile = stageData.gpxFile ? await this.processStageGpxFile(stageData.gpxFile, realTripId, tripData.title, formattedStageIndex, stageData.title) : null
           processedStages.push({ stageData, media: stageMedia, gpxFile: stageGpxFile })
-          console.log(`Stage ${formattedStageIndex} processed successfully`)
+          
         } catch (stageError) {
           console.error(`Error processing stage ${formattedStageIndex}:`, stageError)
           // Continue processing other stages, but log the error
@@ -400,7 +397,7 @@ export class BatchProcessor {
             gpxFile: tripGpxFile as unknown as Prisma.JsonObject,
           },
         })
-        console.log(`Trip ${realTripId} updated with processed files`)
+        
 
         // Crea stages
         for (const { stageData, media, gpxFile } of processedStages) {
@@ -417,14 +414,14 @@ export class BatchProcessor {
                 gpxFile: gpxFile as unknown as Prisma.JsonObject,
               },
             })
-            console.log(`Stage created: ${stageData.title}`)
+            
           } catch (stageError) {
             console.error(`Error creating stage ${stageData.title}:`, stageError)
             throw stageError // This will rollback the transaction
           }
         }
         
-        console.log(`Trip ${realTripId} and all stages created successfully`)
+        
         return realTripId
       }, {
         timeout: 60000, // 60 second timeout for the transaction
@@ -444,7 +441,7 @@ export class BatchProcessor {
       const gpxContent = gpxFile.buffer.toString('utf-8')
       const parseResult = parseGPXCore(gpxContent, gpxFile.filename)
       gpxMetadata = parseResult.metadata
-      console.log(`GPX metadata calculated for ${gpxFile.filename}: distance=${gpxMetadata.distance}m, waypoints=${gpxMetadata.waypoints}`)
+      
     } catch (parseError) {
       console.warn(`Failed to parse GPX metadata for ${gpxFile.filename}:`, parseError)
       // Fallback to default values if parsing fails
@@ -498,7 +495,7 @@ export class BatchProcessor {
       
       // Update with actual URL and log
       const result = { ...gpxFileWithMetadata, url: uploadResult.url }
-      console.log(`Trip GPX processed: ${gpxFile.filename} - ${result.distance}m, ${result.waypoints} waypoints`)
+      
       
       return result
     } catch (error) {
@@ -550,7 +547,7 @@ export class BatchProcessor {
       
       // Update with actual URL and log
       const result = { ...gpxFileWithMetadata, url: uploadResult.url }
-      console.log(`Stage GPX processed: ${gpxFile.filename} - ${result.distance}m, ${result.waypoints} waypoints`)
+      
       
       return result
     } catch (error) {

@@ -20,7 +20,7 @@ export class VercelBlobProvider implements IFileStorageProvider {
     // Vercel Blob non richiede configurazioni esplicite
     // Le credenziali sono gestite automaticamente dal runtime Vercel
     // Eventualmente si potrebbe validare BLOB_READ_WRITE_TOKEN se necessario
-    console.log('VercelBlobProvider: Configurazione automatica Vercel attiva');
+    
   }
   
   /**
@@ -40,7 +40,7 @@ export class VercelBlobProvider implements IFileStorageProvider {
         allowOverwrite: true, // Consente di sovrascrivere file esistenti
       });
       
-      console.log(`File caricato su Vercel Blob: ${blob.url}`);
+      
       
       return {
         url: blob.url,
@@ -61,7 +61,7 @@ export class VercelBlobProvider implements IFileStorageProvider {
   async deleteFile(publicId: string): Promise<void> {
     try {
       await del(publicId);
-      console.log(`File eliminato da Vercel Blob: ${publicId}`);
+      
     } catch (error) {
       console.error('Errore eliminazione file Vercel Blob:', error);
       throw new Error('Errore durante l\'eliminazione del file da Vercel Storage');
@@ -72,7 +72,7 @@ export class VercelBlobProvider implements IFileStorageProvider {
    * Elimina una directory e tutto il suo contenuto da Vercel Blob Storage
    */
   async deleteDirectory(directoryPath: string): Promise<void> {
-    console.log(`🗂️ Vercel Blob: Iniziando eliminazione directory: ${directoryPath}`);
+    
     
     // Prima controlla se il token è configurato
     if (!process.env.BLOB_READ_WRITE_TOKEN) {
@@ -90,28 +90,21 @@ export class VercelBlobProvider implements IFileStorageProvider {
         // Prova senza trailing slash se presente
         const pathWithoutSlash = directoryPath.endsWith('/') ? directoryPath.slice(0, -1) : directoryPath;
         if (pathWithoutSlash !== directoryPath) {
-          console.log(`🔍 Vercel Blob: Tentativo senza trailing slash: ${pathWithoutSlash}`);
+          
           blobs = await this.listBlobsWithPrefix(pathWithoutSlash);
         }
       }
       
       if (blobs.length === 0) {
-        console.log(`❌ Directory Vercel Blob non trovata: ${directoryPath}`);
         throw new Error(`Directory non trovata in Vercel Blob: ${directoryPath}`);
       }
       
-      // Elimina tutti i blob trovati
-      console.log(`🗑️ Eliminazione directory Vercel Blob: ${directoryPath} (${blobs.length} file trovati)`);
       
-      // Mostra tutti i file che verranno eliminati per debug
-      blobs.forEach(blob => {
-        console.log(`  - ${blob.pathname} (${blob.url})`);
-      });
       
       const deletePromises = blobs.map(async (blob) => {
         try {
           await del(blob.url);
-          console.log(`✅ File eliminato: ${blob.pathname}`);
+          
           return { success: true, pathname: blob.pathname };
         } catch (deleteError) {
           console.error(`❌ Errore eliminazione file ${blob.pathname}:`, deleteError);
@@ -120,16 +113,13 @@ export class VercelBlobProvider implements IFileStorageProvider {
       });
       
       const results = await Promise.all(deletePromises);
-      const successful = results.filter(r => r.success).length;
       const failed = results.filter(r => !r.success).length;
       
-      console.log(`📊 Eliminazione completata: ${successful} successi, ${failed} fallimenti`);
+      
       
       if (failed > 0) {
         const failedFiles = results.filter(r => !r.success).map(r => r.pathname);
         console.warn(`⚠️ File non eliminati: ${failedFiles.join(', ')}`);
-      } else {
-        console.log(`✅ Directory completamente eliminata da Vercel Blob: ${directoryPath}`);
       }
       
     } catch (error) {
@@ -150,37 +140,28 @@ export class VercelBlobProvider implements IFileStorageProvider {
   private async listBlobsWithPrefix(prefix: string): Promise<Array<{ url: string; pathname: string }>> {
     try {
       const prefixWithSlash = prefix.endsWith('/') ? prefix : prefix + '/';
-      console.log(`🔍 Listing blobs con prefix: "${prefixWithSlash}"`);
+      
       
       const listResponse = await list({
         prefix: prefixWithSlash,
       });
       
-      console.log(`📋 Vercel list() ha trovato ${listResponse.blobs?.length || 0} blob(s)`);
       
-      if (listResponse.blobs && listResponse.blobs.length > 0) {
-        // Debug: mostra i primi blob trovati (limitato per performance)
-        const blobsToShow = listResponse.blobs.slice(0, 5);
-        blobsToShow.forEach((blob, index) => {
-          console.log(`  ${index + 1}. ${blob.pathname} -> ${blob.url}`);
-        });
-        if (listResponse.blobs.length > 5) {
-          console.log(`  ... e altri ${listResponse.blobs.length - 5} file`);
-        }
-      } else {
+      
+      if (!listResponse.blobs || listResponse.blobs.length === 0) {
         // Se non ha trovato nulla, fai un test generico solo per debug (limitato)
-        console.log(`🔍 Test generico: cerco primi blob con prefix "trips/" per debug`);
+        console.debug(`🔍 Test generico: cerco primi blob con prefix "trips/" per debug`);
         try {
           const genericTest = await list({ prefix: 'trips/', limit: 5 });
-          console.log(`📋 Test generico trovato ${genericTest.blobs?.length || 0} blob(s) (primi 5)`);
+          console.debug(`📋 Test generico trovato ${genericTest.blobs?.length || 0} blob(s) (primi 5)`);
           if (genericTest.blobs && genericTest.blobs.length > 0) {
-            console.log(`🎯 Primi blob in trips/ per confronto:`);
+            console.debug(`🎯 Primi blob in trips/ per confronto:`);
             genericTest.blobs.forEach((blob, index) => {
-              console.log(`     ${index + 1}. ${blob.pathname}`);
+              console.debug(`     ${index + 1}. ${blob.pathname}`);
             });
           }
         } catch (genericError) {
-          console.log(`Errore test generico:`, genericError);
+          console.error(`Errore test generico:`, genericError);
         }
       }
       
@@ -206,8 +187,8 @@ export class VercelBlobProvider implements IFileStorageProvider {
   async validateFile(file: File): Promise<boolean> {
     // Le validazioni specifiche di business logic rimangono nei route handlers
     // Qui solo validazioni tecniche del provider
-    console.log(`Validazione file: ${file.name}, dimensione: ${file.size} bytes`);
-    return true;
+    
+    return file != null;
   }
   
   /**

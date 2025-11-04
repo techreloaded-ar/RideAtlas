@@ -85,8 +85,6 @@ const tripCreationSchema = z.object({
 // Implementazione GET per ottenere tutti i viaggi con filtri appropriati per i ruoli
 export async function GET() {
   try {
-    console.log('Elaborazione richiesta GET /trips');
-    
     // Get current session to determine user role
     const session = await auth();
     
@@ -177,8 +175,6 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
-    console.log('Inizio elaborazione richiesta POST /trips');
-
     const session = await auth();
     if (!session?.user?.id) {
       console.error('Errore autenticazione: sessione non presente');
@@ -195,7 +191,6 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    console.log('Dati ricevuti:', JSON.stringify(body, null, 2));
     
     const parsed = tripCreationSchema.safeParse(body);
     if (!parsed.success) {
@@ -218,11 +213,8 @@ export async function POST(request: NextRequest) {
     // }
     const slug = slugify(tripData.title);
 
-    console.log('Creazione nuovo viaggio:', JSON.stringify({ ...tripData, slug }, null, 2));
-    
     try {      // Ensure user exists in database (sync from JWT session)
       const user = await ensureUserExists(session);
-      console.log(`User ensured in database: ${user.id} - ${user.name}`);
 
       // Calcola la durata automaticamente dalle stages
       const calculatedDays = Math.max(1, tripData.stages.length);
@@ -276,7 +268,6 @@ export async function POST(request: NextRequest) {
             data: stagesData,
           });
 
-          console.log(`Create ${stagesData.length} stages for trip ${newTrip.id}`);
         }
 
         return newTrip;

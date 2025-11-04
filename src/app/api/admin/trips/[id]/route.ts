@@ -79,8 +79,6 @@ export async function DELETE(
     const params = await context.params
     const tripId = params.id
 
-    console.log(`🗑️ Richiesta eliminazione viaggio: ${tripId}`)
-
     // 1. Authentication check
     const session = await auth()
     
@@ -131,7 +129,6 @@ export async function DELETE(
     }
 
     // 4. Load trip with all related data for cleanup
-    console.log(`📋 Caricamento dati viaggio per cleanup: ${tripId}`)
     const tripWithStages = await prisma.trip.findUnique({
       where: { id: tripId },
       include: {
@@ -160,19 +157,7 @@ export async function DELETE(
       )
     }
 
-    console.log(`📊 Viaggio trovato: "${tripWithStages.title}" di ${tripWithStages.user.email}`)
-    console.log(`📊 Tappe da eliminare: ${tripWithStages.stages.length}`)
-
     // 5. Cleanup storage files BEFORE deleting from database
-    console.log(`🧹 Inizio cleanup storage per viaggio: ${tripId}`)
-    console.log(`📊 Dati viaggio da pulire:`)
-    console.log(`   - Media viaggio: ${Array.isArray(tripWithStages.media) ? tripWithStages.media.length : 'N/A'} elementi`)
-    console.log(`   - GPX viaggio: ${tripWithStages.gpxFile ? 'presente' : 'assente'}`)
-    console.log(`   - Tappe: ${tripWithStages.stages.length}`)
-    
-    tripWithStages.stages.forEach((stage, index) => {
-      console.log(`   - Tappa ${index}: ${Array.isArray(stage.media) ? stage.media.length : 'N/A'} media, GPX ${stage.gpxFile ? 'presente' : 'assente'}`)
-    })
     
     try {
       const cleanupResult = await storageCleanupService.cleanupTripStorage(
@@ -184,18 +169,6 @@ export async function DELETE(
         }))
       )
 
-      console.log(`✅ Storage cleanup completato:`)
-      console.log(`   - File eliminati: ${cleanupResult.deletedFiles.length}`)
-      console.log(`   - File falliti: ${cleanupResult.failedFiles.length}`)
-      console.log(`   - Errori: ${cleanupResult.errors.length}`)
-      
-      if (cleanupResult.deletedFiles.length > 0) {
-        console.log(`📁 Dettaglio file eliminati:`)
-        cleanupResult.deletedFiles.forEach((file, i) => {
-          console.log(`     ${i + 1}. ${file}`)
-        })
-      }
-      
       if (cleanupResult.failedFiles.length > 0) {
         console.warn(`⚠️ Alcuni file non sono stati eliminati dallo storage:`)
         cleanupResult.failedFiles.forEach((file, i) => {
@@ -215,17 +188,13 @@ export async function DELETE(
         console.error(`Stack trace:`, storageError.stack)
       }
       // Non blocchiamo l'eliminazione del viaggio anche se il cleanup storage fallisce completamente
-      console.warn(`⚠️ Continuando con eliminazione database nonostante errori storage`)
+      console.warn(`⚠️ Continuo con eliminazione database nonostante errori storage`)
     }
 
     // 6. Delete from database (stages will be deleted automatically due to CASCADE)
-    console.log(`🗄️ Eliminazione viaggio dal database: ${tripId}`)
     await prisma.trip.delete({
       where: { id: tripId }
     })
-
-    console.log(`✅ Viaggio eliminato con successo: ${tripId}`)
-    console.log(`📧 Viaggio "${tripWithStages.title}" di ${tripWithStages.user.email} eliminato da ${session.user.email}`)
 
     return NextResponse.json({
       message: 'Viaggio eliminato con successo',

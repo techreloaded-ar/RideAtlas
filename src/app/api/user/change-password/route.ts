@@ -209,7 +209,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Audit log
-    console.log(`✅ Password aggiornata per utente: ${user.email}`);
+    
 
     return NextResponse.json(
       { 

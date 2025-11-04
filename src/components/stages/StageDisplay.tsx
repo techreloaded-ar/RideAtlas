@@ -120,7 +120,7 @@ export default function StageDisplay({
                 gpxUrl={stage.gpxFile.url}
                 filename={stage.gpxFile.filename}
                 onDownload={() => {
-                  console.log('Download GPX:', stage.gpxFile?.filename);
+                  
                   if (stage.gpxFile?.url) {
                     window.open(stage.gpxFile.url, '_blank');
                   }

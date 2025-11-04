@@ -53,8 +53,6 @@ export async function GET() {
       );
     }
 
-    console.log('Fetching trips for AI chatbot analysis');
-
     // Fetch all published trips with GPX data
     const trips = await prisma.trip.findMany({
       where: {
@@ -131,7 +129,6 @@ export async function GET() {
             processedTrip.gpxData.endPoint = { lat: endPoint.lat, lng: endPoint.lng };
           }
 
-          console.log(`✅ Added ${gpxFile.keyPoints.length} keyPoints to trip "${trip.title}" for AI`);
         }
       } else {
         processedTrip.gpxData = {
@@ -141,8 +138,6 @@ export async function GET() {
 
       return processedTrip;
     });
-
-    console.log(`Returning ${tripsForAI.length} trips for AI analysis`);
 
     return NextResponse.json({
       trips: tripsForAI,

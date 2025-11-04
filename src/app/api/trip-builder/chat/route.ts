@@ -48,7 +48,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log('Processing chatbot request for user:', session.user.id);
 
     // Extract constraints and fetch trips
     const userConstraints = ValidationService.extractConstraints(message);
@@ -57,11 +56,6 @@ export async function POST(request: NextRequest) {
     // Validate trips against constraints
     const validationResult = ValidationService.validateTrips(trips, userConstraints);
     const validTrips = validationResult.validTrips;
-
-    console.log('Extracted constraints:', userConstraints);
-    if (validationResult.violations.length > 0) {
-      console.log('Constraint violations found:', validationResult.violations);
-    }
 
     // Generate AI response
     const aiMessage = await getAIResponse(message, conversationHistory, validTrips, userConstraints);

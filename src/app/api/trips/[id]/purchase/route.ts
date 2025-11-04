@@ -19,17 +19,13 @@ export async function POST(
     }
 
     const tripId = (await params).id;
-    console.log(`📥 [PURCHASE API] Starting purchase for trip ${tripId}, user ${session.user.id}`);
 
     const result = await PurchaseService.createPurchase(
       session.user.id,
       tripId
     );
 
-    console.log(`📤 [PURCHASE API] Purchase result:`, result);
-
     if (!result.success) {
-      console.log(`❌ [PURCHASE API] Purchase failed: ${result.error}`);
       return NextResponse.json(
         { error: result.error },
         { status: 400 }
@@ -42,8 +38,6 @@ export async function POST(
       free: result.free || false,
       message: result.free ? 'Viaggio acquisito gratuitamente' : 'Acquisto iniziato con successo'
     };
-
-    console.log(`✅ [PURCHASE API] Returning response:`, response);
 
     return NextResponse.json(response);
 

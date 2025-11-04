@@ -14,7 +14,6 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    console.log(`Richiesta download GPX per viaggio: ${(await params).id}`)
     
     // Verifica che l'ID sia valido
     if (!(await params).id || typeof (await params).id !== 'string') {
@@ -111,9 +110,6 @@ export async function GET(
         { status: 503 }
       );
     }
-
-    // Log dell'operazione di download
-    console.log(`Download GPX richiesto - Viaggio: ${trip.id}, Utente: ${session.user.id} (${session.user.email})`)
 
     // Redirect diretto al file originale sulla CDN
     return NextResponse.redirect(gpxFile.url);
