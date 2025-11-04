@@ -41,6 +41,8 @@ export default function TripManagement() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [validationErrors, setValidationErrors] = useState<Record<string, TripValidationError[]>>({})
   const [showReorderMode, setShowReorderMode] = useState(false)
+  const [allTripsForReorder, setAllTripsForReorder] = useState<TripWithUser[]>([])
+  const [loadingAllTrips, setLoadingAllTrips] = useState(false)
 
   const fetchTrips = useCallback(async () => {
     try {
@@ -65,6 +67,31 @@ export default function TripManagement() {
       setLoading(false)
     }
   }, [page, search, statusFilter])
+
+  const fetchAllTripsForReorder = useCallback(async () => {
+    try {
+      setLoadingAllTrips(true)
+      setError('')
+
+      // Fetch tutti i viaggi senza paginazione (limit alto)
+      const params = new URLSearchParams({
+        page: '1',
+        limit: '1000', // Limite alto per ottenere tutti i viaggi
+      })
+
+      const response = await fetch(`/api/admin/trips?${params}`)
+      if (!response.ok) {
+        throw new Error('Errore nel caricamento di tutti i viaggi')
+      }
+
+      const data = await response.json()
+      setAllTripsForReorder(data.trips)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Errore sconosciuto')
+    } finally {
+      setLoadingAllTrips(false)
+    }
+  }, [])
 
   const handleApproveTrip = async (tripId: string) => {
     try {
@@ -225,7 +252,11 @@ export default function TripManagement() {
             {/* Mode Toggle */}
             <div className="flex items-center gap-2">
               <button
-                onClick={() => setShowReorderMode(false)}
+                onClick={async () => {
+                  setShowReorderMode(false)
+                  // Ricarica i dati paginati quando si torna alla visualizzazione lista
+                  await fetchTrips()
+                }}
                 className={`inline-flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md transition-colors ${
                   !showReorderMode
                     ? 'bg-primary-100 text-primary-700 border border-primary-200'
@@ -236,14 +267,23 @@ export default function TripManagement() {
                 Visualizza Lista
               </button>
               <button
-                onClick={() => setShowReorderMode(true)}
+                onClick={async () => {
+                  setShowReorderMode(true)
+                  // Carica tutti i viaggi quando si entra in modalità riordinamento
+                  await fetchAllTripsForReorder()
+                }}
+                disabled={loadingAllTrips}
                 className={`inline-flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md transition-colors ${
                   showReorderMode
                     ? 'bg-primary-100 text-primary-700 border border-primary-200'
                     : 'text-gray-700 hover:bg-gray-50 border border-gray-300'
-                }`}
+                } disabled:opacity-50 disabled:cursor-not-allowed`}
               >
-                <ArrowUpDown className="w-4 h-4" />
+                {loadingAllTrips ? (
+                  <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <ArrowUpDown className="w-4 h-4" />
+                )}
                 Riordina Viaggi
               </button>
             </div>
@@ -307,14 +347,45 @@ export default function TripManagement() {
         )}
 
         {/* Trip Reorder Mode */}
-        {!loading && tripsData && showReorderMode && (
-          <TripReorderSection
-            trips={tripsData.trips as Trip[]} // Type conversion needed due to interface differences
-            onReorderComplete={() => {
-              // Refresh trips data after reordering
-              fetchTrips();
-            }}
-          />
+        {showReorderMode && (
+          <>
+            {/* Loading state per il caricamento di tutti i viaggi */}
+            {loadingAllTrips && (
+              <div className="bg-white rounded-lg shadow p-8 text-center">
+                <div className="flex items-center justify-center gap-3 text-gray-600">
+                  <div className="w-5 h-5 border-2 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
+                  <span>Caricamento di tutti i viaggi...</span>
+                </div>
+              </div>
+            )}
+
+            {/* Sezione riordinamento - mostra solo se i viaggi sono stati caricati */}
+            {!loadingAllTrips && allTripsForReorder.length > 0 && (
+              <TripReorderSection
+                trips={allTripsForReorder as Trip[]} // Type conversion needed due to interface differences
+                onReorderComplete={async () => {
+                  // Ricarica tutti i viaggi per il reorder e i dati paginati
+                  await Promise.all([
+                    fetchAllTripsForReorder(),
+                    fetchTrips()
+                  ]);
+                }}
+              />
+            )}
+
+            {/* Empty state se non ci sono viaggi */}
+            {!loadingAllTrips && allTripsForReorder.length === 0 && (
+              <div className="bg-white rounded-lg shadow p-8 text-center">
+                <Navigation className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  Nessun viaggio disponibile
+                </h3>
+                <p className="text-gray-500">
+                  Non ci sono viaggi da riordinare al momento.
+                </p>
+              </div>
+            )}
+          </>
         )}
 
         {/* Trips table */}
