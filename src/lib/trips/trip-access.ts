@@ -198,8 +198,10 @@ export async function fetchPurchaseStatusFromApi(tripId: string): Promise<ApiRes
  * @returns true if fetch should be skipped
  */
 export function shouldSkipAccessFetch(
-  tripId: string | null, 
+  tripId: string | null,
   sessionStatus: 'loading' | 'authenticated' | 'unauthenticated'
 ): boolean {
-  return !tripId || sessionStatus === 'loading';
+  // Skip se non c'è tripId, se la sessione sta caricando,
+  // o se l'utente non è autenticato (il frontend sa già che non ha accesso)
+  return !tripId || sessionStatus === 'loading' || sessionStatus === 'unauthenticated';
 }

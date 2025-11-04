@@ -27,6 +27,16 @@ export function useTripAccess(tripId: string | null): UseTripAccessReturn {
     if (shouldSkipAccessFetch(tripId, status)) {
       if (!tripId) {
         setAccessInfo(null);
+      } else if (status === 'unauthenticated') {
+        // Utente non autenticato: restituisci info di default senza chiamare API
+        setAccessInfo({
+          canAccess: false,
+          isOwner: false,
+          hasPurchased: false,
+          price: 0,
+          reason: 'authentication_required',
+          message: 'È necessario effettuare il login'
+        });
       }
       return;
     }
@@ -69,6 +79,14 @@ export function usePurchaseStatus(tripId: string | null) {
   const fetchPurchaseStatus = useCallback(async () => {
     // Use pure function to determine if we should skip
     if (shouldSkipAccessFetch(tripId, status)) {
+      if (status === 'unauthenticated') {
+        // Utente non autenticato: restituisci info di default senza chiamare API
+        setPurchaseInfo({
+          purchased: false,
+          isOwner: false,
+          price: 0
+        });
+      }
       return;
     }
 

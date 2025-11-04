@@ -372,13 +372,17 @@ describe('Trip Access Pure Functions', () => {
       expect(shouldSkipAccessFetch('trip-123', 'loading')).toBe(true);
     });
 
-    it('should not skip when tripId exists and session is ready', () => {
-      expect(shouldSkipAccessFetch('trip-123', 'authenticated')).toBe(false);
-      expect(shouldSkipAccessFetch('trip-123', 'unauthenticated')).toBe(false);
+    it('should skip when user is unauthenticated', () => {
+      expect(shouldSkipAccessFetch('trip-123', 'unauthenticated')).toBe(true);
     });
 
-    it('should skip when both conditions are met', () => {
+    it('should not skip when tripId exists and user is authenticated', () => {
+      expect(shouldSkipAccessFetch('trip-123', 'authenticated')).toBe(false);
+    });
+
+    it('should skip when multiple conditions are met', () => {
       expect(shouldSkipAccessFetch(null, 'loading')).toBe(true);
+      expect(shouldSkipAccessFetch(null, 'unauthenticated')).toBe(true);
     });
   });
 });
