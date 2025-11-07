@@ -218,7 +218,7 @@ function CheckoutForm({ purchaseId, amount, onSuccess, onError }: StripePaymentF
       </div>
 
       {/* Sezione Carte di Test */}
-      <div className="bg-yellow-50 border border-yellow-200 rounded-lg mb-6">
+      {/* <div className="bg-yellow-50 border border-yellow-200 rounded-lg mb-6">
         <button
           type="button"
           onClick={() => setShowTestCards(!showTestCards)}
@@ -285,7 +285,7 @@ function CheckoutForm({ purchaseId, amount, onSuccess, onError }: StripePaymentF
             </div>
           </div>
         )}
-      </div>
+      </div> */}
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
