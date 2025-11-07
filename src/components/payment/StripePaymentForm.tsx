@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { getStripe } from '@/lib/payment/stripe-client';
-import { CreditCard, Lock, AlertCircle, CheckCircle, ChevronDown, ChevronUp, Copy } from 'lucide-react';
+import { CreditCard, Lock, AlertCircle, CheckCircle } from 'lucide-react';
 
 interface StripePaymentFormProps {
   purchaseId: string;
@@ -37,51 +37,6 @@ function CheckoutForm({ purchaseId, amount, onSuccess, onError }: StripePaymentF
   const [, setPaymentIntentId] = useState<string | null>(null);
   const [cardComplete, setCardComplete] = useState(false);
   const [cardError, setCardError] = useState<string | null>(null);
-  const [showTestCards, setShowTestCards] = useState(false);
-
-  const testCards = [
-    {
-      name: 'Visa (Successo)',
-      number: '4242 4242 4242 4242',
-      expiry: '12/25',
-      cvc: '123',
-      type: 'success',
-      description: 'Pagamento riuscito'
-    },
-    {
-      name: 'Mastercard (Successo)',
-      number: '5555 5555 5555 4444',
-      expiry: '12/25',
-      cvc: '123',
-      type: 'success',
-      description: 'Pagamento riuscito'
-    },
-    {
-      name: 'Visa (Declinata)',
-      number: '4000 0000 0000 0002',
-      expiry: '12/25',
-      cvc: '123',
-      type: 'error',
-      description: 'Carta declinata'
-    },
-    {
-      name: 'Visa (Fondi Insufficienti)',
-      number: '4000 0000 0000 9995',
-      expiry: '12/25',
-      cvc: '123',
-      type: 'error',
-      description: 'Fondi insufficienti'
-    }
-  ];
-
-  const handleTestCard = (card: typeof testCards[0]) => {
-    const cardElement = elements?.getElement(CardElement);
-    if (cardElement) {
-      // Stripe Elements non supporta l'auto-compilazione programmatica
-      // Mostriamo invece un messaggio di istruzioni
-      alert(`Copia questi dati nella carta:\n\nNumero: ${card.number}\nScadenza: ${card.expiry}\nCVC: ${card.cvc}`);
-    }
-  };
 
   const createPaymentIntent = useCallback(async () => {
     try {
@@ -217,76 +172,7 @@ function CheckoutForm({ purchaseId, amount, onSuccess, onError }: StripePaymentF
         </div>
       </div>
 
-      {/* Sezione Carte di Test */}
-      {/* <div className="bg-yellow-50 border border-yellow-200 rounded-lg mb-6">
-        <button
-          type="button"
-          onClick={() => setShowTestCards(!showTestCards)}
-          className="w-full px-4 py-3 flex items-center justify-between text-sm font-medium text-yellow-800 hover:bg-yellow-100 rounded-lg transition-colors"
-        >
-          <div className="flex items-center">
-            <AlertCircle className="w-4 h-4 mr-2" />
-            Carte di Test per Demo
-          </div>
-          {showTestCards ? (
-            <ChevronUp className="w-4 h-4" />
-          ) : (
-            <ChevronDown className="w-4 h-4" />
-          )}
-        </button>
-        
-        {showTestCards && (
-          <div className="px-4 pb-4">
-            <p className="text-xs text-yellow-700 mb-3">
-              Usa queste carte per testare i pagamenti. Copia i dati nei campi sottostanti.
-            </p>
-            <div className="grid gap-2">
-              {testCards.map((card, index) => (
-                <div
-                  key={index}
-                  className={`p-3 rounded-md border-2 ${
-                    card.type === 'success' 
-                      ? 'border-green-200 bg-green-50' 
-                      : 'border-red-200 bg-red-50'
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center mb-1">
-                        <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium mr-2 ${
-                          card.type === 'success' 
-                            ? 'bg-green-100 text-green-800' 
-                            : 'bg-red-100 text-red-800'
-                        }`}>
-                          {card.name}
-                        </span>
-                      </div>
-                      <div className="text-xs text-gray-600 space-y-0.5">
-                        <div><strong>Numero:</strong> {card.number}</div>
-                        <div><strong>Scadenza:</strong> {card.expiry} <strong>CVC:</strong> {card.cvc}</div>
-                        <div className="text-xs italic">{card.description}</div>
-                      </div>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => handleTestCard(card)}
-                      className={`ml-2 px-3 py-1 text-xs rounded-md font-medium transition-colors ${
-                        card.type === 'success'
-                          ? 'bg-green-600 text-white hover:bg-green-700'
-                          : 'bg-red-600 text-white hover:bg-red-700'
-                      }`}
-                    >
-                      <Copy className="w-3 h-3 mr-1 inline" />
-                      Usa
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-      </div> */}
-
+     
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
