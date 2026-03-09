@@ -1,3 +1,6 @@
+/**
+ * @jest-environment <rootDir>/src/tests/setup/jest-environment-jsdom-with-location.js
+ */
 import { render, screen, waitFor } from '../setup/test-utils';
 import userEvent from '@testing-library/user-event';
 import Register from '@/app/auth/register/page';
@@ -11,6 +14,7 @@ const mockSignIn = signIn as jest.MockedFunction<typeof signIn>;
 global.fetch = jest.fn();
 
 // Mock window.location per evitare errori JSDOM
+delete (window as any).location;
 Object.defineProperty(window, 'location', {
   value: {
     href: 'http://localhost:3000',
@@ -19,6 +23,7 @@ Object.defineProperty(window, 'location', {
     reload: jest.fn(),
   },
   writable: true,
+  configurable: true,
 });
 
 describe('Authentication Flow Integration', () => {

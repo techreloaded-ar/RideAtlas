@@ -1,3 +1,6 @@
+/**
+ * @jest-environment <rootDir>/src/tests/setup/jest-environment-jsdom-with-location.js
+ */
 // src/tests/unit/components/maps/DirectLeafletMap.initialization.test.tsx
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
@@ -89,12 +92,6 @@ describe('DirectLeafletMap - Initialization Tests', () => {
   });
 
   it('should setup Leaflet icons configuration', async () => {
-    // Mock window object
-    Object.defineProperty(window, 'window', {
-      value: global,
-      writable: true,
-    });
-
     render(<DirectLeafletMap {...emptyMapScenario.props} />);
 
     jest.advanceTimersByTime(50);
@@ -181,7 +178,7 @@ describe('DirectLeafletMap - Initialization Tests', () => {
 
       // Verifica che gli stili siano stati applicati
       expect(mockElement.style.background).toBe('white');
-      expect(mockElement.style.border).toBe('1px solid #d1d5db');
+      expect(mockElement.style.border).toBe('1px solid rgb(209, 213, 219)');
       expect(mockElement.style.borderRadius).toBe('6px');
       expect(mockElement.style.boxShadow).toBe(
         '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'

@@ -1,3 +1,6 @@
+/**
+ * @jest-environment <rootDir>/src/tests/setup/jest-environment-jsdom-with-location.js
+ */
 import { render, screen, waitFor } from '../setup/test-utils';
 import userEvent from '@testing-library/user-event';
 import { useSession, signOut, getProviders } from 'next-auth/react';
@@ -29,6 +32,7 @@ const mockUseSearchParams = useSearchParams as jest.MockedFunction<typeof useSea
 const mockPush = jest.fn();
 
 // Mock window.location
+delete (window as any).location;
 Object.defineProperty(window, 'location', {
   value: {
     href: '',
@@ -37,6 +41,7 @@ Object.defineProperty(window, 'location', {
     reload: jest.fn(),
   },
   writable: true,
+  configurable: true,
 });
 
 describe('Logout Redirect Flow Integration', () => {

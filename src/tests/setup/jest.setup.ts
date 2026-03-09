@@ -1,10 +1,16 @@
 import '@testing-library/jest-dom';
 import { TextEncoder, TextDecoder } from 'util';
+import { ReadableStream, WritableStream, TransformStream } from 'stream/web';
 import 'whatwg-fetch';
 
 // Setup globals per Node.js
 global.TextEncoder = TextEncoder;
 global.TextDecoder = TextDecoder as typeof globalThis.TextDecoder;
+
+// Web Streams API richieste da undici (dipendenza di @vercel/blob)
+global.ReadableStream = ReadableStream as unknown as typeof globalThis.ReadableStream;
+global.WritableStream = WritableStream as unknown as typeof globalThis.WritableStream;
+global.TransformStream = TransformStream as unknown as typeof globalThis.TransformStream;
 
 // Mock File API per Node.js test environment
 class MockFile extends Blob {

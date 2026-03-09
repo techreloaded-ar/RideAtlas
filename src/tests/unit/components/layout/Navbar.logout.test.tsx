@@ -1,3 +1,6 @@
+/**
+ * @jest-environment <rootDir>/src/tests/setup/jest-environment-jsdom-with-location.js
+ */
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { useSession, signOut } from 'next-auth/react'
 import { usePathname } from 'next/navigation'
@@ -23,11 +26,13 @@ const mockUsePathname = usePathname as jest.MockedFunction<typeof usePathname>
 const mockConsoleError = jest.spyOn(console, 'error').mockImplementation(() => {})
 
 // Mock window.location.href
+delete (window as any).location;
 Object.defineProperty(window, 'location', {
   value: {
     href: '',
   },
   writable: true,
+  configurable: true,
 })
 
 describe('Navbar - Logout Functionality', () => {

@@ -1,3 +1,6 @@
+/**
+ * @jest-environment <rootDir>/src/tests/setup/jest-environment-jsdom-with-location.js
+ */
 import { cookieConsentService, CookieCategory } from '@/lib/ui/cookie-consent';
 
 // Mock document.cookie
@@ -38,11 +41,13 @@ Object.defineProperty(document, 'cookie', {
 });
 
 // Mock window.location for secure cookie tests
+delete (window as any).location;
 Object.defineProperty(window, 'location', {
   value: {
     protocol: 'https:'
   },
-  writable: true
+  writable: true,
+  configurable: true,
 });
 
 describe('CookieConsentService - GDPR Compliance Tests', () => {
