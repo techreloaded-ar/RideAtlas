@@ -1,5 +1,5 @@
 import Stripe from 'stripe';
-import { stripe, formatAmountForStripe, formatAmountFromStripe, STRIPE_CONFIG } from './stripe-server';
+import { getStripeInstance, formatAmountForStripe, formatAmountFromStripe, STRIPE_CONFIG } from './stripe-server';
 
 export interface CreatePaymentIntentParams {
   amount: number;
@@ -57,7 +57,7 @@ export class StripeService {
 
       const stripeAmount = formatAmountForStripe(amount, currency);
       
-      const paymentIntent = await stripe.paymentIntents.create({
+      const paymentIntent = await getStripeInstance().paymentIntents.create({
         amount: stripeAmount,
         currency,
         automatic_payment_methods: STRIPE_CONFIG.automaticPaymentMethods,
@@ -94,7 +94,7 @@ export class StripeService {
     try {
       
 
-      const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+      const paymentIntent = await getStripeInstance().paymentIntents.retrieve(paymentIntentId);
 
       if (!paymentIntent) {
         return {
@@ -113,7 +113,7 @@ export class StripeService {
       }
 
       if (paymentIntent.status === 'requires_confirmation') {
-        const confirmedPaymentIntent = await stripe.paymentIntents.confirm(paymentIntentId);
+        const confirmedPaymentIntent = await getStripeInstance().paymentIntents.confirm(paymentIntentId);
         return {
           success: confirmedPaymentIntent.status === 'succeeded',
           paymentIntent: confirmedPaymentIntent,
@@ -141,7 +141,7 @@ export class StripeService {
 
   static async retrievePaymentIntent(paymentIntentId: string): Promise<Stripe.PaymentIntent | null> {
     try {
-      const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+      const paymentIntent = await getStripeInstance().paymentIntents.retrieve(paymentIntentId);
       return paymentIntent;
     } catch (error) {
       console.error('❌ [STRIPE SERVICE] Errore nel recupero Payment Intent:', error);
@@ -151,7 +151,7 @@ export class StripeService {
 
   private static async findExistingPaymentIntent(purchaseId: string): Promise<Stripe.PaymentIntent | null> {
     try {
-      const paymentIntents = await stripe.paymentIntents.list({
+      const paymentIntents = await getStripeInstance().paymentIntents.list({
         limit: 10,
       });
 
@@ -175,7 +175,7 @@ export class StripeService {
         return null;
       }
 
-      const event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
+      const event = getStripeInstance().webhooks.constructEvent(body, signature, webhookSecret);
       return event;
     } catch (error) {
       console.error('❌ [STRIPE SERVICE] Errore nella costruzione webhook event:', error);

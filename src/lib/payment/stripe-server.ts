@@ -1,19 +1,26 @@
 import Stripe from 'stripe';
 
-if (!process.env.STRIPE_SECRET_KEY) {
-  throw new Error(
-    'STRIPE_SECRET_KEY è richiesto. Aggiungi la chiave segreta Stripe al file .env.local'
-  );
+let stripeInstance: Stripe | null = null;
+
+export function getStripeInstance(): Stripe {
+  if (!stripeInstance) {
+    if (!process.env.STRIPE_SECRET_KEY) {
+      throw new Error(
+        'STRIPE_SECRET_KEY è richiesto. Aggiungi la chiave segreta Stripe al file .env.local'
+      );
+    }
+    stripeInstance = new Stripe(process.env.STRIPE_SECRET_KEY, {
+      apiVersion: '2025-07-30.basil',
+      typescript: true,
+      appInfo: {
+        name: 'RideAtlas',
+        version: '1.0.0',
+      },
+    });
+  }
+  return stripeInstance;
 }
 
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: '2025-07-30.basil',
-  typescript: true,
-  appInfo: {
-    name: 'RideAtlas',
-    version: '1.0.0',
-  },
-});
 
 export const STRIPE_CONFIG = {
   currency: 'eur' as const,

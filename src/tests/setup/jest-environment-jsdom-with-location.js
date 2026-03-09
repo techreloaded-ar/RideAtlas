@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 /**
  * Custom Jest environment che rende window.location (e window.window) mockabile.
  *
@@ -8,9 +9,6 @@
 
 const path = require('path');
 const Module = require('module');
-
-// Intercetta il require di Window.js di JSDOM per patchare configurable: false
-const originalResolveFilename = Module._resolveFilename;
 const windowJsPath = path.join('jsdom', 'lib', 'jsdom', 'browser', 'Window.js').replace(/\\/g, '/');
 
 let patched = false;
