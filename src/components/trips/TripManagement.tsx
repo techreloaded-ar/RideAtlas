@@ -8,8 +8,9 @@ import { UserRole } from '@/types/profile'
 import { TripValidationError, Trip } from '@/types/trip'
 import { User as UserType } from '@/types/profile';
 import { TripReorderSection } from '@/components/admin/TripReorderSection'
-import { Calendar, MapPin, User, Clock, Navigation, Eye, Edit, AlertTriangle, Send, Trash2, RotateCcw, ArrowUpDown, List } from 'lucide-react'
+import { Calendar, MapPin, User, Clock, Navigation, Eye, Edit, AlertTriangle, Send, Trash2, RotateCcw, ArrowUpDown, List, UserPlus } from 'lucide-react'
 import { getTripStatusColor, getTripStatusLabel } from '@/lib/utils/tripStatusUtils'
+import AssegnaRangerDialog from '@/components/admin/AssegnaRangerDialog'
 
 interface TripWithUser extends Trip {
   user: UserType
@@ -43,6 +44,7 @@ export default function TripManagement() {
   const [showReorderMode, setShowReorderMode] = useState(false)
   const [allTripsForReorder, setAllTripsForReorder] = useState<TripWithUser[]>([])
   const [loadingAllTrips, setLoadingAllTrips] = useState(false)
+  const [viaggioPerAssegnazione, setViaggioPerAssegnazione] = useState<TripWithUser | null>(null)
 
   const fetchTrips = useCallback(async () => {
     try {
@@ -501,7 +503,16 @@ export default function TripManagement() {
                           >
                             <Edit className="w-4 h-4" />
                           </a>
-                          
+
+                          {/* Assign Ranger button */}
+                          <button
+                            onClick={() => setViaggioPerAssegnazione(trip)}
+                            className="text-indigo-600 hover:text-indigo-900 p-1 rounded"
+                            title="Assegna Ranger"
+                          >
+                            <UserPlus className="w-4 h-4" />
+                          </button>
+
                           {/* Approve button - only for draft trips */}
                           {trip.status === 'Bozza' && (
                             <button
@@ -743,6 +754,18 @@ export default function TripManagement() {
             </div>
           </div>
         )}
+
+        {/* Assegna Ranger Dialog */}
+        <AssegnaRangerDialog
+          viaggio={viaggioPerAssegnazione}
+          isOpen={viaggioPerAssegnazione !== null}
+          onClose={() => setViaggioPerAssegnazione(null)}
+          onAssegnato={() => {
+            showSuccess('Ranger assegnato con successo')
+            fetchTrips()
+            setViaggioPerAssegnazione(null)
+          }}
+        />
       </div>
     </div>
   )
