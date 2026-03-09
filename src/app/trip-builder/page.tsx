@@ -2,6 +2,7 @@
 "use client";
 
 
+import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 import { MessageSquare, Route, MapPin, Clock, AlertTriangle, ShieldAlert } from 'lucide-react';
 import TripBuilderChat from '@/components/trip-builder/TripBuilderChat';
@@ -47,13 +48,13 @@ export default function TripBuilderPage() {
                 Per utilizzare il Trip Builder AI e accedere a tutti i viaggi disponibili,
                 è necessario effettuare l&apos;accesso al tuo account.
               </p>
-              <a
+              <Link
                 href="/auth/signin"
                 className="btn-primary inline-flex items-center gap-2"
               >
                 <MessageSquare className="w-5 h-5" />
                 Accedi per iniziare
-              </a>
+              </Link>
             </div>
           </div>
         </section>
@@ -72,12 +73,12 @@ export default function TripBuilderPage() {
           <p className="text-gray-600 mb-6">
             Questa funzionalità è riservata agli amministratori del sistema.
           </p>
-          <a
+          <Link
             href="/"
             className="btn-primary inline-flex items-center gap-2"
           >
             Torna alla Home
-          </a>
+          </Link>
         </div>
       </main>
     );
