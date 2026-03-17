@@ -67,6 +67,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (purchase.userId !== session.user.id) {
+      return NextResponse.json(
+        { error: 'Non puoi pagare un acquisto di un altro utente' },
+        { status: 403 }
+      );
+    }
+
     if (purchase.trip.user_id === session.user.id) {
       return NextResponse.json(
         { error: 'Non puoi acquistare il tuo stesso viaggio' },
@@ -82,7 +89,7 @@ export async function POST(request: NextRequest) {
     }
 
     const result = await StripeService.createPaymentIntent({
-      amount: Number(purchase.trip.price),
+      amount: Number(purchase.amount),
       purchaseId,
       userId: session.user.id,
       tripId: purchase.trip.id,
@@ -102,7 +109,7 @@ export async function POST(request: NextRequest) {
       success: true,
       clientSecret: result.clientSecret,
       paymentIntentId: result.paymentIntent?.id,
-      amount: Number(purchase.trip.price),
+      amount: Number(purchase.amount),
       currency: 'eur'
     });
 

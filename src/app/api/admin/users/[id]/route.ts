@@ -9,8 +9,16 @@ import { sendRoleChangeNotificationEmail } from '@/lib/core/email'
 export const dynamic = 'force-dynamic'
 
 const updateUserSchema = z.object({
-  role: z.nativeEnum(UserRole),
-})
+  role: z.nativeEnum(UserRole).optional(),
+  name: z.string().min(1, 'Il nome è obbligatorio').max(100, 'Nome troppo lungo').optional(),
+  bio: z.string().max(1000, 'La biografia deve essere massimo 1000 caratteri').optional(),
+  bikeDescription: z.string().max(500, 'La descrizione moto deve essere massimo 500 caratteri').optional(),
+}).refine(
+  (data) => data.role !== undefined || data.name !== undefined || data.bio !== undefined || data.bikeDescription !== undefined,
+  {
+    message: 'Almeno un campo deve essere fornito',
+  }
+)
 
 // PATCH - Aggiorna il ruolo di un utente (solo per Sentinel)
 export async function PATCH(
@@ -44,11 +52,11 @@ export async function PATCH(
       )
     }
 
-    const { role } = result.data
+    const { role, name, bio, bikeDescription } = result.data
     const { id: userId } = await params
 
     // Non permettere di modificare il proprio ruolo
-    if (session.user.id === userId) {
+    if (role !== undefined && session.user.id === userId) {
       return NextResponse.json(
         { error: 'Non puoi modificare il tuo stesso ruolo' },
         { status: 400 }
@@ -69,9 +77,21 @@ export async function PATCH(
     }
 
     // Aggiorna il ruolo
+    const updateData: {
+      role?: UserRole
+      name?: string
+      bio?: string
+      bikeDescription?: string
+    } = {}
+
+    if (role !== undefined) updateData.role = role
+    if (name !== undefined) updateData.name = name
+    if (bio !== undefined) updateData.bio = bio
+    if (bikeDescription !== undefined) updateData.bikeDescription = bikeDescription
+
     const updatedUser = await prisma.user.update({
       where: { id: userId },
-      data: { role },
+      data: updateData,
       select: {
         id: true,
         name: true,
@@ -81,6 +101,8 @@ export async function PATCH(
         createdAt: true,
         updatedAt: true,
         image: true,
+        bio: true,
+        bikeDescription: true,
         _count: {
           select: {
             trips: true
@@ -90,7 +112,7 @@ export async function PATCH(
     })
 
     // Invia email di notifica se il ruolo è effettivamente cambiato
-    if (existingUser.role !== role && updatedUser.email) {
+    if (role !== undefined && existingUser.role !== role && updatedUser.email) {
       try {
         await sendRoleChangeNotificationEmail(
           updatedUser.email,
@@ -105,7 +127,12 @@ export async function PATCH(
     }
 
     return NextResponse.json({
-      message: 'Ruolo utente aggiornato con successo',
+      message: role !== undefined &&
+        name === undefined &&
+        bio === undefined &&
+        bikeDescription === undefined
+        ? 'Ruolo utente aggiornato con successo'
+        : 'Dati utente aggiornati con successo',
       user: updatedUser
     })
 
@@ -154,6 +181,7 @@ export async function GET(
         updatedAt: true,
         image: true,
         bio: true,
+        bikeDescription: true,
         _count: {
           select: {
             trips: true
@@ -163,6 +191,8 @@ export async function GET(
           select: {
             id: true,
             title: true,
+            slug: true,
+            destination: true,
             status: true,
             created_at: true
           },

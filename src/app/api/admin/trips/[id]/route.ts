@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { z } from 'zod'
 import { prisma } from '@/lib/core/prisma'
 import { auth } from '@/auth'
 import { UserRole } from '@/types/profile'
@@ -6,6 +7,13 @@ import { storageCleanupService } from '@/lib/services/storageCleanup'
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic'
+
+const tripPriceUpdateSchema = z.object({
+  price: z.coerce.number()
+    .finite('Il prezzo deve essere un numero valido')
+    .min(0, 'Il prezzo non può essere negativo')
+    .max(9999.99, 'Il prezzo supera il limite consentito')
+})
 
 // GET - Ottieni dettagli di un singolo viaggio (per completezza API)
 export async function GET(
@@ -63,6 +71,96 @@ export async function GET(
 
   } catch (error) {
     console.error('Errore nel recupero viaggio:', error)
+    return NextResponse.json(
+      { error: 'Errore interno del server' },
+      { status: 500 }
+    )
+  }
+}
+
+// PATCH - Aggiorna il prezzo di un viaggio (solo Sentinel users)
+export async function PATCH(
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
+  try {
+    const params = await context.params
+    const tripId = params.id
+
+    const session = await auth()
+
+    if (!session?.user) {
+      return NextResponse.json(
+        { error: 'Non autorizzato' },
+        { status: 401 }
+      )
+    }
+
+    if (session.user.role !== UserRole.Sentinel) {
+      return NextResponse.json(
+        { error: 'Permessi insufficienti' },
+        { status: 403 }
+      )
+    }
+
+    if (!tripId || typeof tripId !== 'string') {
+      return NextResponse.json(
+        { error: 'ID viaggio non valido' },
+        { status: 400 }
+      )
+    }
+
+    const body = await request.json()
+    const parsedBody = tripPriceUpdateSchema.safeParse(body)
+
+    if (!parsedBody.success) {
+      return NextResponse.json(
+        {
+          error: 'Dati non validi',
+          details: parsedBody.error.flatten().fieldErrors
+        },
+        { status: 400 }
+      )
+    }
+
+    const existingTrip = await prisma.trip.findUnique({
+      where: { id: tripId },
+      select: {
+        id: true,
+        title: true,
+        price: true
+      }
+    })
+
+    if (!existingTrip) {
+      return NextResponse.json(
+        { error: 'Viaggio non trovato' },
+        { status: 404 }
+      )
+    }
+
+    const updatedTrip = await prisma.trip.update({
+      where: { id: tripId },
+      data: {
+        price: parsedBody.data.price
+      },
+      select: {
+        id: true,
+        title: true,
+        price: true,
+        updated_at: true
+      }
+    })
+
+    return NextResponse.json({
+      message: 'Prezzo aggiornato con successo',
+      trip: {
+        ...updatedTrip,
+        previousPrice: Number(existingTrip.price)
+      }
+    })
+  } catch (error) {
+    console.error('Errore durante aggiornamento prezzo viaggio:', error)
     return NextResponse.json(
       { error: 'Errore interno del server' },
       { status: 500 }

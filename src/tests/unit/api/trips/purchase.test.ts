@@ -22,7 +22,8 @@ describe('/api/trips/[id]/purchase', () => {
 
       mockPurchaseService.createPurchase.mockResolvedValue({
         success: true,
-        purchaseId: 'purchase-1'
+        purchaseId: 'purchase-1',
+        amount: 5,
       });
 
       const request = new NextRequest('http://localhost/api/trips/trip-1/purchase', {
@@ -35,6 +36,7 @@ describe('/api/trips/[id]/purchase', () => {
       expect(response.status).toBe(200);
       expect(data.success).toBe(true);
       expect(data.purchaseId).toBe('purchase-1');
+      expect(data.amount).toBe(5);
       expect(mockPurchaseService.createPurchase).toHaveBeenCalledWith('user-1', 'trip-1');
     });
 

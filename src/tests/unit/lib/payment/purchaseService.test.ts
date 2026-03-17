@@ -159,7 +159,8 @@ describe('PurchaseService', () => {
       mockPrisma.tripPurchase.create.mockResolvedValue({
         id: 'purchase-1',
         userId: 'user-1',
-        tripId: 'trip-1'
+        tripId: 'trip-1',
+        amount: 5.00,
       } as any);
 
       mockPrisma.tripPurchaseTransaction.create.mockResolvedValue({
@@ -171,6 +172,7 @@ describe('PurchaseService', () => {
 
       expect(result.success).toBe(true);
       expect(result.purchaseId).toBe('purchase-1');
+      expect(result.amount).toBe(5);
     });
 
     it('should fail if trip not found', async () => {
@@ -261,13 +263,15 @@ describe('PurchaseService', () => {
         id: 'purchase-pending',
         status: PurchaseStatus.PENDING,
         userId: 'user-1',
-        tripId: 'trip-1'
+        tripId: 'trip-1',
+        amount: 7.5,
       } as any);
 
       const result = await PurchaseService.createPurchase('user-1', 'trip-1');
 
       expect(result.success).toBe(true);
       expect(result.purchaseId).toBe('purchase-pending');
+      expect(result.amount).toBe(7.5);
       expect(mockPrisma.tripPurchase.create).not.toHaveBeenCalled();
     });
 
@@ -291,7 +295,8 @@ describe('PurchaseService', () => {
       mockPrisma.tripPurchase.create.mockResolvedValue({
         id: 'purchase-new',
         userId: 'user-1',
-        tripId: 'trip-1'
+        tripId: 'trip-1',
+        amount: 5.00,
       } as any);
 
       mockPrisma.tripPurchaseTransaction.create.mockResolvedValue({
@@ -303,6 +308,7 @@ describe('PurchaseService', () => {
 
       expect(result.success).toBe(true);
       expect(result.purchaseId).toBe('purchase-new');
+      expect(result.amount).toBe(5);
       expect(mockPrisma.tripPurchase.create).toHaveBeenCalled();
     });
   });

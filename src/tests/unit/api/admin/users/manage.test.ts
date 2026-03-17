@@ -55,6 +55,7 @@ describe('/api/admin/users/[id] - Gestione Utenti Admin', () => {
     updatedAt: new Date('2023-12-01'),
     image: null,
     bio: 'Appassionato di moto',
+    bikeDescription: 'Moto adventure',
     _count: {
       trips: 3,
     },
@@ -62,12 +63,16 @@ describe('/api/admin/users/[id] - Gestione Utenti Admin', () => {
       {
         id: 'trip-1',
         title: 'Viaggio 1',
+        slug: 'viaggio-1',
+        destination: 'Dolomiti',
         status: 'Pubblicato',
         created_at: new Date('2023-06-01'),
       },
       {
         id: 'trip-2',
         title: 'Viaggio 2',
+        slug: 'viaggio-2',
+        destination: 'Toscana',
         status: 'Bozza',
         created_at: new Date('2023-07-01'),
       },
@@ -135,6 +140,7 @@ describe('/api/admin/users/[id] - Gestione Utenti Admin', () => {
             updatedAt: true,
             image: true,
             bio: true,
+            bikeDescription: true,
             _count: {
               select: {
                 trips: true,
@@ -144,6 +150,8 @@ describe('/api/admin/users/[id] - Gestione Utenti Admin', () => {
               select: {
                 id: true,
                 title: true,
+                slug: true,
+                destination: true,
                 status: true,
                 created_at: true,
               },
@@ -261,7 +269,6 @@ describe('/api/admin/users/[id] - Gestione Utenti Admin', () => {
           body: JSON.stringify({ 
             role: UserRole.Ranger,
             extraField: 'should be ignored',
-            name: 'should not be updated',
           }),
           headers: { 'Content-Type': 'application/json' },
         })
@@ -311,6 +318,8 @@ describe('/api/admin/users/[id] - Gestione Utenti Admin', () => {
             createdAt: true,
             updatedAt: true,
             image: true,
+            bio: true,
+            bikeDescription: true,
             _count: {
               select: {
                 trips: true,
@@ -352,6 +361,41 @@ describe('/api/admin/users/[id] - Gestione Utenti Admin', () => {
 
         expect(response.status).toBe(200)
         expect(data.user.role).toBe(UserRole.Explorer)
+      })
+
+      it('should update profile fields successfully', async () => {
+        const updatedUser = {
+          ...mockUser,
+          name: 'Mario Bianchi',
+          bio: 'Nuova bio',
+          bikeDescription: 'Nuova moto'
+        }
+        ;(prisma.user.findUnique as jest.Mock).mockResolvedValue(mockUser)
+        ;(prisma.user.update as jest.Mock).mockResolvedValue(updatedUser)
+
+        const request = new NextRequest('http://localhost/api/admin/users/user-123', {
+          method: 'PATCH',
+          body: JSON.stringify({
+            name: 'Mario Bianchi',
+            bio: 'Nuova bio',
+            bikeDescription: 'Nuova moto',
+          }),
+          headers: { 'Content-Type': 'application/json' },
+        })
+        const response = await PATCH(request, { params: { id: 'user-123' } })
+        const data = await response.json()
+
+        expect(response.status).toBe(200)
+        expect(data.message).toBe('Dati utente aggiornati con successo')
+        expect(prisma.user.update).toHaveBeenCalledWith({
+          where: { id: 'user-123' },
+          data: {
+            name: 'Mario Bianchi',
+            bio: 'Nuova bio',
+            bikeDescription: 'Nuova moto',
+          },
+          select: expect.any(Object),
+        })
       })
     })
 

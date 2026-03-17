@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import Link from 'next/link'
 import { UserRole, UserRoleLabels, UserRoleDescriptions } from '@/types/profile'
 import { useSession } from 'next-auth/react'
 import { useToast } from '@/hooks/ui/useToast'
@@ -369,9 +370,12 @@ export default function UserManagement() {
                             <UserAvatar user={user} size="lg" />
                           </div>
                           <div className="ml-4">
-                            <div className="text-sm font-medium text-gray-900">
+                            <Link
+                              href={`/admin/users/${user.id}`}
+                              className="text-sm font-medium text-gray-900 hover:text-primary-700 hover:underline"
+                            >
                               {user.name || 'Nome non specificato'}
-                            </div>
+                            </Link>
                             <div className="text-sm text-gray-500">{user.email}</div>
                             {!user.emailVerified && (
                               <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800 mr-2">

@@ -87,6 +87,7 @@ describe('Purchase Flow Integration', () => {
       const createResult = await PurchaseService.createPurchase(testUser.id, testTrip.id);
       expect(createResult.success).toBe(true);
       expect(createResult.purchaseId).toBe('purchase-1');
+      expect(createResult.amount).toBe(15.5);
 
       // 3. Complete the purchase
       mockPrisma.tripPurchase.findUnique.mockResolvedValueOnce(newPurchase as any);
@@ -139,6 +140,30 @@ describe('Purchase Flow Integration', () => {
       const result = await PurchaseService.createPurchase(testUser.id, testTrip.id);
       expect(result.success).toBe(false);
       expect(result.error).toBe('Hai già acquistato questo viaggio');
+    });
+
+    it('should keep pending purchase original amount after trip price changes', async () => {
+      mockPrisma.user.findUnique.mockResolvedValueOnce(testUser as any);
+      mockPrisma.trip.findUnique.mockResolvedValueOnce({
+        ...testTrip,
+        price: 29.99,
+      } as any);
+      mockPrisma.tripPurchase.findFirst.mockResolvedValueOnce(null);
+      mockPrisma.tripPurchase.findFirst.mockResolvedValueOnce({
+        id: 'purchase-pending',
+        userId: testUser.id,
+        tripId: testTrip.id,
+        amount: 15.50,
+        status: PurchaseStatus.PENDING,
+        createdAt: new Date(),
+      } as any);
+
+      const result = await PurchaseService.createPurchase(testUser.id, testTrip.id);
+
+      expect(result.success).toBe(true);
+      expect(result.purchaseId).toBe('purchase-pending');
+      expect(result.amount).toBe(15.5);
+      expect(mockPrisma.tripPurchase.create).not.toHaveBeenCalled();
     });
   });
 

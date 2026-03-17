@@ -28,6 +28,7 @@ interface PurchasePageClientProps {
 export default function PurchasePageClient({ trip }: PurchasePageClientProps) {
   const router = useRouter();
   const [purchaseId, setPurchaseId] = useState<string | null>(null);
+  const [purchaseAmount, setPurchaseAmount] = useState<number>(trip.price);
   const [step, setStep] = useState<'review' | 'payment' | 'success' | 'error'>('review');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -54,6 +55,7 @@ export default function PurchasePageClient({ trip }: PurchasePageClientProps) {
       const data = await response.json();
       
       setPurchaseId(data.purchaseId);
+      setPurchaseAmount(typeof data.amount === 'number' ? data.amount : trip.price);
 
       if (data.free) {
         setStep('success');
@@ -171,14 +173,14 @@ export default function PurchasePageClient({ trip }: PurchasePageClientProps) {
             <div className="p-6">
               <div className="mb-6 p-4 bg-gray-50 rounded-lg">
                 <h3 className="font-medium text-gray-900 mb-2">{trip.title}</h3>
-                <div className="text-2xl font-bold text-blue-600">
-                  €{trip.price.toFixed(2)}
+                  <div className="text-2xl font-bold text-blue-600">
+                  €{purchaseAmount.toFixed(2)}
                 </div>
               </div>
 
               <StripePaymentForm
                 purchaseId={purchaseId}
-                amount={trip.price}
+                amount={purchaseAmount}
                 onSuccess={handlePaymentSuccess}
                 onError={handlePaymentError}
               />

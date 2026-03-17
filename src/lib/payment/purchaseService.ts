@@ -30,6 +30,14 @@ export interface TripWithPurchaseInfo {
   purchase?: PurchaseInfo;
 }
 
+interface CreatePurchaseResult {
+  success: boolean;
+  purchaseId?: string;
+  amount?: number;
+  error?: string;
+  free?: boolean;
+}
+
 export class PurchaseService {
   static async hasPurchasedTrip(userId: string, tripId: string): Promise<boolean> {
     if (!userId || !tripId) return false;
@@ -115,7 +123,7 @@ export class PurchaseService {
     return purchases;
   }
 
-  static async createPurchase(userId: string, tripId: string): Promise<{ success: boolean; purchaseId?: string; error?: string; free?: boolean }> {
+  static async createPurchase(userId: string, tripId: string): Promise<CreatePurchaseResult> {
     try {
       const user = await prisma.user.findUnique({
         where: { id: userId },
@@ -204,7 +212,7 @@ export class PurchaseService {
         });
 
         
-        return { success: true, purchaseId: purchase.id, free: true };
+        return { success: true, purchaseId: purchase.id, amount: 0, free: true };
       }
 
       // Check if there's an existing PENDING purchase to reuse
@@ -220,8 +228,11 @@ export class PurchaseService {
       });
 
       if (existingPendingPurchase) {
-        
-        return { success: true, purchaseId: existingPendingPurchase.id };
+        return {
+          success: true,
+          purchaseId: existingPendingPurchase.id,
+          amount: Number(existingPendingPurchase.amount)
+        };
       }
 
       // For REFUNDED or FAILED: always create a new purchase
@@ -245,7 +256,11 @@ export class PurchaseService {
         }
       });
 
-      return { success: true, purchaseId: purchase.id };
+      return {
+        success: true,
+        purchaseId: purchase.id,
+        amount: Number(purchase.amount)
+      };
 
     } catch (error) {
       console.error('❌ [PURCHASE SERVICE] Errore nella creazione dell\'acquisto:', error);

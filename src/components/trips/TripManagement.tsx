@@ -8,7 +8,7 @@ import { UserRole } from '@/types/profile'
 import { TripValidationError, Trip } from '@/types/trip'
 import { User as UserType } from '@/types/profile';
 import { TripReorderSection } from '@/components/admin/TripReorderSection'
-import { Calendar, MapPin, User, Clock, Navigation, Eye, Edit, AlertTriangle, Send, Trash2, RotateCcw, ArrowUpDown, List, UserPlus } from 'lucide-react'
+import { Calendar, MapPin, User, Clock, Navigation, Eye, Edit, AlertTriangle, Send, Trash2, RotateCcw, ArrowUpDown, List, UserPlus, Euro } from 'lucide-react'
 import { getTripStatusColor, getTripStatusLabel } from '@/lib/utils/tripStatusUtils'
 import AssegnaRangerDialog from '@/components/admin/AssegnaRangerDialog'
 
@@ -40,6 +40,10 @@ export default function TripManagement() {
   const [deletingTrip, setDeletingTrip] = useState<string | null>(null)
   const [tripToDelete, setTripToDelete] = useState<TripWithUser | null>(null)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [tripToEditPrice, setTripToEditPrice] = useState<TripWithUser | null>(null)
+  const [showPriceModal, setShowPriceModal] = useState(false)
+  const [priceValue, setPriceValue] = useState('')
+  const [updatingPriceTripId, setUpdatingPriceTripId] = useState<string | null>(null)
   const [validationErrors, setValidationErrors] = useState<Record<string, TripValidationError[]>>({})
   const [showReorderMode, setShowReorderMode] = useState(false)
   const [allTripsForReorder, setAllTripsForReorder] = useState<TripWithUser[]>([])
@@ -195,6 +199,59 @@ export default function TripManagement() {
     setTripToDelete(null)
   }
 
+  const openPriceModal = (trip: TripWithUser) => {
+    setTripToEditPrice(trip)
+    setPriceValue(Number(trip.price).toFixed(2))
+    setShowPriceModal(true)
+  }
+
+  const closePriceModal = () => {
+    if (updatingPriceTripId) return
+    setShowPriceModal(false)
+    setTripToEditPrice(null)
+    setPriceValue('')
+  }
+
+  const handleUpdatePrice = async () => {
+    if (!tripToEditPrice) return
+
+    const parsedPrice = Number.parseFloat(priceValue.replace(',', '.'))
+    if (!Number.isFinite(parsedPrice) || parsedPrice < 0) {
+      setError('Inserisci un prezzo valido maggiore o uguale a 0')
+      return
+    }
+
+    try {
+      setUpdatingPriceTripId(tripToEditPrice.id)
+      setError('')
+
+      const response = await fetch(`/api/admin/trips/${tripToEditPrice.id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          price: Number(parsedPrice.toFixed(2))
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Errore nell\'aggiornamento del prezzo')
+      }
+
+      setUpdatingPriceTripId(null)
+      showSuccess(`Prezzo di "${tripToEditPrice.title}" aggiornato`)
+      closePriceModal()
+      await fetchTrips()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Errore sconosciuto')
+    } finally {
+      setUpdatingPriceTripId(null)
+    }
+  }
+
   useEffect(() => {
     if (session?.user?.role === UserRole.Sentinel) {
       fetchTrips()
@@ -218,6 +275,14 @@ export default function TripManagement() {
       month: 'short',
       day: 'numeric'
     }).format(new Date(date));
+  }
+
+  const formatPrice = (value: number | string) => {
+    const parsedValue = typeof value === 'number' ? value : Number(value)
+    return new Intl.NumberFormat('it-IT', {
+      style: 'currency',
+      currency: 'EUR'
+    }).format(parsedValue)
   }
 
   // Check permissions
@@ -393,26 +458,29 @@ export default function TripManagement() {
         {/* Trips table */}
         {!loading && tripsData && !showReorderMode && (
           <div className="bg-white shadow rounded-lg overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
+            <div className="overflow-x-hidden">
+              <table className="w-full table-fixed divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="w-[19%] px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Viaggio
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="w-[23%] px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Creatore
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="w-[9%] px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Stato
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="w-[8%] px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Durata
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="w-[8%] px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Prezzo
+                    </th>
+                    <th className="w-[11%] px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Creato
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="w-[22%] px-2 pr-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Azioni
                     </th>
                   </tr>
@@ -421,18 +489,18 @@ export default function TripManagement() {
                   {tripsData.trips.map((trip) => (
                     <Fragment key={trip.id}>
                       <tr className="hover:bg-gray-50">
-                      <td className="px-6 py-4">
+                      <td className="px-3 py-4">
                         <div className="flex items-start">
                           <div className="flex-shrink-0 h-12 w-12 bg-gradient-to-br from-primary-400 to-secondary-500 rounded-lg flex items-center justify-center">
                             <Navigation className="w-6 h-6 text-white" />
                           </div>
-                          <div className="ml-4">
+                          <div className="ml-2 min-w-0">
                             <div className="text-sm font-medium text-gray-900 line-clamp-1">
                               {trip.title}
                             </div>
-                            <div className="text-sm text-gray-500 flex items-center gap-1">
+                            <div className="text-sm text-gray-500 flex items-start gap-1">
                               <MapPin className="w-3 h-3" />
-                              {trip.destination}
+                              <span className="line-clamp-2">{trip.destination}</span>
                             </div>
                             <div className="text-xs text-gray-400 mt-1">
                               {trip.theme}
@@ -440,7 +508,7 @@ export default function TripManagement() {
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-2 py-4">
                         <div className="flex items-center">
                           <div className="flex-shrink-0 h-8 w-8">
                             {trip.user.image ? (
@@ -457,33 +525,39 @@ export default function TripManagement() {
                               </div>
                             )}
                           </div>
-                          <div className="ml-3">
-                            <div className="text-sm font-medium text-gray-900">
+                          <div className="ml-2 min-w-0">
+                            <div className="text-sm font-medium text-gray-900 truncate">
                               {trip.user.name || 'Nome non specificato'}
                             </div>
-                            <div className="text-sm text-gray-500">{trip.user.email}</div>
+                            <div className="text-sm text-gray-500 truncate">{trip.user.email}</div>
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-2 py-4 whitespace-nowrap">
                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getTripStatusColor(trip.status)}`}>
                           {getTripStatusLabel(trip.status)}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-2 py-4 whitespace-nowrap text-sm text-gray-900">
                         <div className="flex items-center gap-1">
                           <Clock className="w-4 h-4 text-gray-400" />
                           {trip.duration_days} giorni
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td className="px-2 py-4 whitespace-nowrap text-sm text-gray-900">
+                        <div className="font-medium">{formatPrice(trip.price as unknown as number)}</div>
+                        {Number(trip.price) === 0 && (
+                          <div className="text-xs text-green-600">Gratuito</div>
+                        )}
+                      </td>
+                      <td className="px-2 py-4 whitespace-nowrap text-sm text-gray-500">
                         <div className="flex items-center gap-1">
                           <Calendar className="w-3 h-3" />
                           {formatDate(trip.created_at)}
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <div className="flex items-center space-x-2">
+                      <td className="px-2 pr-4 py-4 whitespace-nowrap text-sm font-medium">
+                        <div className="flex items-center gap-0.5">
                           {/* View button */}
                           <a
                             href={`/trips/${trip.slug}`}
@@ -503,6 +577,15 @@ export default function TripManagement() {
                           >
                             <Edit className="w-4 h-4" />
                           </a>
+
+                          <button
+                            onClick={() => openPriceModal(trip)}
+                            disabled={updatingPriceTripId === trip.id}
+                            className="text-emerald-600 hover:text-emerald-900 p-1 rounded disabled:opacity-50"
+                            title="Modifica prezzo"
+                          >
+                            <Euro className="w-4 h-4" />
+                          </button>
 
                           {/* Assign Ranger button */}
                           <button
@@ -570,7 +653,7 @@ export default function TripManagement() {
                     {/* Validation errors row */}
                     {validationErrors[trip.id] && validationErrors[trip.id].length > 0 && (
                       <tr className="bg-amber-50">
-                        <td colSpan={6} className="px-6 py-4">
+                        <td colSpan={7} className="px-6 py-4">
                           <div className="flex items-start gap-3">
                             <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
                             <div className="flex-1">
@@ -750,6 +833,57 @@ export default function TripManagement() {
                     </div>
                   </div>
                 </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {showPriceModal && tripToEditPrice && (
+          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50" onClick={closePriceModal}>
+            <div className="relative top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-md bg-white" onClick={(e) => e.stopPropagation()}>
+              <div className="flex items-center justify-center w-12 h-12 mx-auto bg-emerald-100 rounded-full">
+                <Euro className="w-6 h-6 text-emerald-600" />
+              </div>
+              <div className="mt-4 text-center">
+                <h3 className="text-lg font-medium text-gray-900">Modifica prezzo</h3>
+                <p className="mt-2 text-sm text-gray-500">
+                  Aggiorna il prezzo del viaggio <strong>&ldquo;{tripToEditPrice.title}&rdquo;</strong>.
+                </p>
+              </div>
+
+              <div className="mt-6">
+                <label htmlFor="trip-price" className="block text-sm font-medium text-gray-700 mb-2">
+                  Nuovo prezzo
+                </label>
+                <input
+                  id="trip-price"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={priceValue}
+                  onChange={(e) => setPriceValue(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                />
+                <p className="mt-2 text-xs text-gray-500">
+                  Gli acquisti gi&agrave; creati mantengono il loro importo originario.
+                </p>
+              </div>
+
+              <div className="mt-6 flex gap-3">
+                <button
+                  onClick={closePriceModal}
+                  disabled={updatingPriceTripId === tripToEditPrice.id}
+                  className="w-full px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-md hover:bg-gray-200 disabled:opacity-50"
+                >
+                  Annulla
+                </button>
+                <button
+                  onClick={handleUpdatePrice}
+                  disabled={updatingPriceTripId === tripToEditPrice.id}
+                  className="w-full px-4 py-2 bg-emerald-600 text-white text-sm font-medium rounded-md hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {updatingPriceTripId === tripToEditPrice.id ? 'Salvataggio...' : 'Salva prezzo'}
+                </button>
               </div>
             </div>
           </div>

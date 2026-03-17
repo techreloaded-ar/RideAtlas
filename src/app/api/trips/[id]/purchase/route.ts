@@ -35,6 +35,7 @@ export async function POST(
     const response = {
       success: true,
       purchaseId: result.purchaseId,
+      amount: result.amount ?? null,
       free: result.free || false,
       message: result.free ? 'Viaggio acquisito gratuitamente' : 'Acquisto iniziato con successo'
     };
