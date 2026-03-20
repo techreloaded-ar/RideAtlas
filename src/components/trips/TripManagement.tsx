@@ -241,7 +241,6 @@ export default function TripManagement() {
         throw new Error(data.error || 'Errore nell\'aggiornamento del prezzo')
       }
 
-      setUpdatingPriceTripId(null)
       showSuccess(`Prezzo di "${tripToEditPrice.title}" aggiornato`)
       closePriceModal()
       await fetchTrips()
@@ -257,6 +256,16 @@ export default function TripManagement() {
       fetchTrips()
     }
   }, [fetchTrips, session])
+
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && showPriceModal) {
+        closePriceModal()
+      }
+    }
+    document.addEventListener('keydown', handleEscape)
+    return () => document.removeEventListener('keydown', handleEscape)
+  }, [showPriceModal])
 
   const handleSearchChange = (value: string) => {
     setSearch(value)
@@ -545,7 +554,7 @@ export default function TripManagement() {
                         </div>
                       </td>
                       <td className="px-2 py-4 whitespace-nowrap text-sm text-gray-900">
-                        <div className="font-medium">{formatPrice(trip.price as unknown as number)}</div>
+                        <div className="font-medium">{formatPrice(Number(trip.price))}</div>
                         {Number(trip.price) === 0 && (
                           <div className="text-xs text-green-600">Gratuito</div>
                         )}

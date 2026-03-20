@@ -173,7 +173,7 @@ export default function PurchasePageClient({ trip }: PurchasePageClientProps) {
             <div className="p-6">
               <div className="mb-6 p-4 bg-gray-50 rounded-lg">
                 <h3 className="font-medium text-gray-900 mb-2">{trip.title}</h3>
-                  <div className="text-2xl font-bold text-blue-600">
+                <div className="text-2xl font-bold text-blue-600">
                   €{purchaseAmount.toFixed(2)}
                 </div>
               </div>

@@ -7,7 +7,6 @@ import { ArrowLeft, Loader2, Mail, User, Bike, Shield, MapPinned, Save } from 'l
 import UserAvatar from '@/components/ui/UserAvatar'
 import { useToast } from '@/hooks/ui/useToast'
 import { UserRole, UserRoleLabels, UserRoleDescriptions } from '@/types/profile'
-import type { Session } from 'next-auth'
 
 interface AdminUserTrip {
   id: string
@@ -46,7 +45,12 @@ export default function AdminUserDetail({ userId }: AdminUserDetailProps) {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    name: string;
+    role: UserRole;
+    bio: string;
+    bikeDescription: string;
+  }>({
     name: '',
     role: UserRole.Explorer,
     bio: '',
@@ -174,10 +178,12 @@ export default function AdminUserDetail({ userId }: AdminUserDetailProps) {
   if (!user) return null
 
   const avatarUser = {
+    id: user.id,
     name: user.name,
     email: user.email,
     image: user.image,
-  } as Session['user']
+    role: user.role,
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">

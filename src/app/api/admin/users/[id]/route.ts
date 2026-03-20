@@ -76,7 +76,15 @@ export async function PATCH(
       )
     }
 
-    // Aggiorna il ruolo
+    // Non permettere di declassare un Sentinel
+    if (role !== undefined && existingUser.role === UserRole.Sentinel && role !== UserRole.Sentinel) {
+      return NextResponse.json(
+        { error: 'Non è possibile modificare il ruolo di un Sentinel' },
+        { status: 403 }
+      )
+    }
+
+    // Aggiorna i dati utente
     const updateData: {
       role?: UserRole
       name?: string
@@ -127,12 +135,7 @@ export async function PATCH(
     }
 
     return NextResponse.json({
-      message: role !== undefined &&
-        name === undefined &&
-        bio === undefined &&
-        bikeDescription === undefined
-        ? 'Ruolo utente aggiornato con successo'
-        : 'Dati utente aggiornati con successo',
+      message: 'Dati utente aggiornati con successo',
       user: updatedUser
     })
 
