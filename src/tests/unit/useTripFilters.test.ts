@@ -16,24 +16,27 @@ jest.mock('@/hooks/useDebounce', () => {
 });
 
 describe('useTripFilters', () => {
-  const mockTrips: (SearchableTrip & { id: string })[] = [
+  const mockTrips: (SearchableTrip & { id: string; duration_days: number })[] = [
     {
       id: '1',
       title: 'Viaggio in Toscana',
       destination: 'Firenze, Italia',
-      tags: ['cultura', 'arte', 'vino']
+      tags: ['cultura', 'arte', 'vino'],
+      duration_days: 1
     },
     {
       id: '2',
       title: 'Tour delle Dolomiti',
       destination: 'Alto Adige, Italia',
-      tags: ['montagna', 'natura', 'avventura']
+      tags: ['montagna', 'natura', 'avventura'],
+      duration_days: 2
     },
     {
       id: '3',
       title: 'Costa Amalfitana',
       destination: 'Campania, Italia',
-      tags: ['mare', 'panorama', 'relax']
+      tags: ['mare', 'panorama', 'relax'],
+      duration_days: 4
     }
   ];
 
@@ -217,5 +220,35 @@ describe('useTripFilters', () => {
 
     expect(result.current.searchTerm).toBe('test'); // Valore immediato
     expect(result.current.debouncedSearchTerm).toBe('test'); // Valore con debouncing (mockato per essere immediato)
+  });
+
+  it('dovrebbe filtrare per zona geografica Nord/Centro/Sud', () => {
+    const { result } = renderHook(() => useTripFilters(mockTrips));
+
+    act(() => {
+      result.current.setZoneFilter('centro');
+    });
+
+    expect(result.current.filteredTrips).toHaveLength(1);
+    expect(result.current.filteredTrips[0].title).toBe('Viaggio in Toscana');
+    expect(result.current.hasQuickFilters).toBe(true);
+  });
+
+  it('dovrebbe filtrare per macro durata', () => {
+    const { result } = renderHook(() => useTripFilters(mockTrips));
+
+    act(() => {
+      result.current.setDurationFilter('2');
+    });
+
+    expect(result.current.filteredTrips).toHaveLength(1);
+    expect(result.current.filteredTrips[0].title).toBe('Tour delle Dolomiti');
+
+    act(() => {
+      result.current.setDurationFilter('3plus');
+    });
+
+    expect(result.current.filteredTrips).toHaveLength(1);
+    expect(result.current.filteredTrips[0].title).toBe('Costa Amalfitana');
   });
 });

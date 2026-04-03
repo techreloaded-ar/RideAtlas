@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Navigation } from 'lucide-react';
 import TripSearchBar from '@/components/trips/TripSearchBar';
 import TripGrid from '@/components/trips/TripGrid';
+import TripDiscoveryPanel from '@/components/trips/TripDiscoveryPanel';
 import useTripFilters from '@/hooks/useTripFilters';
 import { Prisma, UserRole } from '@prisma/client';
 import { MediaItem } from '@/types/trip';
@@ -58,13 +59,31 @@ const TripsPageClient: React.FC<TripsPageClientProps> = ({ trips, userRole }) =>
     isValidSearch,
     searchError,
     resultsCount,
+    zoneFilter,
+    setZoneFilter,
+    durationFilter,
+    setDurationFilter,
+    hasQuickFilters,
     clearSearch,
   } = useTripFilters(trips);
 
   return (
     <section className="container mx-auto px-4 py-12">
-      {/* Barra di ricerca */}
+      {/* Sezione discovery con filtri rapidi */}
       <div className="mb-8">
+        <TripDiscoveryPanel
+          zoneFilter={zoneFilter}
+          onZoneChange={setZoneFilter}
+          durationFilter={durationFilter}
+          onDurationChange={setDurationFilter}
+          hasQuickFilters={hasQuickFilters || Boolean(searchTerm)}
+          onResetFilters={clearSearch}
+          resultsCount={resultsCount}
+        />
+      </div>
+
+      {/* Barra di ricerca testuale */}
+      <div className="mb-10">
         <TripSearchBar
           searchTerm={searchTerm}
           onSearchChange={setSearchTerm}
