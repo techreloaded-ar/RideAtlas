@@ -2,8 +2,10 @@ import { useState, useMemo, useEffect } from 'react';
 import useDebounce from './useDebounce';
 import { filterTrips, validateSearchTerm, type SearchableTrip } from '@/lib/utils/searchUtils';
 import {
+  ActiveTripDurationFilters,
+  ActiveTripZoneFilters,
   TripDurationFilter,
-  TripZoneFilter,
+  TripZone,
   matchesDurationFilter,
   matchesZoneFilter,
 } from '@/lib/utils/tripDiscoveryUtils';
@@ -31,15 +33,17 @@ export interface UseTripFiltersReturn<T extends SearchableTrip> {
   /** Numero totale di risultati trovati */
   resultsCount: number;
   /** Filtro geografico Nord/Centro/Sud */
-  zoneFilter: TripZoneFilter;
+  zoneFilter: ActiveTripZoneFilters;
   /** Aggiorna il filtro geografico */
-  setZoneFilter: (zone: TripZoneFilter) => void;
+  setZoneFilter: (zone: TripZone) => void;
   /** Filtro per durata del viaggio */
-  durationFilter: TripDurationFilter;
+  durationFilter: ActiveTripDurationFilters;
   /** Aggiorna il filtro durata */
-  setDurationFilter: (duration: TripDurationFilter) => void;
+  setDurationFilter: (duration: Exclude<TripDurationFilter, 'all'>) => void;
   /** Indica se almeno un filtro rapido è attivo */
   hasQuickFilters: boolean;
+  /** Resetta solo i filtri rapidi */
+  resetQuickFilters: () => void;
   /** Funzione per resettare la ricerca */
   clearSearch: () => void;
 }
@@ -57,8 +61,22 @@ function useTripFilters<T extends SearchableTrip & { duration_days?: number }>(
   debounceDelay: number = 300
 ): UseTripFiltersReturn<T> {
   const [searchTerm, setSearchTerm] = useState<string>('');
-  const [zoneFilter, setZoneFilter] = useState<TripZoneFilter>('all');
-  const [durationFilter, setDurationFilter] = useState<TripDurationFilter>('all');
+  const [zoneFilter, setZoneFilterState] = useState<ActiveTripZoneFilters>([]);
+  const [durationFilter, setDurationFilterState] = useState<ActiveTripDurationFilters>([]);
+
+  const toggleFilterValue = <TValue,>(currentFilters: TValue[], value: TValue): TValue[] => {
+    return currentFilters.includes(value)
+      ? currentFilters.filter((filterValue) => filterValue !== value)
+      : [...currentFilters, value];
+  };
+
+  const setZoneFilter = (zone: TripZone) => {
+    setZoneFilterState((currentFilters) => toggleFilterValue(currentFilters, zone));
+  };
+
+  const setDurationFilter = (duration: Exclude<TripDurationFilter, 'all'>) => {
+    setDurationFilterState((currentFilters) => toggleFilterValue(currentFilters, duration));
+  };
   
   // Applica debouncing al termine di ricerca per ottimizzare le performance
   const debouncedSearchTerm = useDebounce(searchTerm, debounceDelay);
@@ -80,8 +98,7 @@ function useTripFilters<T extends SearchableTrip & { duration_days?: number }>(
 
     // Applica i filtri rapidi per area geografica e durata
     return textFilteredTrips.filter((trip) => {
-      const tripLocationText = `${trip.destination} ${trip.tags.join(' ')}`;
-      const matchesZone = matchesZoneFilter(tripLocationText, zoneFilter);
+      const matchesZone = matchesZoneFilter(trip.destination, trip.tags, zoneFilter);
       const matchesDuration = matchesDurationFilter(trip.duration_days, durationFilter);
       return matchesZone && matchesDuration;
     });
@@ -91,13 +108,17 @@ function useTripFilters<T extends SearchableTrip & { duration_days?: number }>(
   const hasResults = filteredTrips.length > 0;
   const isSearching = searchTerm !== debouncedSearchTerm;
   const resultsCount = filteredTrips.length;
-  const hasQuickFilters = zoneFilter !== 'all' || durationFilter !== 'all';
+  const hasQuickFilters = zoneFilter.length > 0 || durationFilter.length > 0;
+
+  const resetQuickFilters = () => {
+    setZoneFilterState([]);
+    setDurationFilterState([]);
+  };
   
   // Funzione per resettare la ricerca
   const clearSearch = () => {
     setSearchTerm('');
-    setZoneFilter('all');
-    setDurationFilter('all');
+    resetQuickFilters();
   };
   
   // Reset automatico quando la lista dei viaggi cambia (es. nuovi dati dal server)
@@ -123,6 +144,7 @@ function useTripFilters<T extends SearchableTrip & { duration_days?: number }>(
     durationFilter,
     setDurationFilter,
     hasQuickFilters,
+    resetQuickFilters,
     clearSearch,
   };
 }

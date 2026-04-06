@@ -20,8 +20,8 @@ describe('useTripFilters', () => {
     {
       id: '1',
       title: 'Viaggio in Toscana',
-      destination: 'Firenze, Italia',
-      tags: ['cultura', 'arte', 'vino'],
+      destination: 'Toscana, Italia',
+      tags: ['toscana', 'cultura', 'arte', 'vino'],
       duration_days: 1
     },
     {
@@ -49,6 +49,8 @@ describe('useTripFilters', () => {
     expect(result.current.isSearching).toBe(false);
     expect(result.current.isValidSearch).toBe(true);
     expect(result.current.resultsCount).toBe(3);
+    expect(result.current.zoneFilter).toEqual([]);
+    expect(result.current.durationFilter).toEqual([]);
   });
 
   it('dovrebbe filtrare i viaggi quando cambia il termine di ricerca', () => {
@@ -188,7 +190,8 @@ describe('useTripFilters', () => {
       id: '4',
       title: 'Viaggio in Francia',
       destination: 'Parigi, Francia',
-      tags: ['cultura', 'città']
+      tags: ['cultura', 'città'],
+      duration_days: 3
     };
     rerender({ trips: [...mockTrips, newTrip] });
     
@@ -234,6 +237,22 @@ describe('useTripFilters', () => {
     expect(result.current.hasQuickFilters).toBe(true);
   });
 
+  it('dovrebbe permettere la selezione multipla delle zone', () => {
+    const { result } = renderHook(() => useTripFilters(mockTrips));
+
+    act(() => {
+      result.current.setZoneFilter('nord');
+      result.current.setZoneFilter('centro');
+    });
+
+    expect(result.current.zoneFilter).toEqual(['nord', 'centro']);
+    expect(result.current.filteredTrips).toHaveLength(2);
+    expect(result.current.filteredTrips.map((trip) => trip.title)).toEqual([
+      'Viaggio in Toscana',
+      'Tour delle Dolomiti',
+    ]);
+  });
+
   it('dovrebbe filtrare per macro durata', () => {
     const { result } = renderHook(() => useTripFilters(mockTrips));
 
@@ -246,9 +265,71 @@ describe('useTripFilters', () => {
 
     act(() => {
       result.current.setDurationFilter('3plus');
+      result.current.setDurationFilter('2');
     });
 
     expect(result.current.filteredTrips).toHaveLength(1);
     expect(result.current.filteredTrips[0].title).toBe('Costa Amalfitana');
+  });
+
+  it('dovrebbe permettere la selezione multipla delle durate', () => {
+    const { result } = renderHook(() => useTripFilters(mockTrips));
+
+    act(() => {
+      result.current.setDurationFilter('1');
+      result.current.setDurationFilter('2');
+    });
+
+    expect(result.current.durationFilter).toEqual(['1', '2']);
+    expect(result.current.filteredTrips).toHaveLength(2);
+  });
+
+  it('dovrebbe escludere i viaggi esteri dai filtri zona', () => {
+    const { result } = renderHook(() =>
+      useTripFilters([
+        ...mockTrips,
+        {
+          id: '4',
+          title: 'Rutenia - Tra Slovacchia e Carpazi',
+          destination: 'Carpazi orientali, Europa orientale',
+          tags: ['carpazi', 'slovacchia', 'romania', 'ucraina'],
+          duration_days: 8,
+        },
+      ])
+    );
+
+    act(() => {
+      result.current.setZoneFilter('centro');
+    });
+
+    expect(result.current.filteredTrips).toHaveLength(1);
+    expect(result.current.filteredTrips[0].title).toBe('Viaggio in Toscana');
+  });
+
+  it('dovrebbe classificare Emilia-Romagna come nord senza falsi positivi su roma', () => {
+    const { result } = renderHook(() =>
+      useTripFilters([
+        {
+          id: '4',
+          title: 'Le Terre di Matilde',
+          destination: 'Emilia-Romagna, Italia',
+          tags: ['storia', 'Emilia-Romagna', 'castelli'],
+          duration_days: 2,
+        },
+      ])
+    );
+
+    act(() => {
+      result.current.setZoneFilter('nord');
+    });
+
+    expect(result.current.filteredTrips).toHaveLength(1);
+
+    act(() => {
+      result.current.setZoneFilter('nord');
+      result.current.setZoneFilter('centro');
+    });
+
+    expect(result.current.filteredTrips).toHaveLength(0);
   });
 });

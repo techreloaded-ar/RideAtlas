@@ -2,20 +2,26 @@
 
 import React from 'react';
 import { Compass, Mountain, Waves, Sun, CalendarDays, Sparkles } from 'lucide-react';
-import { TripDurationFilter, TripZoneFilter } from '@/lib/utils/tripDiscoveryUtils';
+import {
+  ActiveTripDurationFilters,
+  ActiveTripZoneFilters,
+  TripDurationFilter,
+  TripZone,
+} from '@/lib/utils/tripDiscoveryUtils';
 
 interface TripDiscoveryPanelProps {
-  zoneFilter: TripZoneFilter;
-  onZoneChange: (zone: TripZoneFilter) => void;
-  durationFilter: TripDurationFilter;
-  onDurationChange: (duration: TripDurationFilter) => void;
+  zoneFilter: ActiveTripZoneFilters;
+  onZoneChange: (zone: TripZone) => void;
+  durationFilter: ActiveTripDurationFilters;
+  onDurationChange: (duration: Exclude<TripDurationFilter, 'all'>) => void;
   hasQuickFilters: boolean;
+  onShowAllTrips: () => void;
   onResetFilters: () => void;
   resultsCount: number;
 }
 
 const ZONE_OPTIONS: Array<{
-  key: Exclude<TripZoneFilter, 'all'>;
+  key: TripZone;
   label: string;
   caption: string;
   icon: React.ComponentType<{ className?: string }>;
@@ -41,17 +47,10 @@ const TripDiscoveryPanel: React.FC<TripDiscoveryPanelProps> = ({
   durationFilter,
   onDurationChange,
   hasQuickFilters,
+  onShowAllTrips,
   onResetFilters,
   resultsCount,
 }) => {
-  const toggleZone = (zone: Exclude<TripZoneFilter, 'all'>) => {
-    onZoneChange(zoneFilter === zone ? 'all' : zone);
-  };
-
-  const toggleDuration = (duration: Exclude<TripDurationFilter, 'all'>) => {
-    onDurationChange(durationFilter === duration ? 'all' : duration);
-  };
-
   return (
     <div className="relative overflow-hidden rounded-3xl border border-green-200/60 bg-gradient-to-br from-green-950 via-green-900 to-emerald-900 p-6 text-white shadow-2xl shadow-emerald-900/30 sm:p-8">
       <div
@@ -72,7 +71,7 @@ const TripDiscoveryPanel: React.FC<TripDiscoveryPanelProps> = ({
             Seleziona la tua prossima rotta
           </h2>
           <p className="mt-3 max-w-2xl text-sm text-emerald-50/85 md:text-base">
-            Parti da due scelte semplici: <strong>zona d&apos;Italia</strong> e <strong>durata</strong>. RideAtlas ti mostra subito i viaggi coerenti.
+            Parti da due scelte semplici: <strong>zona d&apos;Italia</strong> e <strong>durata</strong>. Puoi combinare piu filtri in append e tornare in ogni momento a <strong>tutti i viaggi</strong>.
           </p>
         </div>
 
@@ -86,15 +85,33 @@ const TripDiscoveryPanel: React.FC<TripDiscoveryPanelProps> = ({
         <section className="rounded-2xl border border-white/20 bg-white/10 p-5 backdrop-blur">
           <h3 className="mb-4 font-display text-xl font-semibold">Mappa zone Italia</h3>
           <div className="space-y-3">
+            <button
+              type="button"
+              onClick={onShowAllTrips}
+              className={`group relative w-full overflow-hidden rounded-xl border p-4 text-left transition-all duration-300 ${
+                !hasQuickFilters
+                  ? 'border-emerald-100 bg-emerald-50/20 shadow-lg shadow-emerald-950/30'
+                  : 'border-emerald-100/20 bg-black/20 hover:border-emerald-100/60 hover:bg-emerald-200/10'
+              }`}
+            >
+              <div className="flex items-start gap-3">
+                <Compass className={`mt-0.5 h-5 w-5 ${!hasQuickFilters ? 'text-emerald-50' : 'text-emerald-100/80'}`} />
+                <div>
+                  <p className={`font-semibold ${!hasQuickFilters ? 'text-emerald-50' : 'text-white'}`}>Tutti i viaggi</p>
+                  <p className="mt-1 text-sm text-emerald-50/80">Mostra l&apos;intero catalogo senza filtri rapidi</p>
+                </div>
+              </div>
+            </button>
+
             {ZONE_OPTIONS.map((zone) => {
               const Icon = zone.icon;
-              const active = zoneFilter === zone.key;
+              const active = zoneFilter.includes(zone.key);
 
               return (
                 <button
                   key={zone.key}
                   type="button"
-                  onClick={() => toggleZone(zone.key)}
+                  onClick={() => onZoneChange(zone.key)}
                   className={`group relative w-full overflow-hidden rounded-xl border p-4 text-left transition-all duration-300 ${
                     active
                       ? 'border-lime-300 bg-lime-300/20 shadow-lg shadow-lime-900/40'
@@ -118,13 +135,13 @@ const TripDiscoveryPanel: React.FC<TripDiscoveryPanelProps> = ({
           <h3 className="mb-4 font-display text-xl font-semibold">Macro tipologie viaggio</h3>
           <div className="space-y-3">
             {DURATION_OPTIONS.map((option) => {
-              const active = durationFilter === option.key;
+              const active = durationFilter.includes(option.key);
 
               return (
                 <button
                   key={option.key}
                   type="button"
-                  onClick={() => toggleDuration(option.key)}
+                  onClick={() => onDurationChange(option.key)}
                   className={`w-full rounded-xl border p-4 text-left transition-all duration-300 ${
                     active
                       ? 'border-amber-200 bg-amber-300/20 shadow-lg shadow-amber-950/30'
@@ -143,7 +160,7 @@ const TripDiscoveryPanel: React.FC<TripDiscoveryPanelProps> = ({
       <div className="relative mt-6 flex flex-col gap-3 rounded-2xl border border-emerald-100/25 bg-black/20 p-4 text-sm text-emerald-50/90 sm:flex-row sm:items-center sm:justify-between">
         <p className="flex items-center gap-2">
           <CalendarDays className="h-4 w-4" />
-          Clicca di nuovo su un filtro attivo per deselezionarlo.
+          I pulsanti sono cumulativi: puoi selezionare piu zone e piu durate. Clicca di nuovo su un filtro attivo per deselezionarlo.
         </p>
         {hasQuickFilters && (
           <button

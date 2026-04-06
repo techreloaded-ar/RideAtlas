@@ -64,6 +64,7 @@ const TripsPageClient: React.FC<TripsPageClientProps> = ({ trips, userRole }) =>
     durationFilter,
     setDurationFilter,
     hasQuickFilters,
+    resetQuickFilters,
     clearSearch,
   } = useTripFilters(trips);
 
@@ -76,7 +77,8 @@ const TripsPageClient: React.FC<TripsPageClientProps> = ({ trips, userRole }) =>
           onZoneChange={setZoneFilter}
           durationFilter={durationFilter}
           onDurationChange={setDurationFilter}
-          hasQuickFilters={hasQuickFilters || Boolean(searchTerm)}
+          hasQuickFilters={hasQuickFilters}
+          onShowAllTrips={resetQuickFilters}
           onResetFilters={clearSearch}
           resultsCount={resultsCount}
         />
