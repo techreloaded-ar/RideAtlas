@@ -1,47 +1,52 @@
 # Dipendenze
 node_modules/
+
+# Build e output
 .next/
+out/
+dist/
 
-# File di ambiente
-.env*.local
+# Codice generato
+/src/generated/prisma
+
+# File di ambiente e configurazione locale
 .env
+.env*.local
+*.local
 
-# File di sistema
-.DS_Store
-
-# File di debug
+# Log di debug
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# File di build/dist
-out/
-dist/
+# Test
+coverage/
 
-# IDE configuration folders
+# Cache e file temporanei
+.cache/
+*.tmp
+*.temp
+
+# File di sistema
+.DS_Store
+
+# IDE ed editor
 .idea/
 .vscode/
 .cursor/
 
-# File di test
-coverage/
-
-# File temporanei
-*.tmp
-*.temp
-
-# File di configurazione locale
-*.local
-
-# File di cache
-.cache/
-/src/generated/prisma
-CLAUDE.md
-.github/
-.claude/
-.bmad-core/
-.kiro/
+# Strumenti e agenti AI
+.agents/
+.archetipo/
 .augment/
+.bmad-core/
+.claude/
+.kiro/
 .specify/
 specs/
+AGENTS.md
+CLAUDE.md
 GEMINI.md
+
+# GitHub
+.github/
