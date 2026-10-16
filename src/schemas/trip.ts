@@ -82,6 +82,38 @@ const recommendedSeasons = [
   'Inverno'
 ] as const
 
+// Mezzi di trasporto validi
+const vehicleOptions = ['MOTO', 'BICI', 'EBIKE', 'MONOPATTINO'] as const
+
+export type VehicleValue = (typeof vehicleOptions)[number]
+
+export const VehicleOptions = vehicleOptions
+
+export const VehicleLabels: Record<VehicleValue, string> = {
+  MOTO: 'Moto',
+  BICI: 'Bici',
+  EBIKE: 'E-bike',
+  MONOPATTINO: 'Monopattino',
+}
+
+// Caratteristiche offerte solo per la moto (assunzione reversibile: il PRD non definisce la regola)
+const motoOnlyCharacteristics: readonly string[] = ['Autostrada', 'Presenza pedaggi']
+
+export function getCharacteristicOptionsForVehicle(
+  vehicle?: VehicleValue | null
+): (typeof characteristicOptions)[number][] {
+  if (!vehicle || vehicle === 'MOTO') return [...characteristicOptions]
+  return characteristicOptions.filter((c) => !motoOnlyCharacteristics.includes(c))
+}
+
+export function filterCharacteristicsForVehicle<T extends string>(
+  characteristics: readonly T[],
+  vehicle?: VehicleValue | null
+): T[] {
+  const allowed: readonly string[] = getCharacteristicOptionsForVehicle(vehicle)
+  return characteristics.filter((c) => allowed.includes(c))
+}
+
 // Schema principale per TripCreationData
 export const tripFormSchema = z.object({
   title: z.string()
@@ -96,6 +128,7 @@ export const tripFormSchema = z.object({
   theme: z.string()
     .min(1, 'Il tema è obbligatorio')
     .max(100, 'Il tema non può superare 100 caratteri'),
+  vehicle: z.enum(vehicleOptions).optional(),
   characteristics: z.array(z.enum(characteristicOptions)),
   recommended_seasons: z.array(z.enum(recommendedSeasons)),
   tags: z.array(z.string()),

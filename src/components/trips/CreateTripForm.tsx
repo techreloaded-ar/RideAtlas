@@ -20,6 +20,7 @@ const CreateTripForm = () => {
       summary: '',
       destination: '',
       theme: '',
+      vehicle: 'MOTO',
       characteristics: [],
       recommended_seasons: [],
       tags: [],

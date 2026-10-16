@@ -3,13 +3,14 @@
 
 import { UseFormSetError } from 'react-hook-form';
 import type { TripWithStagesData } from '@/schemas/trip';
-import { serverErrorSchema } from '@/schemas/trip';
+import { serverErrorSchema, VehicleOptions, type VehicleValue } from '@/schemas/trip';
 
 export interface TransformedTripData {
   title: string;
   summary: string;
   destination: string;
   theme: string;
+  vehicle?: string;
   characteristics: string[];
   recommended_seasons: string[];
   tags: string[];
@@ -158,6 +159,9 @@ export function transformApiDataToFormData(tripData: Record<string, unknown>): T
     summary: (tripData.summary as string) || '',
     destination: (tripData.destination as string) || '',
     theme: (tripData.theme as string) || '',
+    vehicle: VehicleOptions.includes(tripData.vehicle as VehicleValue)
+      ? (tripData.vehicle as VehicleValue)
+      : 'MOTO',
     characteristics: (tripData.characteristics as TripWithStagesData['characteristics']) || [],
     recommended_seasons: (tripData.recommended_seasons as TripWithStagesData['recommended_seasons']) || [],
     tags: (tripData.tags as string[]) || [],
