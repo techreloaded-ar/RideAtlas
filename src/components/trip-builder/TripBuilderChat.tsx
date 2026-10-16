@@ -8,6 +8,7 @@ import DistanceWarningCard from '@/components/ui/DistanceWarningCard';
 import SuggestedPrompts from '@/components/trip-builder/SuggestedPrompts';
 import ItineraryDisplay from '@/components/trips/ItineraryDisplay';
 import MarkdownRenderer from '@/components/ui/MarkdownRenderer';
+import { VehicleOptions, VehicleLabels, type VehicleValue } from '@/schemas/trip';
 
 interface Message {
   id: string;
@@ -45,6 +46,7 @@ export default function TripBuilderChat() {
   ]);
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [vehicle, setVehicle] = useState<VehicleValue>('MOTO');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -79,6 +81,7 @@ export default function TripBuilderChat() {
         },
         body: JSON.stringify({
           message: message,
+          vehicle,
           conversationHistory: messages.slice(-10), // Send last 10 messages for context
         }),
       });
@@ -146,6 +149,26 @@ export default function TripBuilderChat() {
           </div>
         </div>
       </div>
+
+      {/* Vehicle selector */}
+      <fieldset className="border-b px-4 py-3">
+        <legend className="sr-only">Mezzo</legend>
+        <div className="flex flex-wrap items-center gap-4">
+          <span className="text-sm font-medium text-gray-700">Mezzo</span>
+          {VehicleOptions.map((v) => (
+            <label key={v} className="flex items-center">
+              <input
+                type="radio"
+                name="trip-builder-vehicle"
+                value={v}
+                checked={vehicle === v}
+                onChange={() => setVehicle(v)}
+              />
+              <span className="ml-2 text-sm text-gray-700">{VehicleLabels[v]}</span>
+            </label>
+          ))}
+        </div>
+      </fieldset>
 
       {/* Messages Area */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
