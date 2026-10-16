@@ -1,17 +1,29 @@
 import { Clock, MapPin, Mountain } from 'lucide-react';
 import { SeasonIcon } from '@/components/ui/SeasonIcon';
 import { RecommendedSeason } from '@/types/trip';
+import { VehicleLabels, type VehicleValue } from '@/schemas/trip';
 
 interface TripChipsProps {
   duration: string;
   location: string;
   terrain: string;
   seasons: RecommendedSeason[];
+  vehicle?: VehicleValue;
 }
 
-export function TripChips({ duration, location, terrain, seasons }: TripChipsProps) {
+export function TripChips({ duration, location, terrain, seasons, vehicle }: TripChipsProps) {
   return (
     <div className="flex gap-3 items-center mb-4 flex-wrap">
+      {/* Vehicle chip */}
+      {vehicle && (
+        <div
+          data-testid="trip-vehicle"
+          className="flex items-center gap-2 bg-slate-100 text-slate-700 px-3 py-1 rounded-full text-sm"
+        >
+          <span>{VehicleLabels[vehicle]}</span>
+        </div>
+      )}
+
       {/* Duration chip */}
       <div className="flex items-center gap-2 bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm">
         <Clock className="w-4 h-4" />

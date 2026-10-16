@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from 'react'
 import Link from 'next/link'
+import type { VehicleValue } from '@/schemas/trip'
 import { TripChips } from '@/components/trips/TripChips'
 import { TripMeta } from '@/components/trips/TripMeta'
 import { UnifiedMediaGallery } from '@/components/ui/UnifiedMediaGallery'
@@ -52,6 +53,7 @@ interface TripData {
   characteristics: string[]
   tags: string[]
   travelDate?: Date | null
+  vehicle?: VehicleValue
   user: TripUser
 }
 
@@ -141,6 +143,7 @@ export function TripDetailClient({
           location={trip.destination}
           terrain={trip.theme}
           seasons={mappedSeasons}
+          vehicle={trip.vehicle}
         />
         
         <TripMeta

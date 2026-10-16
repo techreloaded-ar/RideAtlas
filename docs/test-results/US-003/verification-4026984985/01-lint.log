@@ -1,0 +1,34 @@
+
+> ride-atlas@0.1.0-dev lint
+> eslint src/
+
+
+/Users/stefanoleli/Project/RideAtlas/.archetipo/increments/worktrees/inc-ca58ca65b694b32b/src/components/admin/AssegnaRangerDialog.tsx
+  3:40  warning  'useCallback' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/stefanoleli/Project/RideAtlas/.archetipo/increments/worktrees/inc-ca58ca65b694b32b/src/components/trips/TripManagement.tsx
+  268:6  warning  React Hook useEffect has a missing dependency: 'closePriceModal'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/stefanoleli/Project/RideAtlas/.archetipo/increments/worktrees/inc-ca58ca65b694b32b/src/tests/integration/api/profile/helpers.ts
+  33:7  warning  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-explicit-any')
+  36:7  warning  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-explicit-any')
+
+/Users/stefanoleli/Project/RideAtlas/.archetipo/increments/worktrees/inc-ca58ca65b694b32b/src/tests/setup/mocks.ts
+  69:5  warning  Unused eslint-disable directive (no problems were reported from '@next/next/no-img-element')
+
+/Users/stefanoleli/Project/RideAtlas/.archetipo/increments/worktrees/inc-ca58ca65b694b32b/src/tests/unit/components/admin/AssegnaRangerDialog.test.tsx
+  7:5  warning  Unused eslint-disable directive (no problems were reported from '@next/next/no-img-element')
+
+/Users/stefanoleli/Project/RideAtlas/.archetipo/increments/worktrees/inc-ca58ca65b694b32b/src/tests/unit/components/trips/TripDetailClient.vehicle.test.tsx
+  5:30  error  Component definition is missing display name  react/display-name
+
+/Users/stefanoleli/Project/RideAtlas/.archetipo/increments/worktrees/inc-ca58ca65b694b32b/src/tests/unit/components/trips/TripGrid.test.tsx
+  21:5  warning  Unused eslint-disable directive (no problems were reported from '@next/next/no-img-element')
+
+/Users/stefanoleli/Project/RideAtlas/.archetipo/increments/worktrees/inc-ca58ca65b694b32b/src/tests/unit/components/trips/TripGrid.vehicle.test.tsx
+  15:5  warning  Unused eslint-disable directive (no problems were reported from '@next/next/no-img-element')
+
+✖ 9 problems (1 error, 8 warnings)
+  0 errors and 6 warnings potentially fixable with the `--fix` option.
+
+{"schema":"archetipo/v1","kind":"error","error":{"code":"E_INTERNAL","message":"verification command ended unsuccessfully"}}
