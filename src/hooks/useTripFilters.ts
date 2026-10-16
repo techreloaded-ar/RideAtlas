@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
+import type { VehicleValue } from '@/schemas/trip';
 import useDebounce from './useDebounce';
-import { filterTrips, validateSearchTerm, type SearchableTrip } from '@/lib/utils/searchUtils';
+import { filterTrips, filterTripsByVehicle, validateSearchTerm, type SearchableTrip } from '@/lib/utils/searchUtils';
 
 /**
  * Interfaccia per il valore di ritorno dell'hook useTripFilters
@@ -26,6 +27,10 @@ export interface UseTripFiltersReturn<T extends SearchableTrip> {
   resultsCount: number;
   /** Funzione per resettare la ricerca */
   clearSearch: () => void;
+  /** Mezzo selezionato (null = tutti) */
+  vehicleFilter: VehicleValue | null;
+  /** Funzione per impostare il filtro mezzo */
+  setVehicleFilter: (vehicle: VehicleValue | null) => void;
 }
 
 /**
@@ -41,6 +46,7 @@ function useTripFilters<T extends SearchableTrip>(
   debounceDelay: number = 300
 ): UseTripFiltersReturn<T> {
   const [searchTerm, setSearchTerm] = useState<string>('');
+  const [vehicleFilter, setVehicleFilter] = useState<VehicleValue | null>(null);
   
   // Applica debouncing al termine di ricerca per ottimizzare le performance
   const debouncedSearchTerm = useDebounce(searchTerm, debounceDelay);
@@ -58,8 +64,8 @@ function useTripFilters<T extends SearchableTrip>(
     }
     
     // Applica il filtro usando il termine con debouncing
-    return filterTrips(trips, debouncedSearchTerm);
-  }, [trips, debouncedSearchTerm, searchValidation.isValid]);
+    return filterTripsByVehicle(filterTrips(trips, debouncedSearchTerm), vehicleFilter);
+  }, [trips, debouncedSearchTerm, searchValidation.isValid, vehicleFilter]);
   
   // Calcola gli indicatori di stato
   const hasResults = filteredTrips.length > 0;
@@ -90,6 +96,8 @@ function useTripFilters<T extends SearchableTrip>(
     searchError: searchValidation.error,
     resultsCount,
     clearSearch,
+    vehicleFilter,
+    setVehicleFilter,
   };
 }
 

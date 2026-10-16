@@ -117,6 +117,7 @@ model Trip {
   insights           String?           @db.Text
   slug               String            @unique
   status             TripStatus        @default(Bozza)
+  vehicle            Vehicle           @default(MOTO)
   price              Decimal           @default(5.00) @db.Decimal(10,2)
   travelDate         DateTime?         // Data in cui il ranger ha fatto il viaggio
   orderIndex         Int?              // Campo per ordinamento personalizzato amministratore
@@ -153,6 +154,13 @@ enum RecommendedSeason {
   Estate
   Autunno
   Inverno
+}
+
+enum Vehicle {
+  MOTO
+  BICI
+  EBIKE
+  MONOPATTINO
 }
 
 enum TripStatus {

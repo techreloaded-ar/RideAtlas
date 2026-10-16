@@ -2,12 +2,17 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { calculateTripDistance } from '../geo/geoUtils';
 import { ITALIAN_REGIONS, isLocationInRegion } from '../geo/locationData';
+import type { VehicleValue } from '@/schemas/trip';
+import { VehicleLabels } from '@/schemas/trip';
+import { getVehicleLimits } from '@/lib/trip-builder/vehicleLimits';
 
 export interface UserConstraints {
   maxDays?: number;
   region?: string;
   location?: string;
   maxRadiusKm?: number;
+  vehicle?: VehicleValue;
+  maxKmPerDay?: number;
 }
 
 export interface ValidationResult {
@@ -100,6 +105,23 @@ export class ValidationService {
       if (durationResult.exceedsLimit) {
         warnings.push(`Alcuni viaggi sono stati rimossi per rispettare il limite di ${constraints.maxDays} giorni`);
       }
+    }
+
+    // Apply vehicle daily-km constraint (trips without GPX are kept)
+    if (constraints.maxKmPerDay !== undefined) {
+      const maxKm = constraints.maxKmPerDay;
+      validTrips = validTrips.filter((trip) => {
+        const gpx = trip.gpxData;
+        if (!gpx?.hasGpx || !gpx.distance || !(trip.duration_days > 0)) return true;
+        const kmPerDay = gpx.distance / 1000 / trip.duration_days;
+        if (kmPerDay > maxKm) {
+          warnings.push(
+            `${trip.title}: ${Math.round(kmPerDay)} km/giorno superano il massimo di ${maxKm} km/giorno per il mezzo scelto`
+          );
+          return false;
+        }
+        return true;
+      });
     }
 
     const totalDuration = validTrips.reduce((sum, trip) => sum + trip.duration_days, 0);
@@ -213,6 +235,11 @@ export class ValidationService {
   /**
    * Generate duration-specific prompt information
    */
+  static generateVehiclePrompt(vehicle: VehicleValue): string {
+    const limits = getVehicleLimits(vehicle);
+    return `MEZZO DI TRASPORTO: ${VehicleLabels[vehicle]}. VINCOLO ASSOLUTO: i km giornalieri predefiniti sono ${limits.default} km/giorno e il massimo è ${limits.max} km/giorno. Non proporre viaggi che superano ${limits.max} km/giorno.`;
+  }
+
   static generateDurationPrompt(maxDays: number): string {
     return `DURATA MASSIMA: ${maxDays} giorni
 - NON SUPERARE MAI questo limite

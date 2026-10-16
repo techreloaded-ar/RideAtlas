@@ -4,6 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { Navigation } from 'lucide-react';
 import TripSearchBar from '@/components/trips/TripSearchBar';
+import TripVehicleFilter from '@/components/trips/TripVehicleFilter';
 import TripGrid from '@/components/trips/TripGrid';
 import useTripFilters from '@/hooks/useTripFilters';
 import { Prisma, UserRole } from '@prisma/client';
@@ -59,6 +60,8 @@ const TripsPageClient: React.FC<TripsPageClientProps> = ({ trips, userRole }) =>
     searchError,
     resultsCount,
     clearSearch,
+    vehicleFilter,
+    setVehicleFilter,
   } = useTripFilters(trips);
 
   return (
@@ -74,6 +77,11 @@ const TripsPageClient: React.FC<TripsPageClientProps> = ({ trips, userRole }) =>
           errorMessage={searchError}
           resultsCount={resultsCount}
         />
+      </div>
+
+      {/* Filtro per mezzo */}
+      <div className="mb-8 max-w-2xl mx-auto">
+        <TripVehicleFilter value={vehicleFilter} onChange={setVehicleFilter} />
       </div>
 
       {/* Contenuto principale */}

@@ -93,6 +93,22 @@ export interface SearchableTrip {
   title: string;
   destination: string;
   tags: string[];
+  vehicle?: string | null;
+}
+
+/**
+ * Filtra i viaggi per mezzo di trasporto
+ * Un viaggio senza mezzo è trattato come MOTO (default DB)
+ *
+ * @param trips - Array di viaggi da filtrare
+ * @param vehicle - Mezzo selezionato (null = nessun filtro)
+ */
+export function filterTripsByVehicle<T extends SearchableTrip>(trips: T[], vehicle: string | null): T[] {
+  if (vehicle === null) {
+    return trips;
+  }
+  // Un viaggio senza mezzo è trattato come MOTO (default DB)
+  return trips.filter(trip => (trip.vehicle ?? 'MOTO') === vehicle);
 }
 
 /**

@@ -153,6 +153,7 @@ describe('POST /api/trips - Creazione Viaggi', () => {
           media: [],
           gpxFile: null,
           travelDate: null,
+          vehicle: 'MOTO',
           orderIndex: 6,
           slug: 'viaggio-in-toscana',
           user_id: 'user-123',
@@ -198,6 +199,7 @@ describe('POST /api/trips - Creazione Viaggi', () => {
           media: [],
           gpxFile: null,
           travelDate: null,
+          vehicle: 'MOTO',
           orderIndex: 6,
           slug: 'viaggio-minimo',
           duration_days: 1,
@@ -240,6 +242,7 @@ describe('POST /api/trips - Creazione Viaggi', () => {
           media: [],
           gpxFile: null,
           travelDate: null,
+          vehicle: 'MOTO',
           orderIndex: 6,
           slug: 'viaggio-in-toscana-versione-2',
           user_id: 'user-123',
@@ -580,6 +583,7 @@ describe('POST /api/trips - Creazione Viaggi', () => {
             media: [],
             gpxFile: null,
             travelDate: null,
+            vehicle: 'MOTO',
             orderIndex: 6,
             slug: expectedSlug,
             user_id: 'user-123',
@@ -588,6 +592,46 @@ describe('POST /api/trips - Creazione Viaggi', () => {
 
         jest.clearAllMocks()
       }
+    })
+  })
+
+  describe('Mezzo di trasporto (vehicle)', () => {
+    beforeEach(() => {
+      mockAuth.mockResolvedValue({
+        user: mockUser,
+        expires: '2024-12-31T23:59:59.999Z',
+      })
+      mockEnsureUserExists.mockResolvedValue(mockUser)
+      const created = { ...mockCreatedTrip, user: mockUser, stages: [] }
+      ;(prisma.trip.create as jest.Mock).mockResolvedValue(created)
+      ;(prisma.trip.findUnique as jest.Mock).mockResolvedValue(created)
+    })
+
+    it('usa MOTO come default quando vehicle e assente', async () => {
+      const response = await POST(createMockRequest(validTripData))
+
+      expect(response.status).toBe(201)
+      expect(prisma.trip.create).toHaveBeenCalledWith(
+        expect.objectContaining({ data: expect.objectContaining({ vehicle: 'MOTO' }) })
+      )
+    })
+
+    it.each(['BICI', 'EBIKE', 'MONOPATTINO'])('salva il mezzo %s indicato nel body', async (vehicle) => {
+      const response = await POST(createMockRequest({ ...validTripData, vehicle }))
+
+      expect(response.status).toBe(201)
+      expect(prisma.trip.create).toHaveBeenCalledWith(
+        expect.objectContaining({ data: expect.objectContaining({ vehicle }) })
+      )
+    })
+
+    it('risponde 400 con details.vehicle per un mezzo non valido', async () => {
+      const response = await POST(createMockRequest({ ...validTripData, vehicle: 'AEREO' }))
+      const data = await response.json()
+
+      expect(response.status).toBe(400)
+      expect(data.details.vehicle).toBeDefined()
+      expect(prisma.trip.create).not.toHaveBeenCalled()
     })
   })
 })

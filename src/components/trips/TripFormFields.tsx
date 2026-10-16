@@ -4,7 +4,11 @@
 import { UseFormReturn } from 'react-hook-form';
 import {
   type TripWithStagesData,
-  CharacteristicOptions,
+  VehicleOptions,
+  VehicleLabels,
+  type VehicleValue,
+  getCharacteristicOptionsForVehicle,
+  filterCharacteristicsForVehicle,
   RecommendedSeasons,
   MediaItem,
 } from '@/schemas/trip';
@@ -25,6 +29,7 @@ export const TripFormFields = ({ form }: TripFormFieldsProps) => {
     getValues,
   } = form;
 
+  const vehicle = watch('vehicle') ?? 'MOTO';
   const characteristics = watch('characteristics');
   const recommendedSeasons = watch('recommended_seasons');
   const tags = watch('tags');
@@ -32,7 +37,7 @@ export const TripFormFields = ({ form }: TripFormFieldsProps) => {
   const travelDate = watch('travelDate');
 
   const handleCharacteristicChange = (
-    characteristic: (typeof CharacteristicOptions)[number],
+    characteristic: ReturnType<typeof getCharacteristicOptionsForVehicle>[number],
     checked: boolean
   ) => {
     const current = characteristics || [];
@@ -44,6 +49,14 @@ export const TripFormFields = ({ form }: TripFormFieldsProps) => {
         current.filter((c) => c !== characteristic)
       );
     }
+  };
+
+  const handleVehicleChange = (newVehicle: VehicleValue) => {
+    setValue('vehicle', newVehicle, { shouldDirty: true });
+    setValue(
+      'characteristics',
+      filterCharacteristicsForVehicle(getValues('characteristics') || [], newVehicle)
+    );
   };
 
   const handleSeasonChange = (season: string, checked: boolean) => {
@@ -220,13 +233,40 @@ export const TripFormFields = ({ form }: TripFormFieldsProps) => {
         )}
       </div>
 
+      {/* Vehicle */}
+      <fieldset>
+        <legend className={`${formFieldClasses.label} mb-3`}>
+          Mezzo di trasporto
+        </legend>
+        <div className='space-y-2'>
+          {VehicleOptions.map((v) => (
+            <label key={v} className='flex items-center'>
+              <input
+                type='radio'
+                name='vehicle'
+                value={v}
+                checked={vehicle === v}
+                onChange={() => handleVehicleChange(v)}
+                className={formFieldClasses.checkbox}
+              />
+              <span className='ml-2 text-sm text-gray-700'>
+                {VehicleLabels[v]}
+              </span>
+            </label>
+          ))}
+        </div>
+        {errors.vehicle && (
+          <p className={formFieldClasses.error}>{errors.vehicle.message}</p>
+        )}
+      </fieldset>
+
       {/* Characteristics */}
       <div>
         <label className={`${formFieldClasses.label} mb-3`}>
           Caratteristiche del viaggio
         </label>
         <div className='space-y-2'>
-          {CharacteristicOptions.map((characteristic) => (
+          {getCharacteristicOptionsForVehicle(vehicle).map((characteristic) => (
             <label key={characteristic} className='flex items-center'>
               <input
                 type='checkbox'

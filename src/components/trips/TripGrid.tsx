@@ -6,6 +6,7 @@ import { castToMediaItems, MediaItem } from '@/types/trip';
 import { SeasonIcon } from '@/components/ui/SeasonIcon';
 import { getTripStatusColor, getTripStatusLabel, shouldShowStatusBadge } from '@/lib/utils/tripStatusUtils';
 import { Prisma, UserRole } from '@prisma/client';
+import { VehicleLabels, type VehicleValue } from '@/schemas/trip';
 import { UserPermissions } from '@/types/profile';
 
 // Tipi per i dati del viaggio (copiati dalla pagina originale)
@@ -200,9 +201,15 @@ const TripGrid: React.FC<TripGridProps> = React.memo(({ trips, userRole }) => {
             </div>
 
             {/* Tema */}
-            <div className="mb-4">
+            <div className="mb-4 flex flex-wrap gap-2">
               <span className={`px-3 py-1 rounded-full text-sm font-medium ${getThemeColor(trip.theme)}`}>
                 {trip.theme}
+              </span>
+              <span
+                data-testid="trip-vehicle"
+                className="px-3 py-1 rounded-full text-sm font-medium bg-slate-100 text-slate-800"
+              >
+                {VehicleLabels[(trip.vehicle ?? 'MOTO') as VehicleValue]}
               </span>
             </div>
 

@@ -5,6 +5,7 @@ import { auth } from '@/auth';
 import { TripAnalysisService } from '@/lib/trips/tripAnalysisService';
 import { ValidationService } from '@/lib/validation/validationService';
 import { PromptService } from '@/lib/trip-builder/promptService';
+import { getVehicleLimits, parseVehicle } from '@/lib/trip-builder/vehicleLimits';
 
 export const dynamic = 'force-dynamic';
 
@@ -26,6 +27,8 @@ interface ChatResponse {
   message: string;
   tripRecommendations?: TripRecommendation[];
   distanceWarnings?: any[];
+  vehicle: string;
+  dailyKm: { default: number; max: number };
 }
 
 export async function POST(request: NextRequest) {
@@ -40,7 +43,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate request
-    const { message, conversationHistory } = await request.json();
+    const { message, conversationHistory, vehicle: rawVehicle } = await request.json();
     if (!message || typeof message !== 'string') {
       return NextResponse.json(
         { error: 'Message is required' },
@@ -48,9 +51,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const vehicle = rawVehicle === undefined ? 'MOTO' : parseVehicle(rawVehicle);
+    if (!vehicle) {
+      return NextResponse.json(
+        { error: 'Invalid vehicle' },
+        { status: 400 }
+      );
+    }
+    const dailyKm = getVehicleLimits(vehicle);
 
     // Extract constraints and fetch trips
     const userConstraints = ValidationService.extractConstraints(message);
+    userConstraints.vehicle = vehicle;
+    userConstraints.maxKmPerDay = dailyKm.max;
     const trips = await fetchTrips(request);
     
     // Validate trips against constraints
@@ -67,7 +80,9 @@ export async function POST(request: NextRequest) {
     const response: ChatResponse = {
       message: aiMessage,
       tripRecommendations: recommendations,
-      distanceWarnings: analysisResult.distanceWarnings || []
+      distanceWarnings: analysisResult.distanceWarnings || [],
+      vehicle,
+      dailyKm: { default: dailyKm.default, max: dailyKm.max },
     };
 
     return NextResponse.json(response);
@@ -106,6 +121,9 @@ async function getAIResponse(
 ): Promise<string> {
   // Generate constraint info
   const constraintInfo = [];
+  if (constraints.vehicle) {
+    constraintInfo.push(ValidationService.generateVehiclePrompt(constraints.vehicle));
+  }
   if (constraints.maxDays) {
     constraintInfo.push(ValidationService.generateDurationPrompt(constraints.maxDays));
   }
