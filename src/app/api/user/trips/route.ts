@@ -33,6 +33,7 @@ export async function GET() {
         duration_days: true,
         theme: true,
         status: true,
+        vehicle: true,
         created_at: true,
         updated_at: true
       },

@@ -359,6 +359,44 @@ describe('API /api/trips/[id] - Gestione Singolo Viaggio', () => {
       })
     })
 
+    describe('Mezzo di trasporto (vehicle)', () => {
+      beforeEach(() => {
+        mockAuth.mockResolvedValue({
+          user: mockUser,
+          expires: '2024-12-31T23:59:59.999Z',
+        })
+        ;(prisma.trip.findUnique as jest.Mock)
+          .mockResolvedValueOnce(mockExistingTrip)
+          .mockResolvedValue(mockUpdatedTrip)
+        ;(prisma.trip.update as jest.Mock).mockResolvedValue(mockUpdatedTrip)
+      })
+
+      it('aggiorna il mezzo quando vehicle e presente', async () => {
+        const response = await PUT(createMockRequest({ vehicle: 'EBIKE' }), { params: { id: 'trip-123' } })
+
+        expect(response.status).toBe(200)
+        const updateArg = (prisma.trip.update as jest.Mock).mock.calls[0][0]
+        expect(updateArg.data.vehicle).toBe('EBIKE')
+      })
+
+      it('non sovrascrive il mezzo quando vehicle e assente', async () => {
+        const response = await PUT(createMockRequest({ summary: 'Nuova descrizione del viaggio' }), { params: { id: 'trip-123' } })
+
+        expect(response.status).toBe(200)
+        const updateArg = (prisma.trip.update as jest.Mock).mock.calls[0][0]
+        expect(updateArg.data).not.toHaveProperty('vehicle')
+      })
+
+      it('risponde 400 con details.vehicle per un mezzo non valido', async () => {
+        const response = await PUT(createMockRequest({ vehicle: 'AEREO' }), { params: { id: 'trip-123' } })
+        const data = await response.json()
+
+        expect(response.status).toBe(400)
+        expect(data.details.vehicle).toBeDefined()
+        expect(prisma.trip.update).not.toHaveBeenCalled()
+      })
+    })
+
     describe('Validazione dati', () => {
       beforeEach(() => {
         mockAuth.mockResolvedValue({

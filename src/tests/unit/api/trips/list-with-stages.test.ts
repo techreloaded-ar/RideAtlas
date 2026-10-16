@@ -323,4 +323,22 @@ describe('/api/trips GET - Lista viaggi con stages', () => {
       )
     })
   })
+
+  describe('Mezzo di trasporto', () => {
+    it('dovrebbe esporre vehicle sul viaggio restituito', async () => {
+      mockAuth.mockResolvedValue({ user: { id: 'user-1', role: UserRole.Explorer } })
+      mockFindMany.mockResolvedValue([{ ...mockTripLegacy, vehicle: 'BICI' }])
+
+      const { isMultiStageTripUtil, calculateTotalDistance, calculateTripDuration } = await import('@/lib/trips/trip-utils')
+      isMultiStageTripUtil.mockReturnValue(false)
+      calculateTotalDistance.mockReturnValue(0)
+      calculateTripDuration.mockReturnValue({ days: 2, nights: 1 })
+
+      const response = await GET()
+      const data = await response.json()
+
+      expect(response.status).toBe(200)
+      expect(data[0].vehicle).toBe('BICI')
+    })
+  })
 })

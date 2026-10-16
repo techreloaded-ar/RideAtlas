@@ -2,7 +2,7 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/lib/core/prisma';
-import { RecommendedSeason, transformPrismaStages } from '@/types/trip';
+import { RecommendedSeason, Vehicle, transformPrismaStages } from '@/types/trip';
 import { auth } from '@/auth';
 import { ensureUserExists } from '@/lib/auth/user-sync';
 import { UserRole } from '@/types/profile';
@@ -75,6 +75,7 @@ const tripCreationSchema = z.object({
   theme: z.string().min(3, { message: 'Il tema deve contenere almeno 3 caratteri.' }).max(50),
   characteristics: z.array(z.string()).optional().default([]),
   recommended_seasons: z.array(z.nativeEnum(RecommendedSeason)).min(1, { message: 'Devi selezionare almeno una stagione.' }),
+  vehicle: z.nativeEnum(Vehicle).optional().default(Vehicle.MOTO), // Mezzo di trasporto (default MOTO)
   insights: z.string().max(10000, { message: 'Il testo esteso non può superare 10000 caratteri.' }).optional().nullable(),
   media: z.array(mediaItemSchema).optional().default([]),
   gpxFile: gpxFileSchema.optional(),
@@ -242,6 +243,7 @@ export async function POST(request: NextRequest) {
             theme: tripData.theme,
             characteristics: tripData.characteristics,
             recommended_seasons: tripData.recommended_seasons,
+            vehicle: tripData.vehicle,
             insights: tripData.insights,
             media: (tripData.media || []) as unknown as object[],
             gpxFile: (tripData.gpxFile || null) as unknown as object,

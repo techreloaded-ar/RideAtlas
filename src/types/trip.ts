@@ -1,5 +1,5 @@
 // src/types/trip.ts
-import { Trip as PrismaTrip, TripStatus, RecommendedSeason } from '@prisma/client'
+import { Trip as PrismaTrip, TripStatus, RecommendedSeason, Vehicle } from '@prisma/client'
 import { JsonValue } from '@prisma/client/runtime/library'
 
 // Tipo per un elemento media (immagine o video)
@@ -66,10 +66,11 @@ export type Trip = PrismaTrip & {
 // Tipo per la creazione di un viaggio (esclude campi auto-generati)
 // Sostituiamo il campo media JsonValue[] con MediaItem[] per facilitare il lavoro nel frontend
 // Aggiungiamo support per GPX file e stages
-export type TripCreationData = Omit<Trip, 'id' | 'slug' | 'status' | 'created_at' | 'updated_at' | 'user_id' | 'media' | 'gpxFile' | 'stages' | 'price'> & {
+export type TripCreationData = Omit<Trip, 'id' | 'slug' | 'status' | 'created_at' | 'updated_at' | 'user_id' | 'media' | 'gpxFile' | 'stages' | 'price' | 'vehicle'> & {
   media: MediaItem[]
   gpxFile?: GpxFile | null
   stages?: StageCreationData[]
+  vehicle?: Vehicle // Mezzo di trasporto (default MOTO)
   price?: number // Reso opzionale per permettere al DB di gestire il default
   travelDate?: Date | null // Data in cui il ranger ha fatto il viaggio
 }
@@ -158,4 +159,4 @@ export interface TripValidationResult {
 }
 
 // Esporta gli enum per facilità d'uso
-export { TripStatus, RecommendedSeason }
+export { TripStatus, RecommendedSeason, Vehicle }

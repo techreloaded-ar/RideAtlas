@@ -82,6 +82,7 @@ describe('/api/user/trips', () => {
           duration_days: true,
           theme: true,
           status: true,
+          vehicle: true,
           created_at: true,
           updated_at: true,
         },
@@ -89,6 +90,20 @@ describe('/api/user/trips', () => {
           updated_at: 'desc',
         },
       })
+    })
+
+    it('dovrebbe selezionare ed esporre vehicle per ogni viaggio', async () => {
+      mockAuth.mockResolvedValue({ user: { id: 'user-123', email: 'test@example.com', role: 'EXPLORER' } } as any)
+      ;(prisma.trip.findMany as jest.Mock).mockResolvedValue([
+        { id: 'trip-1', slug: 'giro-in-bici', title: 'Giro in bici', vehicle: 'BICI' },
+      ])
+
+      const response = await GET()
+      const data = await response.json()
+
+      expect(response.status).toBe(200)
+      expect((prisma.trip.findMany as jest.Mock).mock.calls[0][0].select.vehicle).toBe(true)
+      expect(data.trips[0].vehicle).toBe('BICI')
     })
 
     it('dovrebbe restituire un array vuoto quando l\'utente non ha viaggi', async () => {
@@ -246,6 +261,7 @@ describe('/api/user/trips', () => {
             duration_days: true,
               theme: true,
             status: true,
+            vehicle: true,
             created_at: true,
             updated_at: true,
           },

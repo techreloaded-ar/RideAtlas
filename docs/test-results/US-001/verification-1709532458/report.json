@@ -1,0 +1,16 @@
+{
+  "id": "verification-1709532458",
+  "operation": "check:prisma-validate",
+  "status": "complete",
+  "passed": true,
+  "stable": true,
+  "reused": true,
+  "input_key": "a8a4bf572fc46f7ce3bea87aa0eaebb2a98f89a2567ce4c37a9380485e64b558",
+  "environment_id": "env-be6749a63babace7",
+  "preparation_id": "verification-2697198561",
+  "reused_report": "/Users/stefanoleli/Project/RideAtlas/.archetipo/increments/worktrees/inc-ca58ca65b694b32b/docs/test-results/US-001/verification-2624336989/report.json",
+  "report_path": "/Users/stefanoleli/Project/RideAtlas/.archetipo/increments/worktrees/inc-ca58ca65b694b32b/docs/test-results/US-001/verification-1709532458/report.json",
+  "started_at": "2026-10-16T14:41:32.874251Z",
+  "duration_ms": 5,
+  "steps": []
+}

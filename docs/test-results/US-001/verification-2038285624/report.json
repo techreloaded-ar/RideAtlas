@@ -1,0 +1,30 @@
+{
+  "id": "verification-2038285624",
+  "operation": "check:typecheck",
+  "status": "complete",
+  "passed": false,
+  "stable": true,
+  "reused": false,
+  "input_key": "bbececa0153a48073623bbd1b31b7ef17cd5fd6cfb9831108a3b270a26dabfab",
+  "environment_id": "env-be6749a63babace7",
+  "preparation_id": "verification-1706713505",
+  "report_path": "/Users/stefanoleli/Project/RideAtlas/.archetipo/increments/worktrees/inc-ca58ca65b694b32b/docs/test-results/US-001/verification-2038285624/report.json",
+  "started_at": "2026-10-16T14:37:01.058264Z",
+  "duration_ms": 5633,
+  "steps": [
+    {
+      "name": "typecheck",
+      "argv": [
+        "npx",
+        "tsc",
+        "--noEmit"
+      ],
+      "started_at": "2026-10-16T14:37:01.066081Z",
+      "duration_ms": 5613,
+      "exit_code": 2,
+      "log_path": "/Users/stefanoleli/Project/RideAtlas/.archetipo/increments/worktrees/inc-ca58ca65b694b32b/docs/test-results/US-001/verification-2038285624/01-typecheck.log",
+      "log_sha256": "64a7dca99dc030861b043addc73b4e95949ea9cafc8d97faaa93cfdf248b90f5",
+      "error": "exit status 2"
+    }
+  ]
+}

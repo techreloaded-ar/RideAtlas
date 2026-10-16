@@ -1,0 +1,31 @@
+{
+  "id": "verification-3903442909",
+  "operation": "check:prisma-validate",
+  "status": "complete",
+  "passed": true,
+  "stable": true,
+  "reused": false,
+  "input_key": "8bcbe908b705c30e90213506fcbfbdc8f3156e3044c447ad09fc253a64caedc6",
+  "environment_id": "env-be6749a63babace7",
+  "preparation_id": "verification-1706713505",
+  "report_path": "/Users/stefanoleli/Project/RideAtlas/.archetipo/increments/worktrees/inc-ca58ca65b694b32b/docs/test-results/US-001/verification-3903442909/report.json",
+  "started_at": "2026-10-16T14:37:00.314617Z",
+  "duration_ms": 641,
+  "steps": [
+    {
+      "name": "prisma-validate",
+      "argv": [
+        "env",
+        "DATABASE_URL=postgresql://u:p@localhost:5432/x",
+        "npx",
+        "prisma",
+        "validate"
+      ],
+      "started_at": "2026-10-16T14:37:00.322891Z",
+      "duration_ms": 623,
+      "exit_code": 0,
+      "log_path": "/Users/stefanoleli/Project/RideAtlas/.archetipo/increments/worktrees/inc-ca58ca65b694b32b/docs/test-results/US-001/verification-3903442909/01-prisma-validate.log",
+      "log_sha256": "87ec5a1ec220f83c7901f1e5363e347ac10881a41f69cdac2b2e74f2b3ed30a6"
+    }
+  ]
+}

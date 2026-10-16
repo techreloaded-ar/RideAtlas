@@ -3,7 +3,7 @@ import { z } from 'zod'
 import { prisma } from '@/lib/core/prisma'
 import { auth } from '@/auth'
 import { UserRole } from '@/types/profile'
-import { RecommendedSeason, transformPrismaStages } from '@/types/trip'
+import { RecommendedSeason, Vehicle, transformPrismaStages } from '@/types/trip'
 import { isMultiStageTripUtil, calculateTotalDistance, calculateTripDuration, prepareJsonFieldsUpdate } from '@/lib/trips/trip-utils';
 import { isTempId } from '@/lib/ui/temp-id-service'
 
@@ -64,6 +64,7 @@ const tripUpdateSchema = z.object({
   theme: z.string().min(3, { message: 'Il tema deve contenere almeno 3 caratteri.' }).max(50).optional(),
   characteristics: z.array(z.string()).optional(),
   recommended_seasons: z.array(z.nativeEnum(RecommendedSeason)).min(1, { message: 'Devi selezionare almeno una stagione.' }).optional(),
+  vehicle: z.nativeEnum(Vehicle).optional(), // Nessun default: un update parziale non deve sovrascrivere il mezzo
   insights: z.string().max(10000, { message: 'Il testo esteso non può superare 10000 caratteri.' }).optional(),
   media: z.array(mediaItemSchema).optional(),
   gpxFile: gpxFileSchema.nullable().optional(),
