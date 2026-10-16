@@ -91,7 +91,7 @@ export default async function TripsPage() {
               Tutti i Viaggi
             </h1>
             <p className="text-xl text-primary-100 max-w-2xl mx-auto">
-              Scopri tutti gli itinerari creati dalla nostra community di motociclisti appassionati
+              Scopri tutti gli itinerari in moto e bici
             </p>
           </div>
         </div>
