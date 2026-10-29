@@ -1,0 +1,46 @@
+schema: archetipo/spec/v2
+code: US-068
+title: rimuovere FAQ dal footer
+epic:
+  code: EP-007
+  title: Conformità Legale
+priority: MEDIUM
+points: 1
+status: DONE
+scope: Storico
+body: |-
+  #### US-068: rimuovere FAQ dal footer
+
+  **Epic:** EP-007 | **Priorità:** MEDIUM | **Punti:** 1 | **Stato:** DONE
+  **Bloccata da:** -
+
+  ## Storia utente
+  Come responsabile del prodotto,
+  voglio rimuovere il collegamento FAQ dal footer,
+  così da rinviare la sezione alla release 1.1.
+
+  ## Dimostrazione
+  Il revisore apre il footer del sito e verifica che non contenga il link FAQ rinviato alla release successiva.
+
+  ## Criteri di accettazione
+  - [ ] AC-1 — Il footer non mostra il collegamento FAQ rinviato alla versione 1.1.
+
+  ## Fuori perimetro
+  Nuovo sviluppo, ampliamenti non presenti nella scheda, nuova accettazione del prodotto e recupero dei documenti o degli allegati esterni. La scheda conserva il perimetro della versione storica.
+
+  ## Provenienza
+  - Fonte: [SBI-182](https://agilereloaded.nifty.pm/Lk!HPsQBFT6LGV/task/SBI-182)
+  - Stato originale: Completed.
+  - Release originale: Release 1.0.
+  - Importazione: 15 ottobre 2026.
+  - Priorità MEDIUM usata come valore neutro di importazione; punti 1 è il minimo tecnico richiesto dal validatore ARchetipo; non è una stima storica né una misura del lavoro svolto.
+
+  ## Note di importazione
+  - Importazione retrospettiva da Nifty: stato originale Completed, stato ARchetipo DONE. Non sono state eseguite nuove verifiche funzionali; le caselle dei criteri restano non spuntate.
+  - Dimostrazione e criteri normalizzati servono alla lettura dello storico e non costituiscono un nuovo piano di sviluppo.
+
+  ## Testo originale Nifty
+  togliere dal footer il link FAQ che rilasceremo nella versione 1.1
+history:
+  - status: DONE
+    at: "2026-10-15T12:30:57Z"

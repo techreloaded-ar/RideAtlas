@@ -1,0 +1,42 @@
+schema: archetipo/spec/v2
+code: US-085
+title: Controllo accesso ai contenuti
+epic:
+  code: EP-002
+  title: Gestione Itinerari e Ciclo di Vita
+priority: HIGH
+points: 3
+status: DONE
+scope: MVP
+body: |-
+  #### US-085: Controllo accesso ai contenuti
+
+  **Epic:** EP-002 | **Priorità:** HIGH | **Punti:** 3 | **Stato:** DONE
+  **Bloccata da:** -
+
+  ## Storia utente
+  Come Marco l'Explorer,
+  voglio vedere solo gli itinerari pubblicati, mentre bozze e itinerari in revisione sono visibili solo al proprietario e ai Sentinel,
+  così da proteggere i contenuti non ancora pronti.
+
+  ## Dimostrazione
+  Partendo dalla homepage senza autenticazione, il revisore naviga nel catalogo e osserva solo itinerari con stato "Pubblicato". Il revisore tenta di accedere a /trips/[slug-di-itinerario-in-bozza] digitando l'URL direttamente e osserva una pagina 404 o "Itinerario non trovato". Il revisore effettua l'accesso come proprietario dell'itinerario in bozza, visita lo stesso URL e osserva la pagina di modifica. Il revisore effettua l'accesso come Sentinel, visita lo stesso URL e osserva la pagina di modifica.
+
+  ## Criteri di accettazione
+  - [ ] AC-1 — Il catalogo pubblico mostra solo itinerari con stato "Pubblicato"
+  - [ ] AC-2 — Un utente non autenticato che tenta di accedere a un itinerario non pubblicato riceve 404 o "Itinerario non trovato"
+  - [ ] AC-3 — Il proprietario può visualizzare i propri itinerari in bozza.
+  - [ ] AC-4 — Un Sentinel può visualizzare qualsiasi itinerario indipendentemente dallo stato.
+  - [ ] AC-5 — Il proprietario può modificare i propri itinerari in bozza.
+  - [ ] AC-6 — Un Sentinel può moderare qualsiasi itinerario indipendentemente dallo stato.
+
+  ## Fuori perimetro
+  Acquisto itinerari, download GPX premium.
+
+  ## Prerequisiti della dimostrazione
+  Predisporre dati e account di esempio coerenti con: US-078 (US-078: Controllo accessi basato sui ruoli). Questi riferimenti tra epic descrivono il contesto funzionale; non costituiscono blocchi di lavorazione.
+history:
+  - status: TODO
+    at: "2026-07-16T16:15:31Z"
+  - status: DONE
+    at: "2026-10-15T11:55:41Z"

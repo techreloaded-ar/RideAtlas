@@ -1,0 +1,50 @@
+schema: archetipo/spec/v2
+code: US-048
+title: check security - test
+epic:
+  code: EP-010
+  title: Operatività e consolidamento storico
+priority: MEDIUM
+points: 1
+status: DONE
+scope: Storico
+body: |-
+  #### US-048: check security - test
+
+  **Epic:** EP-010 | **Priorità:** MEDIUM | **Punti:** 1 | **Stato:** DONE
+  **Bloccata da:** -
+
+  ## Storia utente
+  Come operatore,
+  voglio verificare carico e protezione degli URL riservati,
+  così da individuare problemi di disponibilità o accesso ai viaggi non pubblici.
+
+  ## Dimostrazione
+  Il revisore esamina i risultati dei controlli di carico e dei controlli degli URL di viaggi in bozza. La fonte non definisce soglie di carico o un report allegato; questi dati non sono ricostruiti come risultati.
+
+  ## Criteri di accettazione
+  - [ ] AC-1 — La verifica storica comprende controlli di carico; nessuna soglia è indicata nella fonte.
+  - [ ] AC-2 — La verifica storica comprende la protezione degli URL non pubblici, inclusi i viaggi in bozza.
+
+  ## Fuori perimetro
+  Nuovo sviluppo, ampliamenti non presenti nella scheda, nuova accettazione del prodotto e recupero dei documenti o degli allegati esterni. La scheda conserva il perimetro della versione storica.
+
+  ## Provenienza
+  - Fonte: [SBI-145](https://agilereloaded.nifty.pm/Lk!HPsQBFT6LGV/task/SBI-145)
+  - Stato originale: Completed.
+  - Release originale: Release 1.0.
+  - Importazione: 15 ottobre 2026.
+  - Priorità MEDIUM usata come valore neutro di importazione; punti 1 è il minimo tecnico richiesto dal validatore ARchetipo; non è una stima storica né una misura del lavoro svolto.
+
+  ## Note di importazione
+  - Importazione retrospettiva da Nifty: stato originale Completed, stato ARchetipo DONE. Non sono state eseguite nuove verifiche funzionali; le caselle dei criteri restano non spuntate.
+  - Dimostrazione e criteri normalizzati servono alla lettura dello storico e non costituiscono un nuovo piano di sviluppo.
+
+  ## Testo originale Nifty
+  AC
+
+  Test di carico
+  test sicurezza: API sul sito (es protezione degli url non pubblici come per i viaggi draft)
+history:
+  - status: DONE
+    at: "2026-10-15T12:30:57Z"

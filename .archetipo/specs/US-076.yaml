@@ -1,0 +1,40 @@
+schema: archetipo/spec/v2
+code: US-076
+title: Accesso multi-provider
+epic:
+  code: EP-001
+  title: Autenticazione e Autorizzazione
+priority: HIGH
+points: 3
+status: DONE
+blocked_by:
+  - US-075
+scope: MVP
+body: |-
+  #### US-076: Accesso multi-provider
+
+  **Epic:** EP-001 | **Priorità:** HIGH | **Punti:** 3 | **Stato:** DONE
+  **Bloccata da:** US-075
+
+  ## Storia utente
+  Come Marco l'Explorer,
+  voglio accedere con email e password verificate o con il mio account Google,
+  così da poter usare la piattaforma senza dover ricordare credenziali separate.
+
+  ## Dimostrazione
+  Partendo dalla pagina di accesso, il revisore inserisce le credenziali di un account con email verificata e osserva il reindirizzamento alla dashboard con il nome utente visualizzato nell'intestazione. Il revisore si disconnette, clicca "Accedi con Google", completa il flusso OAuth e osserva il reindirizzamento alla dashboard con il nome dell'account Google visualizzato. Il revisore si disconnette nuovamente, tenta l'accesso con un'email non verificata e osserva l'errore "Verifica la tua email prima di accedere."
+
+  ## Criteri di accettazione
+  - [ ] AC-1 — L'accesso con email e password di un account verificato reindirizza l'utente alla dashboard
+  - [ ] AC-2 — L'accesso con un'email non verificata mostra l'errore "Verifica la tua email prima di accedere" e l'utente rimane sulla pagina di accesso
+  - [ ] AC-3 — L'accesso con Google OAuth reindirizza l'utente alla dashboard.
+  - [ ] AC-4 — Un utente registrato via OAuth può impostare una password dalla sezione profilo, con il form "Imposta password" che richiede nuova password e conferma
+  - [ ] AC-5 — Dopo l'accesso con Google OAuth, l'email dell'account risulta verificata.
+
+  ## Fuori perimetro
+  Registrazione, recupero password, cambio email, gestione ruoli.
+history:
+  - status: TODO
+    at: "2026-07-16T16:15:31Z"
+  - status: DONE
+    at: "2026-10-15T11:55:39Z"

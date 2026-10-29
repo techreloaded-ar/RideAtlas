@@ -1,0 +1,40 @@
+schema: archetipo/spec/v2
+code: US-099
+title: Chat assistita AI per scoperta itinerari
+epic:
+  code: EP-008
+  title: Trip Builder AI
+priority: MEDIUM
+points: 5
+status: DONE
+scope: Growth
+body: |-
+  #### US-099: Chat assistita AI per scoperta itinerari
+
+  **Epic:** EP-008 | **Priorità:** MEDIUM | **Punti:** 5 | **Stato:** DONE
+  **Bloccata da:** -
+
+  ## Storia utente
+  Come Marco l'Explorer,
+  voglio chattare con un assistente AI che mi aiuti a trovare l'itinerario giusto in base ai miei vincoli (durata, zona, preferenze),
+  così da ricevere raccomandazioni personalizzate senza dover filtrare manualmente.
+
+  ## Dimostrazione
+  Partendo dalla pagina /trip-builder, autenticato come Explorer, il revisore osserva l'interfaccia di chat con il messaggio di benvenuto "Ciao! Raccontami cosa cerchi: quanti giorni hai a disposizione? Che zona ti interessa?" Il revisore scrive "Cerco un giro di 3 giorni in Toscana, strade secondarie e bei panorami" e l'assistente risponde con 2-3 itinerari consigliati, ciascuno con titolo, durata e link. Il revisore clicca su un link e viene portato alla pagina di dettaglio dell'itinerario. Il revisore chiede "C'è qualcosa di più impegnativo?" e l'assistente aggiorna i suggerimenti tenendo conto del contesto della conversazione. Il revisore scrive un messaggio non pertinente e l'assistente risponde gentilmente ricordando il proprio scopo.
+
+  ## Criteri di accettazione
+  - [ ] AC-1 — La chat parte con un messaggio di benvenuto che invita l'utente a descrivere le proprie preferenze
+  - [ ] AC-2 — Inserendo un messaggio con vincoli (durata, zona, preferenze), l'assistente risponde con 2-3 itinerari pertinenti, ciascuno con titolo e link cliccabile
+  - [ ] AC-3 — La chat mantiene il contesto della conversazione e i suggerimenti successivi tengono conto della cronologia
+  - [ ] AC-4 — Messaggi non pertinenti ricevono una risposta che ricorda lo scopo dell'assistente senza errori
+
+  ## Fuori perimetro
+  Generazione di itinerari personalizzati, integrazione con mappe interattive nella chat, prenotazione assistita.
+
+  ## Prerequisiti della dimostrazione
+  Predisporre dati e account di esempio coerenti con: US-078 (US-078: Controllo accessi basato sui ruoli); US-087 (US-087: Catalogo pubblico con ricerca e filtri). Questi riferimenti tra epic descrivono il contesto funzionale; non costituiscono blocchi di lavorazione.
+history:
+  - status: TODO
+    at: "2026-07-16T16:15:31Z"
+  - status: DONE
+    at: "2026-10-15T11:55:43Z"

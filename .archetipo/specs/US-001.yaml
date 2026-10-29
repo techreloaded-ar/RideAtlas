@@ -1,0 +1,64 @@
+schema: archetipo/spec/v2
+code: US-001
+title: 'US 4.1 - Creazione viaggio: informazioni base'
+epic:
+  code: EP-002
+  title: Gestione Itinerari e Ciclo di Vita
+priority: MEDIUM
+points: 1
+status: DONE
+scope: Storico
+body: |-
+  #### US-001: US 4.1 - Creazione viaggio: informazioni base
+
+  **Epic:** EP-002 | **Priorità:** MEDIUM | **Punti:** 1 | **Stato:** DONE
+  **Bloccata da:** -
+
+  ## Storia utente
+  Come Ranger
+  Voglio creare un nuovo viaggio con i dati preliminari
+  Affinché possa aggiungere informazioni dettagliate in seguito
+
+  ## Dimostrazione
+  Un Ranger apre la creazione viaggio, compila titolo, descrizione breve, zona, hashtag, stagione e caratteristiche, salva e riapre il viaggio: osserva lo stato bozza e il proprio nome come autore.
+
+  ## Criteri di accettazione
+  - [ ] AC-1 — Il titolo accetta al massimo 100 caratteri.
+  - [ ] AC-2 — La descrizione breve accetta al massimo 500 caratteri.
+  - [ ] AC-3 — La creazione richiede zona geografica, hashtag tematici e stagione preferenziale.
+  - [ ] AC-4 — Il modulo espone il campo caratteristiche.
+  - [ ] AC-5 — Il salvataggio crea un viaggio in stato draft.
+  - [ ] AC-6 — Il viaggio salvato riporta il Ranger autore.
+
+  ## Fuori perimetro
+  Nuovo sviluppo, ampliamenti non presenti nella scheda, nuova accettazione del prodotto e recupero dei documenti o degli allegati esterni. La scheda conserva il perimetro della versione storica.
+
+  ## Provenienza
+  - Fonte: [SBI-2](https://agilereloaded.nifty.pm/Lk!HPsQBFT6LGV/task/SBI-2)
+  - Stato originale: Completed.
+  - Release originale: Release 2.0.
+  - Importazione: 15 ottobre 2026.
+  - Priorità MEDIUM usata come valore neutro di importazione; punti 1 è il minimo tecnico richiesto dal validatore ARchetipo; non è una stima storica né una misura del lavoro svolto.
+
+  ## Note di importazione
+  - Importazione retrospettiva da Nifty: stato originale Completed, stato ARchetipo DONE. Non sono state eseguite nuove verifiche funzionali; le caselle dei criteri restano non spuntate.
+  - Dimostrazione e criteri normalizzati servono alla lettura dello storico e non costituiscono un nuovo piano di sviluppo.
+
+  ## Testo originale Nifty
+  Come Ranger
+  Voglio creare un nuovo viaggio con i dati preliminari
+  Affinché possa aggiungere informazioni dettagliate in seguito
+
+  AC:
+
+  Inserisco obbligatoriamente:
+  Titolo (max 100 caratteri)
+  Descrizione breve (max 500 caratteri)
+  Zona geografica
+  Hashtag tematici (#avventura, #gastronomia)
+  Stagione preferenziale
+  Campo "caratteristiche" (strade sterrate, curve strette, pedaggi...)
+  Il viaggio viene salvato in stato draft associando il nome del ranger
+history:
+  - status: DONE
+    at: "2026-10-15T12:30:57Z"

@@ -1,0 +1,47 @@
+schema: archetipo/spec/v2
+code: US-056
+title: 4. Informativa sui contenuti digitali
+epic:
+  code: EP-007
+  title: Conformità Legale
+priority: MEDIUM
+points: 1
+status: DONE
+scope: Storico
+body: |-
+  #### US-056: 4. Informativa sui contenuti digitali
+
+  **Epic:** EP-007 | **Priorità:** MEDIUM | **Punti:** 1 | **Stato:** DONE
+  **Bloccata da:** -
+
+  ## Storia utente
+  Come acquirente,
+  voglio leggere l’informativa sui contenuti digitali,
+  così da conoscere le condizioni del GPX acquistato.
+
+  ## Dimostrazione
+  Il revisore consulta l’informativa sui contenuti digitali e verifica che descriva il GPX e il consenso informato relativo alla perdita del recesso citato dalla fonte.
+
+  ## Criteri di accettazione
+  - [ ] AC-1 — L’informativa chiarisce che il prodotto acquistato è un file GPX digitale.
+  - [ ] AC-2 — L’informativa descrive il consenso alla perdita del diritto di recesso menzionato nella fonte storica.
+
+  ## Fuori perimetro
+  Nuovo sviluppo, ampliamenti non presenti nella scheda, nuova accettazione del prodotto e recupero dei documenti o degli allegati esterni. La scheda conserva il perimetro della versione storica.
+
+  ## Provenienza
+  - Fonte: [SBI-161](https://agilereloaded.nifty.pm/Lk!HPsQBFT6LGV/task/SBI-161)
+  - Stato originale: Completed.
+  - Release originale: Release 1.0.
+  - Importazione: 15 ottobre 2026.
+  - Priorità MEDIUM usata come valore neutro di importazione; punti 1 è il minimo tecnico richiesto dal validatore ARchetipo; non è una stima storica né una misura del lavoro svolto.
+
+  ## Note di importazione
+  - Importazione retrospettiva da Nifty: stato originale Completed, stato ARchetipo DONE. Non sono state eseguite nuove verifiche funzionali; le caselle dei criteri restano non spuntate.
+  - Dimostrazione e criteri normalizzati servono alla lettura dello storico e non costituiscono un nuovo piano di sviluppo.
+
+  ## Testo originale Nifty
+  Dal 1° gennaio 2022, il Codice del Consumo impone obblighi specifici per i contenuti digitali:deve essere chiarito che il prodotto è un file GPX digitale, e che non esiste un diritto di recesso una volta scaricato (se l’utente ha espresso consenso informato alla perdita di tale diritto).
+history:
+  - status: DONE
+    at: "2026-10-15T12:30:57Z"

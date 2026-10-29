@@ -1,0 +1,48 @@
+schema: archetipo/spec/v2
+code: US-047
+title: Riordinamento viaggi
+epic:
+  code: EP-003
+  title: Catalogo e Scoperta
+priority: MEDIUM
+points: 1
+status: DONE
+scope: Storico
+body: |-
+  #### US-047: Riordinamento viaggi
+
+  **Epic:** EP-003 | **Priorità:** MEDIUM | **Punti:** 1 | **Stato:** DONE
+  **Bloccata da:** -
+
+  ## Storia utente
+  in qualità di admin voglio poter cambiare ordine dei viaggi affinché si possa scegliere ordinamento della presentazione  su /viaggi
+
+  ## Dimostrazione
+  Un admin cambia l’ordine di due viaggi dal pannello di controllo e apre /viaggi: vede il nuovo ordine di presentazione.
+
+  ## Criteri di accettazione
+  - [ ] AC-1 — L’admin può modificare l’ordine dei viaggi dal pannello di controllo.
+  - [ ] AC-2 — La pagina /viaggi presenta i viaggi nell’ordine impostato.
+
+  ## Fuori perimetro
+  Nuovo sviluppo, ampliamenti non presenti nella scheda, nuova accettazione del prodotto e recupero dei documenti o degli allegati esterni. La scheda conserva il perimetro della versione storica.
+
+  ## Provenienza
+  - Fonte: [SBI-142](https://agilereloaded.nifty.pm/Lk!HPsQBFT6LGV/task/SBI-142)
+  - Stato originale: Completed.
+  - Release originale: Release 1.0.
+  - Importazione: 15 ottobre 2026.
+  - Priorità MEDIUM usata come valore neutro di importazione; punti 1 è il minimo tecnico richiesto dal validatore ARchetipo; non è una stima storica né una misura del lavoro svolto.
+
+  ## Note di importazione
+  - Importazione retrospettiva da Nifty: stato originale Completed, stato ARchetipo DONE. Non sono state eseguite nuove verifiche funzionali; le caselle dei criteri restano non spuntate.
+  - Dimostrazione e criteri normalizzati servono alla lettura dello storico e non costituiscono un nuovo piano di sviluppo.
+
+  ## Testo originale Nifty
+  in qualità di admin voglio poter cambiare ordine dei viaggi affinché si possa scegliere ordinamento della presentazione  su /viaggi
+
+  AC
+  admin, sposta ordine dei viaggi, dal pannello di controllo in modo simile a come accade nel riordinamento delle tappe di un singolo viaggio.
+history:
+  - status: DONE
+    at: "2026-10-15T12:30:57Z"

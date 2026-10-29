@@ -1,0 +1,70 @@
+schema: archetipo/spec/v2
+code: US-006
+title: US 0.2 — GEESTIONE UTENTi
+epic:
+  code: EP-006
+  title: Amministrazione e Moderazione
+priority: MEDIUM
+points: 1
+status: DONE
+scope: Storico
+body: |-
+  #### US-006: US 0.2 — GEESTIONE UTENTi
+
+  **Epic:** EP-006 | **Priorità:** MEDIUM | **Punti:** 1 | **Stato:** DONE
+  **Bloccata da:** -
+
+  ## Storia utente
+  In qualità di administrator, voglio cercare un utente per nome o username e assegnare nuovi ruoli affinché possa aggiornare i suoi permessi nella piattaforma.
+
+  ## Dimostrazione
+  Un amministratore cerca un utente per nome, vede email e ruoli, cambia un ruolo e verifica il nuovo insieme di permessi al successivo accesso dell’utente.
+
+  ## Criteri di accettazione
+  - [ ] AC-1 — La ricerca admin filtra gli utenti per nome o username.
+  - [ ] AC-2 — I risultati mostrano nome, email e ruoli attuali.
+  - [ ] AC-3 — L’amministratore può modificare l’assegnazione dei ruoli ranger, admin e biker.
+  - [ ] AC-4 — I ruoli aggiornati persistono immediatamente.
+  - [ ] AC-5 — Al successivo login l’utente dispone dei permessi aggiornati.
+  - [ ] AC-6 — Un utente privo del ruolo admin non può modificare i ruoli.
+
+  ## Fuori perimetro
+  Nuovo sviluppo, ampliamenti non presenti nella scheda, nuova accettazione del prodotto e recupero dei documenti o degli allegati esterni. La scheda conserva il perimetro della versione storica.
+
+  ## Provenienza
+  - Fonte: [SBI-58](https://agilereloaded.nifty.pm/Lk!HPsQBFT6LGV/task/SBI-58)
+  - Stato originale: Completed.
+  - Release originale: Release 1.0.
+  - Importazione: 15 ottobre 2026.
+  - Priorità MEDIUM usata come valore neutro di importazione; punti 1 è il minimo tecnico richiesto dal validatore ARchetipo; non è una stima storica né una misura del lavoro svolto.
+
+  ## Note di importazione
+  - Importazione retrospettiva da Nifty: stato originale Completed, stato ARchetipo DONE. Non sono state eseguite nuove verifiche funzionali; le caselle dei criteri restano non spuntate.
+  - Dimostrazione e criteri normalizzati servono alla lettura dello storico e non costituiscono un nuovo piano di sviluppo.
+  - La richiesta descrive una fase storica; terminologia dei ruoli, provider, accessi e disponibilità possono differire dai requisiti successivi. Non è una modifica al contratto applicativo attuale.
+
+  ## Testo originale Nifty
+  In qualità di administrator, voglio cercare un utente per nome o username e assegnare nuovi ruoli affinché possa aggiornare i suoi permessi nella piattaforma.
+
+  Criteri di accettazione:
+
+  L’admin può cercare un utente esistente tramite nome o username.
+
+  Il sistema restituisce una lista filtrata con i dati principali dell’utente (nome, email, ruoli attuali).
+
+  L’admin può aggiungere o rimuovere utenti assegnando il ruolo (ranger, admin, biker).
+
+  I cambiamenti sono salvati immediatamente e visibili all’utente alla successiva login.
+
+
+
+
+  Task di sviluppo:
+
+  Endpoint GET /users?search= per filtrare utenti per nome/username.
+  Visualizzazione lista utenti con checkbox o toggle dei ruoli.
+  Endpoint PATCH /users/{id}/roles per aggiornare ruoli.
+  Validazione sicurezza: solo admin può modificare ruoli.admin può modificare ruolo di un utente dopo averlo cercato
+history:
+  - status: DONE
+    at: "2026-10-15T12:30:57Z"

@@ -1,0 +1,38 @@
+schema: archetipo/spec/v2
+code: US-097
+title: Banner consenso cookie
+epic:
+  code: EP-007
+  title: Conformità Legale
+priority: MEDIUM
+points: 2
+status: DONE
+scope: MVP
+body: |-
+  #### US-097: Banner consenso cookie
+
+  **Epic:** EP-007 | **Priorità:** MEDIUM | **Punti:** 2 | **Stato:** DONE
+  **Bloccata da:** -
+
+  ## Storia utente
+  Come Marco l'Explorer,
+  voglio vedere un banner di consenso cookie al primo accesso e poter gestire le mie preferenze,
+  così da essere informato sull'uso dei cookie e scegliere cosa accettare.
+
+  ## Dimostrazione
+  Partendo dalla homepage senza cookie impostati, il revisore osserva un banner nella parte inferiore della pagina con il testo "Questo sito utilizza cookie per migliorare l'esperienza di navigazione." e due pulsanti: "Accetta tutti" e "Personalizza". Il revisore clicca "Accetta tutti" e il banner scompare senza ricomparire al successivo caricamento della pagina. Il revisore elimina i cookie, ricarica la pagina e clicca "Personalizza" — si apre un pannello con opzioni per cookie tecnici (sempre attivi) e cookie di marketing/profilazione (toggle). Il revisore salva le preferenze, ricarica la pagina e il banner non riappare. Il revisore naviga alla pagina "Privacy Policy" e trova il link per modificare le preferenze cookie.
+
+  ## Criteri di accettazione
+  - [ ] AC-1 — Al primo accesso, il banner cookie appare in fondo alla pagina con i pulsanti "Accetta tutti" e "Personalizza"
+  - [ ] AC-2 — Cliccando "Accetta tutti", il banner scompare e non riappare ai successivi caricamenti della pagina
+  - [ ] AC-3 — Cliccando "Personalizza", si apre un pannello con cookie tecnici sempre attivi e non modificabili e un toggle per i cookie di marketing.
+  - [ ] AC-4 — Dalla pagina Privacy Policy è accessibile un link "Gestisci preferenze cookie" che riapre il pannello delle preferenze
+  - [ ] AC-5 — Salvando le preferenze, il banner scompare e non riappare ai caricamenti successivi finché le preferenze restano memorizzate.
+
+  ## Fuori perimetro
+  Cookie wall, consenso per cookie di terze parti non configurati, integrazione con CMP esterni.
+history:
+  - status: TODO
+    at: "2026-07-16T16:15:31Z"
+  - status: DONE
+    at: "2026-10-15T11:55:43Z"

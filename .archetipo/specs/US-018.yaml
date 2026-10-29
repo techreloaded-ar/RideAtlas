@@ -1,0 +1,74 @@
+schema: archetipo/spec/v2
+code: US-018
+title: '4.2.1 - Modifica viaggio: informazioni base [CORREZIONE]'
+epic:
+  code: EP-002
+  title: Gestione Itinerari e Ciclo di Vita
+priority: MEDIUM
+points: 1
+status: DONE
+scope: Storico
+body: |-
+  #### US-018: 4.2.1 - Modifica viaggio: informazioni base [CORREZIONE]
+
+  **Epic:** EP-002 | **Priorità:** MEDIUM | **Punti:** 1 | **Stato:** DONE
+  **Bloccata da:** -
+
+  ## Storia utente
+  Come Ranger,
+  voglio compilare caratteristiche chiare e lasciare vuoti i campi opzionali del viaggio,
+  così da salvare senza errori i dati disponibili.
+
+  ## Dimostrazione
+  Il Ranger apre la modifica viaggio, legge le caratteristiche in forma positiva e salva descrizione e tag vuoti; vede una conferma coerente con la grafica del sito senza errore null.
+
+  ## Criteri di accettazione
+  - [ ] AC-1 — Le caratteristiche sono formulate in positivo e includono sterrato, curve strette, pedaggi, traghetto, autostrada e paesaggio.
+  - [ ] AC-2 — Sono disponibili le ulteriori caratteristiche durata visite, gastronomia e interesse storico-culturale indicate nella fonte.
+  - [ ] AC-3 — La descrizione vuota non causa errore null.
+  - [ ] AC-4 — I tag vuoti non causano errore null.
+  - [ ] AC-5 — La conferma della creazione usa un elemento grafico del sito senza popup di sistema.
+
+  ## Fuori perimetro
+  Nuovo sviluppo, ampliamenti non presenti nella scheda, nuova accettazione del prodotto e recupero dei documenti o degli allegati esterni. La scheda conserva il perimetro della versione storica.
+
+  ## Provenienza
+  - Fonte: [SBI-86](https://agilereloaded.nifty.pm/Lk!HPsQBFT6LGV/task/SBI-86)
+  - Stato originale: Completed.
+  - Release originale: Release 1.0.
+  - Importazione: 15 ottobre 2026.
+  - Priorità MEDIUM usata come valore neutro di importazione; punti 1 è il minimo tecnico richiesto dal validatore ARchetipo; non è una stima storica né una misura del lavoro svolto.
+
+  ## Note di importazione
+  - Importazione retrospettiva da Nifty: stato originale Completed, stato ARchetipo DONE. Non sono state eseguite nuove verifiche funzionali; le caselle dei criteri restano non spuntate.
+  - Dimostrazione e criteri normalizzati servono alla lettura dello storico e non costituiscono un nuovo piano di sviluppo.
+
+  ## Testo originale Nifty
+  Effettuare le seguenti modifiche estetico/funzionali
+
+  Checkbox o tag riformulati in forma positiva (es. "presenza di pedaggi" anziché "evita pedaggi").
+  culturale.
+
+  presenza Strade sterrate
+
+  presenza Curve strette
+
+  presenza  pedaggi
+
+  trasferimento traghetto
+
+  trasferimento autostrada
+
+  Bel paesaggio
+
+  Aggiunta di nuove voci: durata visite, gastronomia, interesse storico-
+
+  il campo descrizione se non è inserito genera un errore (null), mentre deve poter essere vuoto
+
+  il campo tag se non è inserito genera un errore (null), mentre deve poter essere vuoto
+
+  il messaggio di conferma creazione viaggio deve essere mostrato con un
+  elemento della guideline grafica, no popup di sistema
+history:
+  - status: DONE
+    at: "2026-10-15T12:30:57Z"

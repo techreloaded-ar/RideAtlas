@@ -1,0 +1,66 @@
+schema: archetipo/spec/v2
+code: US-010
+title: Consolidamento pubblicazione viaggio
+epic:
+  code: EP-002
+  title: Gestione Itinerari e Ciclo di Vita
+priority: MEDIUM
+points: 1
+status: DONE
+scope: Storico
+body: |-
+  #### US-010: Consolidamento pubblicazione viaggio
+
+  **Epic:** EP-002 | **Priorità:** MEDIUM | **Punti:** 1 | **Stato:** DONE
+  **Bloccata da:** -
+
+  ## Storia utente
+  Come Ranger
+  Voglio pubblicare un viaggio
+  Affinché diventi visibile e scaricabile dagli utenti
+
+  ## Dimostrazione
+  Un Ranger apre una bozza con almeno una tappa completa di descrizione e GPX, la pubblica dalla modifica e la vede in libreria. Rimuovendo il GPX da una bozza di prova la pubblicazione non è consentita.
+
+  ## Criteri di accettazione
+  - [ ] AC-1 — La pubblicazione porta il viaggio da bozza a pubblicato.
+  - [ ] AC-2 — La pubblicazione richiede titolo e descrizione completi.
+  - [ ] AC-3 — La pubblicazione richiede almeno una tappa.
+  - [ ] AC-4 — La pubblicazione richiede un GPX per ogni tappa.
+  - [ ] AC-5 — La pubblicazione richiede una descrizione per ogni tappa.
+  - [ ] AC-6 — Il viaggio pubblicato compare nella libreria pubblica.
+  - [ ] AC-7 — La pagina di modifica espone il pulsante di pubblicazione.
+
+  ## Fuori perimetro
+  Nuovo sviluppo, ampliamenti non presenti nella scheda, nuova accettazione del prodotto e recupero dei documenti o degli allegati esterni. La scheda conserva il perimetro della versione storica.
+
+  ## Provenienza
+  - Fonte: [SBI-64](https://agilereloaded.nifty.pm/Lk!HPsQBFT6LGV/task/SBI-64)
+  - Stato originale: Completed.
+  - Release originale: Release 1.0.
+  - Importazione: 15 ottobre 2026.
+  - Priorità MEDIUM usata come valore neutro di importazione; punti 1 è il minimo tecnico richiesto dal validatore ARchetipo; non è una stima storica né una misura del lavoro svolto.
+
+  ## Note di importazione
+  - Importazione retrospettiva da Nifty: stato originale Completed, stato ARchetipo DONE. Non sono state eseguite nuove verifiche funzionali; le caselle dei criteri restano non spuntate.
+  - Dimostrazione e criteri normalizzati servono alla lettura dello storico e non costituiscono un nuovo piano di sviluppo.
+
+  ## Testo originale Nifty
+  Come Ranger
+  Voglio pubblicare un viaggio
+  Affinché diventi visibile e scaricabile dagli utenti
+
+  AC:
+
+  Cambio stato da "bozza" a "pubblicato"
+  Pubblicazione consentita solo con:
+  Titolo e descrizione completi (campo obbligatorio - OK c'è GIA)
+  Avere almeno una tappa
+  Tutte le tappe hanno un GPX associato
+  Tutte le tappe hanno una descrizione
+  Viaggio immediatamente visibile in libreria pubblica
+  Icona pubblicazione deve essere più significativa (vedi la seconda in allegato)
+  il pulsante pubblica deve essere presente anche nella pagina di editing del viaggio.
+history:
+  - status: DONE
+    at: "2026-10-15T12:30:57Z"

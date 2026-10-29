@@ -1,0 +1,41 @@
+schema: archetipo/spec/v2
+code: US-086
+title: Import batch di itinerari
+epic:
+  code: EP-002
+  title: Gestione Itinerari e Ciclo di Vita
+priority: MEDIUM
+points: 5
+status: DONE
+blocked_by:
+  - US-080
+scope: MVP
+body: |-
+  #### US-086: Import batch di itinerari
+
+  **Epic:** EP-002 | **Priorità:** MEDIUM | **Punti:** 5 | **Stato:** DONE
+  **Bloccata da:** US-080
+
+  ## Storia utente
+  Come Giulia la Ranger,
+  voglio caricare un archivio ZIP con più itinerari, GPX e media in una volta sola,
+  così da importare in blocco la mia collezione di viaggi senza doverli creare uno per uno.
+
+  ## Dimostrazione
+  Partendo dalla dashboard Ranger, il revisore clicca "Importa ZIP" e viene portato alla pagina di import batch. Il revisore clicca "Scarica template" e riceve un file CSV di esempio con la struttura attesa. Il revisore carica un archivio ZIP valido contenente due itinerari con rispettivi GPX e osserva il job partire con stato "IN ELABORAZIONE" e un ID job mostrato. Il revisore attende il completamento, ricarica la pagina o effettua il polling, e osserva il job passare a "COMPLETATO" con l'elenco degli ID itinerario creati. Il revisore controlla l'elenco dei propri itinerari e trova i due nuovi viaggi in stato "Bozza".
+
+  ## Criteri di accettazione
+  - [ ] AC-1 — Il template di import è scaricabile e contiene il formato atteso con colonne per titolo, sommario, destinazione, durata e percorso file GPX
+  - [ ] AC-2 — Il caricamento di uno ZIP valido avvia un job asincrono con stato "IN ELABORAZIONE" e restituisce un ID job
+  - [ ] AC-3 — Al completamento del job, lo stato diventa "COMPLETATO".
+  - [ ] AC-4 — Se lo ZIP contiene dati non validi, il job termina con stato "FALLITO".
+  - [ ] AC-5 — Gli itinerari creati dal job compaiono nell’elenco dei propri viaggi in stato "Bozza".
+  - [ ] AC-6 — Un job fallito per dati non validi mostra un report degli errori.
+
+  ## Fuori perimetro
+  Pubblicazione automatica post-import, validazione contenuti avanzata, upload parallelo di più ZIP.
+history:
+  - status: TODO
+    at: "2026-07-16T16:15:31Z"
+  - status: DONE
+    at: "2026-10-15T11:55:41Z"

@@ -1,0 +1,40 @@
+schema: archetipo/spec/v2
+code: US-095
+title: Gestione utenti e ruoli
+epic:
+  code: EP-006
+  title: Amministrazione e Moderazione
+priority: HIGH
+points: 3
+status: DONE
+scope: MVP
+body: |-
+  #### US-095: Gestione utenti e ruoli
+
+  **Epic:** EP-006 | **Priorità:** HIGH | **Punti:** 3 | **Stato:** DONE
+  **Bloccata da:** -
+
+  ## Storia utente
+  Come Sentinel,
+  voglio gestire utenti e i loro ruoli dalla dashboard admin,
+  così da promuovere Explorer a Ranger o gestire account problematici.
+
+  ## Dimostrazione
+  Partendo dalla dashboard admin autenticato come Sentinel, il revisore clicca "Utenti" e osserva l'elenco di tutti gli utenti con email, nome, ruolo e stato verifica email. Il revisore cerca un utente per email, seleziona un Explorer e cambia il ruolo in "Ranger" tramite dropdown — il ruolo si aggiorna e viene mostrato "Ruolo aggiornato a Ranger." Il revisore controlla che l'utente abbia ricevuto un'email di notifica del cambio ruolo. Il revisore seleziona un Ranger e lo riporta a Explorer — il ruolo si aggiorna. Il revisore tenta di declassare un Sentinel e osserva l'azione non consentita.
+
+  ## Criteri di accettazione
+  - [ ] AC-1 — La lista utenti mostra email, nome, ruolo e stato verifica email, con campo di ricerca testuale
+  - [ ] AC-2 — Cambiando il ruolo di un utente da Explorer a Ranger, il ruolo viene aggiornato immediatamente e viene mostrato "Ruolo aggiornato a Ranger"
+  - [ ] AC-3 — L'utente destinatario del cambio ruolo riceve un'email di notifica
+  - [ ] AC-4 — Un Sentinel non può essere declassato tramite l'interfaccia admin
+
+  ## Fuori perimetro
+  Eliminazione utenti, gestione password utenti, moderazione contenuti utente.
+
+  ## Prerequisiti della dimostrazione
+  Predisporre dati e account di esempio coerenti con: US-078 (US-078: Controllo accessi basato sui ruoli). Questi riferimenti tra epic descrivono il contesto funzionale; non costituiscono blocchi di lavorazione.
+history:
+  - status: TODO
+    at: "2026-07-16T16:15:31Z"
+  - status: DONE
+    at: "2026-10-15T11:55:43Z"

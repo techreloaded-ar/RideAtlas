@@ -1,0 +1,70 @@
+schema: archetipo/spec/v2
+code: US-052
+title: Mostra Profilo Ranger
+epic:
+  code: EP-005
+  title: Profilo e Community
+priority: MEDIUM
+points: 1
+status: DONE
+scope: Storico
+body: |-
+  #### US-052: Mostra Profilo Ranger
+
+  **Epic:** EP-005 | **Priorità:** MEDIUM | **Punti:** 1 | **Stato:** DONE
+  **Bloccata da:** -
+
+  ## Storia utente
+  Come Explorer
+  Voglio visualizzare la scheda del Ranger che ha creato il viaggio
+  Così che possa conoscerlo meglio e avere più contesto sulle sue esperienze di viaggio
+
+  ## Dimostrazione
+  Un Explorer apre il profilo del Ranger da un viaggio e vede nome, foto, social, bio e lista automatica dei viaggi, senza indirizzo email.
+
+  ## Criteri di accettazione
+  - [ ] AC-1 — La scheda Ranger è raggiungibile dal dettaglio e dall’elenco viaggi.
+  - [ ] AC-2 — La scheda mostra nome, foto, social e bio disponibili.
+  - [ ] AC-3 — La scheda non espone l’indirizzo email.
+  - [ ] AC-4 — La scheda mostra automaticamente i viaggi creati dal Ranger.
+  - [ ] AC-5 — La lista dei viaggi nella scheda pubblica non è modificabile manualmente.
+
+  ## Fuori perimetro
+  Nuovo sviluppo, ampliamenti non presenti nella scheda, nuova accettazione del prodotto e recupero dei documenti o degli allegati esterni. La scheda conserva il perimetro della versione storica.
+
+  ## Provenienza
+  - Fonte: [SBI-150](https://agilereloaded.nifty.pm/Lk!HPsQBFT6LGV/task/SBI-150)
+  - Stato originale: Completed.
+  - Release originale: Release 1.0.
+  - Importazione: 15 ottobre 2026.
+  - Priorità MEDIUM usata come valore neutro di importazione; punti 1 è il minimo tecnico richiesto dal validatore ARchetipo; non è una stima storica né una misura del lavoro svolto.
+
+  ## Note di importazione
+  - Importazione retrospettiva da Nifty: stato originale Completed, stato ARchetipo DONE. Non sono state eseguite nuove verifiche funzionali; le caselle dei criteri restano non spuntate.
+  - Dimostrazione e criteri normalizzati servono alla lettura dello storico e non costituiscono un nuovo piano di sviluppo.
+
+  ## Testo originale Nifty
+  Come Explorer
+  Voglio visualizzare la scheda del Ranger che ha creato il viaggio
+  Così che possa conoscerlo meglio e avere più contesto sulle sue esperienze di viaggio
+
+  Acceptance Criteria
+
+  GIVEN che mi trovo nella scheda di un viaggio o nell’elenco viaggi
+  WHEN seleziono il nome o il profilo del Ranger associato
+  THEN vengo reindirizzato alla pagina dedicata al Ranger.
+
+  GIVEN che visualizzo la scheda del Ranger
+  WHEN la pagina viene caricata
+  THEN vedo i dati anagrafici disponibili: nome completo, foto utente, url social, biografia, ma non l’indirizzo email.
+
+  GIVEN che sono nella scheda del Ranger
+  WHEN scorro la pagina
+  THEN viene mostrata una sezione con l’elenco dei viaggi creati dal Ranger.
+
+  GIVEN che sono nella sezione dei viaggi del Ranger
+  WHEN la osservo
+  THEN la lista è generata in automatico, non modificabile, e mostra tutti i viaggi creati dal Ranger.
+history:
+  - status: DONE
+    at: "2026-10-15T12:30:57Z"

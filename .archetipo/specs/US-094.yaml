@@ -1,0 +1,42 @@
+schema: archetipo/spec/v2
+code: US-094
+title: Moderazione itinerari Sentinel
+epic:
+  code: EP-006
+  title: Amministrazione e Moderazione
+priority: HIGH
+points: 5
+status: DONE
+scope: MVP
+body: |-
+  #### US-094: Moderazione itinerari Sentinel
+
+  **Epic:** EP-006 | **Priorità:** HIGH | **Punti:** 5 | **Stato:** DONE
+  **Bloccata da:** -
+
+  ## Storia utente
+  Come Sentinel,
+  voglio approvare, assegnare, riordinare ed eliminare itinerari dalla dashboard admin,
+  così da mantenere la qualità del catalogo e gestire i contenuti dei Ranger.
+
+  ## Dimostrazione
+  Partendo dalla dashboard admin autenticato come Sentinel, il revisore clicca "Itinerari" e osserva l'elenco di tutti gli itinerari (qualsiasi stato) con titolo, autore, stato e data. Il revisore filtra per stato "Bozza", seleziona un itinerario e clicca "Approva" — l'itinerario passa a "Pubblicato" con messaggio di conferma. Il revisore seleziona un itinerario pubblicato e clicca "Assegna", sceglie un altro Ranger dal dialog e conferma — l'itinerario viene riassegnato con messaggio "Itinerario assegnato a [nome]" e il nuovo proprietario vede l'itinerario nella propria dashboard. Il revisore trascina un itinerario in una posizione diversa nell'elenco ordinato e rilascia — l'ordine viene salvato e persistente al ricaricamento. Il revisore seleziona un itinerario in bozza e clicca "Elimina" — l'itinerario viene rimosso con messaggio "Itinerario eliminato."
+
+  ## Criteri di accettazione
+  - [ ] AC-1 — Nella dashboard itinerari admin, il Sentinel vede tutti gli itinerari con filtro per stato (Tutti, Bozza, Pubblicato, Archiviato) e dati (titolo, autore, stato, data)
+  - [ ] AC-2 — Il Sentinel può approvare un itinerario in stato "Bozza" portandolo a "Pubblicato" con messaggio "Itinerario approvato e pubblicato"
+  - [ ] AC-3 — Il Sentinel può riassegnare un itinerario a un altro Ranger tramite dialog di selezione; l'itinerario appare nella dashboard del nuovo Ranger
+  - [ ] AC-4 — Il Sentinel può riordinare gli itinerari tramite drag-and-drop; l'ordine persiste al ricaricamento della pagina
+  - [ ] AC-5 — Il Sentinel può eliminare un itinerario in stato "Bozza".
+  - [ ] AC-6 — Per un itinerario in uno stato diverso da "Bozza", il pulsante Elimina è disabilitato.
+
+  ## Fuori perimetro
+  Modifica prezzo itinerario, moderazione utenti, gestione acquisti, moderazione con stato Pronto_per_revisione.
+
+  ## Prerequisiti della dimostrazione
+  Predisporre dati e account di esempio coerenti con: US-078 (US-078: Controllo accessi basato sui ruoli); US-083 (US-083: Ciclo di vita e moderazione itinerario). Questi riferimenti tra epic descrivono il contesto funzionale; non costituiscono blocchi di lavorazione.
+history:
+  - status: TODO
+    at: "2026-07-16T16:15:31Z"
+  - status: DONE
+    at: "2026-10-15T11:55:42Z"

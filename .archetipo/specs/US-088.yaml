@@ -1,0 +1,40 @@
+schema: archetipo/spec/v2
+code: US-088
+title: Pagina dettaglio itinerario con mappa
+epic:
+  code: EP-003
+  title: Catalogo e Scoperta
+priority: HIGH
+points: 3
+status: DONE
+blocked_by:
+  - US-087
+scope: MVP
+body: |-
+  #### US-088: Pagina dettaglio itinerario con mappa
+
+  **Epic:** EP-003 | **Priorità:** HIGH | **Punti:** 3 | **Stato:** DONE
+  **Bloccata da:** US-087
+
+  ## Storia utente
+  Come Marco l'Explorer,
+  voglio aprire la pagina di dettaglio di un itinerario per vedere tappe, media e la traccia su mappa interattiva,
+  così da valutare il percorso prima di decidere se acquistarlo.
+
+  ## Dimostrazione
+  Partendo dal catalogo, il revisore clicca su un itinerario e viene portato alla pagina /trips/[slug]. Il revisore osserva il titolo, sommario, durata, tema, caratteristiche, stagioni, prezzo e la galleria foto. Il revisore scorre e vede l'elenco delle tappe con titolo, descrizione e durata. Il revisore osserva una mappa interattiva che mostra la traccia GPX completa del percorso. Il revisore clicca su una tappa nell'elenco e osserva la mappa zoomare su quel segmento. Il revisore clicca "Acquista" e viene portato alla pagina di pagamento.
+
+  ## Criteri di accettazione
+  - [ ] AC-1 — La pagina di dettaglio mostra titolo, sommario, durata, tema, caratteristiche, stagioni consigliate e prezzo dell'itinerario
+  - [ ] AC-2 — L'elenco delle tappe mostra per ciascuna titolo, descrizione, tipo percorso e durata
+  - [ ] AC-3 — La mappa interattiva mostra la traccia GPX completa dell'itinerario.
+  - [ ] AC-4 — La galleria foto mostra le immagini caricate per l'itinerario in formato slideshow o griglia
+  - [ ] AC-5 — Cliccando su una tappa, la mappa zooma sul relativo segmento.
+
+  ## Fuori perimetro
+  Download GPX (riservato agli acquirenti), recensioni, itinerari correlati.
+history:
+  - status: TODO
+    at: "2026-07-16T16:15:31Z"
+  - status: DONE
+    at: "2026-10-15T11:55:41Z"

@@ -1,0 +1,48 @@
+schema: archetipo/spec/v2
+code: US-074
+title: privacy policy
+epic:
+  code: EP-007
+  title: Conformità Legale
+priority: MEDIUM
+points: 1
+status: DONE
+scope: Storico
+body: |-
+  #### US-074: privacy policy
+
+  **Epic:** EP-007 | **Priorità:** MEDIUM | **Punti:** 1 | **Stato:** DONE
+  **Bloccata da:** -
+
+  ## Storia utente
+  Come utente,
+  voglio trovare il recapito email aggiornato nella privacy policy,
+  così da usare il contatto previsto dall’informativa.
+
+  ## Dimostrazione
+  Il revisore apre la privacy policy e controlla l’aggiornamento del recapito email richiesto dalla scheda. Il nuovo indirizzo non è indicato nella descrizione originale.
+
+  ## Criteri di accettazione
+  - [ ] AC-1 — La richiesta storica riguarda il recapito email nella privacy policy; la descrizione non indica il nuovo indirizzo.
+
+  ## Fuori perimetro
+  Nuovo sviluppo, ampliamenti non presenti nella scheda, nuova accettazione del prodotto e recupero dei documenti o degli allegati esterni. La scheda conserva il perimetro della versione storica.
+
+  ## Provenienza
+  - Fonte: [SBI-193](https://agilereloaded.nifty.pm/Lk!HPsQBFT6LGV/task/SBI-193)
+  - Stato originale: Completed.
+  - Release originale: Release 1.0.
+  - Importazione: 15 ottobre 2026.
+  - Priorità MEDIUM usata come valore neutro di importazione; punti 1 è il minimo tecnico richiesto dal validatore ARchetipo; non è una stima storica né una misura del lavoro svolto.
+
+  ## Note di importazione
+  - Importazione retrospettiva da Nifty: stato originale Completed, stato ARchetipo DONE. Non sono state eseguite nuove verifiche funzionali; le caselle dei criteri restano non spuntate.
+  - Dimostrazione e criteri normalizzati servono alla lettura dello storico e non costituiscono un nuovo piano di sviluppo.
+
+  ## Testo originale Nifty
+  AC*
+
+  cambia mail
+history:
+  - status: DONE
+    at: "2026-10-15T12:30:57Z"

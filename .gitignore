@@ -36,14 +36,16 @@ coverage/
 .cursor/
 
 # Strumenti e agenti AI
+# ARchetipo: conserva solo backlog e specifiche
+/.archetipo/*
+!/.archetipo/backlog.yaml
+!/.archetipo/specs/
 .agents/
-.archetipo/
 .augment/
 .bmad-core/
 .claude/
 .kiro/
 .specify/
-specs/
 AGENTS.md
 CLAUDE.md
 GEMINI.md

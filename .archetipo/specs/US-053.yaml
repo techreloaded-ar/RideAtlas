@@ -1,0 +1,48 @@
+schema: archetipo/spec/v2
+code: US-053
+title: Disabilitare Trip Builder per ora
+epic:
+  code: EP-008
+  title: Trip Builder AI
+priority: MEDIUM
+points: 1
+status: DONE
+scope: Storico
+body: |-
+  #### US-053: Disabilitare Trip Builder per ora
+
+  **Epic:** EP-008 | **Priorità:** MEDIUM | **Punti:** 1 | **Stato:** DONE
+  **Bloccata da:** -
+
+  ## Storia utente
+  Come responsabile del prodotto,
+  voglio disabilitare temporaneamente Trip Builder,
+  così da escludere dal rilascio la funzione indicata dalla scheda.
+
+  ## Dimostrazione
+  Il revisore verifica la scheda storica Disabilitare Trip Builder per ora. La fonte non precisa se la disabilitazione riguardi menu, pagina o API; non viene attribuito un meccanismo non documentato.
+
+  ## Criteri di accettazione
+  - [ ] AC-1 — La scheda storica documenta l’obiettivo riportato nel titolo; non sono presenti criteri di accettazione dettagliati nella fonte.
+
+  ## Fuori perimetro
+  Nuovo sviluppo, ampliamenti non presenti nella scheda, nuova accettazione del prodotto e recupero dei documenti o degli allegati esterni. La scheda conserva il perimetro della versione storica.
+
+  ## Provenienza
+  - Fonte: [SBI-155](https://agilereloaded.nifty.pm/Lk!HPsQBFT6LGV/task/SBI-155)
+  - Stato originale: Completed.
+  - Release originale: Release 1.0.
+  - Importazione: 15 ottobre 2026.
+  - Priorità MEDIUM usata come valore neutro di importazione; punti 1 è il minimo tecnico richiesto dal validatore ARchetipo; non è una stima storica né una misura del lavoro svolto.
+
+  ## Note di importazione
+  - Importazione retrospettiva da Nifty: stato originale Completed, stato ARchetipo DONE. Non sono state eseguite nuove verifiche funzionali; le caselle dei criteri restano non spuntate.
+  - Dimostrazione e criteri normalizzati servono alla lettura dello storico e non costituiscono un nuovo piano di sviluppo.
+  - La descrizione originale è assente: la storia utente è una ricostruzione minima dal titolo. I dettagli mancanti non sono considerati verificati.
+  - La richiesta descrive una fase storica; terminologia dei ruoli, provider, accessi e disponibilità possono differire dai requisiti successivi. Non è una modifica al contratto applicativo attuale.
+
+  ## Testo originale Nifty
+  (Descrizione non presente nella fonte.)
+history:
+  - status: DONE
+    at: "2026-10-15T12:30:57Z"

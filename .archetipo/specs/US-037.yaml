@@ -1,0 +1,46 @@
+schema: archetipo/spec/v2
+code: US-037
+title: Cancellazione definitiva del viaggio
+epic:
+  code: EP-002
+  title: Gestione Itinerari e Ciclo di Vita
+priority: MEDIUM
+points: 1
+status: DONE
+scope: Storico
+body: |-
+  #### US-037: Cancellazione definitiva del viaggio
+
+  **Epic:** EP-002 | **Priorità:** MEDIUM | **Punti:** 1 | **Stato:** DONE
+  **Bloccata da:** -
+
+  ## Storia utente
+  come admin voglio poter eliminare definitivamente un viaggio e le sue risorse (media e gpx)  affinché possa liberare spazio sul disco
+
+  ## Dimostrazione
+  In un ambiente di prova un admin elimina definitivamente un viaggio di esempio con media e GPX e verifica l’assenza del viaggio e delle sue risorse.
+
+  ## Criteri di accettazione
+  - [ ] AC-1 — L’admin può eliminare definitivamente un viaggio.
+  - [ ] AC-2 — L’eliminazione rimuove i media associati.
+  - [ ] AC-3 — L’eliminazione rimuove i GPX associati.
+
+  ## Fuori perimetro
+  Nuovo sviluppo, ampliamenti non presenti nella scheda, nuova accettazione del prodotto e recupero dei documenti o degli allegati esterni. La scheda conserva il perimetro della versione storica.
+
+  ## Provenienza
+  - Fonte: [SBI-124](https://agilereloaded.nifty.pm/Lk!HPsQBFT6LGV/task/SBI-124)
+  - Stato originale: Completed.
+  - Release originale: Release 1.0.
+  - Importazione: 15 ottobre 2026.
+  - Priorità MEDIUM usata come valore neutro di importazione; punti 1 è il minimo tecnico richiesto dal validatore ARchetipo; non è una stima storica né una misura del lavoro svolto.
+
+  ## Note di importazione
+  - Importazione retrospettiva da Nifty: stato originale Completed, stato ARchetipo DONE. Non sono state eseguite nuove verifiche funzionali; le caselle dei criteri restano non spuntate.
+  - Dimostrazione e criteri normalizzati servono alla lettura dello storico e non costituiscono un nuovo piano di sviluppo.
+
+  ## Testo originale Nifty
+  come admin voglio poter eliminare definitivamente un viaggio e le sue risorse (media e gpx)  affinché possa liberare spazio sul disco
+history:
+  - status: DONE
+    at: "2026-10-15T12:30:57Z"

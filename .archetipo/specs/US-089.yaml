@@ -1,0 +1,40 @@
+schema: archetipo/spec/v2
+code: US-089
+title: Acquisto itinerario
+epic:
+  code: EP-004
+  title: Marketplace e Pagamenti
+priority: HIGH
+points: 5
+status: DONE
+scope: MVP
+body: |-
+  #### US-089: Acquisto itinerario
+
+  **Epic:** EP-004 | **Priorità:** HIGH | **Punti:** 5 | **Stato:** DONE
+  **Bloccata da:** -
+
+  ## Storia utente
+  Come Marco l'Explorer,
+  voglio acquistare un itinerario a pagamento con pochi clic,
+  così da ottenere l'accesso ai contenuti premium e al download della traccia GPX.
+
+  ## Dimostrazione
+  Partendo dalla pagina di dettaglio di un itinerario a pagamento, autenticato come Explorer, il revisore clicca "Acquista" e viene reindirizzato alla pagina di checkout. Il revisore visualizza il riepilogo dell'acquisto con titolo itinerario, prezzo e pulsante di pagamento. Il revisore completa il pagamento (Stripe o mock in base all'ambiente) e osserva il messaggio "Acquisto completato con successo!" con il badge "Acquistato" sulla pagina dell'itinerario. Il revisore clicca "Acquista" sullo stesso itinerario e osserva il messaggio "Hai già acquistato questo itinerario" con link diretto al download GPX.
+
+  ## Criteri di accettazione
+  - [ ] AC-1 — Cliccando "Acquista" su un itinerario a pagamento, l'utente viene portato alla pagina di checkout con riepilogo (titolo, prezzo) e opzioni di pagamento
+  - [ ] AC-2 — Completando il pagamento (Stripe o mock), il sistema mostra "Acquisto completato con successo!" e l'itinerario viene marcato come acquistato per quell'utente
+  - [ ] AC-3 — Tentando di acquistare un itinerario già acquistato, il sistema mostra "Hai già acquistato questo itinerario" con link al download
+  - [ ] AC-4 — Un itinerario gratuito (prezzo = 0) viene automaticamente completato senza passare dal checkout e mostra subito l'accesso ai contenuti premium
+
+  ## Fuori perimetro
+  Rimborsi, webhook Stripe, gestione transazioni fallite, carrello multi-itinerario.
+
+  ## Prerequisiti della dimostrazione
+  Predisporre dati e account di esempio coerenti con: US-078 (US-078: Controllo accessi basato sui ruoli); US-088 (US-088: Pagina dettaglio itinerario con mappa). Questi riferimenti tra epic descrivono il contesto funzionale; non costituiscono blocchi di lavorazione.
+history:
+  - status: TODO
+    at: "2026-07-16T16:15:31Z"
+  - status: DONE
+    at: "2026-10-15T11:55:42Z"

@@ -1,0 +1,40 @@
+schema: archetipo/spec/v2
+code: US-096
+title: Gestione acquisti e rimborsi
+epic:
+  code: EP-006
+  title: Amministrazione e Moderazione
+priority: HIGH
+points: 3
+status: DONE
+scope: MVP
+body: |-
+  #### US-096: Gestione acquisti e rimborsi
+
+  **Epic:** EP-006 | **Priorità:** HIGH | **Punti:** 3 | **Stato:** DONE
+  **Bloccata da:** -
+
+  ## Storia utente
+  Come Sentinel,
+  voglio visualizzare tutti gli acquisti e gestire i rimborsi,
+  così da assicurare il corretto funzionamento del marketplace e la soddisfazione degli Explorer.
+
+  ## Dimostrazione
+  Partendo dalla dashboard admin autenticato come Sentinel, il revisore clicca "Acquisti" e osserva l'elenco di tutti gli acquisti con utente, itinerario, importo, metodo pagamento e stato. Il revisore filtra per stato "COMPLETATO", seleziona un acquisto e clicca "Rimborsa" — l'acquisto passa a stato "RIMBORSATO" con messaggio "Acquisto rimborsato con successo." Il revisore verifica che l'utente acquirente non abbia più accesso ai contenuti premium di quell'itinerario. Il revisore tenta di rimborsare un acquisto già in stato "RIMBORSATO" e osserva l'errore "Acquisto già rimborsato."
+
+  ## Criteri di accettazione
+  - [ ] AC-1 — L'elenco acquisti admin mostra utente, itinerario, importo, metodo pagamento e stato, con filtri per stato
+  - [ ] AC-2 — Il Sentinel può rimborsare un acquisto in stato "COMPLETATO", portandolo a "RIMBORSATO" con messaggio di conferma
+  - [ ] AC-3 — Dopo il rimborso, l'utente acquirente perde l'accesso ai contenuti premium (download GPX disabilitato)
+  - [ ] AC-4 — Un acquisto già in stato "RIMBORSATO" non può essere rimborsato nuovamente; il sistema mostra "Acquisto già rimborsato"
+
+  ## Fuori perimetro
+  Rimborso parziale, gestione dispute, rimborso automatico via webhook Stripe.
+
+  ## Prerequisiti della dimostrazione
+  Predisporre dati e account di esempio coerenti con: US-078 (US-078: Controllo accessi basato sui ruoli); US-089 (US-089: Acquisto itinerario). Questi riferimenti tra epic descrivono il contesto funzionale; non costituiscono blocchi di lavorazione.
+history:
+  - status: TODO
+    at: "2026-07-16T16:15:31Z"
+  - status: DONE
+    at: "2026-10-15T11:55:43Z"

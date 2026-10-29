@@ -1,0 +1,44 @@
+schema: archetipo/spec/v2
+code: US-075
+title: Registrazione con verifica email
+epic:
+  code: EP-001
+  title: Autenticazione e Autorizzazione
+priority: HIGH
+points: 3
+status: DONE
+scope: MVP
+body: |-
+  #### US-075: Registrazione con verifica email
+
+  **Epic:** EP-001 | **Priorità:** HIGH | **Punti:** 3 | **Stato:** DONE
+  **Bloccata da:** -
+
+  ## Storia utente
+  Come Marco l'Explorer,
+  voglio registrarmi con email e password e verificare il mio indirizzo email,
+  così da poter accedere in sicurezza alla piattaforma.
+
+  ## Dimostrazione
+  Partendo dalla homepage con utente non autenticato, il revisore clicca su "Registrati", compila il form con email e password valide (min 8 caratteri, almeno una maiuscola e un numero), invia e osserva il messaggio "Registrazione completata. Controlla la tua email per verificare l'indirizzo." Il revisore controlla la casella email configurata e trova un'email di verifica con link. Cliccando il link, viene reindirizzato a una pagina di conferma che mostra "Email verificata con successo. Ora puoi accedere." Il revisore tenta poi di registrarsi con la stessa email e osserva l'errore "Email già utilizzata."
+
+  ## Criteri di accettazione
+  - [ ] AC-1 — L'utente inserisce email e password valide, invia il form e riceve un messaggio di conferma con invito a verificare l'email
+  - [ ] AC-2 — L'email di verifica viene recapitata all'indirizzo fornito con un link valido.
+  - [ ] AC-3 — Cliccando il link di verifica valido, l'utente visualizza "Email verificata con successo. Ora puoi accedere."
+  - [ ] AC-4 — Se l’email è già registrata, il sistema mostra "Email già utilizzata".
+  - [ ] AC-5 — Un token di verifica scaduto o non valido mostra "Link non valido o scaduto".
+  - [ ] AC-6 — Un tentativo di registrazione con email già utilizzata non invia una nuova email di verifica.
+
+  ## Fuori perimetro
+  Login dopo la registrazione, OAuth Google, recupero password, gestione ruoli.
+
+  ## Nota di importazione
+  Alla prima importazione era stato conservato lo stato storico PLANNED; la cartella allegata non conteneva il relativo piano di implementazione. La storia è stata successivamente portata in DONE su richiesta esplicita dell’utente, insieme alle altre storie importate.
+history:
+  - status: TODO
+    at: "2026-07-16T16:15:31Z"
+  - status: PLANNED
+    at: "2026-07-16T16:20:00Z"
+  - status: DONE
+    at: "2026-10-15T11:54:09Z"

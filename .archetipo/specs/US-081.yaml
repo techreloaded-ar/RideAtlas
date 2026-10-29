@@ -1,0 +1,39 @@
+schema: archetipo/spec/v2
+code: US-081
+title: Caricamento e gestione tracce GPX
+epic:
+  code: EP-002
+  title: Gestione Itinerari e Ciclo di Vita
+priority: HIGH
+points: 3
+status: DONE
+blocked_by:
+  - US-079
+scope: MVP
+body: |-
+  #### US-081: Caricamento e gestione tracce GPX
+
+  **Epic:** EP-002 | **Priorità:** HIGH | **Punti:** 3 | **Stato:** DONE
+  **Bloccata da:** US-079
+
+  ## Storia utente
+  Come Giulia la Ranger,
+  voglio caricare tracce GPX per l'itinerario e per ogni tappa,
+  così che gli Explorer possano visualizzare e scaricare il percorso certificato.
+
+  ## Dimostrazione
+  Partendo dalla pagina di creazione/modifica di un itinerario, il revisore clicca "Carica GPX" a livello di itinerario, seleziona un file GPX valido e osserva il nome del file apparire con un'anteprima delle statistiche (distanza, waypoint, elevazione). Il revisore ripete l'operazione per una tappa specifica e osserva il GPX associato a quella tappa. Il revisore carica un file non-GPX e osserva l'errore "Formato file non supportato. Carica un file GPX valido." Il revisore elimina un GPX caricato e osserva il file rimosso dall'elenco.
+
+  ## Criteri di accettazione
+  - [ ] AC-1 — Il caricamento di un file GPX valido a livello di itinerario mostra nome file e statistiche (distanza, waypoint, elevazione) come conferma
+  - [ ] AC-2 — Il caricamento di un file GPX valido a livello di tappa associa la traccia alla tappa specifica
+  - [ ] AC-3 — Il caricamento di un file non GPX mostra l'errore "Formato file non supportato. Carica un file GPX valido."
+  - [ ] AC-4 — L'eliminazione di un GPX caricato rimuove il file dall'itinerario o tappa e il nome scompare dall'elenco
+
+  ## Fuori perimetro
+  Download GPX (coperto da US-091), anteprima su mappa, parsing di GPX malformati.
+history:
+  - status: TODO
+    at: "2026-07-16T16:15:31Z"
+  - status: DONE
+    at: "2026-10-15T11:55:40Z"

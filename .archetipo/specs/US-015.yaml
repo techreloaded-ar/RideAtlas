@@ -1,0 +1,53 @@
+schema: archetipo/spec/v2
+code: US-015
+title: US 4.1.9 Visualizzazione lista viaggi
+epic:
+  code: EP-003
+  title: Catalogo e Scoperta
+priority: MEDIUM
+points: 1
+status: DONE
+scope: Storico
+body: |-
+  #### US-015: US 4.1.9 Visualizzazione lista viaggi
+
+  **Epic:** EP-003 | **Priorità:** MEDIUM | **Punti:** 1 | **Stato:** DONE
+  **Bloccata da:** -
+
+  ## Storia utente
+  Come Utente base
+  Voglio visualizzare l’elenco dei viaggi creati
+  Affinché possa consultare le opzioni di itinerario a disposizione
+
+  ## Dimostrazione
+  Con un viaggio disponibile il revisore apre l’elenco e legge titolo, descrizione, zona e stagione nella relativa voce.
+
+  ## Criteri di accettazione
+  - [ ] AC-1 — Ogni voce dell’elenco mostra il titolo del viaggio.
+  - [ ] AC-2 — Ogni voce dell’elenco mostra descrizione, zona e stagione del viaggio.
+
+  ## Fuori perimetro
+  Nuovo sviluppo, ampliamenti non presenti nella scheda, nuova accettazione del prodotto e recupero dei documenti o degli allegati esterni. La scheda conserva il perimetro della versione storica.
+
+  ## Provenienza
+  - Fonte: [SBI-80](https://agilereloaded.nifty.pm/Lk!HPsQBFT6LGV/task/SBI-80)
+  - Stato originale: Completed.
+  - Release originale: Release 1.0.
+  - Importazione: 15 ottobre 2026.
+  - Priorità MEDIUM usata come valore neutro di importazione; punti 1 è il minimo tecnico richiesto dal validatore ARchetipo; non è una stima storica né una misura del lavoro svolto.
+
+  ## Note di importazione
+  - Importazione retrospettiva da Nifty: stato originale Completed, stato ARchetipo DONE. Non sono state eseguite nuove verifiche funzionali; le caselle dei criteri restano non spuntate.
+  - Dimostrazione e criteri normalizzati servono alla lettura dello storico e non costituiscono un nuovo piano di sviluppo.
+
+  ## Testo originale Nifty
+  Come Utente base
+  Voglio visualizzare l’elenco dei viaggi creati
+  Affinché possa consultare le opzioni di itinerario a disposizione
+
+  AC:
+
+  Posso vedere una lista di tutti i viaggi creati, con informazioni base (titolo, descrizione, zona, stagione)
+history:
+  - status: DONE
+    at: "2026-10-15T12:30:57Z"

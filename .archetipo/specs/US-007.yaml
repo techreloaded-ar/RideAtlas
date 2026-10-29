@@ -1,0 +1,61 @@
+schema: archetipo/spec/v2
+code: US-007
+title: 'US 4.2.1 - Modifica Viaggio: Informazioni Base'
+epic:
+  code: EP-002
+  title: Gestione Itinerari e Ciclo di Vita
+priority: MEDIUM
+points: 1
+status: DONE
+scope: Storico
+body: |-
+  #### US-007: US 4.2.1 - Modifica Viaggio: Informazioni Base
+
+  **Epic:** EP-002 | **Priorità:** MEDIUM | **Punti:** 1 | **Stato:** DONE
+  **Bloccata da:** -
+
+  ## Storia utente
+  Come Ranger
+  Voglio modificare le informazioni base di un viaggio
+  Affinché possa aggiornare i dati preliminari
+
+  ## Dimostrazione
+  Il Ranger autore apre un viaggio, aggiorna titolo e zona, conferma e verifica i nuovi valori nel dettaglio e nella lista. Un altro Ranger non trova la possibilità di modificarlo.
+
+  ## Criteri di accettazione
+  - [ ] AC-1 — La modifica permette di aggiornare titolo, descrizione, zona, hashtag, stagione e caratteristiche.
+  - [ ] AC-2 — Le modifiche persistono solo dopo la conferma.
+  - [ ] AC-3 — Il Ranger creatore può modificare il viaggio.
+  - [ ] AC-4 — Un admin può modificare il viaggio.
+  - [ ] AC-5 — Un Ranger diverso dal creatore non può modificare il viaggio.
+  - [ ] AC-6 — Dopo il salvataggio il dettaglio mostra i valori aggiornati.
+  - [ ] AC-7 — La lista mostra i valori aggiornati dei campi presenti nella lista.
+
+  ## Fuori perimetro
+  Nuovo sviluppo, ampliamenti non presenti nella scheda, nuova accettazione del prodotto e recupero dei documenti o degli allegati esterni. La scheda conserva il perimetro della versione storica.
+
+  ## Provenienza
+  - Fonte: [SBI-59](https://agilereloaded.nifty.pm/Lk!HPsQBFT6LGV/task/SBI-59)
+  - Stato originale: Completed.
+  - Release originale: Release 1.0.
+  - Importazione: 15 ottobre 2026.
+  - Priorità MEDIUM usata come valore neutro di importazione; punti 1 è il minimo tecnico richiesto dal validatore ARchetipo; non è una stima storica né una misura del lavoro svolto.
+
+  ## Note di importazione
+  - Importazione retrospettiva da Nifty: stato originale Completed, stato ARchetipo DONE. Non sono state eseguite nuove verifiche funzionali; le caselle dei criteri restano non spuntate.
+  - Dimostrazione e criteri normalizzati servono alla lettura dello storico e non costituiscono un nuovo piano di sviluppo.
+
+  ## Testo originale Nifty
+  Come Ranger
+  Voglio modificare le informazioni base di un viaggio
+  Affinché possa aggiornare i dati preliminari
+
+  AC:
+
+  Posso modificare tutti i campi della creazione (titolo, descrizione, zona, hashtag, stagione, caratteristiche)
+  Le modifiche vengono salvate solo dopo conferma
+  Solo il ranger creatore o un admin possono modificare
+  Dopo il salvataggio devo poter vedere le modifiche sia nella visualizzazione del viaggio singolo che nell'elenco dei viaggi (se la modifica è fra i campi visualizzati nella visualizzazione elenco viaggi)
+history:
+  - status: DONE
+    at: "2026-10-15T12:30:57Z"

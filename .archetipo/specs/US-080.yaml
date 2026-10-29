@@ -1,0 +1,43 @@
+schema: archetipo/spec/v2
+code: US-080
+title: Modifica itinerario e gestione tappe
+epic:
+  code: EP-002
+  title: Gestione Itinerari e Ciclo di Vita
+priority: HIGH
+points: 5
+status: DONE
+blocked_by:
+  - US-079
+scope: MVP
+body: |-
+  #### US-080: Modifica itinerario e gestione tappe
+
+  **Epic:** EP-002 | **Priorità:** HIGH | **Punti:** 5 | **Stato:** DONE
+  **Bloccata da:** US-079
+
+  ## Storia utente
+  Come Giulia la Ranger,
+  voglio modificare un itinerario esistente, aggiornando metadati e tappe,
+  così da perfezionare il viaggio prima di inviarlo in revisione.
+
+  ## Dimostrazione
+  Partendo dalla dashboard Ranger che mostra l'elenco dei propri itinerari, il revisore clicca su un itinerario in stato "Bozza" e viene portato alla pagina di modifica con tutti i campi precompilati. Il revisore cambia il titolo, aggiorna la descrizione di una tappa esistente, aggiunge una nuova tappa, rimuove una tappa cliccando "Elimina" e osserva la tappa scomparire dall'elenco. Il revisore salva e osserva "Modifiche salvate con successo." Il revisore ricarica la pagina e verifica che tutte le modifiche siano state mantenute.
+
+  ## Criteri di accettazione
+  - [ ] AC-1 — La pagina di modifica carica tutti i campi dell'itinerario esistente precompilati
+  - [ ] AC-2 — Il revisore può modificare metadati (titolo, sommario, durata, tema, caratteristiche, stagioni, tag, prezzo, data, insight) e salvare — le modifiche persistono al ricaricamento della pagina
+  - [ ] AC-3 — Aggiungere una tappa e salvare la rende visibile anche dopo il ricaricamento della pagina.
+  - [ ] AC-4 — Se il titolo cambia, lo slug viene rigenerato con rilevamento di conflitti.
+  - [ ] AC-5 — Modificare una tappa e salvare conserva i valori aggiornati al ricaricamento della pagina.
+  - [ ] AC-6 — Riordinare le tappe e salvare conserva il nuovo ordine al ricaricamento della pagina.
+  - [ ] AC-7 — Eliminare una tappa e salvare ne conserva l’assenza al ricaricamento della pagina.
+  - [ ] AC-8 — Un titolo che genera uno slug già utilizzato mostra "Slug già esistente".
+
+  ## Fuori perimetro
+  Caricamento GPX e media, pubblicazione, validazione, moderazione.
+history:
+  - status: TODO
+    at: "2026-07-16T16:15:31Z"
+  - status: DONE
+    at: "2026-10-15T11:55:40Z"

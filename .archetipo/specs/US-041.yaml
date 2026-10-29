@@ -1,0 +1,46 @@
+schema: archetipo/spec/v2
+code: US-041
+title: '#BUGFIX: link post upload'
+epic:
+  code: EP-002
+  title: Gestione Itinerari e Ciclo di Vita
+priority: MEDIUM
+points: 1
+status: DONE
+scope: Storico
+body: |-
+  #### US-041: #BUGFIX: link post upload
+
+  **Epic:** EP-002 | **Priorità:** MEDIUM | **Punti:** 1 | **Stato:** DONE
+  **Bloccata da:** -
+
+  ## Storia utente
+  Come Ranger,
+  voglio raggiungere la console dei miei viaggi al termine dell’upload ZIP,
+  così da ritrovare il viaggio importato.
+
+  ## Dimostrazione
+  Al termine dell’importazione ZIP il revisore clicca Vai ai tuoi viaggi e raggiunge la console dei propri viaggi.
+
+  ## Criteri di accettazione
+  - [ ] AC-1 — Dopo l’upload ZIP il collegamento Vai ai tuoi viaggi apre la console dei viaggi dell’utente.
+
+  ## Fuori perimetro
+  Nuovo sviluppo, ampliamenti non presenti nella scheda, nuova accettazione del prodotto e recupero dei documenti o degli allegati esterni. La scheda conserva il perimetro della versione storica.
+
+  ## Provenienza
+  - Fonte: [SBI-131](https://agilereloaded.nifty.pm/Lk!HPsQBFT6LGV/task/SBI-131)
+  - Stato originale: Completed.
+  - Release originale: Release 1.0.
+  - Importazione: 15 ottobre 2026.
+  - Priorità MEDIUM usata come valore neutro di importazione; punti 1 è il minimo tecnico richiesto dal validatore ARchetipo; non è una stima storica né una misura del lavoro svolto.
+
+  ## Note di importazione
+  - Importazione retrospettiva da Nifty: stato originale Completed, stato ARchetipo DONE. Non sono state eseguite nuove verifiche funzionali; le caselle dei criteri restano non spuntate.
+  - Dimostrazione e criteri normalizzati servono alla lettura dello storico e non costituiscono un nuovo piano di sviluppo.
+
+  ## Testo originale Nifty
+  dopo il caricamento di uno zip appare un messaggio "vai ai tuoi viaggi" ma è broken link. Deve andare alla console dei tuoi viaggi
+history:
+  - status: DONE
+    at: "2026-10-15T12:30:57Z"

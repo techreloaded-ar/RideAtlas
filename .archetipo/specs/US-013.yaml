@@ -1,0 +1,46 @@
+schema: archetipo/spec/v2
+code: US-013
+title: grafica mail di conferma registrazione
+epic:
+  code: EP-001
+  title: Autenticazione e Autorizzazione
+priority: MEDIUM
+points: 1
+status: DONE
+scope: Storico
+body: |-
+  #### US-013: grafica mail di conferma registrazione
+
+  **Epic:** EP-001 | **Priorità:** MEDIUM | **Punti:** 1 | **Stato:** DONE
+  **Bloccata da:** -
+
+  ## Storia utente
+  Come utente in registrazione,
+  voglio ricevere una conferma email con la grafica del sito,
+  così da riconoscere la provenienza del messaggio.
+
+  ## Dimostrazione
+  Il revisore richiede la conferma di registrazione in ambiente di prova e confronta la grafica dell’email ricevuta con lo stile del sito.
+
+  ## Criteri di accettazione
+  - [ ] AC-1 — L’email di conferma registrazione usa la grafica coerente con il sito richiesta dalla scheda.
+
+  ## Fuori perimetro
+  Nuovo sviluppo, ampliamenti non presenti nella scheda, nuova accettazione del prodotto e recupero dei documenti o degli allegati esterni. La scheda conserva il perimetro della versione storica.
+
+  ## Provenienza
+  - Fonte: [SBI-78](https://agilereloaded.nifty.pm/Lk!HPsQBFT6LGV/task/SBI-78)
+  - Stato originale: Completed.
+  - Release originale: Release 2.0.
+  - Importazione: 15 ottobre 2026.
+  - Priorità MEDIUM usata come valore neutro di importazione; punti 1 è il minimo tecnico richiesto dal validatore ARchetipo; non è una stima storica né una misura del lavoro svolto.
+
+  ## Note di importazione
+  - Importazione retrospettiva da Nifty: stato originale Completed, stato ARchetipo DONE. Non sono state eseguite nuove verifiche funzionali; le caselle dei criteri restano non spuntate.
+  - Dimostrazione e criteri normalizzati servono alla lettura dello storico e non costituiscono un nuovo piano di sviluppo.
+
+  ## Testo originale Nifty
+  la grafica deve essere in stile del sito (ora è blue)
+history:
+  - status: DONE
+    at: "2026-10-15T12:30:57Z"
