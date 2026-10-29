@@ -1,0 +1,50 @@
+schema: archetipo/spec/v2
+code: US-069
+title: Quando un ranger aggiorna la sua bio, si cancella la descrizione della moto e viceversa.
+epic:
+  code: EP-005
+  title: Profilo e Community
+priority: MEDIUM
+points: 1
+status: DONE
+scope: Storico
+body: |-
+  #### US-069: Quando un ranger aggiorna la sua bio, si cancella la descrizione della moto e viceversa.
+
+  **Epic:** EP-005 | **Priorità:** MEDIUM | **Punti:** 1 | **Stato:** DONE
+  **Bloccata da:** -
+
+  ## Storia utente
+  Come Ranger,
+  voglio salvare bio e descrizione moto senza cancellare l’altro campo,
+  così da mantenere integro il profilo.
+
+  ## Dimostrazione
+  Un Ranger modifica solo la bio e salva: la descrizione della moto resta invariata. Poi modifica solo la descrizione della moto e salva: la bio resta invariata.
+
+  ## Criteri di accettazione
+  - [ ] AC-1 — Salvare solo la bio del Ranger conserva la descrizione della moto.
+  - [ ] AC-2 — Salvare solo la descrizione della moto conserva la bio personale.
+
+  ## Fuori perimetro
+  Nuovo sviluppo, ampliamenti non presenti nella scheda, nuova accettazione del prodotto e recupero dei documenti o degli allegati esterni. La scheda conserva il perimetro della versione storica.
+
+  ## Provenienza
+  - Fonte: [SBI-183](https://agilereloaded.nifty.pm/Lk!HPsQBFT6LGV/task/SBI-183)
+  - Stato originale: Completed.
+  - Release originale: Release 1.0.
+  - Importazione: 15 ottobre 2026.
+  - Priorità MEDIUM usata come valore neutro di importazione; punti 1 è il minimo tecnico richiesto dal validatore ARchetipo; non è una stima storica né una misura del lavoro svolto.
+
+  ## Note di importazione
+  - Importazione retrospettiva da Nifty: stato originale Completed, stato ARchetipo DONE. Non sono state eseguite nuove verifiche funzionali; le caselle dei criteri restano non spuntate.
+  - Dimostrazione e criteri normalizzati servono alla lettura dello storico e non costituiscono un nuovo piano di sviluppo.
+
+  ## Testo originale Nifty
+  Nella pagina profilo di un ranger
+
+  Se si modifica la bio personale e si salva -> La descrizione della moto sparisce
+  Se si modifica la descrizione della moto e si salva -> La bio personale sparisce
+history:
+  - status: DONE
+    at: "2026-10-15T12:30:57Z"

@@ -1,0 +1,50 @@
+schema: archetipo/spec/v2
+code: US-025
+title: US 1.3.2 - Download GPX solo per iscritti
+epic:
+  code: EP-004
+  title: Marketplace e Pagamenti
+priority: MEDIUM
+points: 1
+status: DONE
+scope: Storico
+body: |-
+  #### US-025: US 1.3.2 - Download GPX solo per iscritti
+
+  **Epic:** EP-004 | **Priorità:** MEDIUM | **Punti:** 1 | **Stato:** DONE
+  **Bloccata da:** -
+
+  ## Storia utente
+  Come proprietario del sistema
+  In modo da valorizzare i contenuti
+  Vorrei che i GPX possano essere scaricati solo da utenti registrati
+
+  ## Dimostrazione
+  Un visitatore apre un viaggio con GPX e non può scaricare la traccia; lo stesso controllo con un utente registrato rende disponibile il download previsto dalla storia storica.
+
+  ## Criteri di accettazione
+  - [ ] AC-1 — Un visitatore non registrato non può scaricare il GPX.
+  - [ ] AC-2 — Un utente registrato accede al download nel perimetro storico della scheda.
+
+  ## Fuori perimetro
+  Nuovo sviluppo, ampliamenti non presenti nella scheda, nuova accettazione del prodotto e recupero dei documenti o degli allegati esterni. La scheda conserva il perimetro della versione storica.
+
+  ## Provenienza
+  - Fonte: [SBI-103](https://agilereloaded.nifty.pm/Lk!HPsQBFT6LGV/task/SBI-103)
+  - Stato originale: Completed.
+  - Release originale: Release 1.0.
+  - Importazione: 15 ottobre 2026.
+  - Priorità MEDIUM usata come valore neutro di importazione; punti 1 è il minimo tecnico richiesto dal validatore ARchetipo; non è una stima storica né una misura del lavoro svolto.
+
+  ## Note di importazione
+  - Importazione retrospettiva da Nifty: stato originale Completed, stato ARchetipo DONE. Non sono state eseguite nuove verifiche funzionali; le caselle dei criteri restano non spuntate.
+  - Dimostrazione e criteri normalizzati servono alla lettura dello storico e non costituiscono un nuovo piano di sviluppo.
+  - La richiesta descrive una fase storica; terminologia dei ruoli, provider, accessi e disponibilità possono differire dai requisiti successivi. Non è una modifica al contratto applicativo attuale.
+
+  ## Testo originale Nifty
+  Come proprietario del sistema
+  In modo da valorizzare i contenuti
+  Vorrei che i GPX possano essere scaricati solo da utenti registrati
+history:
+  - status: DONE
+    at: "2026-10-15T12:30:57Z"

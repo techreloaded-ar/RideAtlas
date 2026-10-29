@@ -1,0 +1,40 @@
+schema: archetipo/spec/v2
+code: US-082
+title: Caricamento media per itinerari e tappe
+epic:
+  code: EP-002
+  title: Gestione Itinerari e Ciclo di Vita
+priority: HIGH
+points: 3
+status: DONE
+blocked_by:
+  - US-079
+scope: MVP
+body: |-
+  #### US-082: Caricamento media per itinerari e tappe
+
+  **Epic:** EP-002 | **Priorità:** HIGH | **Punti:** 3 | **Stato:** DONE
+  **Bloccata da:** US-079
+
+  ## Storia utente
+  Come Giulia la Ranger,
+  voglio caricare foto per l'itinerario e per ogni tappa,
+  così da arricchire il racconto del viaggio con immagini suggestive per gli Explorer.
+
+  ## Dimostrazione
+  Partendo dalla pagina di creazione/modifica di un itinerario, il revisore clicca "Carica media" a livello di itinerario, seleziona un'immagine valida (JPG, PNG, WebP) e osserva la thumbnail apparire nella galleria dell'itinerario. Il revisore ripete per una tappa specifica e osserva l'immagine associata a quella tappa. Il revisore carica un file non immagine e osserva l'errore "Formato non supportato. Carica un'immagine JPG, PNG o WebP." Il revisore elimina un'immagine e osserva la thumbnail scomparire.
+
+  ## Criteri di accettazione
+  - [ ] AC-1 — Il caricamento di un'immagine valida (JPG, PNG, WebP) mostra la thumbnail nella galleria dell'itinerario o della tappa
+  - [ ] AC-2 — Il caricamento di un file non immagine mostra l'errore "Formato non supportato. Carica un'immagine JPG, PNG o WebP."
+  - [ ] AC-3 — L'eliminazione di un'immagine rimuove la thumbnail dalla galleria.
+  - [ ] AC-4 — Le immagini caricate persistono al salvataggio e sono visibili al successivo caricamento della pagina di modifica
+  - [ ] AC-5 — L'eliminazione di un'immagine rimuove il relativo file dallo storage.
+
+  ## Fuori perimetro
+  Video, album, editing immagini, upload multiplo simultaneo.
+history:
+  - status: TODO
+    at: "2026-07-16T16:15:31Z"
+  - status: DONE
+    at: "2026-10-15T11:55:40Z"

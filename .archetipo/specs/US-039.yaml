@@ -1,0 +1,51 @@
+schema: archetipo/spec/v2
+code: US-039
+title: modifica accessibilità viaggio stato=BOZZA
+epic:
+  code: EP-002
+  title: Gestione Itinerari e Ciclo di Vita
+priority: MEDIUM
+points: 1
+status: DONE
+scope: Storico
+body: |-
+  #### US-039: modifica accessibilità viaggio stato=BOZZA
+
+  **Epic:** EP-002 | **Priorità:** MEDIUM | **Punti:** 1 | **Stato:** DONE
+  **Bloccata da:** -
+
+  ## Storia utente
+  Come Explorer con un acquisto,
+  voglio riconoscere un viaggio momentaneamente non accessibile,
+  così da comprendere perché una bozza non è consultabile.
+
+  ## Dimostrazione
+  Un Explorer che ha acquistato un viaggio ora in bozza apre I miei viaggi: legge Momentaneamente non accessibile. Aprendo l’URL salvato non accede al dettaglio.
+
+  ## Criteri di accettazione
+  - [ ] AC-1 — Un Explorer non accede al dettaglio di un viaggio in bozza tramite URL diretto.
+  - [ ] AC-2 — Un viaggio acquistato ora in bozza compare tra gli acquisti con Momentaneamente non accessibile.
+
+  ## Fuori perimetro
+  Nuovo sviluppo, ampliamenti non presenti nella scheda, nuova accettazione del prodotto e recupero dei documenti o degli allegati esterni. La scheda conserva il perimetro della versione storica.
+
+  ## Provenienza
+  - Fonte: [SBI-128](https://agilereloaded.nifty.pm/Lk!HPsQBFT6LGV/task/SBI-128)
+  - Stato originale: Completed.
+  - Release originale: Release 1.0.
+  - Importazione: 15 ottobre 2026.
+  - Priorità MEDIUM usata come valore neutro di importazione; punti 1 è il minimo tecnico richiesto dal validatore ARchetipo; non è una stima storica né una misura del lavoro svolto.
+
+  ## Note di importazione
+  - Importazione retrospettiva da Nifty: stato originale Completed, stato ARchetipo DONE. Non sono state eseguite nuove verifiche funzionali; le caselle dei criteri restano non spuntate.
+  - Dimostrazione e criteri normalizzati servono alla lettura dello storico e non costituiscono un nuovo piano di sviluppo.
+  - Evoluzione storica: SBI-132 richiedeva l’accesso degli acquirenti alle bozze; SBI-128 lo vieta e prevede Momentaneamente non accessibile. Le due schede restano distinte e non definiscono due regole contemporanee.
+
+  ## Testo originale Nifty
+  Acceptance Criteria
+
+  se un viaggio è in bozza deve essere impedito l'accesso URL (es. se un utente lo ha salvato).
+  modificare la visibilità del viaggio in modo che all'explorer che ha comprato il viaggio, nell'elenco dei suoi viaggi appara una scritta "momentaneamente non accessibile". La pagina di dettaglio non è accessibile
+history:
+  - status: DONE
+    at: "2026-10-15T12:30:57Z"

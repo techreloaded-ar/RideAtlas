@@ -1,0 +1,46 @@
+schema: archetipo/spec/v2
+code: US-070
+title: registrazione da email va in errore
+epic:
+  code: EP-001
+  title: Autenticazione e Autorizzazione
+priority: MEDIUM
+points: 1
+status: DONE
+scope: Storico
+body: |-
+  #### US-070: registrazione da email va in errore
+
+  **Epic:** EP-001 | **Priorità:** MEDIUM | **Punti:** 1 | **Stato:** DONE
+  **Bloccata da:** -
+
+  ## Storia utente
+  Come visitatore,
+  voglio registrarmi con email senza l’errore segnalato,
+  così da creare il mio account.
+
+  ## Dimostrazione
+  In un ambiente di prova il revisore avvia una registrazione da zero tramite email e verifica che il flusso possa essere completato senza il fallimento segnalato. La fonte non specifica il messaggio di errore originale.
+
+  ## Criteri di accettazione
+  - [ ] AC-1 — Una registrazione da zero tramite email può essere completata senza il fallimento segnalato nella fonte.
+
+  ## Fuori perimetro
+  Nuovo sviluppo, ampliamenti non presenti nella scheda, nuova accettazione del prodotto e recupero dei documenti o degli allegati esterni. La scheda conserva il perimetro della versione storica.
+
+  ## Provenienza
+  - Fonte: [SBI-184](https://agilereloaded.nifty.pm/Lk!HPsQBFT6LGV/task/SBI-184)
+  - Stato originale: Completed.
+  - Release originale: Release 1.0.
+  - Importazione: 15 ottobre 2026.
+  - Priorità MEDIUM usata come valore neutro di importazione; punti 1 è il minimo tecnico richiesto dal validatore ARchetipo; non è una stima storica né una misura del lavoro svolto.
+
+  ## Note di importazione
+  - Importazione retrospettiva da Nifty: stato originale Completed, stato ARchetipo DONE. Non sono state eseguite nuove verifiche funzionali; le caselle dei criteri restano non spuntate.
+  - Dimostrazione e criteri normalizzati servono alla lettura dello storico e non costituiscono un nuovo piano di sviluppo.
+
+  ## Testo originale Nifty
+  “ps: non so se è solo a livello di prototipazione, segnalo lo stesso... la registrazione da zero (tramite mail per capirsi) non mi è andata a buon fine”
+history:
+  - status: DONE
+    at: "2026-10-15T12:30:57Z"

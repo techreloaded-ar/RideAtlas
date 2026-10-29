@@ -1,0 +1,47 @@
+schema: archetipo/spec/v2
+code: US-066
+title: assegna viaggi a Mike
+epic:
+  code: EP-006
+  title: Amministrazione e Moderazione
+priority: MEDIUM
+points: 1
+status: DONE
+scope: Storico
+body: |-
+  #### US-066: assegna viaggi a Mike
+
+  **Epic:** EP-006 | **Priorità:** MEDIUM | **Punti:** 1 | **Stato:** DONE
+  **Bloccata da:** -
+
+  ## Storia utente
+  Come amministratore,
+  voglio assegnare a Mike i viaggi indicati escluso Argentario,
+  così da attribuire i contenuti al Ranger previsto.
+
+  ## Dimostrazione
+  Con i viaggi storici di riferimento il revisore verifica l’attribuzione a Mike e controlla che il viaggio in Argentario rimanga escluso.
+
+  ## Criteri di accettazione
+  - [ ] AC-1 — I viaggi storici oggetto dell’operazione sono assegnati a Mike.
+  - [ ] AC-2 — Il viaggio in Argentario è escluso dalla riassegnazione.
+
+  ## Fuori perimetro
+  Nuovo sviluppo, ampliamenti non presenti nella scheda, nuova accettazione del prodotto e recupero dei documenti o degli allegati esterni. La scheda conserva il perimetro della versione storica.
+
+  ## Provenienza
+  - Fonte: [SBI-177](https://agilereloaded.nifty.pm/Lk!HPsQBFT6LGV/task/SBI-177)
+  - Stato originale: Completed.
+  - Release originale: Release 1.0.
+  - Importazione: 15 ottobre 2026.
+  - Priorità MEDIUM usata come valore neutro di importazione; punti 1 è il minimo tecnico richiesto dal validatore ARchetipo; non è una stima storica né una misura del lavoro svolto.
+
+  ## Note di importazione
+  - Importazione retrospettiva da Nifty: stato originale Completed, stato ARchetipo DONE. Non sono state eseguite nuove verifiche funzionali; le caselle dei criteri restano non spuntate.
+  - Dimostrazione e criteri normalizzati servono alla lettura dello storico e non costituiscono un nuovo piano di sviluppo.
+
+  ## Testo originale Nifty
+  tutti tranne il viaggio in argentario
+history:
+  - status: DONE
+    at: "2026-10-15T12:30:57Z"

@@ -1,0 +1,48 @@
+schema: archetipo/spec/v2
+code: US-032
+title: drag&drop immagini viaggio
+epic:
+  code: EP-002
+  title: Gestione Itinerari e Ciclo di Vita
+priority: MEDIUM
+points: 1
+status: DONE
+scope: Storico
+body: |-
+  #### US-032: drag&drop immagini viaggio
+
+  **Epic:** EP-002 | **Priorità:** MEDIUM | **Punti:** 1 | **Stato:** DONE
+  **Bloccata da:** -
+
+  ## Storia utente
+  come ranger voglio poter un sistema rapido per aggiungere più immagini al viaggio per velocizzare inserimento multimedia
+
+  ## Dimostrazione
+  Un Ranger trascina una foto nel viaggio in modifica e la vede associata al viaggio.
+
+  ## Criteri di accettazione
+  - [ ] AC-1 — Il trascinamento di una foto la associa al viaggio in modifica.
+
+  ## Fuori perimetro
+  Nuovo sviluppo, ampliamenti non presenti nella scheda, nuova accettazione del prodotto e recupero dei documenti o degli allegati esterni. La scheda conserva il perimetro della versione storica.
+
+  ## Provenienza
+  - Fonte: [SBI-113](https://agilereloaded.nifty.pm/Lk!HPsQBFT6LGV/task/SBI-113)
+  - Stato originale: Completed.
+  - Release originale: Release 1.0.
+  - Importazione: 15 ottobre 2026.
+  - Priorità MEDIUM usata come valore neutro di importazione; punti 1 è il minimo tecnico richiesto dal validatore ARchetipo; non è una stima storica né una misura del lavoro svolto.
+
+  ## Note di importazione
+  - Importazione retrospettiva da Nifty: stato originale Completed, stato ARchetipo DONE. Non sono state eseguite nuove verifiche funzionali; le caselle dei criteri restano non spuntate.
+  - Dimostrazione e criteri normalizzati servono alla lettura dello storico e non costituiscono un nuovo piano di sviluppo.
+
+  ## Testo originale Nifty
+  come ranger voglio poter un sistema rapido per aggiungere più immagini al viaggio per velocizzare inserimento multimedia
+
+  AC
+
+  voglio poter aggiunger una immagine (opzionale più immagini contemporaneamente) al viaggio con modalità drag&drop
+history:
+  - status: DONE
+    at: "2026-10-15T12:30:57Z"

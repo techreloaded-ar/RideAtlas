@@ -1,0 +1,39 @@
+schema: archetipo/spec/v2
+code: US-091
+title: Accesso contenuti premium
+epic:
+  code: EP-004
+  title: Marketplace e Pagamenti
+priority: HIGH
+points: 3
+status: DONE
+blocked_by:
+  - US-089
+scope: MVP
+body: |-
+  #### US-091: Accesso contenuti premium
+
+  **Epic:** EP-004 | **Priorità:** HIGH | **Punti:** 3 | **Stato:** DONE
+  **Bloccata da:** US-089
+
+  ## Storia utente
+  Come Marco l'Explorer,
+  voglio scaricare la traccia GPX e accedere ai contenuti premium dopo aver acquistato un itinerario,
+  così da poter caricare il percorso sul mio navigatore e partire.
+
+  ## Dimostrazione
+  Partendo dalla pagina di dettaglio di un itinerario a pagamento acquistato, autenticato come Explorer, il revisore osserva il pulsante "Scarica GPX" attivo e clicca per scaricare il file GPX dell'itinerario. Il revisore si disconnette, visita la stessa pagina e osserva il pulsante "Scarica GPX" disattivato o nascosto. Il revisore effettua l'accesso come proprietario dell'itinerario (Ranger) e osserva il pulsante "Scarica GPX" attivo. Il revisore effettua l'accesso come Sentinel e osserva il pulsante attivo.
+
+  ## Criteri di accettazione
+  - [ ] AC-1 — Dopo l'acquisto, il pulsante "Scarica GPX" è attivo e cliccabile; il download restituisce un file GPX valido
+  - [ ] AC-2 — Un utente non autenticato o non acquirente vede il pulsante "Scarica GPX" disattivato o nascosto, anche se l'itinerario è pubblico
+  - [ ] AC-3 — Il proprietario dell'itinerario (Ranger) può sempre scaricare il GPX senza acquisto
+  - [ ] AC-4 — Un Sentinel può sempre scaricare il GPX senza acquisto
+
+  ## Fuori perimetro
+  Download di media premium (foto ad alta risoluzione), download GPX di tappe singole, watermark.
+history:
+  - status: TODO
+    at: "2026-07-16T16:15:31Z"
+  - status: DONE
+    at: "2026-10-15T11:55:42Z"

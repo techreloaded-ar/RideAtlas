@@ -1,0 +1,53 @@
+schema: archetipo/spec/v2
+code: US-004
+title: US 1.2 - Login/Registrazione con email
+epic:
+  code: EP-001
+  title: Autenticazione e Autorizzazione
+priority: MEDIUM
+points: 1
+status: DONE
+scope: Storico
+body: |-
+  #### US-004: US 1.2 - Login/Registrazione con email
+
+  **Epic:** EP-001 | **Priorità:** MEDIUM | **Punti:** 1 | **Stato:** DONE
+  **Bloccata da:** -
+
+  ## Storia utente
+  In qualità di utente voglio registrarmi usando solo la mail affinché possa utilizzare un metodo classico e semplice.
+
+  ## Dimostrazione
+  Un visitatore si registra con email e password, riceve la conferma email e prova ad accedere prima e dopo la verifica: l’accesso è disponibile solo dopo la verifica.
+
+  ## Criteri di accettazione
+  - [ ] AC-1 — Il modulo di registrazione accetta email e password.
+  - [ ] AC-2 — La registrazione recapita un’email di conferma.
+  - [ ] AC-3 — Un account senza verifica email non può effettuare il login.
+  - [ ] AC-4 — Dopo la verifica email l’account può effettuare il login.
+
+  ## Fuori perimetro
+  Nuovo sviluppo, ampliamenti non presenti nella scheda, nuova accettazione del prodotto e recupero dei documenti o degli allegati esterni. La scheda conserva il perimetro della versione storica.
+
+  ## Provenienza
+  - Fonte: [SBI-26](https://agilereloaded.nifty.pm/Lk!HPsQBFT6LGV/task/SBI-26)
+  - Stato originale: Completed.
+  - Release originale: Release 1.0.
+  - Importazione: 15 ottobre 2026.
+  - Priorità MEDIUM usata come valore neutro di importazione; punti 1 è il minimo tecnico richiesto dal validatore ARchetipo; non è una stima storica né una misura del lavoro svolto.
+
+  ## Note di importazione
+  - Importazione retrospettiva da Nifty: stato originale Completed, stato ARchetipo DONE. Non sono state eseguite nuove verifiche funzionali; le caselle dei criteri restano non spuntate.
+  - Dimostrazione e criteri normalizzati servono alla lettura dello storico e non costituiscono un nuovo piano di sviluppo.
+
+  ## Testo originale Nifty
+  In qualità di utente voglio registrarmi usando solo la mail affinché possa utilizzare un metodo classico e semplice.
+
+  Criteri di accettazione:
+
+  Il form di registrazione permette email e password.
+  Dopo la registrazione l’utente riceve un’email di conferma.
+  Il login avviene solo dopo verifica email.
+history:
+  - status: DONE
+    at: "2026-10-15T12:30:57Z"

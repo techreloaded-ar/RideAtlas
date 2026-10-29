@@ -1,0 +1,64 @@
+schema: archetipo/spec/v2
+code: US-011
+title: US 0.1 - Correzione Home Page
+epic:
+  code: EP-003
+  title: Catalogo e Scoperta
+priority: MEDIUM
+points: 1
+status: DONE
+scope: Storico
+body: |-
+  #### US-011: US 0.1 - Correzione Home Page
+
+  **Epic:** EP-003 | **Priorità:** MEDIUM | **Punti:** 1 | **Stato:** DONE
+  **Bloccata da:** -
+
+  ## Storia utente
+  Come motoviaggiatore,
+  voglio riconoscere nella homepage l’identità motociclistica e i viaggi curati,
+  così da capire la proposta di RideAtlas.
+
+  ## Dimostrazione
+  Il revisore apre la homepage e osserva sfondo bianco, grafica nera e verde, hero motociclistica, slogan previsto e richiamo ai viaggi curati.
+
+  ## Criteri di accettazione
+  - [ ] AC-1 — La homepage usa sfondo bianco e grafica nera e verde.
+  - [ ] AC-2 — L’hero mostra una moto in viaggio o in movimento.
+  - [ ] AC-3 — Compare lo slogan «Il viaggio lo progettiamo insieme, tu guidi l’avventura».
+  - [ ] AC-4 — La homepage comunica la presenza di supporto umano oltre all’AI.
+  - [ ] AC-5 — La homepage evidenzia i viaggi curati e testati previsti dalla narrativa storica.
+
+  ## Fuori perimetro
+  Nuovo sviluppo, ampliamenti non presenti nella scheda, nuova accettazione del prodotto e recupero dei documenti o degli allegati esterni. La scheda conserva il perimetro della versione storica.
+
+  ## Provenienza
+  - Fonte: [SBI-70](https://agilereloaded.nifty.pm/Lk!HPsQBFT6LGV/task/SBI-70)
+  - Stato originale: Completed.
+  - Release originale: Release 1.0.
+  - Importazione: 15 ottobre 2026.
+  - Priorità MEDIUM usata come valore neutro di importazione; punti 1 è il minimo tecnico richiesto dal validatore ARchetipo; non è una stima storica né una misura del lavoro svolto.
+
+  ## Note di importazione
+  - Importazione retrospettiva da Nifty: stato originale Completed, stato ARchetipo DONE. Non sono state eseguite nuove verifiche funzionali; le caselle dei criteri restano non spuntate.
+  - Dimostrazione e criteri normalizzati servono alla lettura dello storico e non costituiscono un nuovo piano di sviluppo.
+
+  ## Testo originale Nifty
+  al fine di rendere esperienza utente motociclista con l'applicazione, la guideline grafica dovrebbe essere modificata nel seguente modo:
+
+
+
+  Colori e Tema Visivo
+  Sostituire il colore blu turchese con tonalità che richiamano il viaggio in moto nella natura: colori grafica nero e verde (verde colore usato nelle mappe e che ricordi il verde natura). sfondo bianco.
+
+
+  2. Immagine Hero Homepage
+  Sostituire l'immagine della moto non adatta al viaggio con un'immagine più rappresentativa. Utilizzare foto di motociclista in curva durante un viaggio o immagine generica di moto in movimento con effetto sfumato
+  4. Slogan/Motto
+  Implementare lo slogan "Il viaggio lo progettiamo insieme, tu guidi l'avventura"
+  Comunicare la presenza di supporto umano oltre all'AI
+  5. Pacchetti Viaggi Curati
+  Evidenziare nella homepage i "pacchetti viaggi curati e testati/certificati" Sottolineare che i viaggi sono stati verificati e testati
+history:
+  - status: DONE
+    at: "2026-10-15T12:30:57Z"

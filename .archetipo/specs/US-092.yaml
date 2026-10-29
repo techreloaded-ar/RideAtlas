@@ -1,0 +1,42 @@
+schema: archetipo/spec/v2
+code: US-092
+title: Gestione profilo utente
+epic:
+  code: EP-005
+  title: Profilo e Community
+priority: MEDIUM
+points: 3
+status: DONE
+scope: MVP
+body: |-
+  #### US-092: Gestione profilo utente
+
+  **Epic:** EP-005 | **Priorità:** MEDIUM | **Punti:** 3 | **Stato:** DONE
+  **Bloccata da:** -
+
+  ## Storia utente
+  Come Marco l'Explorer,
+  voglio gestire il mio profilo con bio, avatar e, se sono Ranger, descrizione e foto della moto,
+  così da presentarmi alla community.
+
+  ## Dimostrazione
+  Partendo dalla dashboard utente, il revisore clicca "Profilo" e osserva il form precompilato con nome, email e bio. Il revisore modifica la bio (max 1000 caratteri), carica un avatar e clicca "Salva" e osserva "Profilo aggiornato con successo". Il revisore ricarica la pagina e verifica che le modifiche siano state mantenute. Il revisore, se Ranger, compila la descrizione della moto (max 500 caratteri), carica una foto della moto e salva, osservando "Foto moto caricata con successo". Il revisore aggiunge un link social Instagram valido e osserva il link visualizzato nella sezione social.
+
+  ## Criteri di accettazione
+  - [ ] AC-1 — Il form profilo mostra nome, email (sola lettura), bio (textarea), avatar (upload) e pulsante salva
+  - [ ] AC-2 — Modificando bio e avatar, salvando e ricaricando la pagina, le modifiche persistono e viene mostrato "Profilo aggiornato con successo"
+  - [ ] AC-3 — Un Ranger può salvare una descrizione della moto di massimo 500 caratteri.
+  - [ ] AC-4 — Un link social valido per Instagram, YouTube, Facebook, TikTok, LinkedIn o Website viene salvato nel profilo.
+  - [ ] AC-5 — Dopo il caricamento e il salvataggio di una foto della moto, il Ranger la vede nella sezione dedicata.
+  - [ ] AC-6 — Un URL social non valido mostra un errore di validazione.
+
+  ## Fuori perimetro
+  Pagina pubblica del Ranger, statistiche profilo, social link non verificati.
+
+  ## Prerequisiti della dimostrazione
+  Predisporre dati e account di esempio coerenti con: US-078 (US-078: Controllo accessi basato sui ruoli). Questi riferimenti tra epic descrivono il contesto funzionale; non costituiscono blocchi di lavorazione.
+history:
+  - status: TODO
+    at: "2026-07-16T16:15:31Z"
+  - status: DONE
+    at: "2026-10-15T11:55:42Z"

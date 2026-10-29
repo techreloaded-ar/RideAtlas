@@ -1,0 +1,54 @@
+schema: archetipo/spec/v2
+code: US-017
+title: US 4.6.2 - Caricamento traccia del viaggio
+epic:
+  code: EP-002
+  title: Gestione Itinerari e Ciclo di Vita
+priority: MEDIUM
+points: 1
+status: DONE
+scope: Storico
+body: |-
+  #### US-017: US 4.6.2 - Caricamento traccia del viaggio
+
+  **Epic:** EP-002 | **Priorità:** MEDIUM | **Punti:** 1 | **Stato:** DONE
+  **Bloccata da:** -
+
+  ## Storia utente
+  Come editor di un viaggio
+  Voglio caricare contenuti una traccia al viaggio già creato
+  Affinché gli utenti possano scaricare il file e usarlo nel loro sistema
+
+  ## Dimostrazione
+  L’editor carica un GPX non compresso su un viaggio esistente, lo scarica e confronta il file ricevuto con l’originale: i contenuti coincidono.
+
+  ## Criteri di accettazione
+  - [ ] AC-1 — Un editor può caricare un file GPX non compresso su un viaggio esistente.
+  - [ ] AC-2 — Il GPX scaricato conserva il contenuto del file caricato.
+
+  ## Fuori perimetro
+  Nuovo sviluppo, ampliamenti non presenti nella scheda, nuova accettazione del prodotto e recupero dei documenti o degli allegati esterni. La scheda conserva il perimetro della versione storica.
+
+  ## Provenienza
+  - Fonte: [SBI-85](https://agilereloaded.nifty.pm/Lk!HPsQBFT6LGV/task/SBI-85)
+  - Stato originale: Completed.
+  - Release originale: Release 1.0.
+  - Importazione: 15 ottobre 2026.
+  - Priorità MEDIUM usata come valore neutro di importazione; punti 1 è il minimo tecnico richiesto dal validatore ARchetipo; non è una stima storica né una misura del lavoro svolto.
+
+  ## Note di importazione
+  - Importazione retrospettiva da Nifty: stato originale Completed, stato ARchetipo DONE. Non sono state eseguite nuove verifiche funzionali; le caselle dei criteri restano non spuntate.
+  - Dimostrazione e criteri normalizzati servono alla lettura dello storico e non costituiscono un nuovo piano di sviluppo.
+
+  ## Testo originale Nifty
+  Come editor di un viaggio
+  Voglio caricare contenuti una traccia al viaggio già creato
+  Affinché gli utenti possano scaricare il file e usarlo nel loro sistema
+
+  AC:
+
+  utente, partendo da un viaggio già esistente, aggiunge il file  traccia (gpx) in formato non compresso.
+  Il file viene salvato nel sistema in modo da non alternarne il contenuto (al download utente riceve il file integro pronto per installazione sul suo Device).
+history:
+  - status: DONE
+    at: "2026-10-15T12:30:57Z"

@@ -1,0 +1,57 @@
+schema: archetipo/spec/v2
+code: US-020
+title: US 4.1.10 - visualizza pacchetti viaggio
+epic:
+  code: EP-003
+  title: Catalogo e Scoperta
+priority: MEDIUM
+points: 1
+status: DONE
+scope: Storico
+body: |-
+  #### US-020: US 4.1.10 - visualizza pacchetti viaggio
+
+  **Epic:** EP-003 | **Priorità:** MEDIUM | **Punti:** 1 | **Stato:** DONE
+  **Bloccata da:** -
+
+  ## Storia utente
+  in qualità di utente ranger/admin
+  nel menu principale a sx, alla voce "pacchetti"
+  vorrei accedere solo ai viaggi pubblicati
+  affinché non confonda il menu a sx (navigazione) con quello a dx (funzionalità operativa)
+
+  ## Dimostrazione
+  Un Ranger apre la voce di navigazione I viaggi e vede esclusivamente i viaggi pubblicati.
+
+  ## Criteri di accettazione
+  - [ ] AC-1 — La voce di navigazione dei viaggi mostra esclusivamente viaggi pubblicati.
+  - [ ] AC-2 — La voce Pacchetti è rinominata I viaggi.
+
+  ## Fuori perimetro
+  Nuovo sviluppo, ampliamenti non presenti nella scheda, nuova accettazione del prodotto e recupero dei documenti o degli allegati esterni. La scheda conserva il perimetro della versione storica.
+
+  ## Provenienza
+  - Fonte: [SBI-90](https://agilereloaded.nifty.pm/Lk!HPsQBFT6LGV/task/SBI-90)
+  - Stato originale: Completed.
+  - Release originale: Release 1.0.
+  - Importazione: 15 ottobre 2026.
+  - Priorità MEDIUM usata come valore neutro di importazione; punti 1 è il minimo tecnico richiesto dal validatore ARchetipo; non è una stima storica né una misura del lavoro svolto.
+
+  ## Note di importazione
+  - Importazione retrospettiva da Nifty: stato originale Completed, stato ARchetipo DONE. Non sono state eseguite nuove verifiche funzionali; le caselle dei criteri restano non spuntate.
+  - Dimostrazione e criteri normalizzati servono alla lettura dello storico e non costituiscono un nuovo piano di sviluppo.
+
+  ## Testo originale Nifty
+  in qualità di utente ranger/admin
+  nel menu principale a sx, alla voce "pacchetti"
+  vorrei accedere solo ai viaggi pubblicati
+  affinché non confonda il menu a sx (navigazione) con quello a dx (funzionalità operativa)
+
+  AC
+
+  cliccando sul menu pacchetti vedo solo i viaggi pubblicati.
+  l'elenco mostrato non permette modifiche ai viaggi (opzionale)
+  la voce "pacchetti" deve diventare "i viaggi" descritto nella US 4.1.10_2
+history:
+  - status: DONE
+    at: "2026-10-15T12:30:57Z"

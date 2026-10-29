@@ -1,0 +1,59 @@
+schema: archetipo/spec/v2
+code: US-024
+title: Visualizzazione multitappa del viaggio
+epic:
+  code: EP-003
+  title: Catalogo e Scoperta
+priority: MEDIUM
+points: 1
+status: DONE
+scope: Storico
+body: |-
+  #### US-024: Visualizzazione multitappa del viaggio
+
+  **Epic:** EP-003 | **Priorità:** MEDIUM | **Punti:** 1 | **Stato:** DONE
+  **Bloccata da:** -
+
+  ## Storia utente
+  In qualità di utente, vorrei poter visualizzare il viaggio in modalità multitappa  in modo che possa comprendere meglio ogni singolo spostamento del mio viaggio.
+
+  ## Dimostrazione
+  Il revisore apre un viaggio con due tappe e osserva dati generali, carosello e autore; dopo l’acquisto vede il dettaglio delle tappe con foto, mappa e download GPX.
+
+  ## Criteri di accettazione
+  - [ ] AC-1 — Il dettaglio espone una sezione generale consultabile da tutti.
+  - [ ] AC-2 — La sezione generale mostra titolo, etichette, descrizione, foto, data, autore, tag e caratteristiche.
+  - [ ] AC-3 — Ogni tappa mostra titolo, descrizione e foto.
+  - [ ] AC-4 — Ogni tappa mostra mappa GPX e comando di download.
+  - [ ] AC-5 — L’accesso delle tappe segue la fase storica descritta: libero prima dell’acquisto, riservato agli acquirenti dopo l’introduzione dell’acquisto.
+
+  ## Fuori perimetro
+  Nuovo sviluppo, ampliamenti non presenti nella scheda, nuova accettazione del prodotto e recupero dei documenti o degli allegati esterni. La scheda conserva il perimetro della versione storica.
+
+  ## Provenienza
+  - Fonte: [SBI-98](https://agilereloaded.nifty.pm/Lk!HPsQBFT6LGV/task/SBI-98)
+  - Stato originale: Completed.
+  - Release originale: Release 2.0.
+  - Importazione: 15 ottobre 2026.
+  - Priorità MEDIUM usata come valore neutro di importazione; punti 1 è il minimo tecnico richiesto dal validatore ARchetipo; non è una stima storica né una misura del lavoro svolto.
+
+  ## Note di importazione
+  - Importazione retrospettiva da Nifty: stato originale Completed, stato ARchetipo DONE. Non sono state eseguite nuove verifiche funzionali; le caselle dei criteri restano non spuntate.
+  - Dimostrazione e criteri normalizzati servono alla lettura dello storico e non costituiscono un nuovo piano di sviluppo.
+  - La richiesta descrive una fase storica; terminologia dei ruoli, provider, accessi e disponibilità possono differire dai requisiti successivi. Non è una modifica al contratto applicativo attuale.
+
+  ## Testo originale Nifty
+  In qualità di utente, vorrei poter visualizzare il viaggio in modalità multitappa  in modo che possa comprendere meglio ogni singolo spostamento del mio viaggio.
+
+
+
+
+  Criteri di accettazione:
+
+  Nella scheda viaggio compare una sezione generale in cui sono presenti le informazioni generali del viaggio. Questa sezione è liberamente consultabile per tutti.
+  La sezione generale contiene le seguenti informazioni: titolo, elenco etichette colorate, descrizione generale, elenco di foto (carosello), data creazione e autore, tag e caratteristiche.
+  Ogni viaggio prevede una sezione tappe del viaggio: ogni tappa mostra titolo, descrizione testuale (opz. testo formidabile markdown), una foto, sezione GPX (link per scaricar il file e mappa del GPX stesso).
+  L'intera sezione con elenco delle tappe è consultabile solo se utente ha comprato il viaggio. In questa prima versione è liberamente visibile (Fino a quando non sarà disponibile la funzione di acquisto, tutti gli utenti possono visualizzare le tappe).
+history:
+  - status: DONE
+    at: "2026-10-15T12:30:57Z"

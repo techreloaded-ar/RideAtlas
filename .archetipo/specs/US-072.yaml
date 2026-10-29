@@ -1,0 +1,54 @@
+schema: archetipo/spec/v2
+code: US-072
+title: togliere "crea tuo viaggio in lista viaggi"
+epic:
+  code: EP-003
+  title: Catalogo e Scoperta
+priority: MEDIUM
+points: 1
+status: DONE
+scope: Storico
+body: |-
+  #### US-072: togliere "crea tuo viaggio in lista viaggi"
+
+  **Epic:** EP-003 | **Priorità:** MEDIUM | **Punti:** 1 | **Stato:** DONE
+  **Bloccata da:** -
+
+  ## Storia utente
+  Come Explorer,
+  voglio vedere nell’elenco solo inviti ad azioni consentite al mio ruolo,
+  così da evitare richieste di creazione che non posso completare.
+
+  ## Dimostrazione
+  Un Explorer apre elenco viaggi e una ricerca senza risultati: non vede inviti alla creazione di un viaggio riservata ai Ranger.
+
+  ## Criteri di accettazione
+  - [ ] AC-1 — Un Explorer non vede l’invito a creare un viaggio nella pagina elenco.
+  - [ ] AC-2 — Un Explorer non vede l’invito a creare un viaggio quando la ricerca non ha risultati.
+
+  ## Fuori perimetro
+  Nuovo sviluppo, ampliamenti non presenti nella scheda, nuova accettazione del prodotto e recupero dei documenti o degli allegati esterni. La scheda conserva il perimetro della versione storica.
+
+  ## Provenienza
+  - Fonte: [SBI-188](https://agilereloaded.nifty.pm/Lk!HPsQBFT6LGV/task/SBI-188)
+  - Stato originale: Completed.
+  - Release originale: Release 1.0.
+  - Importazione: 15 ottobre 2026.
+  - Priorità MEDIUM usata come valore neutro di importazione; punti 1 è il minimo tecnico richiesto dal validatore ARchetipo; non è una stima storica né una misura del lavoro svolto.
+
+  ## Note di importazione
+  - Importazione retrospettiva da Nifty: stato originale Completed, stato ARchetipo DONE. Non sono state eseguite nuove verifiche funzionali; le caselle dei criteri restano non spuntate.
+  - Dimostrazione e criteri normalizzati servono alla lettura dello storico e non costituiscono un nuovo piano di sviluppo.
+
+  ## Testo originale Nifty
+  in questo momento ci sono vari punti in cui vengono mostrati elementi grafici per creare un nuovo viaggio (anche se poi cliccando se non sei ranger appare messaggio di errore "Non hai i permessi necessari per accedere a quella sezione.)
+
+  Per semplificare il messaggio per utente, eliminiamo questi punti (o. farli apparire solo se utente è ranger).
+
+  i punti sono:
+
+  in pagina elenco viaggi (vedi screen allegato 1 )
+  al termine della ricerca se non trova alcun viaggio (allegato 2)
+history:
+  - status: DONE
+    at: "2026-10-15T12:30:57Z"

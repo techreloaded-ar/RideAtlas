@@ -1,0 +1,54 @@
+schema: archetipo/spec/v2
+code: US-003
+title: US 1.1 - Login/Registrazione rapida
+epic:
+  code: EP-001
+  title: Autenticazione e Autorizzazione
+priority: MEDIUM
+points: 1
+status: DONE
+scope: Storico
+body: |-
+  #### US-003: US 1.1 - Login/Registrazione rapida
+
+  **Epic:** EP-001 | **Priorità:** MEDIUM | **Punti:** 1 | **Stato:** DONE
+  **Bloccata da:** -
+
+  ## Storia utente
+  In qualità di utente voglio fare login con Google o Apple affinché possa accedere velocemente.
+
+  ## Dimostrazione
+  Dalla schermata principale un utente sceglie Google e poi Apple in due sessioni distinte; completato ciascun accesso arriva alla homepage e trova i dati nel profilo.
+
+  ## Criteri di accettazione
+  - [ ] AC-1 — La schermata principale propone il login Google.
+  - [ ] AC-2 — La schermata principale propone il login Apple.
+  - [ ] AC-3 — Completato il login l’utente raggiunge la homepage.
+  - [ ] AC-4 — I dati dell’utente sono disponibili nel profilo per l’aggiornamento.
+
+  ## Fuori perimetro
+  Nuovo sviluppo, ampliamenti non presenti nella scheda, nuova accettazione del prodotto e recupero dei documenti o degli allegati esterni. La scheda conserva il perimetro della versione storica.
+
+  ## Provenienza
+  - Fonte: [SBI-25](https://agilereloaded.nifty.pm/Lk!HPsQBFT6LGV/task/SBI-25)
+  - Stato originale: Completed.
+  - Release originale: Release 1.0.
+  - Importazione: 15 ottobre 2026.
+  - Priorità MEDIUM usata come valore neutro di importazione; punti 1 è il minimo tecnico richiesto dal validatore ARchetipo; non è una stima storica né una misura del lavoro svolto.
+
+  ## Note di importazione
+  - Importazione retrospettiva da Nifty: stato originale Completed, stato ARchetipo DONE. Non sono state eseguite nuove verifiche funzionali; le caselle dei criteri restano non spuntate.
+  - Dimostrazione e criteri normalizzati servono alla lettura dello storico e non costituiscono un nuovo piano di sviluppo.
+  - La richiesta descrive una fase storica; terminologia dei ruoli, provider, accessi e disponibilità possono differire dai requisiti successivi. Non è una modifica al contratto applicativo attuale.
+
+  ## Testo originale Nifty
+  In qualità di utente voglio fare login con Google o Apple affinché possa accedere velocemente.
+
+  Criteri di accettazione:
+
+  Il login Google e Apple è disponibile nella schermata principale.
+  Dopo il login, l’utente accede direttamente alla homepage.
+  I dati utente sono memorizzati e aggiornabili nel profilo.
+history:
+  - status: DONE
+    at: "2026-10-15T12:30:57Z"

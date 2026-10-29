@@ -1,0 +1,51 @@
+schema: archetipo/spec/v2
+code: US-005
+title: US 1.3.1 — CAMBIO PASSWORD
+epic:
+  code: EP-001
+  title: Autenticazione e Autorizzazione
+priority: MEDIUM
+points: 1
+status: DONE
+scope: Storico
+body: |-
+  #### US-005: US 1.3.1 — CAMBIO PASSWORD
+
+  **Epic:** EP-001 | **Priorità:** MEDIUM | **Punti:** 1 | **Stato:** DONE
+  **Bloccata da:** -
+
+  ## Storia utente
+  In qualità di utente voglio poter cambiare la password affinché possa rendere più sicuro il mio account
+
+  ## Dimostrazione
+  Un utente con password apre il profilo e cambia le credenziali. Un utente OAuth apre lo stesso profilo e non trova la funzione di cambio password.
+
+  ## Criteri di accettazione
+  - [ ] AC-1 — Un utente con credenziali locali può cambiarle dal profilo.
+  - [ ] AC-2 — Un utente autenticato tramite OAuth non dispone della funzione di cambio password nel perimetro storico.
+
+  ## Fuori perimetro
+  Nuovo sviluppo, ampliamenti non presenti nella scheda, nuova accettazione del prodotto e recupero dei documenti o degli allegati esterni. La scheda conserva il perimetro della versione storica.
+
+  ## Provenienza
+  - Fonte: [SBI-27](https://agilereloaded.nifty.pm/Lk!HPsQBFT6LGV/task/SBI-27)
+  - Stato originale: Completed.
+  - Release originale: Release 1.0.
+  - Importazione: 15 ottobre 2026.
+  - Priorità MEDIUM usata come valore neutro di importazione; punti 1 è il minimo tecnico richiesto dal validatore ARchetipo; non è una stima storica né una misura del lavoro svolto.
+
+  ## Note di importazione
+  - Importazione retrospettiva da Nifty: stato originale Completed, stato ARchetipo DONE. Non sono state eseguite nuove verifiche funzionali; le caselle dei criteri restano non spuntate.
+  - Dimostrazione e criteri normalizzati servono alla lettura dello storico e non costituiscono un nuovo piano di sviluppo.
+  - La richiesta descrive una fase storica; terminologia dei ruoli, provider, accessi e disponibilità possono differire dai requisiti successivi. Non è una modifica al contratto applicativo attuale.
+
+  ## Testo originale Nifty
+  In qualità di utente voglio poter cambiare la password affinché possa rendere più sicuro il mio account
+
+  Criteri di accettazione:
+
+  L’utente può modificare le credenziali dal proprio profilo.
+  Se l'utente è collegato tramite autenticazione OAuth (Google, Apple...), la funzionalità non deve essere disponibile
+history:
+  - status: DONE
+    at: "2026-10-15T12:30:57Z"

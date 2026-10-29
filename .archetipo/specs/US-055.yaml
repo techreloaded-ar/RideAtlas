@@ -1,0 +1,72 @@
+schema: archetipo/spec/v2
+code: US-055
+title: Cookie banner
+epic:
+  code: EP-007
+  title: Conformità Legale
+priority: MEDIUM
+points: 1
+status: DONE
+scope: Storico
+body: |-
+  #### US-055: Cookie banner
+
+  **Epic:** EP-007 | **Priorità:** MEDIUM | **Punti:** 1 | **Stato:** DONE
+  **Bloccata da:** -
+
+  ## Storia utente
+  Come visitatore,
+  voglio scegliere le preferenze sui cookie,
+  così da controllare l’attivazione dei cookie non essenziali.
+
+  ## Dimostrazione
+  In una sessione senza consenso il revisore apre il sito e prova Rifiuta tutti, Accetta tutti e Gestisci preferenze; prima del consenso i cookie non essenziali restano bloccati.
+
+  ## Criteri di accettazione
+  - [ ] AC-1 — I cookie non essenziali restano bloccati prima del consenso.
+  - [ ] AC-2 — Il banner offre Accetta tutti.
+  - [ ] AC-3 — Il banner offre Rifiuta tutti.
+  - [ ] AC-4 — Il banner offre Gestisci preferenze.
+  - [ ] AC-5 — La scelta è memorizzata per sei mesi secondo la richiesta storica.
+
+  ## Fuori perimetro
+  Nuovo sviluppo, ampliamenti non presenti nella scheda, nuova accettazione del prodotto e recupero dei documenti o degli allegati esterni. La scheda conserva il perimetro della versione storica.
+
+  ## Provenienza
+  - Fonte: [SBI-159](https://agilereloaded.nifty.pm/Lk!HPsQBFT6LGV/task/SBI-159)
+  - Stato originale: Completed.
+  - Release originale: Release 1.0.
+  - Importazione: 15 ottobre 2026.
+  - Priorità MEDIUM usata come valore neutro di importazione; punti 1 è il minimo tecnico richiesto dal validatore ARchetipo; non è una stima storica né una misura del lavoro svolto.
+
+  ## Note di importazione
+  - Importazione retrospettiva da Nifty: stato originale Completed, stato ARchetipo DONE. Non sono state eseguite nuove verifiche funzionali; le caselle dei criteri restano non spuntate.
+  - Dimostrazione e criteri normalizzati servono alla lettura dello storico e non costituiscono un nuovo piano di sviluppo.
+
+  ## Testo originale Nifty
+  2. Cookie Policy e Banner di consenso
+
+  Necessaria se:
+
+  usate strumenti di analytics (Google Analytics, Plausible, ecc.)
+
+  avete cookie di terze parti (es. Facebook Pixel, YouTube embed, ecc.)
+
+
+
+
+  Il cookie banner deve:
+
+  bloccare i cookie non essenziali finché l’utente non acconsente
+
+  permettere “Accetta tutti”, “Rifiuta tutti”, “Gestisci preferenze”
+
+  memorizzare la scelta per 6 mesi
+
+
+
+
+  Strumenti conformi: Cookiebot, Iubenda, Osano, Klaro.js
+history:
+  - status: DONE
+    at: "2026-10-15T12:30:57Z"

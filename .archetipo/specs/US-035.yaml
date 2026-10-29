@@ -1,0 +1,59 @@
+schema: archetipo/spec/v2
+code: US-035
+title: '#BUGFIX - info tappa'
+epic:
+  code: EP-002
+  title: Gestione Itinerari e Ciclo di Vita
+priority: MEDIUM
+points: 1
+status: DONE
+scope: Storico
+body: |-
+  #### US-035: #BUGFIX - info tappa
+
+  **Epic:** EP-002 | **Priorità:** MEDIUM | **Punti:** 1 | **Stato:** DONE
+  **Bloccata da:** -
+
+  ## Storia utente
+  Come utente che consulta una tappa,
+  voglio vedere i waypoint e un comando Scarica GPX chiaro,
+  così da usare le informazioni pertinenti alla traccia.
+
+  ## Dimostrazione
+  Il revisore apre una tappa con GPX contenente waypoint: vede il conteggio waypoint e il pulsante Scarica GPX, senza dislivello o punti chiave.
+
+  ## Criteri di accettazione
+  - [ ] AC-1 — La tappa mostra i waypoint al posto dei punti traccia.
+  - [ ] AC-2 — Il pulsante di download è etichettato Scarica GPX.
+  - [ ] AC-3 — La tappa non mostra il dislivello nel perimetro della correzione.
+  - [ ] AC-4 — La tappa non mostra i punti chiave nel perimetro della correzione.
+
+  ## Fuori perimetro
+  Nuovo sviluppo, ampliamenti non presenti nella scheda, nuova accettazione del prodotto e recupero dei documenti o degli allegati esterni. La scheda conserva il perimetro della versione storica.
+
+  ## Provenienza
+  - Fonte: [SBI-118](https://agilereloaded.nifty.pm/Lk!HPsQBFT6LGV/task/SBI-118)
+  - Stato originale: Completed.
+  - Release originale: Release 1.0.
+  - Importazione: 15 ottobre 2026.
+  - Priorità MEDIUM usata come valore neutro di importazione; punti 1 è il minimo tecnico richiesto dal validatore ARchetipo; non è una stima storica né una misura del lavoro svolto.
+
+  ## Note di importazione
+  - Importazione retrospettiva da Nifty: stato originale Completed, stato ARchetipo DONE. Non sono state eseguite nuove verifiche funzionali; le caselle dei criteri restano non spuntate.
+  - Dimostrazione e criteri normalizzati servono alla lettura dello storico e non costituiscono un nuovo piano di sviluppo.
+
+  ## Testo originale Nifty
+  nella descrizione della tappa modificare le info
+
+
+
+  nella visualizzazione della tappa inserire i waypoints al posto dei punti traccia (vedi https://agilereloaded.nifty.pm/l/6AxOhIHpuctNWf)
+  per il pulsante download mettere etichetta "Scarica GPX"
+
+  NOTA: già che ci siamo:
+
+  non serve il dislivello
+  i punti chiave non servono
+history:
+  - status: DONE
+    at: "2026-10-15T12:30:57Z"

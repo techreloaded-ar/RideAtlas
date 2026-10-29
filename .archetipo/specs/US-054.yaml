@@ -1,0 +1,82 @@
+schema: archetipo/spec/v2
+code: US-054
+title: GDPR aggiornare testo
+epic:
+  code: EP-007
+  title: Conformità Legale
+priority: MEDIUM
+points: 1
+status: DONE
+scope: Storico
+body: |-
+  #### US-054: GDPR aggiornare testo
+
+  **Epic:** EP-007 | **Priorità:** MEDIUM | **Punti:** 1 | **Stato:** DONE
+  **Bloccata da:** -
+
+  ## Storia utente
+  Come utente,
+  voglio consultare l’informativa sui dati personali richiesta dalla scheda,
+  così da conoscere il trattamento descritto dal prodotto.
+
+  ## Dimostrazione
+  Il revisore apre l’informativa privacy e confronta i temi elencati nella scheda Nifty: titolare, dati, finalità, basi, conservazione, terzi e diritti; verifica i collegamenti previsti in footer e registrazione o acquisto.
+
+  ## Criteri di accettazione
+  - [ ] AC-1 — L’informativa identifica il titolare del trattamento richiesto dalla fonte.
+  - [ ] AC-2 — L’informativa descrive dati raccolti e finalità.
+  - [ ] AC-3 — L’informativa descrive le basi giuridiche.
+  - [ ] AC-4 — L’informativa descrive i periodi di conservazione.
+  - [ ] AC-5 — L’informativa descrive i terzi coinvolti.
+  - [ ] AC-6 — L’informativa descrive i diritti degli utenti.
+  - [ ] AC-7 — L’informativa è collegata nel footer e nel flusso di registrazione o acquisto previsto dalla scheda.
+
+  ## Fuori perimetro
+  Nuovo sviluppo, ampliamenti non presenti nella scheda, nuova accettazione del prodotto e recupero dei documenti o degli allegati esterni. La scheda conserva il perimetro della versione storica.
+
+  ## Provenienza
+  - Fonte: [SBI-158](https://agilereloaded.nifty.pm/Lk!HPsQBFT6LGV/task/SBI-158)
+  - Stato originale: Completed.
+  - Release originale: Release 1.0.
+  - Importazione: 15 ottobre 2026.
+  - Priorità MEDIUM usata come valore neutro di importazione; punti 1 è il minimo tecnico richiesto dal validatore ARchetipo; non è una stima storica né una misura del lavoro svolto.
+
+  ## Note di importazione
+  - Importazione retrospettiva da Nifty: stato originale Completed, stato ARchetipo DONE. Non sono state eseguite nuove verifiche funzionali; le caselle dei criteri restano non spuntate.
+  - Dimostrazione e criteri normalizzati servono alla lettura dello storico e non costituiscono un nuovo piano di sviluppo.
+
+  ## Testo originale Nifty
+  1. Privacy Policy (GDPR)
+
+  Obbligatoria per qualsiasi servizio che raccolga dati personali (es. nome, email, IP, dati di pagamento).
+  Deve indicare:
+
+  Chi è il titolare del trattamento (Agile Reloaded S.r.l.)
+
+  Quali dati vengono raccolti e per quali finalità (es. creazione account, acquisto, comunicazioni, analytics)
+
+  Base giuridica (es. consenso, contratto, obbligo legale)
+
+  Periodo di conservazione dei dati
+
+  Se vengono condivisi con terzi (es. Stripe, Google, Mailchimp, ecc.) hosting abbiamo i dati su vercel,
+  siteground database, mail
+  stripe pagamenti
+  operouter LLM
+  LLM su sviluppo?
+
+  Diritti degli utenti (accesso, rettifica, cancellazione, portabilità, reclamo al Garante)
+
+  *Minimizzare la raccolta di dati personaliAssicurarsi che i fornitori (es. Stripe, hosting, analytics) siano compliant al GDPR e con accordi di data processing (DPA) firmati.
+
+
+
+
+
+
+  Suggerimento: scrivila in modo chiaro e collegala in footer e nel form di registrazione o acquisto.
+
+  https://docs.google.com/document/d/17PYpZOdFOmQwnhUSr9XETasjrbrDYhpehAJuPT_Cbpw/edit?tab=t.0
+history:
+  - status: DONE
+    at: "2026-10-15T12:30:57Z"

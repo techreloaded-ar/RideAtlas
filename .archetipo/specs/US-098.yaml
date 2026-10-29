@@ -1,0 +1,38 @@
+schema: archetipo/spec/v2
+code: US-098
+title: Pagine legali e modulo contatti
+epic:
+  code: EP-007
+  title: Conformità Legale
+priority: MEDIUM
+points: 2
+status: DONE
+scope: MVP
+body: |-
+  #### US-098: Pagine legali e modulo contatti
+
+  **Epic:** EP-007 | **Priorità:** MEDIUM | **Punti:** 2 | **Stato:** DONE
+  **Bloccata da:** -
+
+  ## Storia utente
+  Come Marco l'Explorer,
+  voglio consultare le pagine Privacy Policy, Cookie Policy e Termini di Servizio e poter contattare il team,
+  così da essere informato sulle politiche della piattaforma e poter fare domande.
+
+  ## Dimostrazione
+  Partendo dal footer della homepage, il revisore clicca "Privacy Policy" e viene portato a /privacy con il testo completo dell'informativa privacy. Il revisore clicca "Cookie Policy" dal footer e visualizza la pagina con i dettagli sull'uso dei cookie. Il revisore clicca "Termini di Servizio" e visualizza i termini. Il revisore clicca "Contatti" dal footer, compila il form con nome, email e messaggio, invia e osserva il messaggio "Il tuo messaggio è stato inviato. Ti risponderemo al più presto." Il revisore verifica che l'email di notifica del contatto sia stata ricevuta dall'amministrazione.
+
+  ## Criteri di accettazione
+  - [ ] AC-1 — Le pagine Privacy Policy, Cookie Policy e Termini di Servizio sono accessibili dal footer e contengono il testo informativo completo
+  - [ ] AC-2 — Il form Contatti è accessibile dal footer e contiene campi nome, email e messaggio con validazione lato client
+  - [ ] AC-3 — L’invio valido del form Contatti mostra "Il tuo messaggio è stato inviato. Ti risponderemo al più presto.".
+  - [ ] AC-4 — L'invio del form con email non valida mostra errore di validazione "Inserisci un indirizzo email valido"
+  - [ ] AC-5 — L'invio valido del form Contatti recapita un'email di notifica all'amministrazione.
+
+  ## Fuori perimetro
+  GDPR dashboard per esportazione/cancellazione dati, form di richiesta dati.
+history:
+  - status: TODO
+    at: "2026-07-16T16:15:31Z"
+  - status: DONE
+    at: "2026-10-15T11:55:43Z"

@@ -1,0 +1,57 @@
+schema: archetipo/spec/v2
+code: US-019
+title: US 4.6.4 - Visualizzazione traccia
+epic:
+  code: EP-003
+  title: Catalogo e Scoperta
+priority: MEDIUM
+points: 1
+status: DONE
+scope: Storico
+body: |-
+  #### US-019: US 4.6.4 - Visualizzazione traccia
+
+  **Epic:** EP-003 | **Priorità:** MEDIUM | **Punti:** 1 | **Stato:** DONE
+  **Bloccata da:** -
+
+  ## Storia utente
+  in qualità di utente del sistema (tutti)
+  voglio poter vedere la traccia su una mappa (es. come fa google maps)
+  per poter avere una rappresentazione visiva del viaggio
+
+  ## Dimostrazione
+  Un utente apre Vedi su mappa su un viaggio con GPX e vede la traccia; prova zoom e spostamento senza trovare funzioni di gestione dei POI.
+
+  ## Criteri di accettazione
+  - [ ] AC-1 — Il comando Vedi su mappa rende visibile la traccia del viaggio.
+  - [ ] AC-2 — La mappa consente zoom e spostamento.
+  - [ ] AC-3 — La visualizzazione non offre gestione dei POI nel perimetro storico.
+
+  ## Fuori perimetro
+  Nuovo sviluppo, ampliamenti non presenti nella scheda, nuova accettazione del prodotto e recupero dei documenti o degli allegati esterni. La scheda conserva il perimetro della versione storica.
+
+  ## Provenienza
+  - Fonte: [SBI-87](https://agilereloaded.nifty.pm/Lk!HPsQBFT6LGV/task/SBI-87)
+  - Stato originale: Completed.
+  - Release originale: Release 1.0.
+  - Importazione: 15 ottobre 2026.
+  - Priorità MEDIUM usata come valore neutro di importazione; punti 1 è il minimo tecnico richiesto dal validatore ARchetipo; non è una stima storica né una misura del lavoro svolto.
+
+  ## Note di importazione
+  - Importazione retrospettiva da Nifty: stato originale Completed, stato ARchetipo DONE. Non sono state eseguite nuove verifiche funzionali; le caselle dei criteri restano non spuntate.
+  - Dimostrazione e criteri normalizzati servono alla lettura dello storico e non costituiscono un nuovo piano di sviluppo.
+
+  ## Testo originale Nifty
+  in qualità di utente del sistema (tutti)
+  voglio poter vedere la traccia su una mappa (es. come fa google maps)
+  per poter avere una rappresentazione visiva del viaggio
+
+  AC
+
+  utente seleziona la visualizzazione "vedi su mappa" (può essere in pagina del viaggio oppure un elemento grafico apposito (altra finestra etc etc... Esempio utente è abituato alla modalità di visualizzazione stile Booking.com?)
+  Nella visualizzazione modalità mappa vede la traccia del viaggio.
+  la visualizzazione mappa in questa versione non gestisce i POI presenti nella mappa.
+  utente può solo vedere la traccia e non può interagire con la mappa, oltre al classico zoom, pan,...
+history:
+  - status: DONE
+    at: "2026-10-15T12:30:57Z"

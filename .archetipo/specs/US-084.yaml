@@ -1,0 +1,39 @@
+schema: archetipo/spec/v2
+code: US-084
+title: Validazione pre-pubblicazione
+epic:
+  code: EP-002
+  title: Gestione Itinerari e Ciclo di Vita
+priority: HIGH
+points: 3
+status: DONE
+blocked_by:
+  - US-080
+scope: MVP
+body: |-
+  #### US-084: Validazione pre-pubblicazione
+
+  **Epic:** EP-002 | **Priorità:** HIGH | **Punti:** 3 | **Stato:** DONE
+  **Bloccata da:** US-080
+
+  ## Storia utente
+  Come Giulia la Ranger,
+  voglio che il sistema verifichi che l'itinerario abbia tutti i campi obbligatori prima di permettere la pubblicazione,
+  così da evitare percorsi incompleti nel catalogo pubblico.
+
+  ## Dimostrazione
+  Partendo dalla pagina di modifica di un itinerario senza titolo, il revisore clicca "Pubblica" e osserva l'errore "Impossibile pubblicare: il titolo è obbligatorio." Il revisore aggiunge il titolo ma lascia una tappa senza descrizione, clicca "Pubblica" e osserva l'errore "Impossibile pubblicare: tutte le tappe devono avere una descrizione." Il revisore completa tutti i campi obbligatori (titolo, sommario, almeno una tappa con descrizione e GPX), clicca "Pubblica" e l'itinerario viene pubblicato con successo.
+
+  ## Criteri di accettazione
+  - [ ] AC-1 — Il tentativo di pubblicare un itinerario senza titolo mostra "Impossibile pubblicare: il titolo è obbligatorio"
+  - [ ] AC-2 — Il tentativo di pubblicare un itinerario con una tappa priva di descrizione mostra "Impossibile pubblicare: tutte le tappe devono avere una descrizione"
+  - [ ] AC-3 — Il tentativo di pubblicare un itinerario senza tappe mostra "Impossibile pubblicare: almeno una tappa è richiesta"
+  - [ ] AC-4 — Completando tutti i campi obbligatori (titolo, sommario, ≥1 tappa con descrizione, GPX), la pubblicazione riesce e l'itinerario passa a stato "Pubblicato"
+
+  ## Fuori perimetro
+  Validazione della qualità dei contenuti (es. lunghezza descrizione minima, appropriatezza delle foto), moderazione Sentinel.
+history:
+  - status: TODO
+    at: "2026-07-16T16:15:31Z"
+  - status: DONE
+    at: "2026-10-15T11:55:41Z"

@@ -1,0 +1,62 @@
+schema: archetipo/spec/v2
+code: US-014
+title: Dashboard utente
+epic:
+  code: EP-006
+  title: Amministrazione e Moderazione
+priority: MEDIUM
+points: 1
+status: DONE
+scope: Storico
+body: |-
+  #### US-014: Dashboard utente
+
+  **Epic:** EP-006 | **Priorità:** MEDIUM | **Punti:** 1 | **Stato:** DONE
+  **Bloccata da:** -
+
+  ## Storia utente
+  in qualità di utente
+  voglio vedere nella mia dashboard
+  solo quello che posso fare con il mio ruolo utente può fare.
+  affinché non sia confuso pensando di poter fare (o scoprire l'esistenza) azioni  che non mi appartengano
+
+  ## Dimostrazione
+  Il revisore apre la dashboard con un account admin, uno Ranger e uno motociclista; osserva per ciascuno solo i riquadri delle azioni previste dal ruolo.
+
+  ## Criteri di accettazione
+  - [ ] AC-1 — La dashboard admin espone creazione utenti, navigazione viaggi e amministrazione.
+  - [ ] AC-2 — La dashboard Ranger espone creazione viaggi e navigazione viaggi.
+  - [ ] AC-3 — La dashboard motociclista espone navigazione viaggi.
+  - [ ] AC-4 — Una funzione abilitata ha un solo riquadro operativo.
+  - [ ] AC-5 — La voce Crea viaggio non compare nel menu di primo livello a destra.
+
+  ## Fuori perimetro
+  Nuovo sviluppo, ampliamenti non presenti nella scheda, nuova accettazione del prodotto e recupero dei documenti o degli allegati esterni. La scheda conserva il perimetro della versione storica.
+
+  ## Provenienza
+  - Fonte: [SBI-79](https://agilereloaded.nifty.pm/Lk!HPsQBFT6LGV/task/SBI-79)
+  - Stato originale: Completed.
+  - Release originale: Release 1.0.
+  - Importazione: 15 ottobre 2026.
+  - Priorità MEDIUM usata come valore neutro di importazione; punti 1 è il minimo tecnico richiesto dal validatore ARchetipo; non è una stima storica né una misura del lavoro svolto.
+
+  ## Note di importazione
+  - Importazione retrospettiva da Nifty: stato originale Completed, stato ARchetipo DONE. Non sono state eseguite nuove verifiche funzionali; le caselle dei criteri restano non spuntate.
+  - Dimostrazione e criteri normalizzati servono alla lettura dello storico e non costituiscono un nuovo piano di sviluppo.
+
+  ## Testo originale Nifty
+  in qualità di utente
+  voglio vedere nella mia dashboard
+  solo quello che posso fare con il mio ruolo utente può fare.
+  affinché non sia confuso pensando di poter fare (o scoprire l'esistenza) azioni  che non mi appartengano
+
+  AC
+
+  se sono admin vedo creazione utenti, naviga viaggi e amministrazione
+  se ranger vedo creazione viaggi e naviga viaggi
+  se sono motociclisti vedo naviga viaggi
+  Se una funzione è abilitata, mettere solo box per eseguirla (non importa ripeter il box "creazione viaggio, abilitata" + box "crea viaggio").
+  non deve apparire nel menu di primo livello a dx la voce "crea viaggio" che sarà solo nella dashboard
+history:
+  - status: DONE
+    at: "2026-10-15T12:30:57Z"

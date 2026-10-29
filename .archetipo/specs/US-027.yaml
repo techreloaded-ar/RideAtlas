@@ -1,0 +1,62 @@
+schema: archetipo/spec/v2
+code: US-027
+title: Inserimento tappe viaggio
+epic:
+  code: EP-002
+  title: Gestione Itinerari e Ciclo di Vita
+priority: MEDIUM
+points: 1
+status: DONE
+scope: Storico
+body: |-
+  #### US-027: Inserimento tappe viaggio
+
+  **Epic:** EP-002 | **Priorità:** MEDIUM | **Punti:** 1 | **Stato:** DONE
+  **Bloccata da:** -
+
+  ## Storia utente
+  in qualità di ranger vorrei poter aggiungere le tappe di un viaggio per definire completamente il viaggio
+
+  ## Dimostrazione
+  Un Ranger aggiunge due tappe con titolo, descrizione, foto e GPX, le riordina con up/down ed elimina una tappa; la durata in giorni si aggiorna al numero delle tappe rimaste.
+
+  ## Criteri di accettazione
+  - [ ] AC-1 — Una tappa permette titolo e descrizione con markdown.
+  - [ ] AC-2 — Una tappa permette una foto.
+  - [ ] AC-3 — Una tappa permette un file GPX.
+  - [ ] AC-4 — Le tappe sono riordinabili con comandi up/down.
+  - [ ] AC-5 — Il comando Aggiungi un’altra tappa resta disponibile.
+  - [ ] AC-6 — L’icona cestino elimina una tappa.
+  - [ ] AC-7 — Aggiunta o rimozione di una tappa aggiorna la durata calcolata del viaggio.
+  - [ ] AC-8 — La durata del viaggio è espressa solo in giorni.
+
+  ## Fuori perimetro
+  Nuovo sviluppo, ampliamenti non presenti nella scheda, nuova accettazione del prodotto e recupero dei documenti o degli allegati esterni. La scheda conserva il perimetro della versione storica.
+
+  ## Provenienza
+  - Fonte: [SBI-106](https://agilereloaded.nifty.pm/Lk!HPsQBFT6LGV/task/SBI-106)
+  - Stato originale: Completed.
+  - Release originale: Release 1.0.
+  - Importazione: 15 ottobre 2026.
+  - Priorità MEDIUM usata come valore neutro di importazione; punti 1 è il minimo tecnico richiesto dal validatore ARchetipo; non è una stima storica né una misura del lavoro svolto.
+
+  ## Note di importazione
+  - Importazione retrospettiva da Nifty: stato originale Completed, stato ARchetipo DONE. Non sono state eseguite nuove verifiche funzionali; le caselle dei criteri restano non spuntate.
+  - Dimostrazione e criteri normalizzati servono alla lettura dello storico e non costituiscono un nuovo piano di sviluppo.
+
+  ## Testo originale Nifty
+  in qualità di ranger vorrei poter aggiungere le tappe di un viaggio per definire completamente il viaggio
+
+  AC:
+
+  per ogni tappa del viaggio posso inserire titolo, descrizione testuale (uso il markdown per mettere creare una scheda con in bold la durata, la lunghezza e altre cose a scelta libera)
+  per ogni tappa posso aggiungere una foto
+  per ogni tappa posso aggiungere un file GPX
+  gli elementi della lista sono riordinabili up/down
+  appare sempre un pulsante/etichetta "aggiungi un'altra tappa"
+  una tappa può essere eliminata tramite icona cestino
+  il campo "durata del viaggio" ora è un campo calcolato, non inserito da utente: ogni volta che una tappa viene aggiunta/rimossa, si aggiorna automaticamente la durata del viaggio.
+  Il campo "durata del viaggio" ora comprende solo il numero di gg (no giorni/notti)
+history:
+  - status: DONE
+    at: "2026-10-15T12:30:57Z"

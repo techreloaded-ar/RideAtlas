@@ -1,0 +1,39 @@
+schema: archetipo/spec/v2
+code: US-083
+title: Ciclo di vita e moderazione itinerario
+epic:
+  code: EP-002
+  title: Gestione Itinerari e Ciclo di Vita
+priority: HIGH
+points: 5
+status: DONE
+blocked_by:
+  - US-080
+scope: MVP
+body: |-
+  #### US-083: Ciclo di vita e moderazione itinerario
+
+  **Epic:** EP-002 | **Priorità:** HIGH | **Punti:** 5 | **Stato:** DONE
+  **Bloccata da:** US-080
+
+  ## Storia utente
+  Come Giulia la Ranger,
+  voglio pubblicare i miei itinerari e, in qualità di Sentinel, approvare o riportare a bozza gli itinerari dei Ranger,
+  così da garantire che solo contenuti di qualità arrivino nel catalogo pubblico.
+
+  ## Dimostrazione
+  Partendo dalla pagina di modifica di un itinerario in stato "Bozza", il revisore clicca "Pubblica" e osserva il messaggio "Itinerario pubblicato con successo" e lo stato aggiornato a "Pubblicato". Il revisore Sentinel accede alla dashboard admin, trova l'itinerario pubblicato e clicca "Riporta a bozza" e osserva il messaggio "Itinerario riportato a bozza" e lo stato aggiornato. Il revisore Sentinel clicca "Approva" sull'itinerario ora in bozza e osserva lo stato tornare "Pubblicato". Il revisore Sentinel clicca "Archivia" e osserva lo stato "Archiviato".
+
+  ## Criteri di accettazione
+  - [ ] AC-1 — Il proprietario di un itinerario in stato "Bozza" può cliccare "Pubblica" e vederlo passare a "Pubblicato" con messaggio di conferma
+  - [ ] AC-2 — Un Sentinel può approvare un itinerario in stato "Bozza" dalla dashboard admin, portandolo a "Pubblicato"
+  - [ ] AC-3 — Un Sentinel può riportare a "Bozza" un itinerario "Pubblicato" o "Archiviato" con messaggio di conferma
+  - [ ] AC-4 — Un Sentinel può archiviare un itinerario "Pubblicato" portandolo a "Archiviato"
+
+  ## Fuori perimetro
+  Validazione contenuti prima della pubblicazione, moderazione con Pronto_per_revisione, assegnazione ad altro Ranger, riordino catalogo.
+history:
+  - status: TODO
+    at: "2026-07-16T16:15:31Z"
+  - status: DONE
+    at: "2026-10-15T11:55:41Z"

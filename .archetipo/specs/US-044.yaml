@@ -1,0 +1,62 @@
+schema: archetipo/spec/v2
+code: US-044
+title: Modifica profilo utente
+epic:
+  code: EP-005
+  title: Profilo e Community
+priority: MEDIUM
+points: 1
+status: DONE
+scope: Storico
+body: |-
+  #### US-044: Modifica profilo utente
+
+  **Epic:** EP-005 | **Priorità:** MEDIUM | **Punti:** 1 | **Stato:** DONE
+  **Bloccata da:** -
+
+  ## Storia utente
+  in qualità di utente del sistema (explorer, ranger, admin) voglio poter modificare il mio profilo utente per aggiornare i miei dati personali
+
+  ## Dimostrazione
+  Un utente apre Profilo utente dal burger, aggiorna nome, foto, social e bio, salva e riapre: ritrova i dati. L’email non è modificabile nel perimetro storico.
+
+  ## Criteri di accettazione
+  - [ ] AC-1 — Profilo utente è raggiungibile dal burger.
+  - [ ] AC-2 — Il profilo permette di modificare il nome.
+  - [ ] AC-3 — Il profilo permette foto, social e bio opzionali.
+  - [ ] AC-4 — L’email non è modificabile nel perimetro storico della scheda.
+  - [ ] AC-5 — Il cambio password richiede la vecchia password.
+  - [ ] AC-6 — Il profilo offre il recupero password.
+
+  ## Fuori perimetro
+  Nuovo sviluppo, ampliamenti non presenti nella scheda, nuova accettazione del prodotto e recupero dei documenti o degli allegati esterni. La scheda conserva il perimetro della versione storica.
+
+  ## Provenienza
+  - Fonte: [SBI-135](https://agilereloaded.nifty.pm/Lk!HPsQBFT6LGV/task/SBI-135)
+  - Stato originale: Completed.
+  - Release originale: Release 1.0.
+  - Importazione: 15 ottobre 2026.
+  - Priorità MEDIUM usata come valore neutro di importazione; punti 1 è il minimo tecnico richiesto dal validatore ARchetipo; non è una stima storica né una misura del lavoro svolto.
+
+  ## Note di importazione
+  - Importazione retrospettiva da Nifty: stato originale Completed, stato ARchetipo DONE. Non sono state eseguite nuove verifiche funzionali; le caselle dei criteri restano non spuntate.
+  - Dimostrazione e criteri normalizzati servono alla lettura dello storico e non costituiscono un nuovo piano di sviluppo.
+  - La richiesta descrive una fase storica; terminologia dei ruoli, provider, accessi e disponibilità possono differire dai requisiti successivi. Non è una modifica al contratto applicativo attuale.
+
+  ## Testo originale Nifty
+  in qualità di utente del sistema (explorer, ranger, admin) voglio poter modificare il mio profilo utente per aggiornare i miei dati personali
+
+  AC
+
+  si accede alla pagina dal menu burger alla voce profilo utente
+  la pagina permette di modificare i dati anagrafici:
+  nome
+  foto (campo opzionale)
+  url social (campo opzionale)
+  bio (campo opzionale)
+  email NO (al momento la usiamo come uid)
+  utente può cambiare la sua passwd immettendo la vecchia
+  utente può recuperare la propriapasswd
+history:
+  - status: DONE
+    at: "2026-10-15T12:30:57Z"

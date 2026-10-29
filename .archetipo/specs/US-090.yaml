@@ -1,0 +1,40 @@
+schema: archetipo/spec/v2
+code: US-090
+title: Pagamento Stripe e riconciliazione webhook
+epic:
+  code: EP-004
+  title: Marketplace e Pagamenti
+priority: HIGH
+points: 5
+status: DONE
+blocked_by:
+  - US-089
+scope: MVP
+body: |-
+  #### US-090: Pagamento Stripe e riconciliazione webhook
+
+  **Epic:** EP-004 | **Priorità:** HIGH | **Punti:** 5 | **Stato:** DONE
+  **Bloccata da:** US-089
+
+  ## Storia utente
+  Come Marco l'Explorer,
+  voglio pagare in sicurezza con Stripe,
+  così che la transazione sia protetta e l'acquisto venga registrato anche in caso di interruzione.
+
+  ## Dimostrazione
+  Partendo dalla pagina di checkout dopo aver cliccato "Acquista", il revisore inserisce i dati di pagamento nel form Stripe Elements (numero carta 4242 4242 4242 4242, data futura, CVC 123) e clicca "Paga". Il revisore osserva l'indicatore di caricamento, poi il messaggio "Pagamento confermato. Acquisto completato!" e viene reindirizzato alla pagina dell'itinerario con accesso sbloccato. Il revisore (come Sentinel) accede alla dashboard acquisti admin e osserva la transazione registrata con stato "COMPLETATO" e ID Stripe. Il revisore (simulando webhook) verifica che lo stato acquisto sia aggiornato anche via webhook Stripe.
+
+  ## Criteri di accettazione
+  - [ ] AC-1 — Il form Stripe Elements viene renderizzato nella pagina di checkout con i campi numero carta, scadenza e CVC
+  - [ ] AC-2 — Completando il pagamento con Stripe, la transazione viene registrata con stato "COMPLETATO" e l'utente visualizza "Pagamento confermato. Acquisto completato!"
+  - [ ] AC-3 — Il webhook Stripe aggiorna lo stato dell'acquisto in base all'esito del pagamento ricevuto.
+  - [ ] AC-4 — Un Sentinel può visualizzare tutte le transazioni dalla dashboard admin, incluse quelle via Stripe e via mock
+  - [ ] AC-5 — Un pagamento fallito non sblocca i contenuti premium.
+
+  ## Fuori perimetro
+  Rimborsi, acquisto mock, pagamento con altri metodi (PayPal, carte alternative), fatturazione.
+history:
+  - status: TODO
+    at: "2026-07-16T16:15:31Z"
+  - status: DONE
+    at: "2026-10-15T11:55:42Z"

@@ -1,0 +1,54 @@
+schema: archetipo/spec/v2
+code: US-042
+title: riportare in BOZZA un viaggio
+epic:
+  code: EP-002
+  title: Gestione Itinerari e Ciclo di Vita
+priority: MEDIUM
+points: 1
+status: DONE
+scope: Storico
+body: |-
+  #### US-042: riportare in BOZZA un viaggio
+
+  **Epic:** EP-002 | **Priorità:** MEDIUM | **Punti:** 1 | **Stato:** DONE
+  **Bloccata da:** -
+
+  ## Storia utente
+  come Ranger (e Sentinel) voglio riportsre un viaggio in stato  BOZZA affinché non sia più visibile dalla lista dei viaggi pubblici.
+
+  ## Dimostrazione
+  Un Ranger riporta un viaggio pubblicato in bozza dalla dashboard; il viaggio esce dall’elenco pubblico e non è più acquistabile. La richiesta originale di accesso degli acquirenti è conservata come requisito storico superato da SBI-128.
+
+  ## Criteri di accettazione
+  - [ ] AC-1 — Un Ranger può riportare un viaggio in bozza dalla dashboard dei propri viaggi.
+  - [ ] AC-2 — Un Sentinel può riportare un viaggio in bozza dall’amministrazione viaggi.
+  - [ ] AC-3 — Il viaggio riportato in bozza non compare nell’elenco pubblico.
+  - [ ] AC-4 — Un viaggio in bozza non è acquistabile.
+  - [ ] AC-5 — La richiesta storica di mantenere l’accesso agli acquirenti è conservata, con conflitto esplicito rispetto alla successiva SBI-128.
+
+  ## Fuori perimetro
+  Nuovo sviluppo, ampliamenti non presenti nella scheda, nuova accettazione del prodotto e recupero dei documenti o degli allegati esterni. La scheda conserva il perimetro della versione storica.
+
+  ## Provenienza
+  - Fonte: [SBI-132](https://agilereloaded.nifty.pm/Lk!HPsQBFT6LGV/task/SBI-132)
+  - Stato originale: Completed.
+  - Release originale: Release 1.0.
+  - Importazione: 15 ottobre 2026.
+  - Priorità MEDIUM usata come valore neutro di importazione; punti 1 è il minimo tecnico richiesto dal validatore ARchetipo; non è una stima storica né una misura del lavoro svolto.
+
+  ## Note di importazione
+  - Importazione retrospettiva da Nifty: stato originale Completed, stato ARchetipo DONE. Non sono state eseguite nuove verifiche funzionali; le caselle dei criteri restano non spuntate.
+  - Dimostrazione e criteri normalizzati servono alla lettura dello storico e non costituiscono un nuovo piano di sviluppo.
+  - Evoluzione storica: SBI-132 richiedeva l’accesso degli acquirenti alle bozze; SBI-128 lo vieta e prevede Momentaneamente non accessibile. Le due schede restano distinte e non definiscono due regole contemporanee.
+
+  ## Testo originale Nifty
+  come Ranger (e Sentinel) voglio riportsre un viaggio in stato  BOZZA affinché non sia più visibile dalla lista dei viaggi pubblici.
+
+  AC
+  * un viaggio in BOZZA non potrà più essere comprato da nessuno
+  * il viaggio in BOZZA è ancora accessibile a chi lo ha acquistato
+  * Il viaggiopotrà essere riportato in bozza sia  nella dashboard  I tuoi viaggi ) che nella pagina di Amministrazione (gestione viaggi)
+history:
+  - status: DONE
+    at: "2026-10-15T12:30:57Z"

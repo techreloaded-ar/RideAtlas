@@ -1,0 +1,40 @@
+schema: archetipo/spec/v2
+code: US-079
+title: Creazione itinerario multi-tappa
+epic:
+  code: EP-002
+  title: Gestione Itinerari e Ciclo di Vita
+priority: HIGH
+points: 5
+status: DONE
+scope: MVP
+body: |-
+  #### US-079: Creazione itinerario multi-tappa
+
+  **Epic:** EP-002 | **Priorità:** HIGH | **Punti:** 5 | **Stato:** DONE
+  **Bloccata da:** -
+
+  ## Storia utente
+  Come Giulia la Ranger,
+  voglio creare un nuovo itinerario compilando titolo, destinazione, durata, tema, caratteristiche, stagioni e tappe ordinate,
+  così da organizzare un viaggio completo prima di pubblicarlo.
+
+  ## Dimostrazione
+  Partendo dalla dashboard Ranger, il revisore clicca "Crea itinerario" e viene portato a un form con campi per titolo, sommario, destinazione, durata (giorni/notti), tema (dropdown), caratteristiche (checkbox multiple), stagioni consigliate (checkbox), tag (testo libero), prezzo (importo), data del viaggio (date picker) e insight (textarea). Il revisore compila i campi, aggiunge una prima tappa con titolo, descrizione, tipo percorso e durata, clicca "Aggiungi tappa" e la vede comparire nell'elenco ordinato. Il revisore aggiunge una seconda tappa, poi riordina le tappe tramite drag-and-drop e osserva l'indice aggiornarsi. Il revisore salva l'itinerario come bozza e osserva il messaggio "Itinerario salvato come bozza" e viene reindirizzato alla pagina di modifica.
+
+  ## Criteri di accettazione
+  - [ ] AC-1 — Il form di creazione presenta tutti i campi obbligatori (titolo, destinazione, durata) e opzionali (tema, caratteristiche, stagioni, tag, prezzo, data, insight)
+  - [ ] AC-2 — Il revisore può aggiungere una o più tappe con titolo, descrizione, tipo percorso e durata; ogni tappa appare ordinata nell'elenco
+  - [ ] AC-3 — Le tappe sono riordinabili tramite drag-and-drop e l'indice di ordinamento viene aggiornato coerentemente nel salvataggio
+  - [ ] AC-4 — Salvando l'itinerario, il sistema crea un record con stato "Bozza" e mostra conferma "Itinerario salvato come bozza"
+
+  ## Fuori perimetro
+  Caricamento GPX e media, pubblicazione, validazione pre-pubblicazione, moderazione Sentinel.
+
+  ## Prerequisiti della dimostrazione
+  Predisporre dati e account di esempio coerenti con: US-078 (US-078: Controllo accessi basato sui ruoli). Questi riferimenti tra epic descrivono il contesto funzionale; non costituiscono blocchi di lavorazione.
+history:
+  - status: TODO
+    at: "2026-07-16T16:15:31Z"
+  - status: DONE
+    at: "2026-10-15T11:55:40Z"

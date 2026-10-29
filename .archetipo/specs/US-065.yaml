@@ -1,0 +1,46 @@
+schema: archetipo/spec/v2
+code: US-065
+title: check km percorsi
+epic:
+  code: EP-005
+  title: Profilo e Community
+priority: MEDIUM
+points: 1
+status: DONE
+scope: Storico
+body: |-
+  #### US-065: check km percorsi
+
+  **Epic:** EP-005 | **Priorità:** MEDIUM | **Punti:** 1 | **Stato:** DONE
+  **Bloccata da:** -
+
+  ## Storia utente
+  Come responsabile del prodotto,
+  voglio verificare il significato di Km percorsi nel profilo,
+  così da comprendere il dato presentato agli utenti.
+
+  ## Dimostrazione
+  Il revisore apre la pagina utente e individua il valore Km percorsi; la fonte richiede di verificarne il significato senza definire formula o valore atteso.
+
+  ## Criteri di accettazione
+  - [ ] AC-1 — La verifica riguarda il significato di Km percorsi nella pagina utente; formula e valore atteso non sono presenti nella fonte.
+
+  ## Fuori perimetro
+  Nuovo sviluppo, ampliamenti non presenti nella scheda, nuova accettazione del prodotto e recupero dei documenti o degli allegati esterni. La scheda conserva il perimetro della versione storica.
+
+  ## Provenienza
+  - Fonte: [SBI-176](https://agilereloaded.nifty.pm/Lk!HPsQBFT6LGV/task/SBI-176)
+  - Stato originale: Completed.
+  - Release originale: Release 1.0.
+  - Importazione: 15 ottobre 2026.
+  - Priorità MEDIUM usata come valore neutro di importazione; punti 1 è il minimo tecnico richiesto dal validatore ARchetipo; non è una stima storica né una misura del lavoro svolto.
+
+  ## Note di importazione
+  - Importazione retrospettiva da Nifty: stato originale Completed, stato ARchetipo DONE. Non sono state eseguite nuove verifiche funzionali; le caselle dei criteri restano non spuntate.
+  - Dimostrazione e criteri normalizzati servono alla lettura dello storico e non costituiscono un nuovo piano di sviluppo.
+
+  ## Testo originale Nifty
+  verificare cosa è km percorsi nella pagina utente
+history:
+  - status: DONE
+    at: "2026-10-15T12:30:57Z"

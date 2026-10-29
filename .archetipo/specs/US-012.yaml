@@ -1,0 +1,57 @@
+schema: archetipo/spec/v2
+code: US-012
+title: US 4.1.9bis Visualizzazione lista viaggi [INTEGRAZIONE per ruolo]
+epic:
+  code: EP-003
+  title: Catalogo e Scoperta
+priority: MEDIUM
+points: 1
+status: DONE
+scope: Storico
+body: |-
+  #### US-012: US 4.1.9bis Visualizzazione lista viaggi [INTEGRAZIONE per ruolo]
+
+  **Epic:** EP-003 | **Priorità:** MEDIUM | **Punti:** 1 | **Stato:** DONE
+  **Bloccata da:** -
+
+  ## Storia utente
+  Come Utente del sistema
+  Voglio visualizzare l’elenco dei viaggi creati in base al mio ruolo
+  Affinché possa consultare i viaggi in funzione dello scopo del mio ruolo
+
+  ## Dimostrazione
+  Con due viaggi, uno pubblicato e uno in bozza, il revisore apre l’elenco come admin, Ranger ed Explorer e confronta i risultati ammessi per ciascun ruolo.
+
+  ## Criteri di accettazione
+  - [ ] AC-1 — Admin e Ranger vedono i viaggi pubblicati.
+  - [ ] AC-2 — Admin e Ranger vedono i viaggi in bozza.
+  - [ ] AC-3 — L’Explorer vede esclusivamente i viaggi pubblicati.
+
+  ## Fuori perimetro
+  Nuovo sviluppo, ampliamenti non presenti nella scheda, nuova accettazione del prodotto e recupero dei documenti o degli allegati esterni. La scheda conserva il perimetro della versione storica.
+
+  ## Provenienza
+  - Fonte: [SBI-75](https://agilereloaded.nifty.pm/Lk!HPsQBFT6LGV/task/SBI-75)
+  - Stato originale: Completed.
+  - Release originale: Release 1.0.
+  - Importazione: 15 ottobre 2026.
+  - Priorità MEDIUM usata come valore neutro di importazione; punti 1 è il minimo tecnico richiesto dal validatore ARchetipo; non è una stima storica né una misura del lavoro svolto.
+
+  ## Note di importazione
+  - Importazione retrospettiva da Nifty: stato originale Completed, stato ARchetipo DONE. Non sono state eseguite nuove verifiche funzionali; le caselle dei criteri restano non spuntate.
+  - Dimostrazione e criteri normalizzati servono alla lettura dello storico e non costituiscono un nuovo piano di sviluppo.
+
+  ## Testo originale Nifty
+  Come Utente del sistema
+  Voglio visualizzare l’elenco dei viaggi creati in base al mio ruolo
+  Affinché possa consultare i viaggi in funzione dello scopo del mio ruolo
+
+  AC:
+
+
+
+  admin e ranger possono vedere tutti i viaggi (pubblicati e bozza)
+  explorer può vedere solo i viaggi pubblicati
+history:
+  - status: DONE
+    at: "2026-10-15T12:30:57Z"

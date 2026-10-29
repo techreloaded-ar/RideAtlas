@@ -1,0 +1,49 @@
+schema: archetipo/spec/v2
+code: US-029
+title: Visibilità viaggi non acquistati
+epic:
+  code: EP-004
+  title: Marketplace e Pagamenti
+priority: MEDIUM
+points: 1
+status: DONE
+scope: Storico
+body: |-
+  #### US-029: Visibilità viaggi non acquistati
+
+  **Epic:** EP-004 | **Priorità:** MEDIUM | **Punti:** 1 | **Stato:** DONE
+  **Bloccata da:** -
+
+  ## Storia utente
+  In qualità di ranger, vorrei che gli utenti non possano vedere i dettagli dei viaggi che non hanno comprato in modo da invogliarli all'acquisto
+
+  ## Dimostrazione
+  Un utente apre un viaggio che non ha acquistato: l’elenco delle tappe è nascosto e compare il comando per acquistarlo.
+
+  ## Criteri di accettazione
+  - [ ] AC-1 — Per un viaggio non acquistato l’utente non vede l’elenco delle tappe.
+  - [ ] AC-2 — Al posto delle tappe nascoste compare un comando di acquisto.
+
+  ## Fuori perimetro
+  Nuovo sviluppo, ampliamenti non presenti nella scheda, nuova accettazione del prodotto e recupero dei documenti o degli allegati esterni. La scheda conserva il perimetro della versione storica.
+
+  ## Provenienza
+  - Fonte: [SBI-108](https://agilereloaded.nifty.pm/Lk!HPsQBFT6LGV/task/SBI-108)
+  - Stato originale: Completed.
+  - Release originale: Release 2.0.
+  - Importazione: 15 ottobre 2026.
+  - Priorità MEDIUM usata come valore neutro di importazione; punti 1 è il minimo tecnico richiesto dal validatore ARchetipo; non è una stima storica né una misura del lavoro svolto.
+
+  ## Note di importazione
+  - Importazione retrospettiva da Nifty: stato originale Completed, stato ARchetipo DONE. Non sono state eseguite nuove verifiche funzionali; le caselle dei criteri restano non spuntate.
+  - Dimostrazione e criteri normalizzati servono alla lettura dello storico e non costituiscono un nuovo piano di sviluppo.
+
+  ## Testo originale Nifty
+  In qualità di ranger, vorrei che gli utenti non possano vedere i dettagli dei viaggi che non hanno comprato in modo da invogliarli all'acquisto
+
+  Criteri di accettazione:
+
+  Se utente non ha comprato il viaggio la sezione elenco delle tappe non è visibile. In tal caso appare, un pulsante/etichetta/link per poterlo comprare.
+history:
+  - status: DONE
+    at: "2026-10-15T12:30:57Z"

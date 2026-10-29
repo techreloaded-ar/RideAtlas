@@ -1,0 +1,57 @@
+schema: archetipo/spec/v2
+code: US-043
+title: Modifica dashboard
+epic:
+  code: EP-006
+  title: Amministrazione e Moderazione
+priority: MEDIUM
+points: 1
+status: DONE
+scope: Storico
+body: |-
+  #### US-043: Modifica dashboard
+
+  **Epic:** EP-006 | **Priorità:** MEDIUM | **Punti:** 1 | **Stato:** DONE
+  **Bloccata da:** -
+
+  ## Storia utente
+  Come utente,
+  voglio trovare i comandi della dashboard nelle sezioni previste per il mio ruolo,
+  così da accedere alle azioni senza riquadri duplicati.
+
+  ## Dimostrazione
+  Il revisore apre la dashboard come Ranger e poi come admin: trova creazione e batch nella sezione dei propri viaggi, Amministrazione nel burger per l’admin e Profilo nel burger per tutti.
+
+  ## Criteri di accettazione
+  - [ ] AC-1 — La dashboard non mostra il box Esplora viaggi.
+  - [ ] AC-2 — La creazione viaggio è disponibile nella sezione dei propri viaggi per Ranger e admin.
+  - [ ] AC-3 — Il caricamento batch compare accanto alla creazione per Ranger e admin.
+  - [ ] AC-4 — Amministrazione compare nel burger solo per admin.
+  - [ ] AC-5 — Il burger espone il collegamento al profilo per tutti.
+  - [ ] AC-6 — I vecchi riquadri operativi superiori sono rimossi dalla dashboard.
+
+  ## Fuori perimetro
+  Nuovo sviluppo, ampliamenti non presenti nella scheda, nuova accettazione del prodotto e recupero dei documenti o degli allegati esterni. La scheda conserva il perimetro della versione storica.
+
+  ## Provenienza
+  - Fonte: [SBI-134](https://agilereloaded.nifty.pm/Lk!HPsQBFT6LGV/task/SBI-134)
+  - Stato originale: Completed.
+  - Release originale: Release 1.0.
+  - Importazione: 15 ottobre 2026.
+  - Priorità MEDIUM usata come valore neutro di importazione; punti 1 è il minimo tecnico richiesto dal validatore ARchetipo; non è una stima storica né una misura del lavoro svolto.
+
+  ## Note di importazione
+  - Importazione retrospettiva da Nifty: stato originale Completed, stato ARchetipo DONE. Non sono state eseguite nuove verifiche funzionali; le caselle dei criteri restano non spuntate.
+  - Dimostrazione e criteri normalizzati servono alla lettura dello storico e non costituiscono un nuovo piano di sviluppo.
+
+  ## Testo originale Nifty
+  AC
+  si elimina la sezione coi comandi in alto alla dashboard ridistribuendo le azioni nel seguente modo:
+
+  eliminare il box Esplora viaggi si accede dal menu principale
+  eliminare il box Crea viaggio va nella sezione dei miei viaggi, dove si deve aggiungere il caricamento batch accanto a crea viaggio (solo per ranger e admin)
+  eliminare il box *Amministrazione che va nel burger (solo per admin)
+  eliminare  il box Sicurezza Account che va nel burger (per tutti): da questo link si accede alla pagina modifica profilo. la pagina gestione profilo per adesso gestisce solo la passwd. La gestione degli altri attributi in una storia specifica.
+history:
+  - status: DONE
+    at: "2026-10-15T12:30:57Z"

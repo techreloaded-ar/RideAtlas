@@ -1,0 +1,65 @@
+schema: archetipo/spec/v2
+code: US-050
+title: Modifica profilo Ranger
+epic:
+  code: EP-005
+  title: Profilo e Community
+priority: MEDIUM
+points: 1
+status: DONE
+scope: Storico
+body: |-
+  #### US-050: Modifica profilo Ranger
+
+  **Epic:** EP-005 | **Priorità:** MEDIUM | **Punti:** 1 | **Stato:** DONE
+  **Bloccata da:** -
+
+  ## Storia utente
+  Come Ranger
+  Voglio poter modificare il mio profilo
+  Così che possa aggiornare i miei dati e renderli visibili a tutti gli utenti, in particolare agli Explorer che acquistano i viaggi
+
+  ## Dimostrazione
+  Un Ranger apre Profilo utente, aggiorna descrizione moto e foto alla guida, salva e riapre: ritrova le informazioni motociclistiche aggiornate.
+
+  ## Criteri di accettazione
+  - [ ] AC-1 — Il Ranger accede alla modifica del profilo dal burger.
+  - [ ] AC-2 — Il profilo Ranger include un blocco con descrizione della moto.
+  - [ ] AC-3 — Il profilo Ranger include foto alla guida in un carosello.
+  - [ ] AC-4 — Le informazioni aggiornate persistono alla riapertura del profilo.
+
+  ## Fuori perimetro
+  Nuovo sviluppo, ampliamenti non presenti nella scheda, nuova accettazione del prodotto e recupero dei documenti o degli allegati esterni. La scheda conserva il perimetro della versione storica.
+
+  ## Provenienza
+  - Fonte: [SBI-148](https://agilereloaded.nifty.pm/Lk!HPsQBFT6LGV/task/SBI-148)
+  - Stato originale: Completed.
+  - Release originale: Release 1.0.
+  - Importazione: 15 ottobre 2026.
+  - Priorità MEDIUM usata come valore neutro di importazione; punti 1 è il minimo tecnico richiesto dal validatore ARchetipo; non è una stima storica né una misura del lavoro svolto.
+
+  ## Note di importazione
+  - Importazione retrospettiva da Nifty: stato originale Completed, stato ARchetipo DONE. Non sono state eseguite nuove verifiche funzionali; le caselle dei criteri restano non spuntate.
+  - Dimostrazione e criteri normalizzati servono alla lettura dello storico e non costituiscono un nuovo piano di sviluppo.
+
+  ## Testo originale Nifty
+  Come Ranger
+  Voglio poter modificare il mio profilo
+  Così che possa aggiornare i miei dati e renderli visibili a tutti gli utenti, in particolare agli Explorer che acquistano i viaggi
+
+  Acceptance Criteria
+
+  GIVEN che sono autenticato nell’applicazione
+  WHEN apro il menu burger e seleziono la voce "Profilo utente"
+  THEN accedo alla pagina di modifica del mio profilo.
+
+  GIVEN che sono un utente con ruolo Ranger
+  WHEN accedo alla pagina del profilo
+  THEN viene mostrato un blocco aggiuntivo con le informazioni relative alla mia esperienza motociclistica: descrizione della moto e carosello con alcune foto alla guida.
+
+  GIVEN che salvo le modifiche al profilo
+  WHEN i dati vengono aggiornati correttamente
+  THEN le nuove informazioni vengono mostrate la prossima volta che accedo alla pagina di modifica del mio profilo..
+history:
+  - status: DONE
+    at: "2026-10-15T12:30:57Z"

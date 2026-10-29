@@ -1,0 +1,40 @@
+schema: archetipo/spec/v2
+code: US-087
+title: Catalogo pubblico con ricerca e filtri
+epic:
+  code: EP-003
+  title: Catalogo e Scoperta
+priority: HIGH
+points: 3
+status: DONE
+scope: MVP
+body: |-
+  #### US-087: Catalogo pubblico con ricerca e filtri
+
+  **Epic:** EP-003 | **Priorità:** HIGH | **Punti:** 3 | **Stato:** DONE
+  **Bloccata da:** -
+
+  ## Storia utente
+  Come Marco l'Explorer,
+  voglio sfogliare il catalogo degli itinerari pubblicati con ricerca e filtri per durata, area e stagione,
+  così da trovare rapidamente il viaggio che fa per me.
+
+  ## Dimostrazione
+  Partendo dalla homepage, il revisore clicca "Catalogo" e osserva l'elenco degli itinerari pubblicati con titolo, thumbnail, durata e prezzo. Il revisore digita "Appennino" nella barra di ricerca e osserva la lista filtrata mostrando solo gli itinerari con "Appennino" nel titolo o nella destinazione. Il revisore seleziona il filtro "Durata" scegliendo "3-5 giorni" e osserva la lista ulteriormente ridotta. Il revisore deseleziona i filtri e osserva il catalogo completo tornare visibile. Il revisore clicca su un itinerario e viene portato alla pagina di dettaglio.
+
+  ## Criteri di accettazione
+  - [ ] AC-1 — Il catalogo mostra tutti gli itinerari con stato "Pubblicato", ordinati per indice di vetrina, con titolo, thumbnail, durata e prezzo
+  - [ ] AC-2 — La ricerca testuale filtra gli itinerari per titolo o destinazione, aggiornando la lista in tempo reale
+  - [ ] AC-3 — I filtri per durata, area geografica e stagione si combinano tra loro e con la ricerca testuale per restringere i risultati
+  - [ ] AC-4 — Rimuovendo tutti i filtri, il catalogo completo torna visibile
+
+  ## Fuori perimetro
+  Mappa interattiva nel catalogo, ordinamento per prezzo/popolarità, wishlist.
+
+  ## Prerequisiti della dimostrazione
+  Predisporre dati e account di esempio coerenti con: US-085 (US-085: Controllo accesso ai contenuti). Questi riferimenti tra epic descrivono il contesto funzionale; non costituiscono blocchi di lavorazione.
+history:
+  - status: TODO
+    at: "2026-07-16T16:15:31Z"
+  - status: DONE
+    at: "2026-10-15T11:55:41Z"

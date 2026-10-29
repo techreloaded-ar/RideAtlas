@@ -1,0 +1,39 @@
+schema: archetipo/spec/v2
+code: US-078
+title: Controllo accessi basato sui ruoli
+epic:
+  code: EP-001
+  title: Autenticazione e Autorizzazione
+priority: HIGH
+points: 3
+status: DONE
+blocked_by:
+  - US-076
+scope: MVP
+body: |-
+  #### US-078: Controllo accessi basato sui ruoli
+
+  **Epic:** EP-001 | **Priorità:** HIGH | **Punti:** 3 | **Stato:** DONE
+  **Bloccata da:** US-076
+
+  ## Storia utente
+  Come Sentinel,
+  voglio che il sistema applichi permessi diversi per Explorer, Ranger e Sentinel,
+  così che ogni utente veda e possa fare solo ciò che è consentito al proprio ruolo.
+
+  ## Dimostrazione
+  Partendo da un account Explorer, il revisore naviga nella home e osserva che il menu mostra "Catalogo" e "Profilo" ma non "Admin" né "Crea itinerario". Il revisore tenta di accedere a /admin digitando l'URL direttamente e osserva una pagina di errore 403 o reindirizzamento. Il revisore si disconnette, effettua l'accesso come Ranger e osserva che il menu mostra "Crea itinerario" e "Dashboard". Il revisore si disconnette, effettua l'accesso come Sentinel e osserva che il menu mostra "Admin" con le voci di moderazione.
+
+  ## Criteri di accettazione
+  - [ ] AC-1 — Un Explorer non vede voci di navigazione per creazione itinerari, admin o moderazione
+  - [ ] AC-2 — Un Ranger vede "Crea itinerario" e "Dashboard" ma non "Admin"
+  - [ ] AC-3 — Un Sentinel vede "Admin" con accesso a tutte le sezioni di moderazione
+  - [ ] AC-4 — L'accesso diretto via URL a pagine non autorizzate restituisce 403 o reindirizza l'utente
+
+  ## Fuori perimetro
+  Modifica del ruolo, interfaccia di admin, creazione itinerari.
+history:
+  - status: TODO
+    at: "2026-07-16T16:15:31Z"
+  - status: DONE
+    at: "2026-10-15T11:55:40Z"

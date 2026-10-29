@@ -1,0 +1,42 @@
+schema: archetipo/spec/v2
+code: US-093
+title: Pagina pubblica del Ranger
+epic:
+  code: EP-005
+  title: Profilo e Community
+priority: MEDIUM
+points: 3
+status: DONE
+blocked_by:
+  - US-092
+scope: MVP
+body: |-
+  #### US-093: Pagina pubblica del Ranger
+
+  **Epic:** EP-005 | **Priorità:** MEDIUM | **Punti:** 3 | **Stato:** DONE
+  **Bloccata da:** US-092
+
+  ## Storia utente
+  Come Marco l'Explorer,
+  voglio visitare la pagina pubblica di un Ranger per vedere i suoi itinerari, bio e social,
+  così da conoscere l'esperto dietro i percorsi che mi interessano.
+
+  ## Dimostrazione
+  Partendo dalla pagina di dettaglio di un itinerario, il revisore clicca sul nome del Ranger e viene reindirizzato a /ranger/[username]. Il revisore osserva il nome, bio, avatar, foto moto, link social e statistiche (numero itinerari pubblicati). Il revisore scorre e vede l'elenco degli itinerari pubblicati dal Ranger con titolo, thumbnail, durata e prezzo. Il revisore clicca su un itinerario e viene portato alla pagina di dettaglio. Il revisore visita /ranger/username-inesistente e osserva una pagina 404 con messaggio "Ranger non trovato."
+
+  ## Criteri di accettazione
+  - [ ] AC-1 — La pagina pubblica del Ranger mostra nome, bio, avatar, foto moto, link social e statistiche (n. itinerari pubblicati)
+  - [ ] AC-2 — L'elenco degli itinerari pubblicati dal Ranger mostra titolo, thumbnail, durata e prezzo per ciascun viaggio
+  - [ ] AC-3 — Cliccando su un itinerario nell'elenco, l'utente viene portato alla pagina di dettaglio dell'itinerario
+  - [ ] AC-4 — Visitando /ranger/[username] per un utente inesistente o non Ranger viene mostrata una pagina 404 con "Ranger non trovato"
+
+  ## Fuori perimetro
+  Recensioni dei Ranger, messaggistica diretta, follower.
+
+  ## Prerequisiti della dimostrazione
+  Predisporre dati e account di esempio coerenti con: US-085 (US-085: Controllo accesso ai contenuti). Questi riferimenti tra epic descrivono il contesto funzionale; non costituiscono blocchi di lavorazione.
+history:
+  - status: TODO
+    at: "2026-07-16T16:15:31Z"
+  - status: DONE
+    at: "2026-10-15T11:55:42Z"

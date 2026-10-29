@@ -1,0 +1,42 @@
+schema: archetipo/spec/v2
+code: US-077
+title: Recupero password e cambio email
+epic:
+  code: EP-001
+  title: Autenticazione e Autorizzazione
+priority: HIGH
+points: 3
+status: DONE
+blocked_by:
+  - US-075
+scope: MVP
+body: |-
+  #### US-077: Recupero password e cambio email
+
+  **Epic:** EP-001 | **Priorità:** HIGH | **Punti:** 3 | **Stato:** DONE
+  **Bloccata da:** US-075
+
+  ## Storia utente
+  Come Marco l'Explorer,
+  voglio recuperare la password dimenticata e cambiare il mio indirizzo email,
+  così da mantenere l'accesso al mio account in caso di smarrimento credenziali.
+
+  ## Dimostrazione
+  Partendo dalla pagina di accesso, il revisore clicca "Password dimenticata?", inserisce l'email registrata e osserva il messaggio "Se l'email è registrata, riceverai un link di reset." Il revisore controlla la casella email, trova il link di reset, lo segue e viene portato alla pagina di reset. Il revisore inserisce una nuova password valida e osserva "Password reimpostata con successo." Il revisore torna alla pagina di accesso, inserisce la nuova password e accede correttamente. Il revisore tenta poi di usare un token di reset scaduto e osserva "Link non valido o scaduto."
+
+  ## Criteri di accettazione
+  - [ ] AC-1 — Richiedere il reset password con un'email registrata invia un'email con link di reset valido.
+  - [ ] AC-2 — Inserire una nuova password valida tramite link di reset valido aggiorna la password e mostra "Password reimpostata con successo"
+  - [ ] AC-3 — Richiedere il cambio email dalla sezione profilo invia un'email di conferma al nuovo indirizzo.
+  - [ ] AC-4 — Un token di reset o cambio email scaduto o non valido mostra l'errore "Link non valido o scaduto"
+  - [ ] AC-5 — La richiesta di reset mostra "Se l’email è registrata, riceverai un link di reset".
+  - [ ] AC-6 — Confermando il cambio tramite il link valido, l'email dell'account viene aggiornata al nuovo indirizzo.
+  - [ ] AC-7 — Dopo la conferma del cambio email, il vecchio indirizzo non consente più l'accesso.
+
+  ## Fuori perimetro
+  Login, registrazione, OAuth, setup password per utenti OAuth.
+history:
+  - status: TODO
+    at: "2026-07-16T16:15:31Z"
+  - status: DONE
+    at: "2026-10-15T11:55:40Z"

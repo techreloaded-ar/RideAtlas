@@ -1,0 +1,57 @@
+schema: archetipo/spec/v2
+code: US-026
+title: Acquisto del viaggio
+epic:
+  code: EP-004
+  title: Marketplace e Pagamenti
+priority: MEDIUM
+points: 1
+status: DONE
+scope: Storico
+body: |-
+  #### US-026: Acquisto del viaggio
+
+  **Epic:** EP-004 | **Priorità:** MEDIUM | **Punti:** 1 | **Stato:** DONE
+  **Bloccata da:** -
+
+  ## Storia utente
+  In qualità di utente, vorrei poter comprare un viaggio in modo da poter vedere il dettaglio delle tappe del viaggio e poi scaricare i file GPX.
+
+  ## Dimostrazione
+  Un utente apre Acquista su un viaggio, completa il pagamento simulato e torna al viaggio: vede le tappe e trova il viaggio tra I miei viaggi.
+
+  ## Criteri di accettazione
+  - [ ] AC-1 — Il comando di acquisto apre una sezione dedicata.
+  - [ ] AC-2 — Il pagamento della prima versione è simulato.
+  - [ ] AC-3 — Completato il pagamento l’utente torna alla pagina del viaggio.
+  - [ ] AC-4 — Dopo il pagamento l’utente vede la sezione tappe.
+  - [ ] AC-5 — Il viaggio acquistato compare in I miei viaggi.
+  - [ ] AC-6 — L’admin dispone dell’annullamento dell’acquisto previsto dalla fonte.
+
+  ## Fuori perimetro
+  Nuovo sviluppo, ampliamenti non presenti nella scheda, nuova accettazione del prodotto e recupero dei documenti o degli allegati esterni. La scheda conserva il perimetro della versione storica.
+
+  ## Provenienza
+  - Fonte: [SBI-105](https://agilereloaded.nifty.pm/Lk!HPsQBFT6LGV/task/SBI-105)
+  - Stato originale: Completed.
+  - Release originale: Release 2.0.
+  - Importazione: 15 ottobre 2026.
+  - Priorità MEDIUM usata come valore neutro di importazione; punti 1 è il minimo tecnico richiesto dal validatore ARchetipo; non è una stima storica né una misura del lavoro svolto.
+
+  ## Note di importazione
+  - Importazione retrospettiva da Nifty: stato originale Completed, stato ARchetipo DONE. Non sono state eseguite nuove verifiche funzionali; le caselle dei criteri restano non spuntate.
+  - Dimostrazione e criteri normalizzati servono alla lettura dello storico e non costituiscono un nuovo piano di sviluppo.
+  - La richiesta descrive una fase storica; terminologia dei ruoli, provider, accessi e disponibilità possono differire dai requisiti successivi. Non è una modifica al contratto applicativo attuale.
+
+  ## Testo originale Nifty
+  In qualità di utente, vorrei poter comprare un viaggio in modo da poter vedere il dettaglio delle tappe del viaggio e poi scaricare i file GPX.
+
+  Criteri di accettazione:
+
+  quando utente segue il flusso di acquisto, viene portato in una sezione apposita. Dopo acquisto il viaggio verrà visualizzato nella sezione "I miei viaggi".
+  in questa prima simulazione, l'acquisto viene eseguito mostrando una pagina di simulazione del pagamento (es. un solo bottone "paga"). La storia che implementa il pagamento è a parte.  NOTA admin ha super potere per "annullare questo acquisto.
+  dopo che utente ha effettuato il pagamento, si torna sulla pagina del viaggio e utente vede tutta la sezione "tappe".
+  il viaggio può vederlo visualizzato nella sezione "i miei viaggi"
+history:
+  - status: DONE
+    at: "2026-10-15T12:30:57Z"

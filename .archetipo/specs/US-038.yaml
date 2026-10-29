@@ -1,0 +1,50 @@
+schema: archetipo/spec/v2
+code: US-038
+title: Import Batch Viaggi
+epic:
+  code: EP-002
+  title: Gestione Itinerari e Ciclo di Vita
+priority: MEDIUM
+points: 1
+status: DONE
+scope: Storico
+body: |-
+  #### US-038: Import Batch Viaggi
+
+  **Epic:** EP-002 | **Priorità:** MEDIUM | **Punti:** 1 | **Stato:** DONE
+  **Bloccata da:** -
+
+  ## Storia utente
+  Come Admin voglio poter caricare un viaggio tramite uno zip in modo da non doverlo fare da interfaccia
+
+  ## Dimostrazione
+  Un Ranger carica uno ZIP di viaggio valido tramite importazione batch e vede il viaggio importato; uno ZIP con errori produce un riscontro di validazione.
+
+  ## Criteri di accettazione
+  - [ ] AC-1 — Un Ranger può importare un viaggio da ZIP.
+  - [ ] AC-2 — L’importazione segnala gli errori di validazione dello ZIP.
+
+  ## Fuori perimetro
+  Nuovo sviluppo, ampliamenti non presenti nella scheda, nuova accettazione del prodotto e recupero dei documenti o degli allegati esterni. La scheda conserva il perimetro della versione storica.
+
+  ## Provenienza
+  - Fonte: [SBI-125](https://agilereloaded.nifty.pm/Lk!HPsQBFT6LGV/task/SBI-125)
+  - Stato originale: Completed.
+  - Release originale: Release 1.0.
+  - Importazione: 15 ottobre 2026.
+  - Priorità MEDIUM usata come valore neutro di importazione; punti 1 è il minimo tecnico richiesto dal validatore ARchetipo; non è una stima storica né una misura del lavoro svolto.
+
+  ## Note di importazione
+  - Importazione retrospettiva da Nifty: stato originale Completed, stato ARchetipo DONE. Non sono state eseguite nuove verifiche funzionali; le caselle dei criteri restano non spuntate.
+  - Dimostrazione e criteri normalizzati servono alla lettura dello storico e non costituiscono un nuovo piano di sviluppo.
+
+  ## Testo originale Nifty
+  Come Admin voglio poter caricare un viaggio tramite uno zip in modo da non doverlo fare da interfaccia
+
+  AC
+
+  Deve essere possibile importarlo come Ranger
+  Ci deve essere una validazione degli errori
+history:
+  - status: DONE
+    at: "2026-10-15T12:30:57Z"
