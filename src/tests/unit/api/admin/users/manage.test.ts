@@ -303,7 +303,7 @@ describe('/api/admin/users/[id] - Gestione Utenti Admin', () => {
         const data = await response.json()
 
         expect(response.status).toBe(200)
-        expect(data.message).toBe('Ruolo utente aggiornato con successo')
+        expect(data.message).toBe('Dati utente aggiornati con successo')
         expect(data.user).toEqual(updatedUser)
 
         expect(prisma.user.update).toHaveBeenCalledWith({
