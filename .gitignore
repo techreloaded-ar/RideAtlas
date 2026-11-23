@@ -36,10 +36,12 @@ coverage/
 .cursor/
 
 # Strumenti e agenti AI
-# ARchetipo: conserva solo backlog e specifiche
+# ARchetipo: conserva backlog, specifiche e ricetta dell'ambiente di preview
 /.archetipo/*
 !/.archetipo/backlog.yaml
 !/.archetipo/specs/
+!/.archetipo/environment.json
+!/.archetipo/preview.json
 .agents/
 .augment/
 .bmad-core/

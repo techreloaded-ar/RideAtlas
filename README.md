@@ -213,6 +213,7 @@ npx prisma generate     # Genera client Prisma
 npx prisma db push      # Sincronizza schema
 npx prisma studio       # Interface grafica database
 npx prisma migrate dev  # Crea migration
+RIDEATLAS_DEMO_DATA=1 npm run db:seed  # Crea i dati demo su un database locale
 
 # Testing
 npm test                # Esegui test
@@ -222,6 +223,77 @@ npm run lint            # Controllo codice
 # Debug
 npm run dev -- --inspect  # Debug mode
 ```
+
+## 🧪 Ambiente locale con ARchetipo e dati demo
+
+Il repository contiene la ricetta completa dell'ambiente di preview ARchetipo:
+chi clona il progetto può preparare dipendenze, database, schema e dati demo con un solo comando.
+
+| File | Contenuto |
+|---|---|
+| `.archetipo/environment.json` | Ricetta: servizio PostgreSQL, passi di preparazione, controllo di prontezza e check |
+| `.archetipo/preview.json` | Avvio della preview (`next dev` sulla porta assegnata, email simulate) |
+| `scripts/archetipo/runtime.cjs` | Helper non segreto che esegue ogni passo e ogni check |
+| `prisma/seed.ts`, `prisma/demo-data.ts` | Dati demo, usabili anche senza ARchetipo |
+
+### Prerequisiti
+
+- **Node.js** (verificato con la versione 22) e npm;
+- **CLI `archetipo`** nel `PATH`;
+- **PostgreSQL 17 server** installato ma **non avviato a mano**: ARchetipo avvia un'istanza dedicata al checkout
+  con il binario di sistema (su Debian/Ubuntu il pacchetto `postgresql-17`, binario `/usr/lib/postgresql/17/bin/postgres`).
+  Non serve Docker.
+
+Non servono file `.env` né credenziali: l'helper toglie dall'ambiente le chiavi di Stripe, SMTP, Google, Blob,
+AWS e OpenRouter, e usa solo password locali sintetiche.
+
+### Comandi
+
+```bash
+# Prepara l'ambiente: install bloccato dal lockfile, database PostgreSQL del checkout, schema, dati demo
+archetipo execution environment prepare
+
+# Check di verifica
+archetipo execution environment check quality      # ESLint + test Jest
+archetipo execution environment check build        # next build
+archetipo execution environment check persistence  # scrittura e rilettura reale sul database del checkout
+
+# Preview (in ARchetipo View si avvia dal viewer)
+archetipo execution preview run
+
+# Ferma i servizi del checkout; i dati restano in .archetipo/environment/services/db/data
+archetipo execution environment cleanup
+```
+
+La preparazione si può ripetere: installa di nuovo solo se cambia il lockfile, non usa mai `--accept-data-loss`
+e non cancella dati. Il database è legato al checkout da una tabella marcatore (`archetipo.checkout_owner`):
+l'helper rifiuta di scrivere su un database diverso da quello del checkout o già popolato da altri.
+
+### Dati demo
+
+Tutti gli account usano la password `RideAtlasDemo1` (solo locale).
+
+| Account | Ruolo | Cosa mostra |
+|---|---|---|
+| `ranger.demo@rideatlas.invalid` | Ranger | autore di «Dolomiti in 4 giorni», «Costa Amalfitana», una bozza e un viaggio archiviato |
+| `giulia.demo@rideatlas.invalid` | Ranger | autrice di «Colline toscane», «Sardegna da costa a costa», «Etna in giornata» (gratuito, senza tappe) e di un viaggio pronto per revisione |
+| `explorer.demo@rideatlas.invalid` | Explorer | acquisto completato di «Dolomiti in 4 giorni», uno rimborsato e uno in attesa |
+| `paolo.demo@rideatlas.invalid` | Explorer | nessun acquisto |
+| `sentinel.demo@rideatlas.invalid` | Sentinel | amministrazione e revisione dei viaggi |
+
+Le email simulate non vengono inviate: il dominio `.invalid` non esiste.
+
+**Senza ARchetipo**, su un tuo PostgreSQL locale con lo schema già applicato (`npx prisma db push`):
+
+```bash
+DATABASE_URL="postgresql://utente:password@127.0.0.1:5432/rideatlas" RIDEATLAS_DEMO_DATA=1 npm run db:seed
+```
+
+Il seed crea solo i record che mancano e non modifica né cancella mai dati esistenti, quindi si può rieseguire.
+Per sicurezza si rifiuta di partire senza `RIDEATLAS_DEMO_DATA=1`, con `NODE_ENV=production`, oppure se
+l'host di `DATABASE_URL` non è locale (`localhost`, `127.0.0.1`, `::1`): `sentinel.demo` è un amministratore
+con password nota e non deve mai finire su un database reale. La stessa protezione vale per `npm run db:reset`,
+che esegue il seed in automatico.
 
 ## 📁 Struttura del Progetto
 

@@ -1,0 +1,144 @@
+{
+  "version": 1,
+  "inputs": [
+    "package.json",
+    "package-lock.json",
+    "prisma",
+    "scripts/archetipo/runtime.cjs"
+  ],
+  "outputs": [
+    "node_modules/.package-lock.json",
+    "node_modules/.prisma/client/index.js"
+  ],
+  "local_files": [],
+  "prepare": [
+    {
+      "name": "install",
+      "argv": [
+        "node",
+        "scripts/archetipo/runtime.cjs",
+        "install"
+      ],
+      "timeout_seconds": 1200
+    },
+    {
+      "name": "target",
+      "argv": [
+        "node",
+        "scripts/archetipo/runtime.cjs",
+        "target"
+      ],
+      "timeout_seconds": 60
+    },
+    {
+      "name": "schema",
+      "argv": [
+        "node",
+        "scripts/archetipo/runtime.cjs",
+        "schema"
+      ],
+      "timeout_seconds": 300
+    },
+    {
+      "name": "demo",
+      "argv": [
+        "node",
+        "scripts/archetipo/runtime.cjs",
+        "demo"
+      ],
+      "timeout_seconds": 300
+    }
+  ],
+  "probe": [
+    {
+      "name": "ready",
+      "argv": [
+        "node",
+        "scripts/archetipo/runtime.cjs",
+        "ready"
+      ],
+      "timeout_seconds": 60
+    }
+  ],
+  "checks": {
+    "build": {
+      "name": "build",
+      "argv": [
+        "node",
+        "scripts/archetipo/runtime.cjs",
+        "build"
+      ],
+      "timeout_seconds": 1200,
+      "inputs": [
+        "src",
+        "public",
+        "package.json",
+        "package-lock.json",
+        "prisma",
+        "tsconfig.json",
+        "next-env.d.ts",
+        "eslint.config.mjs",
+        "next.config.js",
+        "tailwind.config.js",
+        "postcss.config.js",
+        "scripts/archetipo/runtime.cjs"
+      ],
+      "cache": true
+    },
+    "persistence": {
+      "name": "persistence",
+      "argv": [
+        "node",
+        "scripts/archetipo/runtime.cjs",
+        "persistence"
+      ],
+      "timeout_seconds": 120,
+      "inputs": [
+        "prisma",
+        "package-lock.json",
+        "scripts/archetipo/runtime.cjs"
+      ],
+      "cache": false,
+      "during_preview": true
+    },
+    "quality": {
+      "name": "quality",
+      "argv": [
+        "node",
+        "scripts/archetipo/runtime.cjs",
+        "quality"
+      ],
+      "timeout_seconds": 900,
+      "inputs": [
+        "src",
+        "package.json",
+        "package-lock.json",
+        "prisma",
+        "tsconfig.json",
+        "next-env.d.ts",
+        "eslint.config.mjs",
+        "jest.config.js",
+        "jest.setup.js",
+        "next.config.js",
+        "scripts/archetipo/runtime.cjs"
+      ],
+      "cache": true,
+      "during_preview": true
+    }
+  },
+  "services": {
+    "db": {
+      "image": "postgres:17",
+      "port": 5432,
+      "env": {
+        "POSTGRES_DB": "rideatlas",
+        "POSTGRES_PASSWORD": "rideatlas-local-only",
+        "POSTGRES_USER": "rideatlas"
+      },
+      "data": "/var/lib/postgresql/data",
+      "expose": {
+        "DATABASE_URL": "postgresql://rideatlas:rideatlas-local-only@{host}:{port}/rideatlas"
+      }
+    }
+  }
+}
