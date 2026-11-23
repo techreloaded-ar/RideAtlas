@@ -9,6 +9,7 @@ import useTripFilters from '@/hooks/useTripFilters';
 import { Prisma, UserRole } from '@prisma/client';
 import { MediaItem } from '@/types/trip';
 import { UserPermissions } from '@/types/profile';
+import type { ReviewSummary } from '@/types/trip-community';
 
 // Tipi per i dati del viaggio (copiati dalla pagina originale)
 type TripWithRelations = Prisma.TripGetPayload<{
@@ -34,6 +35,7 @@ type TripWithProcessedData = Omit<TripWithRelations, 'price'> & {
   price: number; // Convertito da Decimal a number per serializzazione client
   processedGpxFile: unknown;
   processedMedia: MediaItem[];
+  reviewSummary?: ReviewSummary;
 };
 
 interface TripsPageClientProps {

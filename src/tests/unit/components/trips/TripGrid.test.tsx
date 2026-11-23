@@ -31,6 +31,7 @@ jest.mock('lucide-react', () => ({
   User: () => <div data-testid="user-icon" />,
   Clock: () => <div data-testid="clock-icon" />,
   Navigation: () => <div data-testid="navigation-icon" />,
+  Star: () => <span data-testid="star-icon" />,
 }));
 
 // Mock di SeasonIcon
@@ -215,6 +216,32 @@ describe('TripGrid', () => {
       expect(screen.getByText('Viaggio in Toscana')).toBeInTheDocument();
       expect(screen.getByText('Tour delle Dolomiti')).toBeInTheDocument();
       expect(screen.getByText('Costa Amalfitana')).toBeInTheDocument();
+    });
+  });
+
+  describe('Valutazione media delle recensioni', () => {
+    it('dovrebbe mostrare media e numero di recensioni in testo', () => {
+      const trips = [{ ...mockTrips[0], reviewSummary: { average: 4.5, count: 12 } }];
+      render(<TripGrid trips={trips} userRole={UserRole.Explorer} />);
+
+      const rating = screen.getByTestId('trip-rating');
+      expect(rating).toHaveTextContent('4,5');
+      expect(rating).toHaveTextContent('(12 recensioni)');
+      expect(rating).toHaveTextContent('Valutazione media 4,5 su 5');
+    });
+
+    it('dovrebbe usare il singolare con una sola recensione', () => {
+      const trips = [{ ...mockTrips[0], reviewSummary: { average: 4, count: 1 } }];
+      render(<TripGrid trips={trips} userRole={UserRole.Explorer} />);
+
+      expect(screen.getByTestId('trip-rating')).toHaveTextContent('(1 recensione)');
+    });
+
+    it('dovrebbe indicare quando il viaggio non ha recensioni', () => {
+      const trips = [{ ...mockTrips[0], reviewSummary: { average: null, count: 0 } }];
+      render(<TripGrid trips={trips} userRole={UserRole.Explorer} />);
+
+      expect(screen.getByText('Nessuna recensione ancora')).toBeInTheDocument();
     });
   });
 });

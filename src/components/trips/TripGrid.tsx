@@ -7,6 +7,8 @@ import { SeasonIcon } from '@/components/ui/SeasonIcon';
 import { getTripStatusColor, getTripStatusLabel, shouldShowStatusBadge } from '@/lib/utils/tripStatusUtils';
 import { Prisma, UserRole } from '@prisma/client';
 import { UserPermissions } from '@/types/profile';
+import { formatAverageRating, ReviewSummary } from '@/types/trip-community';
+import { StarDisplay } from '@/components/trips/community/StarRating';
 
 // Tipi per i dati del viaggio (copiati dalla pagina originale)
 type TripWithRelations = Prisma.TripGetPayload<{
@@ -32,6 +34,7 @@ type TripWithProcessedData = Omit<TripWithRelations, 'price'> & {
   price: number; // Convertito da Decimal a number per serializzazione client
   processedGpxFile: unknown;
   processedMedia: MediaItem[];
+  reviewSummary?: ReviewSummary;
 };
 
 interface TripGridProps {
@@ -198,6 +201,24 @@ const TripGrid: React.FC<TripGridProps> = React.memo(({ trips, userRole }) => {
               <Clock className="w-4 h-4" />
               <span>{trip.duration_days} giorni</span>
             </div>
+
+            {/* Valutazione media delle recensioni */}
+            {trip.reviewSummary && (
+              <div className="flex items-center gap-2 text-sm mb-4" data-testid="trip-rating">
+                {trip.reviewSummary.count > 0 && trip.reviewSummary.average !== null ? (
+                  <>
+                    <StarDisplay value={trip.reviewSummary.average} />
+                    <span className="font-semibold text-gray-900">{formatAverageRating(trip.reviewSummary.average)}</span>
+                    <span className="text-gray-500">
+                      ({trip.reviewSummary.count} {trip.reviewSummary.count === 1 ? 'recensione' : 'recensioni'})
+                    </span>
+                    <span className="sr-only">Valutazione media {formatAverageRating(trip.reviewSummary.average)} su 5</span>
+                  </>
+                ) : (
+                  <span className="text-gray-500">Nessuna recensione ancora</span>
+                )}
+              </div>
+            )}
 
             {/* Tema */}
             <div className="mb-4">

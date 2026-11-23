@@ -4,6 +4,7 @@ import { castToGpxFile, castToMediaItems } from '@/types/trip';
 import { Prisma } from '@prisma/client';
 import TripsPageClient from './TripsPageClient';
 import { auth } from '@/auth';
+import { getReviewSummaries } from '@/lib/trips/trip-community';
 
 
 // Force dynamic rendering
@@ -72,13 +73,17 @@ export default async function TripsPage() {
     ]
   });
 
+  // Media e numero di recensioni per ogni viaggio del catalogo
+  const reviewSummaries = await getReviewSummaries(trips.map(trip => trip.id));
+
   // Converte i GPX per ogni viaggio per uso interno e serializza i Decimal per il client
   const tripsWithProcessedData = trips.map(trip => ({
     ...trip,
     // Converte Decimal in number per la serializzazione client-side
     price: trip.price ? Number(trip.price) : 0,
     processedGpxFile: castToGpxFile(trip.gpxFile),
-    processedMedia: castToMediaItems(trip.media || [])
+    processedMedia: castToMediaItems(trip.media || []),
+    reviewSummary: reviewSummaries[trip.id] ?? { average: null, count: 0 }
   }));
 
   return (

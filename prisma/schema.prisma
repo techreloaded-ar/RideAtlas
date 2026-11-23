@@ -31,6 +31,8 @@ model User {
   purchases     TripPurchase[]
   batchJobs     BatchJob[]
   emailChangeTokens EmailChangeToken[]
+  tripReviews   TripReview[]
+  tripComments  TripComment[]
 
   @@map("users")
 }
@@ -126,6 +128,8 @@ model Trip {
   user               User              @relation(fields: [user_id], references: [id])
   stages             Stage[]           // Relazione con le tappe
   purchases          TripPurchase[]
+  reviews            TripReview[]
+  comments           TripComment[]
 
   @@map("trips")
 }
@@ -184,6 +188,40 @@ model TripPurchase {
   @@index([userId, status])
   @@index([tripId, status])
   @@map("trip_purchases")
+}
+
+// Recensione di un viaggio: solo chi ha un acquisto COMPLETED può crearla o modificarla.
+// Una sola recensione per persona per viaggio.
+model TripReview {
+  id        String   @id @default(cuid())
+  tripId    String
+  userId    String
+  rating    Int      // Voto da 1 a 5 (validato a livello applicazione)
+  content   String?  @db.Text // Testo facoltativo (max 1000 caratteri)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  trip      Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([tripId, userId])
+  @@index([tripId, createdAt])
+  @@map("trip_reviews")
+}
+
+// Commento di discussione aperta su un viaggio pubblicato.
+model TripComment {
+  id        String   @id @default(cuid())
+  tripId    String
+  userId    String
+  content   String   @db.Text // Testo obbligatorio (max 1000 caratteri)
+  createdAt DateTime @default(now())
+
+  trip      Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([tripId, createdAt])
+  @@map("trip_comments")
 }
 
 model TripPurchaseTransaction {

@@ -77,7 +77,7 @@ describe('Email notifications for role changes', () => {
     const data = await response.json()
 
     expect(response.status).toBe(200)
-    expect(data.message).toBe('Ruolo utente aggiornato con successo')
+    expect(data.message).toBe('Dati utente aggiornati con successo')
     
     // Verifica che l'email sia stata inviata
     expect(mockSendRoleChangeNotificationEmail).toHaveBeenCalledWith(
@@ -126,7 +126,7 @@ describe('Email notifications for role changes', () => {
 
     // L'operazione dovrebbe comunque riuscire
     expect(response.status).toBe(200)
-    expect(data.message).toBe('Ruolo utente aggiornato con successo')
+    expect(data.message).toBe('Dati utente aggiornati con successo')
     expect(mockSendRoleChangeNotificationEmail).toHaveBeenCalled()
   })
 })

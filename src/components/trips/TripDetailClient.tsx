@@ -9,6 +9,7 @@ import StageTimeline from '@/components/stages/StageTimeline'
 import AccessGate from '@/components/auth/AccessGate'
 import { PublishTripButton } from '@/components/trips/PublishTripButton'
 import { TripValidationWarning } from '@/components/trips/TripValidationWarning'
+import { TripCommunitySection } from '@/components/trips/community/TripCommunitySection'
 import { GpxFile, RecommendedSeason } from '@/types/trip'
 
 interface MediaItem {
@@ -43,6 +44,7 @@ interface TripStage {
 interface TripData {
   id: string
   title: string
+  slug: string
   summary: string
   destination: string
   duration_days: number
@@ -217,6 +219,11 @@ export function TripDetailClient({
             />
           </AccessGate>
         </div>
+      )}
+
+      {/* Recensioni e commenti - solo per viaggi pubblicati */}
+      {trip.status === 'Pubblicato' && (
+        <TripCommunitySection tripId={trip.id} tripSlug={trip.slug} />
       )}
     </div>
   )
