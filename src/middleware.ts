@@ -21,6 +21,7 @@ export default auth((req) => {
     nextUrl.pathname.match(/^\/api\/trips\/[^\/]+\/access$/) ||  // /api/trips/{id}/access
     nextUrl.pathname.match(/^\/api\/trips\/[^\/]+\/purchase$/) ||  // /api/trips/{id}/purchase
     nextUrl.pathname.match(/^\/api\/trips\/[^\/]+\/gpx$/) ||  // /api/trips/{id}/gpx
+    nextUrl.pathname.match(/^\/api\/trips\/[^\/]+\/(reviews|comments)(\/[^\/]+)?$/) ||  // recensioni e commenti: lettura pubblica, permessi verificati nella route
     nextUrl.pathname.startsWith('/api/payments/') ||
     nextUrl.pathname.startsWith('/api/user/purchases')
   )

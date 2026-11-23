@@ -371,6 +371,39 @@ describe('Middleware Authorization', () => {
     })
   })
 
+  describe('Recensioni e commenti dei viaggi', () => {
+    const urls = [
+      'http://localhost/api/trips/trip-1/reviews',
+      'http://localhost/api/trips/trip-1/reviews/review-1',
+      'http://localhost/api/trips/trip-1/comments',
+      'http://localhost/api/trips/trip-1/comments?cursor=c-1',
+      'http://localhost/api/trips/trip-1/comments/comment-1',
+    ]
+
+    it.each(urls)('non reindirizza utenti non autenticati: %s', (url) => {
+      testMiddleware(createMockRequest(url))
+
+      expect(mockRedirect).not.toHaveBeenCalled()
+      expect(mockNext).toHaveBeenCalled()
+    })
+
+    it.each(urls)('non blocca gli Explorer: %s', (url) => {
+      testMiddleware(createMockRequest(url, { user: { id: 'explorer-1', role: UserRole.Explorer } }))
+
+      expect(mockRedirect).not.toHaveBeenCalled()
+      expect(mockNext).toHaveBeenCalled()
+    })
+
+    it('continua a proteggere le altre API dei viaggi', () => {
+      testMiddleware(createMockRequest('http://localhost/api/trips/trip-1/reviews-export'))
+      expect(mockRedirect).toHaveBeenCalledWith(new URL('/auth/signin', 'http://localhost/api/trips/trip-1/reviews-export'))
+
+      mockRedirect.mockClear()
+      testMiddleware(createMockRequest('http://localhost/api/trips/trip-1/comments/c-1/extra', { user: { id: 'explorer-1', role: UserRole.Explorer } }))
+      expect(mockRedirect).toHaveBeenCalled()
+    })
+  })
+
   describe('Performance and Security', () => {
     it('should not make unnecessary redirects for allowed routes', () => {
       const request = createMockRequest('http://localhost/dashboard', {
