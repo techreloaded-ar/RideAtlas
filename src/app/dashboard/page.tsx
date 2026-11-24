@@ -8,7 +8,7 @@ import { useEffect, useState, Suspense } from 'react';
 import UserTrips from '@/components/trips/UserTrips';
 import PurchasedTrips from '@/components/trips/PurchasedTrips';
 import MyGuidedTripRegistrations from '@/components/guided-trips/MyGuidedTripRegistrations';
-import Link from 'next/link';
+import OrganizedGuidedTrips from '@/components/guided-trips/OrganizedGuidedTrips';
 import ChangePasswordForm from '@/components/profile/ChangePasswordForm';
 
 function DashboardContent() {
@@ -114,20 +114,7 @@ function DashboardContent() {
 
               {/* Viaggi guidati organizzati - Solo per Ranger e Sentinel */}
               {UserPermissions.canCreateTrips(userRole) && (
-                <section className="bg-white border border-gray-200 rounded-lg p-6 flex flex-wrap items-center justify-between gap-4" data-testid="organizer-guided-trips-entry">
-                  <div>
-                    <h2 className="text-lg font-semibold text-gray-900">Viaggi guidati che organizzi</h2>
-                    <p className="text-sm text-gray-600">Pubblica viaggi a numero chiuso, gestisci date, posti e partecipanti.</p>
-                  </div>
-                  <div className="flex gap-2">
-                    <Link href="/dashboard/guided-trips" className="px-4 py-2 rounded-lg border border-gray-300 text-gray-800 font-medium hover:bg-gray-50">
-                      I miei viaggi guidati
-                    </Link>
-                    <Link href="/dashboard/guided-trips/new" className="px-4 py-2 rounded-lg bg-primary-600 hover:bg-primary-700 text-white font-medium">
-                      Nuovo viaggio guidato
-                    </Link>
-                  </div>
-                </section>
+                <OrganizedGuidedTrips />
               )}
 
               {/* Iscrizioni ai viaggi guidati - Per tutti gli utenti */}

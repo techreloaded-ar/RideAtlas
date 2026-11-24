@@ -36,7 +36,7 @@ function withRelations(trip: Row) {
   return { ...trip, organizer, registrations }
 }
 
-const mockPrismaClient = {
+const mockPrismaClient: Record<string, unknown> = {
   guidedTrip: {
     findUnique: jest.fn(async ({ where }: { where: Record<string, unknown> }) => {
       const trip = db.guidedTrips.find(t => matches(t, where))
@@ -83,8 +83,8 @@ const mockPrismaClient = {
     }),
   },
   $queryRaw: jest.fn(async () => []),
-  $transaction: jest.fn(async (fn: (tx: unknown) => Promise<unknown>) => {
-    const run = transactionQueue.then(() => fn(mockPrismaClient))
+  $transaction: jest.fn(async (fn: (tx: unknown) => Promise<unknown>): Promise<unknown> => {
+    const run: Promise<unknown> = transactionQueue.then(() => fn(mockPrismaClient))
     transactionQueue = run.catch(() => undefined)
     return run
   }),

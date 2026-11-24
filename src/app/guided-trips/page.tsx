@@ -1,5 +1,7 @@
 import Link from 'next/link'
 import { CalendarDays, MapPin, Users } from 'lucide-react'
+import { currentActingUser } from '@/lib/guided-trips/guided-trip-api'
+import { UserPermissions } from '@/types/profile'
 import { GuidedTripService } from '@/lib/guided-trips/guided-trip-service'
 import { formatCalendarRange } from '@/lib/guided-trips/guided-trip-rules'
 import { formatEuro, seatsLeftLabel } from '@/components/guided-trips/guided-trip-format'
@@ -12,7 +14,9 @@ export const metadata = {
 }
 
 export default async function GuidedTripsPage() {
-  const guidedTrips = await GuidedTripService.listPublishedUpcoming()
+  const [guidedTrips, viewer] = await Promise.all([GuidedTripService.listPublishedUpcoming(), currentActingUser()])
+  // Stessa regola della pagina Viaggi: l'invito a creare lo vede chi può organizzare.
+  const canOrganize = viewer ? UserPermissions.canCreateTrips(viewer.role) : false
 
   return (
     <main className="min-h-screen bg-gray-50">
@@ -27,8 +31,22 @@ export default async function GuidedTripsPage() {
 
       <section className="container mx-auto px-4 py-10">
         {guidedTrips.length === 0 ? (
-          <div className="bg-white border border-gray-200 rounded-xl p-10 text-center text-gray-600" data-testid="guided-trips-empty">
-            Al momento non ci sono viaggi guidati in programma. Torna presto!
+          <div className="text-center py-20" data-testid="guided-trips-empty">
+            <div className="max-w-md mx-auto">
+              <div className="mb-8">
+                <Users className="w-24 h-24 text-gray-300 mx-auto mb-4" aria-hidden="true" />
+                <h2 className="text-2xl font-bold text-gray-600 mb-2">Nessun viaggio guidato in programma</h2>
+                <p className="text-gray-500">
+                  Al momento non ci sono viaggi guidati con iscrizioni aperte.{canOrganize && ' Organizza tu il primo!'}
+                </p>
+              </div>
+              {canOrganize && (
+                <Link href="/dashboard/guided-trips/new" className="btn-primary inline-flex items-center gap-2">
+                  <Users className="w-5 h-5" aria-hidden="true" />
+                  Organizza il primo viaggio guidato
+                </Link>
+              )}
+            </div>
           </div>
         ) : (
           <ul className="grid gap-6 md:grid-cols-2 lg:grid-cols-3" data-testid="guided-trips-list">
@@ -73,6 +91,21 @@ export default async function GuidedTripsPage() {
               )
             })}
           </ul>
+        )}
+
+        {guidedTrips.length > 0 && canOrganize && (
+          <div className="mt-16 text-center" data-testid="guided-trips-organize-cta">
+            <div className="bg-white rounded-xl shadow-lg p-8 max-w-2xl mx-auto">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">Vuoi guidare un gruppo?</h2>
+              <p className="text-gray-600 mb-6">
+                Organizza un viaggio guidato a numero chiuso: scegli date, posti e prezzo e accompagna altri motociclisti
+              </p>
+              <Link href="/dashboard/guided-trips/new" className="btn-primary inline-flex items-center gap-2">
+                <Users className="w-5 h-5" aria-hidden="true" />
+                Organizza un viaggio guidato
+              </Link>
+            </div>
+          </div>
         )}
       </section>
     </main>
