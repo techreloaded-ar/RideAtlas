@@ -6,6 +6,7 @@ import {
   DEMO_TRIPS,
   DEMO_USERS,
 } from '../../../../prisma/demo-data'
+import { stageSchema, tripFormSchema } from '@/schemas/trip'
 
 const LOCAL_URL = 'postgresql://rideatlas:rideatlas-local-only@127.0.0.1:5432/rideatlas'
 
@@ -84,6 +85,48 @@ describe('seedDemoData', () => {
     for (const p of DEMO_PURCHASES) {
       expect(DEMO_TRIPS.find(t => t.id === p.trip)?.status).toBe('Pubblicato')
     }
+  })
+
+  it('ha media validi per lo schema dell\'app, così i viaggi demo restano modificabili', () => {
+    for (const trip of DEMO_TRIPS) {
+      expect(tripFormSchema.shape.media.safeParse(trip.media ?? []).success).toBe(true)
+      for (const stage of trip.stages) {
+        expect(stageSchema.shape.media.safeParse(stage.media ?? []).success).toBe(true)
+      }
+    }
+  })
+
+  it('usa solo immagini di images.unsplash.com, con id unici in ogni viaggio', () => {
+    for (const trip of DEMO_TRIPS) {
+      const media = [...(trip.media ?? []), ...trip.stages.flatMap(s => s.media ?? [])]
+      for (const item of media) {
+        expect(item.type).toBe('image')
+        expect(new URL(item.url).hostname).toBe('images.unsplash.com')
+        expect(item.caption).not.toBe('')
+      }
+      expect(new Set(media.map(m => m.id)).size).toBe(media.length)
+    }
+  })
+
+  it('ha viaggi pubblicati con immagini e uno senza, per il caso vuoto', () => {
+    const published = DEMO_TRIPS.filter(t => t.status === 'Pubblicato')
+    const hasImages = (t: (typeof DEMO_TRIPS)[number]) => (t.media?.length ?? 0) > 0 || t.stages.some(s => (s.media?.length ?? 0) > 0)
+    expect(published.some(hasImages)).toBe(true)
+    expect(published.some(t => !hasImages(t))).toBe(true)
+  })
+
+  it('salva i media del viaggio e delle tappe', async () => {
+    const f = fakePrisma()
+    await seedDemoData(f.prisma, hash)
+
+    const demo = DEMO_TRIPS.find(t => t.id === 'demo-trip-dolomiti')!
+    const dolomiti = f.tables.trip.find(t => t.id === demo.id)!
+    expect(dolomiti.media).toEqual(demo.media)
+    const stages = (dolomiti.stages as { create: { media?: unknown }[] }).create
+    expect(stages.map(s => s.media)).toEqual(demo.stages.map(s => s.media))
+
+    const senzaMedia = DEMO_TRIPS.find(t => !t.media)!
+    expect(f.tables.trip.find(t => t.id === senzaMedia.id)!.media).toEqual([])
   })
 
   it('una seconda esecuzione non duplica e non modifica nulla', async () => {

@@ -56,11 +56,32 @@ export interface DemoUser {
   bikeDescription?: string
 }
 
+// Alias e non interface: Prisma accetta nei campi Json solo tipi con index signature implicita.
+export type DemoMedia = {
+  id: string
+  type: 'image'
+  url: string
+  caption: string
+}
+
+// Le foto demo sono hotlink a Unsplash (licenza Unsplash, uso libero): `images.unsplash.com`
+// è già in `images.remotePatterns` e gli URL assoluti superano la validazione Zod dei media.
+// Ritaglio 3:2 fisso, così anche le foto verticali rendono bene come copertina.
+function unsplashImage(photoId: string, caption: string): DemoMedia {
+  return {
+    id: `demo-media-${photoId}`,
+    type: 'image',
+    url: `https://images.unsplash.com/photo-${photoId}?w=1600&h=1067&fit=crop&q=80`,
+    caption,
+  }
+}
+
 export interface DemoStage {
   title: string
   description: string
   routeType: string
   duration: string
+  media?: DemoMedia[]
 }
 
 export interface DemoTrip {
@@ -80,6 +101,7 @@ export interface DemoTrip {
   price: string
   travelDate?: string
   insights?: string
+  media?: DemoMedia[]
   stages: DemoStage[]
 }
 
@@ -131,11 +153,33 @@ export const DEMO_TRIPS: DemoTrip[] = [
     price: '12.00',
     travelDate: '2025-07-12',
     insights: 'Partire presto la mattina: dalle 10 i passi si riempiono di traffico turistico.',
+    media: [
+      unsplashImage('1753978103194-56aebd721785', 'Tornanti tra le cime dolomitiche'),
+      unsplashImage('1629014568959-f8260cbe6cd8', 'Boschi di abeti ai piedi delle pareti rocciose'),
+    ],
     stages: [
       { title: 'Bolzano – Canazei', description: 'Salita al Passo Costalunga con vista sul Catinaccio.', routeType: 'Strada di montagna', duration: '3 ore' },
-      { title: 'Giro dei quattro passi', description: 'Sella, Gardena, Campolongo e Pordoi in un unico anello.', routeType: 'Passi alpini', duration: '5 ore' },
-      { title: 'Canazei – Cortina', description: 'Passo Giau e Falzarego, pranzo al rifugio.', routeType: 'Passi alpini', duration: '4 ore' },
-      { title: 'Cortina – Tre Cime – Dobbiaco', description: 'Giro panoramico intorno alle Tre Cime di Lavaredo.', routeType: 'Strada panoramica', duration: '3 ore' },
+      {
+        title: 'Giro dei quattro passi',
+        description: 'Sella, Gardena, Campolongo e Pordoi in un unico anello.',
+        routeType: 'Passi alpini',
+        duration: '5 ore',
+        media: [unsplashImage('1753978103194-1e02e091039a', 'In salita verso il passo')],
+      },
+      {
+        title: 'Canazei – Cortina',
+        description: 'Passo Giau e Falzarego, pranzo al rifugio.',
+        routeType: 'Passi alpini',
+        duration: '4 ore',
+        media: [unsplashImage('1723808877139-da1dbc2647f3', 'La strada che sale al Passo Giau')],
+      },
+      {
+        title: 'Cortina – Tre Cime – Dobbiaco',
+        description: 'Giro panoramico intorno alle Tre Cime di Lavaredo.',
+        routeType: 'Strada panoramica',
+        duration: '3 ore',
+        media: [unsplashImage('1597221863553-d5fc0a67679a', 'Le pareti delle Tre Cime di Lavaredo')],
+      },
     ],
   },
   {
@@ -154,9 +198,19 @@ export const DEMO_TRIPS: DemoTrip[] = [
     tags: ['costa', 'mare', 'borghi'],
     price: '9.00',
     travelDate: '2025-05-03',
+    media: [
+      unsplashImage('1612698093158-e07ac200d44e', 'Case colorate a picco sul mare di Amalfi'),
+      unsplashImage('1561956021-947f09ae0101', 'Positano vista dalla statale 163'),
+    ],
     stages: [
       { title: 'Salerno – Amalfi', description: 'Vietri sul Mare, Cetara e Maiori lungo la costa.', routeType: 'Strada costiera', duration: '2 ore' },
-      { title: 'Amalfi – Ravello – Positano', description: 'Salita a Ravello e discesa verso Positano.', routeType: 'Strada costiera', duration: '3 ore' },
+      {
+        title: 'Amalfi – Ravello – Positano',
+        description: 'Salita a Ravello e discesa verso Positano.',
+        routeType: 'Strada costiera',
+        duration: '3 ore',
+        media: [unsplashImage('1782056094486-ee96fdaff0eb', 'La costiera vista dai giardini di Ravello')],
+      },
       { title: 'Positano – Sorrento', description: 'Il Nastro Azzurro fino alla penisola sorrentina.', routeType: 'Strada panoramica', duration: '2 ore' },
     ],
   },
@@ -175,8 +229,18 @@ export const DEMO_TRIPS: DemoTrip[] = [
     characteristics: ['Strade sterrate', 'Bel paesaggio', 'Interesse gastronomico'],
     tags: ['vino', 'borghi', 'weekend'],
     price: '5.00',
+    media: [
+      unsplashImage('1518098268026-4e89f1a2cd8e', 'Strada tra i cipressi delle colline toscane'),
+      unsplashImage('1636545191544-90e0d6d1202d', 'Colline della Val d\'Orcia'),
+    ],
     stages: [
-      { title: 'Siena – Pienza', description: 'Crete senesi e Val d\'Orcia fino a Pienza.', routeType: 'Provinciale', duration: '3 ore' },
+      {
+        title: 'Siena – Pienza',
+        description: 'Crete senesi e Val d\'Orcia fino a Pienza.',
+        routeType: 'Provinciale',
+        duration: '3 ore',
+        media: [unsplashImage('1632660967293-ec569f27dfd0', 'Un vicolo fiorito di Pienza')],
+      },
       { title: 'Pienza – Greve in Chianti', description: 'Montalcino e la Chiantigiana verso nord.', routeType: 'Strade bianche e provinciali', duration: '4 ore' },
     ],
   },
@@ -196,12 +260,34 @@ export const DEMO_TRIPS: DemoTrip[] = [
     tags: ['isola', 'traghetto', 'lungo viaggio'],
     price: '19.90',
     travelDate: '2025-06-20',
+    media: [
+      unsplashImage('1688141307717-63cff4415a4f', 'Scogliere e acqua turchese sulla costa sarda'),
+      unsplashImage('1571831693821-352cc8c08241', 'Rocce bianche e macchia mediterranea'),
+    ],
     stages: [
-      { title: 'Olbia – Cala Gonone', description: 'Lungo la costa orientale fino al golfo di Orosei.', routeType: 'Statale costiera', duration: '4 ore' },
-      { title: 'Cala Gonone – Fonni', description: 'Salita nel cuore della Barbagia.', routeType: 'Strada di montagna', duration: '3 ore' },
+      {
+        title: 'Olbia – Cala Gonone',
+        description: 'Lungo la costa orientale fino al golfo di Orosei.',
+        routeType: 'Statale costiera',
+        duration: '4 ore',
+        media: [unsplashImage('1642960681498-9b80acd6a983', 'Il golfo di Orosei')],
+      },
+      {
+        title: 'Cala Gonone – Fonni',
+        description: 'Salita nel cuore della Barbagia.',
+        routeType: 'Strada di montagna',
+        duration: '3 ore',
+        media: [unsplashImage('1700572659067-89778088803c', 'Un paese della Barbagia tra le montagne')],
+      },
       { title: 'Fonni – Oristano', description: 'Altopiani e nuraghi verso la costa occidentale.', routeType: 'Provinciale', duration: '4 ore' },
       { title: 'Oristano – Teulada', description: 'Costa del Sulcis e miniere abbandonate.', routeType: 'Strada costiera', duration: '5 ore' },
-      { title: 'Teulada – Cagliari', description: 'Chia e la costa sud fino a Cagliari.', routeType: 'Strada costiera', duration: '3 ore' },
+      {
+        title: 'Teulada – Cagliari',
+        description: 'Chia e la costa sud fino a Cagliari.',
+        routeType: 'Strada costiera',
+        duration: '3 ore',
+        media: [unsplashImage('1646865043257-3767188963f1', 'Spiaggia e costa del sud dall\'alto')],
+      },
     ],
   },
   {
@@ -236,9 +322,19 @@ export const DEMO_TRIPS: DemoTrip[] = [
     characteristics: ['Bel paesaggio', 'Presenza pedaggi'],
     tags: ['laghi', 'bozza'],
     price: '5.00',
+    media: [
+      unsplashImage('1586974726316-c6302de6a160', 'Ville affacciate sul Lago di Como'),
+      unsplashImage('1664433451451-11337deef597', 'Villa del Balbianello sul Lago di Como'),
+    ],
     stages: [
       { title: 'Como – Bellagio', description: 'Lungolago occidentale fino a Bellagio.', routeType: 'Strada lacustre', duration: '2 ore' },
-      { title: 'Lecco – Iseo', description: 'Valle San Martino e discesa sul Sebino.', routeType: 'Provinciale', duration: '3 ore' },
+      {
+        title: 'Lecco – Iseo',
+        description: 'Valle San Martino e discesa sul Sebino.',
+        routeType: 'Provinciale',
+        duration: '3 ore',
+        media: [unsplashImage('1695634929711-1e37053f262a', 'Un paese sulle rive del Lago d\'Iseo')],
+      },
     ],
   },
   {
@@ -256,9 +352,19 @@ export const DEMO_TRIPS: DemoTrip[] = [
     characteristics: ['Curve strette', 'Bel paesaggio', 'Presenza pedaggi'],
     tags: ['svizzera', 'passi alpini'],
     price: '14.00',
+    media: [
+      unsplashImage('1677333434008-635e27acb4f4', 'Tornanti del Passo della Furka'),
+      unsplashImage('1690187190441-c760b2b93c3a', 'Motociclisti in sosta al passo'),
+    ],
     stages: [
       { title: 'Domodossola – Andermatt', description: 'Passo del Sempione e Passo della Novena.', routeType: 'Passi alpini', duration: '4 ore' },
-      { title: 'Anello Furka – Grimsel – Susten', description: 'I tre passi più famosi in un giorno.', routeType: 'Passi alpini', duration: '6 ore' },
+      {
+        title: 'Anello Furka – Grimsel – Susten',
+        description: 'I tre passi più famosi in un giorno.',
+        routeType: 'Passi alpini',
+        duration: '6 ore',
+        media: [unsplashImage('1577711128545-e7c9c31ad092', 'La strada del Susten tra prati e montagne')],
+      },
       { title: 'Andermatt – Lugano', description: 'San Gottardo sulla vecchia Tremola.', routeType: 'Strada storica', duration: '3 ore' },
     ],
   },
@@ -277,9 +383,16 @@ export const DEMO_TRIPS: DemoTrip[] = [
     characteristics: ['Curve strette', 'Strade sterrate'],
     tags: ['inverno', 'archiviato'],
     price: '6.00',
+    media: [unsplashImage('1588788087412-ac02f75e6d4b', 'Crinale appenninico innevato')],
     stages: [
       { title: 'Bologna – Abetone', description: 'Porrettana e salita all\'Abetone.', routeType: 'Strada di montagna', duration: '3 ore' },
-      { title: 'Abetone – Lucca', description: 'Discesa in Garfagnana fino a Lucca.', routeType: 'Provinciale', duration: '3 ore' },
+      {
+        title: 'Abetone – Lucca',
+        description: 'Discesa in Garfagnana fino a Lucca.',
+        routeType: 'Provinciale',
+        duration: '3 ore',
+        media: [unsplashImage('1707401100280-b40d51f1846a', 'Lucca con le Apuane sullo sfondo')],
+      },
     ],
   },
 ]
@@ -369,6 +482,7 @@ export async function seedDemoData(
         price: trip.price,
         status: trip.status,
         insights: trip.insights,
+        media: trip.media ?? [],
         travelDate: trip.travelDate ? new Date(trip.travelDate) : undefined,
         user: { connect: { id: authorId } },
         stages: { create: trip.stages.map((stage, orderIndex) => ({ ...stage, orderIndex })) },

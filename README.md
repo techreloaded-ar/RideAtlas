@@ -283,6 +283,11 @@ Tutti gli account usano la password `RideAtlasDemo1` (solo locale).
 
 Le email simulate non vengono inviate: il dominio `.invalid` non esiste.
 
+I viaggi demo hanno foto in galleria e su alcune tappe, tranne «Etna in giornata», che resta senza immagini
+per mostrare il caso vuoto. Le foto sono URL di `images.unsplash.com` (licenza Unsplash), quindi per vederle
+serve la connessione a internet. Dato che il seed non aggiorna i record esistenti, su un database con i viaggi
+demo creati prima dell'aggiunta delle foto queste compaiono solo dopo averlo ricreato.
+
 **Senza ARchetipo**, su un tuo PostgreSQL locale con lo schema già applicato (`npx prisma db push`):
 
 ```bash

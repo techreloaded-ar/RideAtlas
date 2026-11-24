@@ -54,3 +54,4 @@ GEMINI.md
 
 # GitHub
 .github/
+.playwright*
