@@ -89,8 +89,11 @@ describe('TripSearchBar', () => {
     render(<TripSearchBar {...defaultProps} />);
     
     const input = screen.getByRole('searchbox');
+    // Il componente applica un focus automatico 100 ms dopo il montaggio: va atteso prima
+    // di digitare, altrimenti su una macchina lenta arriva dopo Enter e rimette il focus.
+    await waitFor(() => expect(input).toHaveFocus());
     await user.type(input, 'test{Enter}');
-    
+
     // Il tasto Enter dovrebbe rimuovere il focus (blur)
     expect(input).not.toHaveFocus();
   });
@@ -102,7 +105,8 @@ describe('TripSearchBar', () => {
     render(<TripSearchBar {...defaultProps} searchTerm="test" onClear={onClear} />);
     
     const input = screen.getByRole('searchbox');
-    input.focus();
+    // Attende il focus automatico (100 ms dopo il montaggio) così non arriva dopo Escape.
+    await waitFor(() => expect(input).toHaveFocus());
     await user.keyboard('{Escape}');
     
     expect(onClear).toHaveBeenCalledTimes(1);
