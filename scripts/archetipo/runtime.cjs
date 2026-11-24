@@ -209,12 +209,29 @@ function runParallel(tasks, env) {
   })));
 }
 
+// Jest on Windows turns <rootDir> into a glob keeping a backslash before glob-special
+// characters (jest-util replacePathSepForGlob), so a checkout under a directory such as
+// ".archetipo" yields "RideAtlas\.archetipo" (an escaped dot, no separator) and testMatch
+// finds no test. In that case pass the project's own testMatch with a forward-slash root.
+async function jestTestMatchArgs() {
+  if (!isWin || !/\\[{}()+?.^$]/.test(root)) return [];
+  const loaded = require(path.join(root, 'jest.config.js'));
+  const config = typeof loaded === 'function' ? await loaded() : loaded;
+  const patterns = config.testMatch;
+  if (!Array.isArray(patterns) || !patterns.length) fail('jest.config.js declares no testMatch to normalize');
+  const globRoot = root.split(path.sep).join('/');
+  const normalized = patterns.map(p => p.split('<rootDir>').join(globRoot));
+  console.log(`Jest testMatch normalized for Windows checkout path: ${normalized.join(', ')}`);
+  return normalized.flatMap(p => ['--testMatch', p]);
+}
+
 async function quality() {
   const env = { ...projectEnv(), NODE_ENV: 'test' };
+  const testMatchArgs = await jestTestMatchArgs();
   const results = await runParallel([
     { name: 'lint', argv: [process.execPath, bin('eslint/bin/eslint.js'), 'src/'] },
     // Application type-checking is performed by the `build` check (next build); no duplicate tsc here.
-    { name: 'tests', argv: [process.execPath, bin('jest/bin/jest.js'), '--ci', '--watchAll=false', `--cacheDirectory=${path.join(stateDir, 'jest-cache')}`] },
+    { name: 'tests', argv: [process.execPath, bin('jest/bin/jest.js'), '--ci', '--watchAll=false', `--cacheDirectory=${path.join(stateDir, 'jest-cache')}`, ...testMatchArgs] },
   ], env);
   for (const r of results) {
     console.log(`\n===== ${r.name}: ${r.code === 0 ? 'PASSED' : `FAILED (exit ${r.code})`} in ${r.seconds}s =====`);

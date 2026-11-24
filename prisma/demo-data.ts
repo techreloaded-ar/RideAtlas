@@ -403,6 +403,113 @@ export const DEMO_PURCHASES: DemoPurchase[] = [
   { id: 'demo-purchase-explorer-amalfi', buyer: 'demo-user-explorer', trip: 'demo-trip-amalfi', status: 'PENDING' },
 ]
 
+type GuidedTripState = 'Bozza' | 'Pubblicato' | 'Annullato'
+type GuidedTripBookingState = 'CONFIRMED' | 'REFUND_PENDING'
+
+export interface DemoGuidedTrip {
+  id: string
+  organizer: string // id di DemoUser
+  linkedTrip?: string // id di DemoTrip (collegato solo se presente)
+  title: string
+  description: string
+  startDate: string // 'YYYY-MM-DD'
+  endDate: string
+  meetingPoint: string
+  pricePerPerson: string
+  maxParticipants: number
+  freeCancellationUntil: string
+  status: GuidedTripState
+}
+
+export interface DemoGuidedTripBooking {
+  id: string
+  participant: string // id di DemoUser
+  guidedTrip: string // id di DemoGuidedTrip
+  status: GuidedTripBookingState
+  confirmedAt: string
+}
+
+// Date fisse nel 2027: partenze future per il catalogo dimostrativo.
+export const DEMO_GUIDED_TRIPS: DemoGuidedTrip[] = [
+  {
+    id: 'demo-guided-dolomiti',
+    organizer: 'demo-user-ranger',
+    linkedTrip: 'demo-trip-dolomiti',
+    title: 'Dolomiti: i grandi passi',
+    description: 'Quattro giorni sui passi Sella, Pordoi, Giau e Falzarego in gruppo con Marco. Pernottamenti in hotel inclusi, cena del primo giorno insieme.\nLivello: intermedio. Moto propria.',
+    startDate: '2027-06-12',
+    endDate: '2027-06-15',
+    meetingPoint: 'Bolzano, piazza Walther · ore 8:30',
+    pricePerPerson: '450.00',
+    maxParticipants: 8,
+    freeCancellationUntil: '2027-05-29',
+    status: 'Pubblicato',
+  },
+  {
+    id: 'demo-guided-amalfi',
+    organizer: 'demo-user-giulia',
+    linkedTrip: 'demo-trip-amalfi',
+    title: 'Costa Amalfitana slow',
+    description: 'Tre giorni lenti tra Positano, Amalfi e Ravello, con soste nei borghi e una cena vista mare. Ritmo tranquillo, adatto anche a chi guida da poco.',
+    startDate: '2027-06-28',
+    endDate: '2027-06-30',
+    meetingPoint: 'Salerno, lungomare Trieste · ore 9:00',
+    pricePerPerson: '320.00',
+    maxParticipants: 3,
+    freeCancellationUntil: '2027-06-14',
+    status: 'Pubblicato',
+  },
+  {
+    id: 'demo-guided-sardegna',
+    organizer: 'demo-user-giulia',
+    linkedTrip: 'demo-trip-sardegna',
+    title: "Sardegna dell'interno",
+    description: 'Sei giorni dal Gennargentu al Supramonte, lontano dalle spiagge affollate. Traghetto escluso.',
+    startDate: '2027-07-05',
+    endDate: '2027-07-10',
+    meetingPoint: 'Olbia, porto Isola Bianca · ore 10:00',
+    pricePerPerson: '780.00',
+    maxParticipants: 2,
+    freeCancellationUntil: '2027-06-05',
+    status: 'Pubblicato',
+  },
+  {
+    id: 'demo-guided-appennino',
+    organizer: 'demo-user-ranger',
+    title: 'Appennino tosco-emiliano',
+    description: "Due giorni tra Abetone, passo delle Radici e Cerreto. Annullato dal Ranger: esempio per i rimborsi del Sentinel.",
+    startDate: '2027-07-19',
+    endDate: '2027-07-20',
+    meetingPoint: 'Modena, piazza Grande · ore 8:00',
+    pricePerPerson: '190.00',
+    maxParticipants: 10,
+    freeCancellationUntil: '2027-07-05',
+    status: 'Annullato',
+  },
+  {
+    id: 'demo-guided-langhe',
+    organizer: 'demo-user-ranger',
+    title: "Langhe d'autunno",
+    description: 'Un fine settimana tra vigne e noccioleti nel periodo della vendemmia. Bozza non ancora pubblicata.',
+    startDate: '2027-10-10',
+    endDate: '2027-10-11',
+    meetingPoint: 'Alba, piazza Risorgimento · ore 9:30',
+    pricePerPerson: '210.00',
+    maxParticipants: 10,
+    freeCancellationUntil: '2027-09-26',
+    status: 'Bozza',
+  },
+]
+
+export const DEMO_GUIDED_TRIP_BOOKINGS: DemoGuidedTripBooking[] = [
+  { id: 'demo-booking-paolo-dolomiti', participant: 'demo-user-paolo', guidedTrip: 'demo-guided-dolomiti', status: 'CONFIRMED', confirmedAt: '2026-11-02T10:00:00Z' },
+  { id: 'demo-booking-paolo-amalfi', participant: 'demo-user-paolo', guidedTrip: 'demo-guided-amalfi', status: 'CONFIRMED', confirmedAt: '2026-11-03T11:00:00Z' },
+  { id: 'demo-booking-sentinel-amalfi', participant: 'demo-user-sentinel', guidedTrip: 'demo-guided-amalfi', status: 'CONFIRMED', confirmedAt: '2026-11-04T12:00:00Z' },
+  { id: 'demo-booking-paolo-sardegna', participant: 'demo-user-paolo', guidedTrip: 'demo-guided-sardegna', status: 'CONFIRMED', confirmedAt: '2026-11-05T09:00:00Z' },
+  { id: 'demo-booking-sentinel-sardegna', participant: 'demo-user-sentinel', guidedTrip: 'demo-guided-sardegna', status: 'CONFIRMED', confirmedAt: '2026-11-05T09:30:00Z' },
+  { id: 'demo-booking-paolo-appennino', participant: 'demo-user-paolo', guidedTrip: 'demo-guided-appennino', status: 'REFUND_PENDING', confirmedAt: '2026-11-06T15:00:00Z' },
+]
+
 export interface DemoSeedSummary {
   created: string[]
   kept: string[]
@@ -521,6 +628,68 @@ export async function seedDemoData(
         user: { connect: { id: buyerId } },
         trip: { connect: { id: trip.id } },
         transactions: { create: transactions },
+      },
+    })
+    summary.created.push(label)
+  }
+
+  const guidedTripIds = new Set<string>()
+  for (const guidedTrip of DEMO_GUIDED_TRIPS) {
+    const label = `viaggio guidato «${guidedTrip.title}»`
+    if (await prisma.guidedTrip.findUnique({ where: { id: guidedTrip.id }, select: { id: true } })) {
+      guidedTripIds.add(guidedTrip.id)
+      summary.kept.push(label)
+      continue
+    }
+    const organizerId = userIds.get(guidedTrip.organizer)
+    if (!organizerId) {
+      summary.skipped.push(`${label}: organizzatore non disponibile`)
+      continue
+    }
+    await prisma.guidedTrip.create({
+      data: {
+        id: guidedTrip.id,
+        title: guidedTrip.title,
+        description: guidedTrip.description,
+        startDate: new Date(`${guidedTrip.startDate}T00:00:00.000Z`),
+        endDate: new Date(`${guidedTrip.endDate}T00:00:00.000Z`),
+        meetingPoint: guidedTrip.meetingPoint,
+        pricePerPerson: guidedTrip.pricePerPerson,
+        maxParticipants: guidedTrip.maxParticipants,
+        freeCancellationUntil: new Date(`${guidedTrip.freeCancellationUntil}T00:00:00.000Z`),
+        status: guidedTrip.status,
+        publishedAt: guidedTrip.status === 'Bozza' ? undefined : new Date('2026-11-01T09:00:00Z'),
+        cancelledAt: guidedTrip.status === 'Annullato' ? new Date('2026-11-20T09:00:00Z') : undefined,
+        organizer: { connect: { id: organizerId } },
+        // L'itinerario è facoltativo: se non è disponibile il viaggio guidato nasce senza collegamento.
+        linkedTrip: guidedTrip.linkedTrip && tripIds.has(guidedTrip.linkedTrip) ? { connect: { id: guidedTrip.linkedTrip } } : undefined,
+      },
+    })
+    guidedTripIds.add(guidedTrip.id)
+    summary.created.push(label)
+  }
+
+  for (const booking of DEMO_GUIDED_TRIP_BOOKINGS) {
+    const guidedTrip = DEMO_GUIDED_TRIPS.find(g => g.id === booking.guidedTrip)
+    const label = `prenotazione ${booking.status} di «${guidedTrip?.title ?? booking.guidedTrip}»`
+    if (await prisma.guidedTripBooking.findUnique({ where: { id: booking.id }, select: { id: true } })) {
+      summary.kept.push(label)
+      continue
+    }
+    const participantId = userIds.get(booking.participant)
+    if (!guidedTrip || !participantId || !guidedTripIds.has(guidedTrip.id)) {
+      summary.skipped.push(`${label}: partecipante o viaggio guidato non disponibile`)
+      continue
+    }
+    await prisma.guidedTripBooking.create({
+      data: {
+        id: booking.id,
+        amountPaid: guidedTrip.pricePerPerson,
+        status: booking.status,
+        paymentMethod: 'simulated',
+        confirmedAt: new Date(booking.confirmedAt),
+        participant: { connect: { id: participantId } },
+        guidedTrip: { connect: { id: guidedTrip.id } },
       },
     })
     summary.created.push(label)

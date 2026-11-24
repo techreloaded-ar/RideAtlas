@@ -42,6 +42,7 @@ export default function Navbar() {
   const navigation = [
     { name: 'Home', href: '/' },
     { name: 'Viaggi', href: '/trips' },
+    { name: 'Viaggi guidati', href: '/guided-trips' },
     ...(session?.user?.role === UserRole.Sentinel ? [{ name: 'Trip Builder', href: '/trip-builder' }] : []),
   ];
 
@@ -71,7 +72,7 @@ export default function Navbar() {
             </div>
             <div className="hidden sm:-my-px sm:ml-6 sm:flex sm:space-x-8">
               {navigation.map((item) => {
-                const isActive = pathname === item.href;
+                const isActive = pathname === item.href || (item.href !== '/' && pathname?.startsWith(`${item.href}/`));
                 return (
                   <Link
                     key={item.name}
@@ -222,7 +223,7 @@ export default function Navbar() {
         <div className="sm:hidden" id="mobile-menu">
           <div className="space-y-1 pt-2 pb-3">
             {navigation.map((item) => {
-              const isActive = pathname === item.href;
+              const isActive = pathname === item.href || (item.href !== '/' && pathname?.startsWith(`${item.href}/`));
               return (
                 <Link
                   key={item.name}

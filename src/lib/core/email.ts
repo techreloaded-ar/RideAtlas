@@ -339,3 +339,74 @@ Ricevuto il ${new Date().toLocaleString('it-IT')}
     return { success: false, error: errorMessage };
   }
 }
+
+// ---------- Viaggi guidati ----------
+
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function formatEmailDay(day: Date): string {
+  return new Intl.DateTimeFormat('it-IT', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }).format(day);
+}
+
+function formatEmailEuro(amount: number): string {
+  return new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR' }).format(amount);
+}
+
+export async function sendGuidedTripBookingConfirmationEmail(params: {
+  email: string;
+  participantName: string | null;
+  guidedTripId: string;
+  title: string;
+  startDate: Date;
+  meetingPoint: string;
+  freeCancellationUntil: Date;
+  amountPaid: number;
+}): Promise<EmailResult> {
+  const templateData: EmailTemplateData = {
+    title: 'Posto prenotato!',
+    welcomeText: `Ciao ${escapeHtml(params.participantName || '')},\n\nil tuo posto per «${escapeHtml(params.title)}» è confermato. Hai pagato ${formatEmailEuro(params.amountPaid)}.\n\nPartenza: ${formatEmailDay(params.startDate)}\nRitrovo: ${escapeHtml(params.meetingPoint)}`,
+    buttonText: 'Vedi il viaggio',
+    buttonUrl: `${process.env.NEXTAUTH_URL}/guided-trips/${params.guidedTripId}`,
+    footerText: `Puoi disdire gratuitamente fino al ${formatEmailDay(params.freeCancellationUntil)}: riceverai il rimborso in automatico. Dopo questa data la prenotazione non è rimborsabile, salvo annullamento del viaggio.`,
+  };
+  return sendTemplatedEmail(params.email, `Prenotazione confermata: ${params.title} - RideAtlas`, templateData, 'Email di conferma prenotazione');
+}
+
+export async function sendGuidedTripBookingCancelledEmail(params: {
+  email: string;
+  participantName: string | null;
+  title: string;
+  amount: number;
+  refunded: boolean;
+}): Promise<EmailResult> {
+  const templateData: EmailTemplateData = {
+    title: 'Disdetta registrata',
+    welcomeText: `Ciao ${escapeHtml(params.participantName || '')},\n\nabbiamo registrato la disdetta della tua prenotazione per «${escapeHtml(params.title)}».\n\n${params.refunded ? `Il rimborso di ${formatEmailEuro(params.amount)} è stato avviato sul metodo di pagamento usato.` : 'Il rimborso automatico non è riuscito: lo verificherà un amministratore e ti ricontatteremo.'}`,
+    buttonText: 'Le mie prenotazioni',
+    buttonUrl: `${process.env.NEXTAUTH_URL}/dashboard`,
+    footerText: 'Grazie per averci avvisato per tempo.',
+  };
+  return sendTemplatedEmail(params.email, `Disdetta registrata: ${params.title} - RideAtlas`, templateData, 'Email di disdetta prenotazione');
+}
+
+export async function sendGuidedTripCancelledByOrganizerEmail(params: {
+  email: string;
+  participantName: string | null;
+  title: string;
+}): Promise<EmailResult> {
+  const templateData: EmailTemplateData = {
+    title: 'Viaggio annullato',
+    welcomeText: `Ciao ${escapeHtml(params.participantName || '')},\n\nci dispiace: il Ranger ha annullato il viaggio guidato «${escapeHtml(params.title)}».\n\nRiceverai il rimborso completo dell'importo pagato: lo esegue il nostro staff nei prossimi giorni.`,
+    buttonText: 'Le mie prenotazioni',
+    buttonUrl: `${process.env.NEXTAUTH_URL}/dashboard`,
+    footerText: 'Per qualsiasi domanda puoi scriverci dalla pagina Contatti.',
+  };
+  return sendTemplatedEmail(params.email, `Viaggio annullato: ${params.title} - RideAtlas`, templateData, 'Email di annullamento viaggio guidato');
+}

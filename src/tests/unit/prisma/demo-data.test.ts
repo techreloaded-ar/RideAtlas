@@ -2,6 +2,8 @@ import type { PrismaClient } from '@prisma/client'
 import {
   assertDemoSeedAllowed,
   seedDemoData,
+  DEMO_GUIDED_TRIP_BOOKINGS,
+  DEMO_GUIDED_TRIPS,
   DEMO_PURCHASES,
   DEMO_TRIPS,
   DEMO_USERS,
@@ -37,7 +39,7 @@ type Row = Record<string, unknown> & { id: string }
 
 // Client finto con sole letture e creazioni: qualsiasi update/upsert/delete fallirebbe.
 function fakePrisma() {
-  const tables = { user: [] as Row[], trip: [] as Row[], tripPurchase: [] as Row[] }
+  const tables = { user: [] as Row[], trip: [] as Row[], tripPurchase: [] as Row[], guidedTrip: [] as Row[], guidedTripBooking: [] as Row[] }
   const model = (rows: Row[]) => ({
     findUnique: jest.fn(async ({ where }: { where: Record<string, unknown> }) => {
       const [key, value] = Object.entries(where)[0]
@@ -48,7 +50,13 @@ function fakePrisma() {
       return data
     }),
   })
-  const client = { user: model(tables.user), trip: model(tables.trip), tripPurchase: model(tables.tripPurchase) }
+  const client = {
+    user: model(tables.user),
+    trip: model(tables.trip),
+    tripPurchase: model(tables.tripPurchase),
+    guidedTrip: model(tables.guidedTrip),
+    guidedTripBooking: model(tables.guidedTripBooking),
+  }
   return { tables, client, prisma: client as unknown as PrismaClient }
 }
 
@@ -67,6 +75,8 @@ describe('seedDemoData', () => {
     expect(tables.user.map(u => u.email)).toEqual(DEMO_USERS.map(u => u.email))
     expect(tables.trip.map(t => t.id)).toEqual(DEMO_TRIPS.map(t => t.id))
     expect(tables.tripPurchase.map(p => p.id)).toEqual(DEMO_PURCHASES.map(p => p.id))
+    expect(tables.guidedTrip.map(g => g.id)).toEqual(DEMO_GUIDED_TRIPS.map(g => g.id))
+    expect(tables.guidedTripBooking.map(b => b.id)).toEqual(DEMO_GUIDED_TRIP_BOOKINGS.map(b => b.id))
     expect(tables.user.every(u => u.password === 'hashed' && u.emailVerified instanceof Date)).toBe(true)
     expect(hash).toHaveBeenCalledTimes(1)
 
@@ -167,5 +177,35 @@ describe('seedDemoData', () => {
     expect(f.tables.trip.find(t => t.slug === 'demo-dolomiti-in-4-giorni')).toEqual({ id: 'real-trip', slug: 'demo-dolomiti-in-4-giorni', title: 'Viaggio reale' })
     expect(f.tables.tripPurchase.some(p => p.id === 'demo-purchase-explorer-dolomiti')).toBe(false)
     expect(summary.skipped).toHaveLength(2)
+  })
+
+  it('crea viaggi guidati che coprono posti liberi, ultimi posti, completo, annullato e bozza', async () => {
+    const f = fakePrisma()
+    await seedDemoData(f.prisma, hash)
+
+    expect(new Set(DEMO_GUIDED_TRIPS.map(g => g.status))).toEqual(new Set(['Pubblicato', 'Annullato', 'Bozza']))
+    const confirmedSeats = (id: string) => DEMO_GUIDED_TRIP_BOOKINGS.filter(b => b.guidedTrip === id && b.status === 'CONFIRMED').length
+    const sardegna = DEMO_GUIDED_TRIPS.find(g => g.id === 'demo-guided-sardegna')!
+    expect(confirmedSeats(sardegna.id)).toBe(sardegna.maxParticipants)
+    const amalfi = DEMO_GUIDED_TRIPS.find(g => g.id === 'demo-guided-amalfi')!
+    expect(amalfi.maxParticipants - confirmedSeats(amalfi.id)).toBe(1)
+    // L'Explorer demo resta senza prenotazioni, così può provare il flusso completo.
+    expect(DEMO_GUIDED_TRIP_BOOKINGS.some(b => b.participant === 'demo-user-explorer')).toBe(false)
+    for (const guidedTrip of DEMO_GUIDED_TRIPS) {
+      expect(guidedTrip.freeCancellationUntil <= guidedTrip.startDate).toBe(true)
+      expect(guidedTrip.endDate >= guidedTrip.startDate).toBe(true)
+    }
+    const dolomiti = f.tables.guidedTrip.find(g => g.id === 'demo-guided-dolomiti')!
+    expect(dolomiti.linkedTrip).toEqual({ connect: { id: 'demo-trip-dolomiti' } })
+  })
+
+  it("crea il viaggio guidato senza itinerario se l'itinerario demo non è disponibile", async () => {
+    const f = fakePrisma()
+    f.tables.trip.push({ id: 'real-trip', slug: 'demo-dolomiti-in-4-giorni', title: 'Viaggio reale' })
+
+    await seedDemoData(f.prisma, hash)
+
+    const dolomiti = f.tables.guidedTrip.find(g => g.id === 'demo-guided-dolomiti')!
+    expect(dolomiti.linkedTrip).toBeUndefined()
   })
 })

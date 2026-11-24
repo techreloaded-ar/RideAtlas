@@ -3,6 +3,8 @@ import { StripeService } from '@/lib/payment/stripeService';
 import { PurchaseService } from '@/lib/payment/purchaseService';
 import { STRIPE_WEBHOOK_EVENTS } from '@/lib/payment/stripe-server';
 import Stripe from 'stripe';
+import { confirmGuidedTripBookingPayment } from '@/lib/guided-trips/guidedTripService';
+import { notifyBookingConfirmed } from '@/lib/guided-trips/guidedTripApi';
 
 export const dynamic = 'force-dynamic';
 
@@ -54,15 +56,26 @@ export async function POST(request: NextRequest) {
     let result;
 
     switch (event.type) {
-      case STRIPE_WEBHOOK_EVENTS.PAYMENT_INTENT_SUCCEEDED:
-        result = await handlePaymentIntentSucceeded(event.data.object as Stripe.PaymentIntent);
+      case STRIPE_WEBHOOK_EVENTS.PAYMENT_INTENT_SUCCEEDED: {
+        const succeededIntent = event.data.object as Stripe.PaymentIntent;
+        result = succeededIntent.metadata?.guidedTripBookingId
+          ? await handleGuidedTripPaymentSucceeded(succeededIntent.metadata.guidedTripBookingId)
+          : await handlePaymentIntentSucceeded(succeededIntent);
         break;
+      }
       
       case STRIPE_WEBHOOK_EVENTS.PAYMENT_INTENT_PAYMENT_FAILED:
+        if ((event.data.object as Stripe.PaymentIntent).metadata?.guidedTripBookingId) {
+          // Il posto trattenuto scade da solo: l'utente può riprovare a pagare entro il tempo previsto.
+          return NextResponse.json({ received: true, status: 'ignored' });
+        }
         result = await handlePaymentIntentFailed(event.data.object as Stripe.PaymentIntent);
         break;
       
       case STRIPE_WEBHOOK_EVENTS.PAYMENT_INTENT_CANCELED:
+        if ((event.data.object as Stripe.PaymentIntent).metadata?.guidedTripBookingId) {
+          return NextResponse.json({ received: true, status: 'ignored' });
+        }
         result = await handlePaymentIntentCanceled(event.data.object as Stripe.PaymentIntent);
         break;
       
@@ -90,6 +103,17 @@ export async function POST(request: NextRequest) {
       { error: 'Errore interno del server' },
       { status: 500 }
     );
+  }
+}
+
+async function handleGuidedTripPaymentSucceeded(guidedTripBookingId: string) {
+  try {
+    const outcome = await confirmGuidedTripBookingPayment(guidedTripBookingId);
+    await notifyBookingConfirmed(outcome);
+    return { success: true };
+  } catch (error) {
+    console.error('❌ [STRIPE WEBHOOK] Conferma prenotazione viaggio guidato non riuscita:', error);
+    return { success: false, error: error instanceof Error ? error.message : 'Errore sconosciuto' };
   }
 }
 

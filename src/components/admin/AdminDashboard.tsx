@@ -1,12 +1,13 @@
 'use client'
 
 import { useState } from 'react'
-import { Users, Navigation, Settings, CreditCard } from 'lucide-react'
+import { Users, Navigation, Settings, CreditCard, Flag } from 'lucide-react'
 import UserManagement from '@/components/admin/UserManagement'
 import TripManagement from '@/components/trips/TripManagement'
 import PurchaseManagement from '@/components/admin/PurchaseManagement'
+import GuidedTripRefundManagement from '@/components/admin/GuidedTripRefundManagement'
 
-type AdminTab = 'users' | 'trips' | 'purchases' | 'settings'
+type AdminTab = 'users' | 'trips' | 'purchases' | 'guided-trips' | 'settings'
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<AdminTab>('users')
@@ -31,6 +32,12 @@ export default function AdminDashboard() {
       description: 'Gestisci acquisti, rimborsi e regali'
     },
     {
+      id: 'guided-trips' as AdminTab,
+      name: 'Viaggi guidati',
+      icon: Flag,
+      description: 'Prenotazioni di viaggi annullati dal Ranger, in attesa di rimborso'
+    },
+    {
       id: 'settings' as AdminTab,
       name: 'Impostazioni',
       icon: Settings,
@@ -46,6 +53,8 @@ export default function AdminDashboard() {
         return <TripManagement />
       case 'purchases':
         return <PurchaseManagement />
+      case 'guided-trips':
+        return <GuidedTripRefundManagement />
       case 'settings':
         return (
           <div className="min-h-screen bg-gray-50 py-8">

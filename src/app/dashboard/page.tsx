@@ -7,6 +7,8 @@ import { UserRole, UserRoleLabels, UserRoleDescriptions, UserPermissions } from 
 import { useEffect, useState, Suspense } from 'react';
 import UserTrips from '@/components/trips/UserTrips';
 import PurchasedTrips from '@/components/trips/PurchasedTrips';
+import OrganizedGuidedTripsSection from '@/components/guided-trips/OrganizedGuidedTripsSection';
+import GuidedTripBookingsSection from '@/components/guided-trips/GuidedTripBookingsSection';
 import ChangePasswordForm from '@/components/profile/ChangePasswordForm';
 
 function DashboardContent() {
@@ -110,8 +112,16 @@ function DashboardContent() {
                 <UserTrips />
               )}
 
+              {/* Viaggi guidati organizzati - Solo per Ranger e Sentinel */}
+              {UserPermissions.canCreateTrips(userRole) && (
+                <OrganizedGuidedTripsSection />
+              )}
+
               {/* Viaggi acquistati - Per tutti gli utenti */}
               <PurchasedTrips />
+
+              {/* Prenotazioni di viaggi guidati - Per tutti gli utenti */}
+              <GuidedTripBookingsSection />
             </div>
           </div>
         </div>
