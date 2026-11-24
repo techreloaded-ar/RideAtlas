@@ -5,6 +5,7 @@ import { Users, Navigation, Settings, CreditCard } from 'lucide-react'
 import UserManagement from '@/components/admin/UserManagement'
 import TripManagement from '@/components/trips/TripManagement'
 import PurchaseManagement from '@/components/admin/PurchaseManagement'
+import GuidedTripRefunds from '@/components/admin/GuidedTripRefunds'
 
 type AdminTab = 'users' | 'trips' | 'purchases' | 'settings'
 
@@ -45,7 +46,12 @@ export default function AdminDashboard() {
       case 'trips':
         return <TripManagement />
       case 'purchases':
-        return <PurchaseManagement />
+        return (
+          <>
+            <GuidedTripRefunds />
+            <PurchaseManagement />
+          </>
+        )
       case 'settings':
         return (
           <div className="min-h-screen bg-gray-50 py-8">

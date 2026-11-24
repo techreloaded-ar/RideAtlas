@@ -3,8 +3,11 @@ import { StripeService } from '@/lib/payment/stripeService';
 import { PurchaseService } from '@/lib/payment/purchaseService';
 import { STRIPE_WEBHOOK_EVENTS } from '@/lib/payment/stripe-server';
 import Stripe from 'stripe';
+import { guidedTripRegistrationIdFromPaymentIntent, handleGuidedTripPaymentIntentEvent } from '@/lib/guided-trips/guided-trip-stripe';
 
 export const dynamic = 'force-dynamic';
+
+type WebhookHandlerResult = { success: boolean; error?: string; status?: string };
 
 const PROCESSED_EVENTS = new Set<string>();
 const MAX_PROCESSED_EVENTS = 1000;
@@ -93,7 +96,10 @@ export async function POST(request: NextRequest) {
   }
 }
 
-async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent) {
+async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent): Promise<WebhookHandlerResult> {
+  if (guidedTripRegistrationIdFromPaymentIntent(paymentIntent)) {
+    return handleGuidedTripPaymentIntentEvent(paymentIntent, 'succeeded');
+  }
   try {
     
 
@@ -138,7 +144,10 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
   }
 }
 
-async function handlePaymentIntentFailed(paymentIntent: Stripe.PaymentIntent) {
+async function handlePaymentIntentFailed(paymentIntent: Stripe.PaymentIntent): Promise<WebhookHandlerResult> {
+  if (guidedTripRegistrationIdFromPaymentIntent(paymentIntent)) {
+    return handleGuidedTripPaymentIntentEvent(paymentIntent, 'failed');
+  }
   try {
     
 
@@ -171,7 +180,10 @@ async function handlePaymentIntentFailed(paymentIntent: Stripe.PaymentIntent) {
   }
 }
 
-async function handlePaymentIntentCanceled(paymentIntent: Stripe.PaymentIntent) {
+async function handlePaymentIntentCanceled(paymentIntent: Stripe.PaymentIntent): Promise<WebhookHandlerResult> {
+  if (guidedTripRegistrationIdFromPaymentIntent(paymentIntent)) {
+    return handleGuidedTripPaymentIntentEvent(paymentIntent, 'canceled');
+  }
   try {
     
 

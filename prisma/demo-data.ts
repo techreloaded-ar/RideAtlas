@@ -290,6 +290,109 @@ export const DEMO_PURCHASES: DemoPurchase[] = [
   { id: 'demo-purchase-explorer-amalfi', buyer: 'demo-user-explorer', trip: 'demo-trip-amalfi', status: 'PENDING' },
 ]
 
+type GuidedTripState = 'Bozza' | 'Pubblicato' | 'Annullato'
+type GuidedRegistrationState = 'CONFIRMED' | 'REFUND_DUE'
+
+export interface DemoGuidedTrip {
+  id: string
+  slug: string
+  title: string
+  organizer: string // id di DemoUser
+  status: GuidedTripState
+  description: string
+  program: string[]
+  includedServices?: string
+  meetingPoint: string
+  // Date relative al giorno del seed, così i viaggi demo risultano futuri appena creati.
+  departureInDays: number
+  durationDays: number
+  registrationClosesDaysBeforeDeparture: number
+  cancellationNoticeDays: number
+  maxParticipants: number
+  pricePerParticipant: string
+}
+
+export interface DemoGuidedTripRegistration {
+  id: string
+  participant: string // id di DemoUser
+  guidedTrip: string // id di DemoGuidedTrip
+  status: GuidedRegistrationState
+  cancellationOrigin?: 'PARTICIPANT' | 'ORGANIZER'
+}
+
+export const DEMO_GUIDED_TRIPS: DemoGuidedTrip[] = [
+  {
+    id: 'demo-guided-dolomiti',
+    slug: 'demo-guidato-dolomiti-passi-e-rifugi',
+    title: 'Dolomiti, passi e rifugi',
+    organizer: 'demo-user-ranger',
+    status: 'Pubblicato',
+    description: 'Tre giorni sui passi dolomitici con andatura tranquilla, soste fotografiche e pernottamenti in rifugio. Adatto a chi ha qualche anno di esperienza su strade di montagna.',
+    program: [
+      'Bassano → Passo Rolle → San Martino di Castrozza (180 km)',
+      'Giro dei quattro passi: Pordoi, Sella, Gardena, Campolongo (160 km)',
+      'Passo Giau → Cortina → rientro a Bassano (210 km)',
+    ],
+    includedServices: 'Guida del Ranger · 2 notti in mezza pensione · Traccia GPX del percorso',
+    meetingPoint: 'Bassano del Grappa, piazza Libertà, ore 8:30',
+    departureInDays: 60,
+    durationDays: 3,
+    registrationClosesDaysBeforeDeparture: 14,
+    cancellationNoticeDays: 14,
+    maxParticipants: 8,
+    pricePerParticipant: '450.00',
+  },
+  {
+    id: 'demo-guided-costiera',
+    slug: 'demo-guidato-costiera-all-alba',
+    title: 'Costiera all\'alba',
+    organizer: 'demo-user-giulia',
+    status: 'Pubblicato',
+    description: 'Una giornata lunga sulla Costiera Amalfitana partendo prima dell\'alba, per trovare la statale libera dal traffico.',
+    program: ['Salerno → Amalfi → Positano → Sorrento, rientro nel pomeriggio (150 km)'],
+    includedServices: 'Guida della Ranger · colazione a Positano',
+    meetingPoint: 'Salerno, piazza della Concordia, ore 5:30',
+    departureInDays: 30,
+    durationDays: 1,
+    registrationClosesDaysBeforeDeparture: 3,
+    cancellationNoticeDays: 7,
+    maxParticipants: 2,
+    pricePerParticipant: '120.00',
+  },
+  {
+    id: 'demo-guided-langhe',
+    slug: 'demo-guidato-langhe-d-autunno',
+    title: 'Langhe d\'autunno',
+    organizer: 'demo-user-ranger',
+    status: 'Bozza',
+    description: 'Bozza: weekend tra vigneti e castelli delle Langhe nel periodo della vendemmia.',
+    program: ['Alba → Barolo → La Morra', 'Monforte → Dogliani → rientro ad Alba'],
+    meetingPoint: 'Alba, piazza Duomo, ore 9:00',
+    departureInDays: 90,
+    durationDays: 2,
+    registrationClosesDaysBeforeDeparture: 10,
+    cancellationNoticeDays: 14,
+    maxParticipants: 6,
+    pricePerParticipant: '280.00',
+  },
+]
+
+export const DEMO_GUIDED_TRIP_REGISTRATIONS: DemoGuidedTripRegistration[] = [
+  { id: 'demo-guided-reg-giulia-dolomiti', participant: 'demo-user-giulia', guidedTrip: 'demo-guided-dolomiti', status: 'CONFIRMED' },
+  { id: 'demo-guided-reg-paolo-dolomiti', participant: 'demo-user-paolo', guidedTrip: 'demo-guided-dolomiti', status: 'CONFIRMED' },
+  { id: 'demo-guided-reg-explorer-dolomiti', participant: 'demo-user-explorer', guidedTrip: 'demo-guided-dolomiti', status: 'REFUND_DUE', cancellationOrigin: 'PARTICIPANT' },
+  { id: 'demo-guided-reg-ranger-costiera', participant: 'demo-user-ranger', guidedTrip: 'demo-guided-costiera', status: 'CONFIRMED' },
+  { id: 'demo-guided-reg-paolo-costiera', participant: 'demo-user-paolo', guidedTrip: 'demo-guided-costiera', status: 'CONFIRMED' },
+]
+
+const DAY_IN_MILLISECONDS = 24 * 60 * 60 * 1000
+
+/** Giorno di calendario (mezzanotte UTC) a N giorni da oggi. */
+function calendarDayFromToday(today: Date, days: number): Date {
+  const start = Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate())
+  return new Date(start + days * DAY_IN_MILLISECONDS)
+}
+
 export interface DemoSeedSummary {
   created: string[]
   kept: string[]
@@ -407,6 +510,76 @@ export async function seedDemoData(
         user: { connect: { id: buyerId } },
         trip: { connect: { id: trip.id } },
         transactions: { create: transactions },
+      },
+    })
+    summary.created.push(label)
+  }
+
+  const guidedTripIds = new Set<string>()
+  const today = new Date()
+  for (const guidedTrip of DEMO_GUIDED_TRIPS) {
+    const label = `viaggio guidato «${guidedTrip.title}»`
+    if (await prisma.guidedTrip.findUnique({ where: { id: guidedTrip.id }, select: { id: true } })) {
+      guidedTripIds.add(guidedTrip.id)
+      summary.kept.push(label)
+      continue
+    }
+    if (await prisma.guidedTrip.findUnique({ where: { slug: guidedTrip.slug }, select: { id: true } })) {
+      summary.skipped.push(`${label}: lo slug ${guidedTrip.slug} è già usato da un altro viaggio guidato`)
+      continue
+    }
+    const organizerId = userIds.get(guidedTrip.organizer)
+    if (!organizerId) {
+      summary.skipped.push(`${label}: organizzatore non disponibile`)
+      continue
+    }
+    await prisma.guidedTrip.create({
+      data: {
+        id: guidedTrip.id,
+        slug: guidedTrip.slug,
+        title: guidedTrip.title,
+        description: guidedTrip.description,
+        program: guidedTrip.program.join('\n'),
+        includedServices: guidedTrip.includedServices,
+        meetingPoint: guidedTrip.meetingPoint,
+        departureDate: calendarDayFromToday(today, guidedTrip.departureInDays),
+        returnDate: calendarDayFromToday(today, guidedTrip.departureInDays + guidedTrip.durationDays - 1),
+        registrationDeadline: calendarDayFromToday(today, guidedTrip.departureInDays - guidedTrip.registrationClosesDaysBeforeDeparture),
+        cancellationNoticeDays: guidedTrip.cancellationNoticeDays,
+        maxParticipants: guidedTrip.maxParticipants,
+        pricePerParticipant: guidedTrip.pricePerParticipant,
+        status: guidedTrip.status,
+        publishedAt: guidedTrip.status === 'Pubblicato' ? today : undefined,
+        organizer: { connect: { id: organizerId } },
+      },
+    })
+    guidedTripIds.add(guidedTrip.id)
+    summary.created.push(label)
+  }
+
+  for (const registration of DEMO_GUIDED_TRIP_REGISTRATIONS) {
+    const guidedTrip = DEMO_GUIDED_TRIPS.find(t => t.id === registration.guidedTrip)
+    const label = `iscrizione ${registration.status} a «${guidedTrip?.title ?? registration.guidedTrip}»`
+    if (await prisma.guidedTripRegistration.findUnique({ where: { id: registration.id }, select: { id: true } })) {
+      summary.kept.push(label)
+      continue
+    }
+    const participantId = userIds.get(registration.participant)
+    if (!guidedTrip || !participantId || !guidedTripIds.has(guidedTrip.id)) {
+      summary.skipped.push(`${label}: partecipante o viaggio guidato non disponibile`)
+      continue
+    }
+    await prisma.guidedTripRegistration.create({
+      data: {
+        id: registration.id,
+        amount: guidedTrip.pricePerParticipant,
+        status: registration.status,
+        paymentMethod: 'simulated',
+        confirmedAt: today,
+        cancelledAt: registration.status === 'REFUND_DUE' ? today : undefined,
+        cancellationOrigin: registration.cancellationOrigin,
+        participant: { connect: { id: participantId } },
+        guidedTrip: { connect: { id: guidedTrip.id } },
       },
     })
     summary.created.push(label)

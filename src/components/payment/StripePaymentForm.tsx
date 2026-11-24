@@ -10,6 +10,10 @@ interface StripePaymentFormProps {
   amount: number;
   onSuccess: () => void;
   onError: (error: string) => void;
+  /** Endpoint alternativo per creare il Payment Intent (default: acquisto itinerari). */
+  paymentIntentEndpoint?: string;
+  /** Endpoint alternativo per confermare il pagamento (default: acquisto itinerari). */
+  confirmEndpoint?: string;
 }
 
 const CARD_ELEMENT_OPTIONS = {
@@ -29,7 +33,14 @@ const CARD_ELEMENT_OPTIONS = {
   hidePostalCode: false,
 };
 
-function CheckoutForm({ purchaseId, amount, onSuccess, onError }: StripePaymentFormProps) {
+function CheckoutForm({
+  purchaseId,
+  amount,
+  onSuccess,
+  onError,
+  paymentIntentEndpoint = '/api/payments/stripe/create-payment-intent',
+  confirmEndpoint = '/api/payments/stripe/confirm-payment',
+}: StripePaymentFormProps) {
   const stripe = useStripe();
   const elements = useElements();
   const [isProcessing, setIsProcessing] = useState(false);
@@ -40,7 +51,7 @@ function CheckoutForm({ purchaseId, amount, onSuccess, onError }: StripePaymentF
 
   const createPaymentIntent = useCallback(async () => {
     try {
-      const response = await fetch('/api/payments/stripe/create-payment-intent', {
+      const response = await fetch(paymentIntentEndpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -63,7 +74,7 @@ function CheckoutForm({ purchaseId, amount, onSuccess, onError }: StripePaymentF
       console.error('Errore nella creazione del Payment Intent:', error);
       onError(error instanceof Error ? error.message : 'Errore nella preparazione del pagamento');
     }
-  }, [purchaseId, onError]);
+  }, [purchaseId, onError, paymentIntentEndpoint]);
 
   useEffect(() => {
     createPaymentIntent();
@@ -111,7 +122,7 @@ function CheckoutForm({ purchaseId, amount, onSuccess, onError }: StripePaymentF
       }
 
       if (paymentIntent?.status === 'succeeded') {
-        const confirmResponse = await fetch('/api/payments/stripe/confirm-payment', {
+        const confirmResponse = await fetch(confirmEndpoint, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

@@ -2,6 +2,8 @@ import type { PrismaClient } from '@prisma/client'
 import {
   assertDemoSeedAllowed,
   seedDemoData,
+  DEMO_GUIDED_TRIP_REGISTRATIONS,
+  DEMO_GUIDED_TRIPS,
   DEMO_PURCHASES,
   DEMO_TRIPS,
   DEMO_USERS,
@@ -36,7 +38,13 @@ type Row = Record<string, unknown> & { id: string }
 
 // Client finto con sole letture e creazioni: qualsiasi update/upsert/delete fallirebbe.
 function fakePrisma() {
-  const tables = { user: [] as Row[], trip: [] as Row[], tripPurchase: [] as Row[] }
+  const tables = {
+    user: [] as Row[],
+    trip: [] as Row[],
+    tripPurchase: [] as Row[],
+    guidedTrip: [] as Row[],
+    guidedTripRegistration: [] as Row[],
+  }
   const model = (rows: Row[]) => ({
     findUnique: jest.fn(async ({ where }: { where: Record<string, unknown> }) => {
       const [key, value] = Object.entries(where)[0]
@@ -47,7 +55,13 @@ function fakePrisma() {
       return data
     }),
   })
-  const client = { user: model(tables.user), trip: model(tables.trip), tripPurchase: model(tables.tripPurchase) }
+  const client = {
+    user: model(tables.user),
+    trip: model(tables.trip),
+    tripPurchase: model(tables.tripPurchase),
+    guidedTrip: model(tables.guidedTrip),
+    guidedTripRegistration: model(tables.guidedTripRegistration),
+  }
   return { tables, client, prisma: client as unknown as PrismaClient }
 }
 
@@ -72,6 +86,24 @@ describe('seedDemoData', () => {
     const dolomiti = tables.trip.find(t => t.id === 'demo-trip-dolomiti')!
     expect(dolomiti.status).toBe('Pubblicato')
     expect((dolomiti.stages as { create: { orderIndex: number }[] }).create.map(s => s.orderIndex)).toEqual([0, 1, 2, 3])
+
+    expect(tables.guidedTrip.map(t => t.id)).toEqual(DEMO_GUIDED_TRIPS.map(t => t.id))
+    expect(tables.guidedTripRegistration.map(r => r.id)).toEqual(DEMO_GUIDED_TRIP_REGISTRATIONS.map(r => r.id))
+    const guidedDolomiti = tables.guidedTrip.find(t => t.id === 'demo-guided-dolomiti')!
+    expect((guidedDolomiti.departureDate as Date).getTime()).toBeGreaterThan(Date.now())
+    expect((guidedDolomiti.registrationDeadline as Date).getTime()).toBeLessThan((guidedDolomiti.departureDate as Date).getTime())
+  })
+
+  it('copre i casi dei viaggi guidati: posti liberi, esauriti, bozza e rimborso dovuto', () => {
+    const confirmedFor = (tripId: string) =>
+      DEMO_GUIDED_TRIP_REGISTRATIONS.filter(r => r.guidedTrip === tripId && r.status === 'CONFIRMED').length
+    expect(new Set(DEMO_GUIDED_TRIPS.map(t => t.status))).toEqual(new Set(['Pubblicato', 'Bozza']))
+    expect(DEMO_GUIDED_TRIPS.some(t => t.status === 'Pubblicato' && confirmedFor(t.id) < t.maxParticipants)).toBe(true)
+    expect(DEMO_GUIDED_TRIPS.some(t => t.status === 'Pubblicato' && confirmedFor(t.id) === t.maxParticipants)).toBe(true)
+    expect(DEMO_GUIDED_TRIP_REGISTRATIONS.some(r => r.status === 'REFUND_DUE')).toBe(true)
+    for (const r of DEMO_GUIDED_TRIP_REGISTRATIONS) {
+      expect(DEMO_GUIDED_TRIPS.find(t => t.id === r.guidedTrip)?.organizer).not.toBe(r.participant)
+    }
   })
 
   it('copre combinazioni diverse di ruoli, stati e acquisti', () => {
