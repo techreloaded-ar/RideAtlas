@@ -1,3 +1,5 @@
+import { auth } from '@/auth';
+import { UserPermissions, UserRole } from '@/types/profile';
 import { GuidedTripService } from '@/lib/guided-trips/guidedTripService';
 import GuidedTripsAgenda from '@/components/guided-trips/GuidedTripsAgenda';
 
@@ -9,12 +11,15 @@ export const metadata = {
 };
 
 export default async function GuidedTripsPage() {
+  const session = await auth();
+  const userRole = session?.user?.role as UserRole | undefined;
+  const canCreateGuidedTrip = userRole ? UserPermissions.canCreateTrips(userRole) : false;
   const guidedTrips = await GuidedTripService.listUpcomingPublished();
 
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <GuidedTripsAgenda guidedTrips={guidedTrips} />
+        <GuidedTripsAgenda guidedTrips={guidedTrips} canCreateGuidedTrip={canCreateGuidedTrip} />
       </div>
     </div>
   );

@@ -16,11 +16,14 @@ import {
 
 interface GuidedTripsAgendaProps {
   guidedTrips: GuidedTripListItem[];
+  /** Ranger e Sentinel vedono l'invito a creare un viaggio guidato, come nella pagina «Viaggi». */
+  canCreateGuidedTrip?: boolean;
 }
 
 const ALL_MONTHS = 'all';
+const NEW_GUIDED_TRIP_HREF = '/dashboard/guided-trips/new';
 
-export default function GuidedTripsAgenda({ guidedTrips }: GuidedTripsAgendaProps) {
+export default function GuidedTripsAgenda({ guidedTrips, canCreateGuidedTrip = false }: GuidedTripsAgendaProps) {
   const [selectedMonth, setSelectedMonth] = useState<string>(ALL_MONTHS);
 
   const months = useMemo(() => {
@@ -67,7 +70,17 @@ export default function GuidedTripsAgenda({ guidedTrips }: GuidedTripsAgendaProp
       {guidedTrips.length === 0 && (
         <div className="bg-white rounded-xl shadow-sm p-10 text-center mt-6">
           <p className="text-lg font-semibold text-gray-900">Nessun viaggio guidato in programma</p>
-          <p className="text-gray-600 mt-1">Torna presto: i Ranger pubblicano nuove partenze durante l&apos;anno.</p>
+          <p className="text-gray-600 mt-1">
+            {canCreateGuidedTrip
+              ? 'Sii il primo a proporre una partenza di gruppo!'
+              : <>Torna presto: i Ranger pubblicano nuove partenze durante l&apos;anno.</>}
+          </p>
+          {canCreateGuidedTrip && (
+            <Link href={NEW_GUIDED_TRIP_HREF} className="btn-primary inline-flex items-center gap-2 mt-6">
+              <Users className="w-5 h-5" aria-hidden />
+              Crea il primo viaggio guidato
+            </Link>
+          )}
         </div>
       )}
 
@@ -124,6 +137,22 @@ export default function GuidedTripsAgenda({ guidedTrips }: GuidedTripsAgendaProp
           </ul>
         </section>
       ))}
+
+      {/* Invito a organizzare un viaggio guidato, con lo stesso schema della pagina «Viaggi» */}
+      {guidedTrips.length > 0 && canCreateGuidedTrip && (
+        <div className="mt-16 text-center">
+          <div className="bg-white rounded-xl shadow-lg p-8 max-w-2xl mx-auto">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Vuoi accompagnare un gruppo?</h2>
+            <p className="text-gray-600 mb-6">
+              Organizza un viaggio guidato a numero chiuso: scegli date, prezzo e posti, i partecipanti prenotano e pagano online.
+            </p>
+            <Link href={NEW_GUIDED_TRIP_HREF} className="btn-primary inline-flex items-center gap-2">
+              <Users className="w-5 h-5" aria-hidden />
+              Crea un viaggio guidato
+            </Link>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

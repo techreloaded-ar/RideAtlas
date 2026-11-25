@@ -50,6 +50,22 @@ describe('GuidedTripsAgenda', () => {
   it('spiega quando non ci sono viaggi in programma', () => {
     render(<GuidedTripsAgenda guidedTrips={[]} />);
     expect(screen.getByText('Nessun viaggio guidato in programma')).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: /Crea il primo viaggio guidato/ })).not.toBeInTheDocument();
+  });
+
+  it('al Ranger mostra l\'invito a creare un viaggio guidato, come nella pagina Viaggi', () => {
+    const { rerender } = render(<GuidedTripsAgenda guidedTrips={[listItem({})]} canCreateGuidedTrip />);
+    expect(screen.getByRole('heading', { name: 'Vuoi accompagnare un gruppo?' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /Crea un viaggio guidato/ })).toHaveAttribute('href', '/dashboard/guided-trips/new');
+
+    rerender(<GuidedTripsAgenda guidedTrips={[]} canCreateGuidedTrip />);
+    expect(screen.getByRole('link', { name: /Crea il primo viaggio guidato/ })).toHaveAttribute('href', '/dashboard/guided-trips/new');
+  });
+
+  it('agli Explorer e ai visitatori non mostra l\'invito a creare', () => {
+    render(<GuidedTripsAgenda guidedTrips={[listItem({})]} canCreateGuidedTrip={false} />);
+    expect(screen.queryByRole('link', { name: /Crea un viaggio guidato/ })).not.toBeInTheDocument();
+    expect(screen.queryByText('Vuoi accompagnare un gruppo?')).not.toBeInTheDocument();
   });
 });
 
