@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { StripeService } from '@/lib/payment/stripeService';
 import { PurchaseService } from '@/lib/payment/purchaseService';
 import { STRIPE_WEBHOOK_EVENTS } from '@/lib/payment/stripe-server';
+import { GuidedTripService } from '@/lib/guided-trips/guidedTripService';
 import Stripe from 'stripe';
 
 export const dynamic = 'force-dynamic';
@@ -95,7 +96,11 @@ export async function POST(request: NextRequest) {
 
 async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent) {
   try {
-    
+    if (paymentIntent.metadata?.guidedTripBookingId) {
+      // Prenotazione di un viaggio guidato: verifica e conferma (o rimborso se il posto non è più disponibile)
+      await GuidedTripService.confirmStripePayment(paymentIntent.metadata.guidedTripBookingId, paymentIntent.id, null);
+      return { success: true };
+    }
 
     const { purchaseId } = paymentIntent.metadata;
 
@@ -142,6 +147,9 @@ async function handlePaymentIntentFailed(paymentIntent: Stripe.PaymentIntent) {
   try {
     
 
+    // Prenotazioni dei viaggi guidati: un pagamento non riuscito lascia scadere la riserva del posto
+    if (paymentIntent.metadata?.guidedTripBookingId) return { success: true };
+
     const { purchaseId } = paymentIntent.metadata;
 
     if (!purchaseId) {
@@ -174,6 +182,9 @@ async function handlePaymentIntentFailed(paymentIntent: Stripe.PaymentIntent) {
 async function handlePaymentIntentCanceled(paymentIntent: Stripe.PaymentIntent) {
   try {
     
+
+    // Prenotazioni dei viaggi guidati: un pagamento non riuscito lascia scadere la riserva del posto
+    if (paymentIntent.metadata?.guidedTripBookingId) return { success: true };
 
     const { purchaseId } = paymentIntent.metadata;
 

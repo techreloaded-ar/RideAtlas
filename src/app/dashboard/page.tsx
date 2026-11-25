@@ -3,6 +3,7 @@
 import { useSession } from 'next-auth/react';
 import { redirect, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
+import Link from 'next/link';
 import { UserRole, UserRoleLabels, UserRoleDescriptions, UserPermissions } from '@/types/profile';
 import { useEffect, useState, Suspense } from 'react';
 import UserTrips from '@/components/trips/UserTrips';
@@ -109,6 +110,28 @@ function DashboardContent() {
               {UserPermissions.canCreateTrips(userRole) && (
                 <UserTrips />
               )}
+
+              {/* Viaggi guidati - prenotazioni per tutti, organizzazione per Ranger e Sentinel */}
+              <div className="border border-gray-200 rounded-lg p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div>
+                  <h2 className="text-lg font-semibold text-gray-900">Viaggi guidati</h2>
+                  <p className="text-sm text-gray-600">
+                    {UserPermissions.canCreateTrips(userRole)
+                      ? 'Organizza partenze di gruppo a numero chiuso e gestisci le tue prenotazioni.'
+                      : 'Ritrova i posti che hai prenotato sui viaggi accompagnati dai Ranger.'}
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {UserPermissions.canCreateTrips(userRole) && (
+                    <Link href="/dashboard/guided-trips?tab=organized" className="px-4 py-2 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold">
+                      I miei viaggi guidati
+                    </Link>
+                  )}
+                  <Link href="/dashboard/guided-trips?tab=bookings" className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 text-sm font-semibold">
+                    Le mie prenotazioni
+                  </Link>
+                </div>
+              </div>
 
               {/* Viaggi acquistati - Per tutti gli utenti */}
               <PurchasedTrips />

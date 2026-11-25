@@ -339,3 +339,36 @@ Ricevuto il ${new Date().toLocaleString('it-IT')}
     return { success: false, error: errorMessage };
   }
 }
+
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+export async function sendGuidedTripCancellationEmail(params: {
+  to: string;
+  participantName: string;
+  guidedTripTitle: string;
+  reason: string;
+  refundedAmount: number;
+  refundCompleted: boolean;
+}): Promise<EmailResult> {
+  const amount = params.refundedAmount.toLocaleString('it-IT', { style: 'currency', currency: 'EUR' });
+  const refundText = params.refundCompleted
+    ? `Ti abbiamo rimborsato l'intero importo pagato (${amount}) con lo stesso metodo di pagamento.`
+    : `Il rimborso dell'intero importo (${amount}) è in corso di verifica: ti contatteremo se servono informazioni.`;
+
+  const templateData: EmailTemplateData = {
+    title: 'Viaggio guidato annullato',
+    welcomeText: `Ciao ${escapeHtml(params.participantName || 'viaggiatore')},\n\nil ranger ha annullato il viaggio guidato «${escapeHtml(params.guidedTripTitle)}».\n\nMotivo: ${escapeHtml(params.reason)}\n\n${refundText}`,
+    buttonText: 'Le mie prenotazioni',
+    buttonUrl: `${process.env.NEXTAUTH_URL}/dashboard/guided-trips`,
+    footerText: 'Ci dispiace per l\'inconveniente. Trovi altri viaggi guidati in programma su RideAtlas.',
+  };
+
+  return sendTemplatedEmail(params.to, 'Viaggio guidato annullato - RideAtlas', templateData, 'Email di annullamento viaggio guidato');
+}

@@ -31,6 +31,8 @@ model User {
   purchases     TripPurchase[]
   batchJobs     BatchJob[]
   emailChangeTokens EmailChangeToken[]
+  organizedGuidedTrips GuidedTrip[]        @relation("GuidedTripOrganizer")
+  guidedTripBookings   GuidedTripBooking[] @relation("GuidedTripParticipant")
 
   @@map("users")
 }
@@ -126,6 +128,7 @@ model Trip {
   user               User              @relation(fields: [user_id], references: [id])
   stages             Stage[]           // Relazione con le tappe
   purchases          TripPurchase[]
+  guidedTrips        GuidedTrip[]      // Viaggi guidati che dichiarano di riprendere questo percorso
 
   @@map("trips")
 }
@@ -247,4 +250,71 @@ model EmailChangeToken {
   @@index([userId])
   @@index([token])
   @@map("email_change_tokens")
+}
+
+// Viaggio guidato a numero chiuso organizzato da un Ranger (o Sentinel)
+model GuidedTrip {
+  id                 String            @id @default(cuid())
+  title              String
+  description        String            @db.Text
+  startDate          DateTime          // Giorno di partenza (mezzanotte UTC)
+  endDate            DateTime          // Giorno di rientro (mezzanotte UTC)
+  meetingPoint       String
+  pricePerPerson     Decimal           @db.Decimal(10,2)
+  maxParticipants    Int
+  status             GuidedTripStatus  @default(Bozza)
+  publishedAt        DateTime?
+  cancelledAt        DateTime?
+  cancellationReason String?           @db.Text
+  organizerId        String
+  organizer          User              @relation("GuidedTripOrganizer", fields: [organizerId], references: [id])
+  linkedTripId       String?           // Facoltativo: solo per comunicare che il percorso è lo stesso
+  linkedTrip         Trip?             @relation(fields: [linkedTripId], references: [id], onDelete: SetNull)
+  bookings           GuidedTripBooking[]
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+
+  @@index([status, startDate])
+  @@index([organizerId])
+  @@map("guided_trips")
+}
+
+enum GuidedTripStatus {
+  Bozza
+  Pubblicato
+  Annullato
+}
+
+// Prenotazione di un posto (uno per prenotazione) su un viaggio guidato
+model GuidedTripBooking {
+  id                    String                   @id @default(cuid())
+  guidedTripId          String
+  participantId         String
+  amount                Decimal                  @db.Decimal(10,2)
+  status                GuidedTripBookingStatus  @default(PENDING_PAYMENT)
+  seatHeldUntil         DateTime                 // Scadenza della riserva del posto durante il pagamento
+  paymentMethod         String?                  // "stripe" | "simulated"
+  stripePaymentIntentId String?                  @unique
+  paymentReference      String?                  // Riferimento del pagamento confermato
+  confirmedAt           DateTime?
+  cancelledAt           DateTime?
+  refundedAt            DateTime?
+  refundReference       String?
+  refundError           String?                  // Valorizzato se il rimborso automatico non è riuscito
+  createdAt             DateTime                 @default(now())
+  updatedAt             DateTime                 @updatedAt
+  guidedTrip            GuidedTrip               @relation(fields: [guidedTripId], references: [id], onDelete: Cascade)
+  participant           User                     @relation("GuidedTripParticipant", fields: [participantId], references: [id], onDelete: Cascade)
+
+  @@index([guidedTripId, status])
+  @@index([participantId, status])
+  @@map("guided_trip_bookings")
+}
+
+enum GuidedTripBookingStatus {
+  PENDING_PAYMENT          // Posto riservato, pagamento non ancora concluso
+  CONFIRMED                // Pagato: il posto è del partecipante
+  CANCELLED_BY_PARTICIPANT // Disdetta dal partecipante entro la scadenza, rimborsata
+  CANCELLED_BY_ORGANIZER   // Viaggio annullato dal ranger, rimborsata
+  EXPIRED                  // Riserva scaduta o pagamento non riuscito
 }

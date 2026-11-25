@@ -403,6 +403,112 @@ export const DEMO_PURCHASES: DemoPurchase[] = [
   { id: 'demo-purchase-explorer-amalfi', buyer: 'demo-user-explorer', trip: 'demo-trip-amalfi', status: 'PENDING' },
 ]
 
+type GuidedTripState = 'Bozza' | 'Pubblicato' | 'Annullato'
+type GuidedTripBookingState = 'CONFIRMED' | 'CANCELLED_BY_PARTICIPANT' | 'CANCELLED_BY_ORGANIZER'
+
+export interface DemoGuidedTrip {
+  id: string
+  organizer: string // id di DemoUser
+  title: string
+  description: string
+  startsInDays: number // giorni dalla preparazione: le date demo restano future
+  durationDays: number
+  meetingPoint: string
+  pricePerPerson: string
+  maxParticipants: number
+  status: GuidedTripState
+  linkedTrip?: string // id di DemoTrip
+  cancellationReason?: string
+}
+
+export interface DemoGuidedTripBooking {
+  id: string
+  guidedTrip: string // id di DemoGuidedTrip
+  participant: string // id di DemoUser
+  status: GuidedTripBookingState
+}
+
+export const DEMO_GUIDED_TRIPS: DemoGuidedTrip[] = [
+  {
+    id: 'demo-guided-dolomiti',
+    organizer: 'demo-user-ranger',
+    title: 'Dolomiti in gruppo',
+    description: 'Quattro giorni tra i passi dolomitici in un gruppo di massimo 8 moto. Pernottamenti in rifugio, soste nei punti panoramici e briefing ogni mattina sul percorso del giorno.',
+    startsInDays: 60,
+    durationDays: 4,
+    meetingPoint: 'Bolzano, piazza Walther, ore 8:30',
+    pricePerPerson: '450.00',
+    maxParticipants: 8,
+    status: 'Pubblicato',
+    linkedTrip: 'demo-trip-dolomiti',
+  },
+  {
+    id: 'demo-guided-amalfi',
+    organizer: 'demo-user-giulia',
+    title: 'Costiera in piccolo gruppo',
+    description: 'Tre giorni sulla Costiera Amalfitana con partenze all\'alba per evitare il traffico e cene di gruppo. Solo tre moto per godersi le curve senza fretta.',
+    startsInDays: 10,
+    durationDays: 3,
+    meetingPoint: 'Salerno, lungomare Trieste, ore 7:30',
+    pricePerPerson: '320.00',
+    maxParticipants: 3,
+    status: 'Pubblicato',
+    linkedTrip: 'demo-trip-amalfi',
+  },
+  {
+    id: 'demo-guided-appennino',
+    organizer: 'demo-user-giulia',
+    title: 'Weekend sull\'Appennino tosco-emiliano',
+    description: 'Due giorni di curve tra Abetone e Passo delle Radici, con pranzo in trattoria e rientro il pomeriggio della domenica.',
+    startsInDays: 95,
+    durationDays: 2,
+    meetingPoint: 'Pavullo nel Frignano, piazza Montecuccoli, ore 9:00',
+    pricePerPerson: '180.00',
+    maxParticipants: 6,
+    status: 'Pubblicato',
+  },
+  {
+    id: 'demo-guided-garfagnana',
+    organizer: 'demo-user-ranger',
+    title: 'Weekend in Garfagnana',
+    description: 'Bozza in preparazione: anello della Garfagnana con passaggio al lago di Vagli.',
+    startsInDays: 120,
+    durationDays: 2,
+    meetingPoint: 'Castelnuovo di Garfagnana',
+    pricePerPerson: '160.00',
+    maxParticipants: 6,
+    status: 'Bozza',
+  },
+  {
+    id: 'demo-guided-garda',
+    organizer: 'demo-user-giulia',
+    title: 'Giro del lago di Garda',
+    description: 'Giro completo del lago con la Gardesana occidentale e la strada della Forra.',
+    startsInDays: 30,
+    durationDays: 2,
+    meetingPoint: 'Desenzano del Garda, porto vecchio',
+    pricePerPerson: '210.00',
+    maxParticipants: 8,
+    status: 'Annullato',
+    cancellationReason: 'Allerta meteo sul lago per tutto il fine settimana',
+  },
+]
+
+export const DEMO_GUIDED_TRIP_BOOKINGS: DemoGuidedTripBooking[] = [
+  { id: 'demo-booking-dolomiti-elena', guidedTrip: 'demo-guided-dolomiti', participant: 'demo-user-explorer', status: 'CONFIRMED' },
+  { id: 'demo-booking-dolomiti-paolo', guidedTrip: 'demo-guided-dolomiti', participant: 'demo-user-paolo', status: 'CONFIRMED' },
+  { id: 'demo-booking-amalfi-elena', guidedTrip: 'demo-guided-amalfi', participant: 'demo-user-explorer', status: 'CONFIRMED' },
+  { id: 'demo-booking-amalfi-paolo', guidedTrip: 'demo-guided-amalfi', participant: 'demo-user-paolo', status: 'CONFIRMED' },
+  { id: 'demo-booking-amalfi-sara', guidedTrip: 'demo-guided-amalfi', participant: 'demo-user-sentinel', status: 'CONFIRMED' },
+  { id: 'demo-booking-garda-elena', guidedTrip: 'demo-guided-garda', participant: 'demo-user-explorer', status: 'CANCELLED_BY_ORGANIZER' },
+]
+
+const DAY_MS = 24 * 60 * 60 * 1000
+
+function utcDayFromNow(now: Date, days: number): Date {
+  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()) + days * DAY_MS)
+}
+
 export interface DemoSeedSummary {
   created: string[]
   kept: string[]
@@ -419,6 +525,7 @@ export async function seedDemoData(
   prisma: PrismaClient,
   hashPassword: (password: string) => Promise<string>,
   log: Log = () => {},
+  now: Date = new Date(),
 ): Promise<DemoSeedSummary> {
   const summary: DemoSeedSummary = { created: [], kept: [], skipped: [] }
   const userIds = new Map<string, string>()
@@ -521,6 +628,74 @@ export async function seedDemoData(
         user: { connect: { id: buyerId } },
         trip: { connect: { id: trip.id } },
         transactions: { create: transactions },
+      },
+    })
+    summary.created.push(label)
+  }
+
+  const guidedTripIds = new Set<string>()
+  for (const guided of DEMO_GUIDED_TRIPS) {
+    const label = `viaggio guidato «${guided.title}»`
+    if (await prisma.guidedTrip.findUnique({ where: { id: guided.id }, select: { id: true } })) {
+      guidedTripIds.add(guided.id)
+      summary.kept.push(label)
+      continue
+    }
+    const organizerId = userIds.get(guided.organizer)
+    if (!organizerId) {
+      summary.skipped.push(`${label}: organizzatore non disponibile`)
+      continue
+    }
+    const startDate = utcDayFromNow(now, guided.startsInDays)
+    await prisma.guidedTrip.create({
+      data: {
+        id: guided.id,
+        title: guided.title,
+        description: guided.description,
+        startDate,
+        endDate: new Date(startDate.getTime() + (guided.durationDays - 1) * DAY_MS),
+        meetingPoint: guided.meetingPoint,
+        pricePerPerson: guided.pricePerPerson,
+        maxParticipants: guided.maxParticipants,
+        status: guided.status,
+        publishedAt: guided.status === 'Bozza' ? null : now,
+        cancelledAt: guided.status === 'Annullato' ? now : null,
+        cancellationReason: guided.cancellationReason ?? null,
+        organizer: { connect: { id: organizerId } },
+        ...(guided.linkedTrip && tripIds.has(guided.linkedTrip) ? { linkedTrip: { connect: { id: guided.linkedTrip } } } : {}),
+      },
+    })
+    guidedTripIds.add(guided.id)
+    summary.created.push(label)
+  }
+
+  for (const booking of DEMO_GUIDED_TRIP_BOOKINGS) {
+    const guided = DEMO_GUIDED_TRIPS.find(g => g.id === booking.guidedTrip)
+    const label = `prenotazione ${booking.status} su «${guided?.title ?? booking.guidedTrip}»`
+    if (await prisma.guidedTripBooking.findUnique({ where: { id: booking.id }, select: { id: true } })) {
+      summary.kept.push(label)
+      continue
+    }
+    const participantId = userIds.get(booking.participant)
+    if (!guided || !participantId || !guidedTripIds.has(guided.id)) {
+      summary.skipped.push(`${label}: partecipante o viaggio guidato non disponibile`)
+      continue
+    }
+    const refunded = booking.status !== 'CONFIRMED'
+    await prisma.guidedTripBooking.create({
+      data: {
+        id: booking.id,
+        amount: guided.pricePerPerson,
+        status: booking.status,
+        seatHeldUntil: now,
+        paymentMethod: 'simulated',
+        paymentReference: `simulated_payment_${booking.id}`,
+        confirmedAt: now,
+        cancelledAt: refunded ? now : null,
+        refundedAt: refunded ? now : null,
+        refundReference: refunded ? `simulated_refund_${booking.id}` : null,
+        guidedTrip: { connect: { id: guided.id } },
+        participant: { connect: { id: participantId } },
       },
     })
     summary.created.push(label)
