@@ -1,12 +1,13 @@
 'use client'
 
 import { useState } from 'react'
-import { Users, Navigation, Settings, CreditCard } from 'lucide-react'
+import { Users, Navigation, Settings, CreditCard, Flag } from 'lucide-react'
 import UserManagement from '@/components/admin/UserManagement'
 import TripManagement from '@/components/trips/TripManagement'
 import PurchaseManagement from '@/components/admin/PurchaseManagement'
+import GuidedTripManagement from '@/components/admin/GuidedTripManagement'
 
-type AdminTab = 'users' | 'trips' | 'purchases' | 'settings'
+type AdminTab = 'users' | 'trips' | 'guided' | 'purchases' | 'settings'
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<AdminTab>('users')
@@ -23,6 +24,12 @@ export default function AdminDashboard() {
       name: 'Gestione Viaggi',
       icon: Navigation,
       description: 'Approva e gestisci i viaggi del sistema'
+    },
+    {
+      id: 'guided' as AdminTab,
+      name: 'Viaggi guidati',
+      icon: Flag,
+      description: 'Controlla e ritira i viaggi guidati'
     },
     {
       id: 'purchases' as AdminTab,
@@ -44,6 +51,8 @@ export default function AdminDashboard() {
         return <UserManagement />
       case 'trips':
         return <TripManagement />
+      case 'guided':
+        return <GuidedTripManagement />
       case 'purchases':
         return <PurchaseManagement />
       case 'settings':

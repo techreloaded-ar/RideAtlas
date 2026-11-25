@@ -42,6 +42,7 @@ export default function Navbar() {
   const navigation = [
     { name: 'Home', href: '/' },
     { name: 'Viaggi', href: '/trips' },
+    { name: 'Viaggi guidati', href: '/guided-trips' },
     ...(session?.user?.role === UserRole.Sentinel ? [{ name: 'Trip Builder', href: '/trip-builder' }] : []),
   ];
 

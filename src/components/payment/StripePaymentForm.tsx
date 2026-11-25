@@ -10,6 +10,8 @@ interface StripePaymentFormProps {
   amount: number;
   onSuccess: () => void;
   onError: (error: string) => void;
+  /** Endpoint alternativi (per esempio per le prenotazioni dei viaggi guidati). */
+  endpoints?: { createIntent: string; confirm: string };
 }
 
 const CARD_ELEMENT_OPTIONS = {
@@ -29,7 +31,9 @@ const CARD_ELEMENT_OPTIONS = {
   hidePostalCode: false,
 };
 
-function CheckoutForm({ purchaseId, amount, onSuccess, onError }: StripePaymentFormProps) {
+function CheckoutForm({ purchaseId, amount, onSuccess, onError, endpoints }: StripePaymentFormProps) {
+  const createIntentUrl = endpoints?.createIntent ?? '/api/payments/stripe/create-payment-intent';
+  const confirmUrl = endpoints?.confirm ?? '/api/payments/stripe/confirm-payment';
   const stripe = useStripe();
   const elements = useElements();
   const [isProcessing, setIsProcessing] = useState(false);
@@ -40,7 +44,7 @@ function CheckoutForm({ purchaseId, amount, onSuccess, onError }: StripePaymentF
 
   const createPaymentIntent = useCallback(async () => {
     try {
-      const response = await fetch('/api/payments/stripe/create-payment-intent', {
+      const response = await fetch(createIntentUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -63,7 +67,7 @@ function CheckoutForm({ purchaseId, amount, onSuccess, onError }: StripePaymentF
       console.error('Errore nella creazione del Payment Intent:', error);
       onError(error instanceof Error ? error.message : 'Errore nella preparazione del pagamento');
     }
-  }, [purchaseId, onError]);
+  }, [purchaseId, onError, createIntentUrl]);
 
   useEffect(() => {
     createPaymentIntent();
@@ -111,7 +115,7 @@ function CheckoutForm({ purchaseId, amount, onSuccess, onError }: StripePaymentF
       }
 
       if (paymentIntent?.status === 'succeeded') {
-        const confirmResponse = await fetch('/api/payments/stripe/confirm-payment', {
+        const confirmResponse = await fetch(confirmUrl, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

@@ -403,6 +403,86 @@ export const DEMO_PURCHASES: DemoPurchase[] = [
   { id: 'demo-purchase-explorer-amalfi', buyer: 'demo-user-explorer', trip: 'demo-trip-amalfi', status: 'PENDING' },
 ]
 
+// Viaggi guidati demo. Date fisse nel 2027, quindi future rispetto ai dati demo; le prenotazioni
+// confermate mostrano i tre stati dei posti: liberi, ultimo posto, completo.
+export interface DemoGuidedTrip {
+  id: string
+  title: string
+  organizer: string // id di DemoUser
+  linkedTrip?: string // id di DemoTrip
+  status: 'Bozza' | 'Pubblicato' | 'Ritirato'
+  description: string
+  included: string
+  startDate: string // AAAA-MM-GG
+  endDate: string
+  meetingPoint: string
+  price: string
+  maxParticipants: number
+  bookedBy: string[] // id di DemoUser con posto confermato
+}
+
+export const DEMO_GUIDED_TRIPS: DemoGuidedTrip[] = [
+  {
+    id: 'demo-guided-dolomiti',
+    title: 'Dolomiti in gruppo: tre giorni di passi',
+    organizer: 'demo-user-ranger',
+    linkedTrip: 'demo-trip-dolomiti',
+    status: 'Pubblicato',
+    description: 'Tre giorni tra i passi dolomitici in gruppo, con soste nei rifugi e un ritmo adatto a tutti. Il Ranger apre la strada e attende il gruppo a ogni bivio.',
+    included: '2 notti in hotel con colazione\nCene del venerdì e del sabato\nAccompagnamento del Ranger e assistenza lungo il percorso',
+    startDate: '2027-06-11',
+    endDate: '2027-06-13',
+    meetingPoint: 'Bolzano, piazza Walther, ore 8:30',
+    price: '590.00',
+    maxParticipants: 12,
+    bookedBy: ['demo-user-paolo'],
+  },
+  {
+    id: 'demo-guided-sardegna',
+    title: 'Sardegna guidata da costa a costa',
+    organizer: 'demo-user-giulia',
+    linkedTrip: 'demo-trip-sardegna',
+    status: 'Pubblicato',
+    description: 'Quattro giorni sulle strade più belle dell\'isola, dal mare dell\'Ogliastra alle curve del Gennargentu, in un piccolo gruppo.',
+    included: '3 notti in agriturismo con colazione\nPranzo tipico del secondo giorno\nAccompagnamento della Ranger',
+    startDate: '2027-05-20',
+    endDate: '2027-05-23',
+    meetingPoint: 'Olbia, porto Isola Bianca, ore 9:00',
+    price: '740.00',
+    maxParticipants: 4,
+    bookedBy: ['demo-user-paolo', 'demo-user-sentinel', 'demo-user-ranger'],
+  },
+  {
+    id: 'demo-guided-toscana',
+    title: 'Crete senesi al tramonto',
+    organizer: 'demo-user-giulia',
+    linkedTrip: 'demo-trip-toscana',
+    status: 'Pubblicato',
+    description: 'Un weekend lento tra le colline toscane, con l\'ultima tappa al tramonto sulle crete.',
+    included: '1 notte in hotel con colazione\nCena di sabato\nAccompagnamento della Ranger',
+    startDate: '2027-09-18',
+    endDate: '2027-09-19',
+    meetingPoint: 'Siena, piazzale della stazione, ore 10:00',
+    price: '320.00',
+    maxParticipants: 2,
+    bookedBy: ['demo-user-paolo', 'demo-user-ranger'],
+  },
+  {
+    id: 'demo-guided-laghi-bozza',
+    title: 'Laghi lombardi d\'autunno',
+    organizer: 'demo-user-ranger',
+    status: 'Bozza',
+    description: 'Bozza di un giro di due giorni tra lago di Como e lago d\'Iseo, ancora da completare.',
+    included: '1 notte in hotel con colazione',
+    startDate: '2027-10-09',
+    endDate: '2027-10-10',
+    meetingPoint: 'Lecco, lungolago, ore 9:00',
+    price: '280.00',
+    maxParticipants: 8,
+    bookedBy: [],
+  },
+]
+
 export interface DemoSeedSummary {
   created: string[]
   kept: string[]
@@ -521,6 +601,47 @@ export async function seedDemoData(
         user: { connect: { id: buyerId } },
         trip: { connect: { id: trip.id } },
         transactions: { create: transactions },
+      },
+    })
+    summary.created.push(label)
+  }
+
+  for (const guided of DEMO_GUIDED_TRIPS) {
+    const label = `viaggio guidato «${guided.title}»`
+    if (await prisma.guidedTrip.findUnique({ where: { id: guided.id }, select: { id: true } })) {
+      summary.kept.push(label)
+      continue
+    }
+    const organizerId = userIds.get(guided.organizer)
+    if (!organizerId) {
+      summary.skipped.push(`${label}: organizzatore non disponibile`)
+      continue
+    }
+    const bookers = guided.bookedBy.map(id => userIds.get(id)).filter((id): id is string => !!id && id !== organizerId)
+    await prisma.guidedTrip.create({
+      data: {
+        id: guided.id,
+        title: guided.title,
+        description: guided.description,
+        included: guided.included,
+        startDate: new Date(`${guided.startDate}T00:00:00.000Z`),
+        endDate: new Date(`${guided.endDate}T00:00:00.000Z`),
+        meetingPoint: guided.meetingPoint,
+        price: guided.price,
+        maxParticipants: guided.maxParticipants,
+        status: guided.status,
+        organizer: { connect: { id: organizerId } },
+        // Il collegamento resta vuoto se l'itinerario demo non è stato creato.
+        ...(guided.linkedTrip && tripIds.has(guided.linkedTrip) ? { linkedTrip: { connect: { id: guided.linkedTrip } } } : {}),
+        bookings: {
+          create: bookers.map(userId => ({
+            amount: guided.price,
+            status: 'CONFIRMED' as const,
+            paymentMethod: 'simulated',
+            confirmedAt: new Date('2026-11-01T10:00:00Z'),
+            user: { connect: { id: userId } },
+          })),
+        },
       },
     })
     summary.created.push(label)
