@@ -4,7 +4,14 @@ import { useCallback, useState, type ReactNode } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { CheckCircle, AlertCircle, Lock } from 'lucide-react';
-import StripePaymentForm from '@/components/payment/StripePaymentForm';
+import dynamic from 'next/dynamic';
+
+// Caricato solo per il pagamento con Stripe: il modulo Stripe del browser richiede la chiave
+// pubblica e senza di essa (anteprima con pagamento simulato) farebbe fallire l'intera scheda.
+const StripePaymentForm = dynamic(() => import('@/components/payment/StripePaymentForm'), {
+  ssr: false,
+  loading: () => <p className="text-center text-sm text-gray-600">Preparazione del pagamento…</p>,
+});
 import type { PaymentMode } from '@/lib/payment/paymentMode';
 import { formatPrice } from '@/lib/guided-trips/rules';
 
