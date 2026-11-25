@@ -3,6 +3,7 @@ import { StripeService } from '@/lib/payment/stripeService';
 import { PurchaseService } from '@/lib/payment/purchaseService';
 import { STRIPE_WEBHOOK_EVENTS } from '@/lib/payment/stripe-server';
 import Stripe from 'stripe';
+import { GuidedTripBookingService } from '@/lib/guided-trips/service';
 
 export const dynamic = 'force-dynamic';
 
@@ -95,6 +96,12 @@ export async function POST(request: NextRequest) {
 
 async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent) {
   try {
+    if (paymentIntent.metadata?.bookingId) {
+      const result = await GuidedTripBookingService.confirmPaid(paymentIntent.metadata.bookingId, 'stripe', paymentIntent.id);
+      if (!result.confirmed) console.error(`❌ [STRIPE WEBHOOK] Prenotazione ${paymentIntent.metadata.bookingId} pagata dopo l'esaurimento dei posti: rimborso manuale`);
+      return { success: true };
+    }
+
     
 
     const { purchaseId } = paymentIntent.metadata;
@@ -140,6 +147,11 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
 
 async function handlePaymentIntentFailed(paymentIntent: Stripe.PaymentIntent) {
   try {
+    if (paymentIntent.metadata?.bookingId) {
+      await GuidedTripBookingService.fail(paymentIntent.metadata.bookingId, paymentIntent.last_payment_error?.message || 'Pagamento fallito');
+      return { success: true };
+    }
+
     
 
     const { purchaseId } = paymentIntent.metadata;
@@ -173,6 +185,11 @@ async function handlePaymentIntentFailed(paymentIntent: Stripe.PaymentIntent) {
 
 async function handlePaymentIntentCanceled(paymentIntent: Stripe.PaymentIntent) {
   try {
+    if (paymentIntent.metadata?.bookingId) {
+      await GuidedTripBookingService.fail(paymentIntent.metadata.bookingId, 'Pagamento annullato');
+      return { success: true };
+    }
+
     
 
     const { purchaseId } = paymentIntent.metadata;

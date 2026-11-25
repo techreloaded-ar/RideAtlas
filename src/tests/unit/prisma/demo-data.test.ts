@@ -2,6 +2,7 @@ import type { PrismaClient } from '@prisma/client'
 import {
   assertDemoSeedAllowed,
   seedDemoData,
+  DEMO_GUIDED_TRIPS,
   DEMO_PURCHASES,
   DEMO_TRIPS,
   DEMO_USERS,
@@ -37,7 +38,7 @@ type Row = Record<string, unknown> & { id: string }
 
 // Client finto con sole letture e creazioni: qualsiasi update/upsert/delete fallirebbe.
 function fakePrisma() {
-  const tables = { user: [] as Row[], trip: [] as Row[], tripPurchase: [] as Row[] }
+  const tables = { user: [] as Row[], trip: [] as Row[], tripPurchase: [] as Row[], guidedTrip: [] as Row[] }
   const model = (rows: Row[]) => ({
     findUnique: jest.fn(async ({ where }: { where: Record<string, unknown> }) => {
       const [key, value] = Object.entries(where)[0]
@@ -48,7 +49,7 @@ function fakePrisma() {
       return data
     }),
   })
-  const client = { user: model(tables.user), trip: model(tables.trip), tripPurchase: model(tables.tripPurchase) }
+  const client = { user: model(tables.user), trip: model(tables.trip), tripPurchase: model(tables.tripPurchase), guidedTrip: model(tables.guidedTrip) }
   return { tables, client, prisma: client as unknown as PrismaClient }
 }
 
@@ -67,6 +68,7 @@ describe('seedDemoData', () => {
     expect(tables.user.map(u => u.email)).toEqual(DEMO_USERS.map(u => u.email))
     expect(tables.trip.map(t => t.id)).toEqual(DEMO_TRIPS.map(t => t.id))
     expect(tables.tripPurchase.map(p => p.id)).toEqual(DEMO_PURCHASES.map(p => p.id))
+    expect(tables.guidedTrip.map(g => g.id)).toEqual(DEMO_GUIDED_TRIPS.map(g => g.id))
     expect(tables.user.every(u => u.password === 'hashed' && u.emailVerified instanceof Date)).toBe(true)
     expect(hash).toHaveBeenCalledTimes(1)
 
@@ -85,6 +87,27 @@ describe('seedDemoData', () => {
     for (const p of DEMO_PURCHASES) {
       expect(DEMO_TRIPS.find(t => t.id === p.trip)?.status).toBe('Pubblicato')
     }
+  })
+
+  it('crea viaggi guidati futuri con posti liberi, ultimo posto e completo', async () => {
+    const f = fakePrisma()
+    await seedDemoData(f.prisma, hash)
+    const published = DEMO_GUIDED_TRIPS.filter(g => g.status === 'Pubblicato')
+    const free = published.map(g => g.maxParticipants - g.bookedBy.length)
+    expect(free.some(n => n > 3)).toBe(true)
+    expect(free).toContain(1)
+    expect(free).toContain(0)
+    expect(DEMO_GUIDED_TRIPS.some(g => g.status === 'Bozza')).toBe(true)
+    for (const g of DEMO_GUIDED_TRIPS) {
+      expect(g.bookedBy).not.toContain(g.organizer)
+      expect(new Set(g.bookedBy).size).toBe(g.bookedBy.length)
+      expect(g.bookedBy.length).toBeLessThanOrEqual(g.maxParticipants)
+      expect(new Date(`${g.startDate}T00:00:00Z`).getTime()).toBeGreaterThan(new Date('2026-11-25T00:00:00Z').getTime())
+      expect(g.endDate >= g.startDate).toBe(true)
+    }
+    const dolomiti = f.tables.guidedTrip.find(g => g.id === 'demo-guided-dolomiti')!
+    expect(dolomiti.linkedTrip).toEqual({ connect: { id: 'demo-trip-dolomiti' } })
+    expect((dolomiti.bookings as { create: { status: string }[] }).create.map(b => b.status)).toEqual(['CONFIRMED'])
   })
 
   it('ha media validi per lo schema dell\'app, così i viaggi demo restano modificabili', () => {
